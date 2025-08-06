@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -297,7 +297,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                   </div>
 
                   {/* Editable Parameters */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     {/* Sets */}
                     <div className="space-y-2">
                       <label className="text-xs text-slate-400 uppercase tracking-wider">Séries</label>
@@ -385,6 +385,58 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                         className="bg-slate-800 border-slate-700 text-white h-8 text-center"
                         placeholder="--"
                       />
+                    </div>
+                  </div>
+
+                  {/* Rest Duration */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs text-slate-400 uppercase tracking-wider flex items-center">
+                        <Timer className="w-3 h-3 mr-1" />
+                        Descanso (segundos)
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 p-0 bg-slate-800 border-slate-700"
+                          onClick={() => {
+                            const newRest = Math.max(30, (exercise.restDurationSeconds || 90) - 15);
+                            handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                          }}
+                          disabled={updateExerciseMutation.isPending}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            value={exercise.restDurationSeconds || 90}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (value >= 15) handleQuickUpdate(exercise.id, 'restDurationSeconds', value);
+                            }}
+                            className="bg-slate-800 border-slate-700 text-white h-8 text-center"
+                            min={15}
+                            step={15}
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 p-0 bg-slate-800 border-slate-700"
+                          onClick={() => {
+                            const newRest = Math.min(300, (exercise.restDurationSeconds || 90) + 15);
+                            handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                          }}
+                          disabled={updateExerciseMutation.isPending}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <div className="text-xs text-slate-500 text-center">
+                        {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')} min
+                      </div>
                     </div>
                   </div>
                 </div>

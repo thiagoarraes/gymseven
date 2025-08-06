@@ -104,7 +104,8 @@ export default function WorkoutSession() {
     if (currentExerciseIndex < templateExercises.length - 1) {
       setCurrentExerciseIndex(prev => prev + 1);
       setCurrentSetIndex(0);
-      setRestTimer(90); // 90 seconds default rest
+      const nextExercise = templateExercises[currentExerciseIndex + 1];
+      setRestTimer(nextExercise?.restDurationSeconds || 90);
     }
   };
 
@@ -119,7 +120,7 @@ export default function WorkoutSession() {
     const currentExercise = templateExercises[currentExerciseIndex];
     if (currentSetIndex < currentExercise?.sets - 1) {
       setCurrentSetIndex(prev => prev + 1);
-      setRestTimer(90); // Start rest timer
+      setRestTimer(currentExercise?.restDurationSeconds || 90); // Use custom rest duration
       toast({
         title: "Série concluída!",
         description: "Ótimo trabalho, continue assim.",
@@ -333,7 +334,7 @@ export default function WorkoutSession() {
             {/* Rest Timer */}
             {restTimer > 0 && (
               <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-3">
                   <div>
                     <div className="text-sm text-orange-400 font-medium">Descanso</div>
                     <div className="text-xs text-slate-400">Entre séries</div>
@@ -341,9 +342,35 @@ export default function WorkoutSession() {
                   <div className="text-2xl font-bold text-orange-400">{formatTime(restTimer)}</div>
                 </div>
                 <Progress 
-                  value={(90 - restTimer) / 90 * 100}
-                  className="w-full mt-3 h-2"
+                  value={((templateExercises[currentExerciseIndex]?.restDurationSeconds || 90) - restTimer) / (templateExercises[currentExerciseIndex]?.restDurationSeconds || 90) * 100}
+                  className="w-full mb-3 h-2"
                 />
+                <div className="flex items-center justify-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 bg-slate-800/50 border-orange-500/30 text-orange-400 hover:bg-orange-500/20"
+                    onClick={() => setRestTimer(prev => Math.max(0, prev - 15))}
+                  >
+                    -15s
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 bg-slate-800/50 border-orange-500/30 text-orange-400 hover:bg-orange-500/20"
+                    onClick={() => setRestTimer(prev => prev + 15)}
+                  >
+                    +15s
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 bg-slate-800/50 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                    onClick={() => setRestTimer(0)}
+                  >
+                    Pular
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

@@ -33,6 +33,7 @@ export const workoutTemplateExercises = pgTable("workout_template_exercises", {
   sets: integer("sets").notNull(),
   reps: text("reps").notNull(),
   weight: real("weight"),
+  restDurationSeconds: integer("rest_duration_seconds").default(90),
   order: integer("order").notNull(),
 });
 
