@@ -344,10 +344,19 @@ class DatabaseStorage implements IStorage {
   private db;
 
   constructor() {
-    const connectionString = process.env.DATABASE_URL;
+    // Build DATABASE_URL from Neon variables if DATABASE_URL is broken or missing
+    let connectionString = process.env.DATABASE_URL;
+    
+    // If DATABASE_URL contains the broken Supabase URL, build from Neon variables instead
+    if (!connectionString || connectionString.includes('vlqzjrwxqeyroqsglqwr.supabase.co')) {
+      if (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE && process.env.PGPORT) {
+        connectionString = `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
+        console.log('🔄 Using Neon database instead of broken Supabase connection');
+      }
+    }
     
     if (!connectionString) {
-      throw new Error('DATABASE_URL is required. Please provide your Supabase connection string.');
+      throw new Error('DATABASE_URL or Neon environment variables required. Please provide your Supabase connection string.');
     }
 
     // Enhanced configuration for Supabase and other PostgreSQL providers
