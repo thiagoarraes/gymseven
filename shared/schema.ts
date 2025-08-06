@@ -43,7 +43,6 @@ export const workoutLogs = pgTable("workout_logs", {
   name: text("name").notNull(),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time"),
-  completed: boolean("completed").default(false),
 });
 
 export const workoutLogExercises = pgTable("workout_log_exercises", {

@@ -331,7 +331,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workoutLogs')
       .select('*')
-      .order('createdAt', { ascending: false });
+      .order('created_at', { ascending: false });
     
     if (error) throw error;
     return data || [];
@@ -384,7 +384,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workoutLogs')
       .select('*')
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit);
     
     if (error) throw error;
