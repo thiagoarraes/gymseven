@@ -18,6 +18,9 @@ Preferred communication style: Simple, everyday language.
 - ✓ Redesigned workout cards to show actual exercise count and list
 - ✓ Made exercise areas clickable for adding exercises to templates
 - ✓ Removed time estimation and creation date from workout cards for cleaner design
+- ✓ Added customizable rest duration for each exercise in workout templates
+- ✓ Integrated custom rest timers in workout session with per-exercise durations
+- ✓ Improved card layout in template editor with better component distribution
 
 # System Architecture
 
