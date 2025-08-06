@@ -33,6 +33,21 @@ export default function Workouts() {
     queryFn: workoutTemplateApi.getAll,
   });
 
+  // Query to get exercises for each template
+  const { data: templatesWithExercises = [] } = useQuery({
+    queryKey: ["/api/workout-templates-with-exercises"],
+    queryFn: async () => {
+      const templatesWithExercises = await Promise.all(
+        workoutTemplates.map(async (template) => {
+          const exercises = await workoutTemplateApi.getExercises(template.id);
+          return { ...template, exercises };
+        })
+      );
+      return templatesWithExercises;
+    },
+    enabled: workoutTemplates.length > 0,
+  });
+
   const createMutation = useMutation({
     mutationFn: workoutTemplateApi.create,
     onSuccess: () => {
@@ -274,7 +289,7 @@ export default function Workouts() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {workoutTemplates.map((template) => (
+          {(templatesWithExercises.length > 0 ? templatesWithExercises : workoutTemplates).map((template) => (
             <Card key={template.id} className="glass-card rounded-2xl hover-lift cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -323,28 +338,52 @@ export default function Workouts() {
                   </div>
                 </div>
                 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-slate-300">
-                    <Dumbbell className="text-blue-400 mr-2 w-4 h-4" />
-                    <span>0 exercícios</span> {/* TODO: Calculate from actual data */}
+                {/* Exercise List */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-sm text-slate-300">
+                      <Dumbbell className="text-blue-400 mr-2 w-4 h-4" />
+                      <span>{template.exercises?.length || 0} exercícios</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-blue-400 hover:text-blue-300 p-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/workout-template/${template.id}`);
+                      }}
+                    >
+                      + Adicionar
+                    </Button>
                   </div>
-                  <div className="flex items-center text-sm text-slate-300">
-                    <Clock className="text-purple-400 mr-2 w-4 h-4" />
-                    <span>~1h 15m</span> {/* TODO: Estimate from exercises */}
-                  </div>
-                  <div className="flex items-center text-sm text-slate-300">
-                    <Calendar className="text-emerald-400 mr-2 w-4 h-4" />
-                    <span>Criado: {formatDate(template.createdAt!)}</span>
-                  </div>
-                </div>
-                
-                {/* Exercise Preview */}
-                <div className="space-y-2 mb-4">
-                  <div className="text-xs text-slate-500 uppercase tracking-wide">Exercícios</div>
-                  <div className="flex flex-wrap gap-1">
-                    <span className="bg-slate-800/50 text-slate-400 text-xs px-2 py-1 rounded">
-                      Adicione exercícios
-                    </span>
+                  
+                  <div className="space-y-2">
+                    {template.exercises && template.exercises.length > 0 ? (
+                      template.exercises.slice(0, 3).map((exercise: any, index: number) => (
+                        <div key={exercise.id} className="flex items-center text-xs text-slate-400">
+                          <span className="w-4 text-center">{index + 1}</span>
+                          <span className="flex-1 ml-2">{exercise.name}</span>
+                          <span className="text-blue-400 text-xs">{exercise.sets}×{exercise.reps}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div 
+                        className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 text-center cursor-pointer hover:bg-slate-800/50 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/workout-template/${template.id}`);
+                        }}
+                      >
+                        <span className="text-slate-400 text-sm">+ Adicionar exercícios</span>
+                      </div>
+                    )}
+                    
+                    {template.exercises && template.exercises.length > 3 && (
+                      <div className="text-xs text-slate-500 text-center pt-1">
+                        +{template.exercises.length - 3} mais exercícios
+                      </div>
+                    )}
                   </div>
                 </div>
                 

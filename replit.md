@@ -12,6 +12,12 @@ Preferred communication style: Simple, everyday language.
 - ✓ Added exercise selection mode for adding exercises to workout templates
 - ✓ Created workout template editor with exercise management functionality
 - ✓ Enhanced mobile-first design with improved user experience
+- ✓ Implemented direct editing of sets, reps, and weights in workout templates
+- ✓ Added exercise removal functionality from workout templates
+- ✓ Fixed exercise name and muscle group display in template editor
+- ✓ Redesigned workout cards to show actual exercise count and list
+- ✓ Made exercise areas clickable for adding exercises to templates
+- ✓ Removed time estimation and creation date from workout cards for cleaner design
 
 # System Architecture
 
