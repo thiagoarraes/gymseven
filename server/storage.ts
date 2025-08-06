@@ -686,19 +686,13 @@ class DatabaseStorage implements IStorage {
 let storage: IStorage;
 
 try {
-  // For now, use database storage until Supabase tables are created
-  // Uncomment the lines below after creating tables in Supabase dashboard
-  /*
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.log('🚀 Using Supabase SDK integration');
     storage = new SupabaseStorage();
   } else {
-  */
-    console.log('🗄️ Using PostgreSQL database storage (Supabase ready but tables need setup)');
+    console.log('🗄️ Using PostgreSQL database storage');
     storage = new DatabaseStorage();
-  /*
   }
-  */
 } catch (error) {
   console.error('❌ Storage initialization failed, falling back to database storage');
   storage = new DatabaseStorage();
