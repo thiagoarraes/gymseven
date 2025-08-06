@@ -205,7 +205,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
             variant="ghost"
             size="sm"
             onClick={() => navigate("/workouts")}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
