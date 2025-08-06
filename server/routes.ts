@@ -212,10 +212,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/workout-logs", async (req, res) => {
     try {
+      console.log("Creating workout log with data:", req.body);
       const validatedData = insertWorkoutLogSchema.parse(req.body);
       const log = await storage.createWorkoutLog(validatedData);
       res.status(201).json(log);
     } catch (error) {
+      console.error("Workout log creation error:", error);
       res.status(400).json({ message: "Dados inválidos para criação do treino" });
     }
   });

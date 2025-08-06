@@ -107,13 +107,17 @@ export default function Workouts() {
   });
 
   const startWorkoutMutation = useMutation({
-    mutationFn: (templateId: string) => 
-      workoutLogApi.create({
+    mutationFn: (templateId: string) => {
+      const template = workoutTemplates.find(t => t.id === templateId);
+      const workoutData = {
         templateId,
-        name: workoutTemplates.find(t => t.id === templateId)?.name || "Treino",
-        startTime: new Date().toISOString(),
+        name: template?.name || "Treino",
+        startTime: new Date(),
         completed: false,
-      }),
+      };
+      console.log('Creating workout with data:', workoutData);
+      return workoutLogApi.create(workoutData);
+    },
     onSuccess: (workoutLog) => {
       navigate(`/workout-session/${workoutLog.id}`);
     },
