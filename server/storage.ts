@@ -7,6 +7,13 @@ import {
   type WorkoutLogSet, type InsertWorkoutLogSet
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { eq, desc, and } from 'drizzle-orm';
+import { 
+  users, exercises, workoutTemplates, workoutTemplateExercises, 
+  workoutLogs, workoutLogExercises, workoutLogSets 
+} from '@shared/schema';
 
 export interface IStorage {
   // Users
@@ -218,7 +225,8 @@ export class MemStorage implements IStorage {
     const templateExercise: WorkoutTemplateExercise = { 
       ...insertExercise, 
       id,
-      weight: insertExercise.weight || null
+      weight: insertExercise.weight || null,
+      restDurationSeconds: insertExercise.restDurationSeconds ?? 90
     };
     this.workoutTemplateExercises.set(id, templateExercise);
     return templateExercise;
@@ -329,4 +337,240 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+
+
+class DatabaseStorage implements IStorage {
+  private db;
+
+  constructor() {
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+    this.db = drizzle(pool);
+    
+    // Initialize with sample data if needed
+    this.initializeSampleData();
+  }
+
+  private async initializeSampleData() {
+    try {
+      // Check if we already have exercises
+      const existingExercises = await this.db.select().from(exercises).limit(1);
+      if (existingExercises.length > 0) return;
+
+      // Sample exercises
+      const sampleExercises = [
+        {
+          name: "Supino Reto",
+          muscleGroup: "Peito",
+          description: "Exercício fundamental para o desenvolvimento do peitoral",
+          imageUrl: null,
+          videoUrl: null,
+        },
+        {
+          name: "Agachamento Livre",
+          muscleGroup: "Pernas", 
+          description: "Exercício composto para pernas e glúteos",
+          imageUrl: null,
+          videoUrl: null,
+        },
+        {
+          name: "Puxada Frontal",
+          muscleGroup: "Costas",
+          description: "Desenvolvimento do latíssimo do dorso",
+          imageUrl: null,
+          videoUrl: null,
+        },
+        {
+          name: "Rosca Direta",
+          muscleGroup: "Braços",
+          description: "Desenvolvimento do bíceps",
+          imageUrl: null,
+          videoUrl: null,
+        },
+        {
+          name: "Desenvolvimento Militar",
+          muscleGroup: "Ombros",
+          description: "Exercício para deltoides",
+          imageUrl: null,
+          videoUrl: null,
+        }
+      ];
+
+      await this.db.insert(exercises).values(sampleExercises);
+    } catch (error) {
+      console.error('Error initializing sample data:', error);
+    }
+  }
+
+  // User methods
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await this.db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  // Exercise methods
+  async getAllExercises(): Promise<Exercise[]> {
+    return await this.db.select().from(exercises);
+  }
+
+  async getExercise(id: string): Promise<Exercise | undefined> {
+    const result = await this.db.select().from(exercises).where(eq(exercises.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createExercise(exercise: InsertExercise): Promise<Exercise> {
+    const result = await this.db.insert(exercises).values(exercise).returning();
+    return result[0];
+  }
+
+  async updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined> {
+    const result = await this.db.update(exercises).set(exercise).where(eq(exercises.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteExercise(id: string): Promise<boolean> {
+    const result = await this.db.delete(exercises).where(eq(exercises.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getExercisesByMuscleGroup(muscleGroup: string): Promise<Exercise[]> {
+    return await this.db.select().from(exercises).where(eq(exercises.muscleGroup, muscleGroup));
+  }
+
+  // Workout Template methods
+  async getAllWorkoutTemplates(): Promise<WorkoutTemplate[]> {
+    return await this.db.select().from(workoutTemplates);
+  }
+
+  async getWorkoutTemplate(id: string): Promise<WorkoutTemplate | undefined> {
+    const result = await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
+    const result = await this.db.insert(workoutTemplates).values(template).returning();
+    return result[0];
+  }
+
+  async updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined> {
+    const result = await this.db.update(workoutTemplates).set(template).where(eq(workoutTemplates.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteWorkoutTemplate(id: string): Promise<boolean> {
+    const result = await this.db.delete(workoutTemplates).where(eq(workoutTemplates.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Workout Template Exercise methods
+  async getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
+    const result = await this.db.select({
+      id: workoutTemplateExercises.id,
+      templateId: workoutTemplateExercises.templateId,
+      exerciseId: workoutTemplateExercises.exerciseId,
+      sets: workoutTemplateExercises.sets,
+      reps: workoutTemplateExercises.reps,
+      weight: workoutTemplateExercises.weight,
+      restDurationSeconds: workoutTemplateExercises.restDurationSeconds,
+      order: workoutTemplateExercises.order,
+      exercise: exercises
+    })
+    .from(workoutTemplateExercises)
+    .innerJoin(exercises, eq(workoutTemplateExercises.exerciseId, exercises.id))
+    .where(eq(workoutTemplateExercises.templateId, templateId));
+    
+    return result;
+  }
+
+  async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
+    const result = await this.db.insert(workoutTemplateExercises).values(exercise).returning();
+    return result[0];
+  }
+
+  async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
+    const result = await this.db.update(workoutTemplateExercises).set(updates).where(eq(workoutTemplateExercises.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {
+    const result = await this.db.delete(workoutTemplateExercises).where(eq(workoutTemplateExercises.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {
+    const result = await this.db.delete(workoutTemplateExercises)
+      .where(and(eq(workoutTemplateExercises.templateId, templateId), eq(workoutTemplateExercises.exerciseId, exerciseId)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Workout Log methods  
+  async getAllWorkoutLogs(): Promise<WorkoutLog[]> {
+    return await this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
+  }
+
+  async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
+    const result = await this.db.select().from(workoutLogs).where(eq(workoutLogs.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog> {
+    const result = await this.db.insert(workoutLogs).values(log).returning();
+    return result[0];
+  }
+
+  async updateWorkoutLog(id: string, log: Partial<InsertWorkoutLog>): Promise<WorkoutLog | undefined> {
+    const result = await this.db.update(workoutLogs).set(log).where(eq(workoutLogs.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteWorkoutLog(id: string): Promise<boolean> {
+    const result = await this.db.delete(workoutLogs).where(eq(workoutLogs.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getRecentWorkoutLogs(limit: number = 5): Promise<WorkoutLog[]> {
+    return await this.db.select().from(workoutLogs)
+      .orderBy(desc(workoutLogs.startTime))
+      .limit(limit);
+  }
+
+  // Workout Log Set methods
+  async getWorkoutLogSets(logId: string): Promise<WorkoutLogSet[]> {
+    const result = await this.db.select({
+      id: workoutLogSets.id,
+      logExerciseId: workoutLogSets.logExerciseId,
+      setNumber: workoutLogSets.setNumber,
+      reps: workoutLogSets.reps,
+      weight: workoutLogSets.weight,
+      completed: workoutLogSets.completed,
+    })
+    .from(workoutLogSets)
+    .leftJoin(workoutLogExercises, eq(workoutLogSets.logExerciseId, workoutLogExercises.id))
+    .where(eq(workoutLogExercises.logId, logId));
+    
+    return result;
+  }
+
+  async createWorkoutLogSet(set: InsertWorkoutLogSet): Promise<WorkoutLogSet> {
+    const result = await this.db.insert(workoutLogSets).values(set).returning();
+    return result[0];
+  }
+
+  async updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined> {
+    const result = await this.db.update(workoutLogSets).set(set).where(eq(workoutLogSets.id, id)).returning();
+    return result[0];
+  }
+}
+
+export const storage = new DatabaseStorage();
