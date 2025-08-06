@@ -24,6 +24,7 @@ Preferred communication style: Simple, everyday language.
 - ✓ Redesigned exercise cards with modern UI/UX, color-coded parameters, and glassmorphism effects
 - ✓ Added exercise name display in workout session header for better context
 - ✓ Implemented automatic workout completion when finishing the last set of the last exercise
+- ✓ Added celebratory completion screen with confetti animation and motivational message
 
 # System Architecture
 

@@ -125,4 +125,29 @@
   .nav-active {
     @apply text-primary;
   }
+
+  /* Confetti Animations */
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-100vh) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  .confetti-0, .confetti-1, .confetti-2, .confetti-3, .confetti-4, .confetti-5 {
+    animation: confetti-fall 3s linear infinite;
+    font-size: 1.5rem;
+    user-select: none;
+  }
+
+  .confetti-0 { animation-delay: 0s; }
+  .confetti-1 { animation-delay: 0.1s; }
+  .confetti-2 { animation-delay: 0.2s; }
+  .confetti-3 { animation-delay: 0.3s; }
+  .confetti-4 { animation-delay: 0.4s; }
+  .confetti-5 { animation-delay: 0.5s; }
 }

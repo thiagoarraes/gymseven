@@ -27,6 +27,7 @@ export default function WorkoutSession() {
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [restTimer, setRestTimer] = useState(0);
   const [workoutDuration, setWorkoutDuration] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -134,15 +135,12 @@ export default function WorkoutSession() {
           description: "Próximo exercício carregado.",
         });
       } else {
-        // Last set of last exercise - automatically finish workout
-        toast({
-          title: "Treino concluído!",
-          description: "Parabéns! Finalizando automaticamente...",
-        });
-        // Automatically finish the workout after a brief delay
+        // Last set of last exercise - show celebration and finish workout
+        setShowCelebration(true);
+        // Automatically finish the workout after celebration
         setTimeout(() => {
           finishWorkoutMutation.mutate();
-        }, 1500);
+        }, 4000);
       }
     }
   };
@@ -392,6 +390,56 @@ export default function WorkoutSession() {
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
+
+      {/* Celebration Overlay */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          {/* Confetti Animation */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {Array.from({ length: 50 }).map((_, i) => (
+              <div
+                key={i}
+                className={`absolute animate-bounce confetti-${i % 6}`}
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `-10px`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${2 + Math.random() * 2}s`,
+                }}
+              >
+                {['🎉', '🎊', '✨', '🎈', '🏆', '💪'][i % 6]}
+              </div>
+            ))}
+          </div>
+
+          {/* Celebration Message */}
+          <Card className="glass-card rounded-3xl border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-lg max-w-md mx-4 transform animate-pulse">
+            <CardContent className="p-8 text-center">
+              <div className="text-6xl mb-4 animate-bounce">
+                🎉
+              </div>
+              <h2 className="text-3xl font-bold text-yellow-400 mb-4">
+                Treino Finalizado!
+              </h2>
+              <p className="text-lg text-white mb-2">
+                🔥 Parabéns, guerreiro(a)! 🔥
+              </p>
+              <p className="text-slate-300 mb-4">
+                Mais um treino destruído! Você está cada dia mais forte. Continue assim que logo você vai estar quebrando tudo! 💪
+              </p>
+              <div className="flex items-center justify-center space-x-2 text-emerald-400">
+                <span className="text-2xl">⏱️</span>
+                <span className="text-xl font-semibold">
+                  {formatTime(workoutDuration)}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                Redirecionando automaticamente...
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
