@@ -134,11 +134,15 @@ export default function WorkoutSession() {
           description: "Próximo exercício carregado.",
         });
       } else {
-        // Last set of last exercise
+        // Last set of last exercise - automatically finish workout
         toast({
           title: "Treino concluído!",
-          description: "Parabéns! Finalize o treino para salvar.",
+          description: "Parabéns! Finalizando automaticamente...",
         });
+        // Automatically finish the workout after a brief delay
+        setTimeout(() => {
+          finishWorkoutMutation.mutate();
+        }, 1500);
       }
     }
   };
