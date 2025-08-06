@@ -196,6 +196,11 @@ export default function WorkoutSession() {
               <p className="text-sm text-slate-400">
                 Exercício {currentExerciseIndex + 1} de {templateExercises.length}
               </p>
+              {currentExercise && (
+                <p className="text-sm text-blue-300 font-medium mt-1">
+                  {currentExercise.exercise.name}
+                </p>
+              )}
             </div>
             <div className="text-right">
               <div className="text-lg font-semibold text-emerald-400">

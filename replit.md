@@ -21,6 +21,8 @@ Preferred communication style: Simple, everyday language.
 - ✓ Added customizable rest duration for each exercise in workout templates
 - ✓ Integrated custom rest timers in workout session with per-exercise durations
 - ✓ Improved card layout in template editor with better component distribution
+- ✓ Redesigned exercise cards with modern UI/UX, color-coded parameters, and glassmorphism effects
+- ✓ Added exercise name display in workout session header for better context
 
 # System Architecture
 
