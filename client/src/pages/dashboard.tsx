@@ -63,9 +63,7 @@ export default function Dashboard() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
           <div className="flex items-center justify-between mb-6">
             <div className="relative z-10">
-              <h2 className="text-3xl font-black text-white mb-2 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">
-                Olá, Atleta! 🔥
-              </h2>
+              <h2 className="text-3xl font-black text-white mb-2 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">Olá, Seven!🔥</h2>
               <p className="text-slate-300 text-lg">Pronto para quebrar recordes hoje?</p>
             </div>
             <div className="text-right relative z-10">
@@ -99,7 +97,6 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
@@ -166,7 +163,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Recent Workouts */}
       <Card className="glass-card rounded-2xl hover-lift">
         <CardContent className="p-6">
@@ -238,7 +234,6 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
-
       {/* Progress Chart */}
       <Card className="glass-card rounded-2xl hover-lift">
         <CardContent className="p-6">
