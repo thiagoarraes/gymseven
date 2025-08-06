@@ -681,19 +681,23 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-// For Replit environment, prioritize Replit's PostgreSQL database
+// Database selection priority: Supabase > PostgreSQL > In-memory
 async function initializeStorage(): Promise<IStorage> {
   try {
-    // First check if we have Replit's DATABASE_URL or component PostgreSQL variables
-    if (process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE)) {
-      console.log('🗄️ Using PostgreSQL database storage (Replit environment)');
-      return new DatabaseStorage();
-    } else if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // First priority: Supabase if credentials are available
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.log('🚀 Using Supabase SDK integration');
       // Dynamic import to avoid loading Supabase when not needed
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
-    } else {
+    } 
+    // Second priority: PostgreSQL (Replit/Neon)
+    else if (process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE)) {
+      console.log('🗄️ Using PostgreSQL database storage (Replit environment)');
+      return new DatabaseStorage();
+    } 
+    // Fallback: In-memory storage
+    else {
       console.log('⚠️ No database configured, using in-memory storage (development only)');
       return new MemStorage();
     }
