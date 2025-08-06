@@ -112,7 +112,7 @@ export default function Workouts() {
       const workoutData = {
         templateId,
         name: template?.name || "Treino",
-        startTime: new Date(),
+        startTime: new Date().toISOString(),
         completed: false,
       };
       console.log('Creating workout with data:', workoutData);

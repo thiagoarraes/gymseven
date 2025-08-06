@@ -78,6 +78,9 @@ export const insertWorkoutTemplateExerciseSchema = createInsertSchema(workoutTem
 
 export const insertWorkoutLogSchema = createInsertSchema(workoutLogs).omit({
   id: true,
+}).extend({
+  startTime: z.union([z.date(), z.string()]).transform((val) => new Date(val)),
+  endTime: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
 });
 
 export const insertWorkoutLogSetSchema = createInsertSchema(workoutLogSets).omit({
