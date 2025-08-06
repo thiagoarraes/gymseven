@@ -1,0 +1,156 @@
+# GymSeven - Mobile Gym Workout Logger
+
+Crie um aplicativo mobile-first moderno e ágil para log de treinos de academia usando React/Next.js com shadcn/ui e Tailwind CSS.
+
+## 📱 Visão Geral
+**Nome**: GymSeven
+**Conceito**: App minimalista para registro de treinos com foco em simplicidade e agilidade
+**Design**: Mobile-first, interface limpa e moderna usando shadcn/ui
+
+## 🏗️ Estrutura Principal
+
+### 1. Tela Inicial / Dashboard
+- Header com logo "GymSeven" 
+- Cards com resumo: treinos da semana, último treino, próximo treino
+- Botões de acesso rápido: "Novo Treino" e "Ver Exercícios"
+- Navegação inferior: Home, Exercícios, Treinos, Histórico
+
+### 2. Área de Exercícios
+**Funcionalidades:**
+- Lista de exercícios cadastrados com filtros por grupo muscular
+- Botão "+" para adicionar novo exercício
+- Cards com: nome, grupo muscular, thumbnail da imagem
+
+**Formulário de Cadastro de Exercício:**
+- Nome do exercício (text input)
+- Grupo muscular (select: Peito, Costas, Ombros, Braços, Pernas, Core, Cardio)
+- Upload de imagem ou vídeo demonstrativo
+- Botão "Salvar Exercício"
+
+*Integração sugerida*: Use dados do MuscleWiki.com como referência para exercícios populares
+
+### 3. Área de Treinos
+**Lista de Treinos:**
+- Cards com nome do treino, data da última execução
+- Botão "+" para criar novo treino
+- Opção de duplicar treino existente
+
+**Criador de Treino:**
+- Nome do treino (ex: "Push A", "Pernas")
+- Lista de exercícios adicionados
+- Para cada exercício:
+  - Seletor de exercício (dropdown/modal)
+  - Quantidade de séries (counter: 1-10)
+  - Repetições sugeridas (text input)
+  - Carga sugerida (number input)
+- Botão "Salvar Treino"
+
+### 4. Execução de Treino
+**Interface durante o treino:**
+- Nome do treino no topo
+- Lista de exercícios com expansão
+- Para cada série:
+  - Checkboxes para marcar série completa
+  - Input de repetições realizadas
+  - Input de carga utilizada
+  - Timer de descanso (opcional)
+- Botões: "Série Anterior", "Próxima Série", "Finalizar Treino"
+
+### 5. Histórico e Gráficos
+**Por exercício:**
+- Seletor de exercício
+- Gráfico de linha mostrando evolução da carga ao longo do tempo
+- Eixo X: Datas dos treinos
+- Eixo Y: Carga máxima do dia
+- Pontos clicáveis mostrando detalhes (séries x reps x carga)
+
+## 🎨 Especificações de Design
+
+### Cores e Tema
+- Tema escuro como padrão
+- Paleta: Preto, cinza escuro, branco, accent color (azul/verde)
+- Usar variáveis CSS do shadcn/ui
+
+### Componentes shadcn/ui a utilizar:
+- Button, Input, Select, Checkbox
+- Card, Badge, Separator
+- Dialog/Modal, Sheet (para mobile)
+- Chart (para gráficos)
+- Tabs, Accordion
+- Toast para notificações
+
+### Responsividade:
+- Mobile-first (320px+)
+- Interface otimizada para uso com uma mão
+- Botões grandes e acessíveis
+- Swipe gestures onde apropriado
+
+## 🔧 Funcionalidades Técnicas
+
+### Armazenamento Local:
+- LocalStorage para dados offline
+- Estrutura de dados JSON para exercícios, treinos e histórico
+
+### Performance:
+- Lazy loading de imagens
+- Componentes otimizados
+- Transições suaves
+
+### Acessibilidade:
+- Labels adequados
+- Contrast ratio WCAG AA
+- Navegação por teclado
+
+## 📊 Estrutura de Dados Sugerida
+
+```typescript
+interface Exercise {
+  id: string;
+  name: string;
+  muscleGroup: string;
+  image?: string;
+  video?: string;
+}
+
+interface WorkoutTemplate {
+  id: string;
+  name: string;
+  exercises: {
+    exerciseId: string;
+    sets: number;
+    reps: string;
+    weight: number;
+  }[];
+}
+
+interface WorkoutLog {
+  id: string;
+  templateId: string;
+  date: Date;
+  exercises: {
+    exerciseId: string;
+    sets: {
+      reps: number;
+      weight: number;
+      completed: boolean;
+    }[];
+  }[];
+}
+```
+
+## 🚀 Fluxo de Uso Prioritário
+1. Usuário abre o app
+2. Seleciona "Novo Treino" ou treino existente
+3. Executa série por série marcando reps e cargas
+4. Finaliza treino
+5. Dados são salvos automaticamente
+6. Histórico fica disponível nos gráficos
+
+## 💡 Diferenciais
+- Interface extremamente ágil e intuitiva
+- Foco na execução rápida durante o treino
+- Visualização clara do progresso
+- Design moderno e minimalista
+- Funcionamento offline
+
+Implemente com foco na usabilidade durante o treino real, quando o usuário está na academia e precisa de agilidade máxima.
