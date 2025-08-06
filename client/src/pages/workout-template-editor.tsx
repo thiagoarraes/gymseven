@@ -32,6 +32,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [editingExercise, setEditingExercise] = useState<any>(null);
   const [isExerciseFormOpen, setIsExerciseFormOpen] = useState(false);
+  const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -347,11 +348,36 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                       <label className="text-xs text-slate-400 uppercase tracking-wider">Peso (kg)</label>
                       <Input
                         type="text"
-                        value={exercise.weight || ''}
+                        value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
                         onChange={(e) => {
                           const value = e.target.value;
-                          const numericValue = value === '' ? null : parseFloat(value) || null;
-                          handleQuickUpdate(exercise.id, 'weight', numericValue);
+                          setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value.trim();
+                          if (value === '') {
+                            handleQuickUpdate(exercise.id, 'weight', null);
+                            setWeightInputs(prev => {
+                              const newInputs = { ...prev };
+                              delete newInputs[exercise.id];
+                              return newInputs;
+                            });
+                          } else {
+                            const numericValue = parseFloat(value);
+                            if (!isNaN(numericValue)) {
+                              handleQuickUpdate(exercise.id, 'weight', numericValue);
+                              setWeightInputs(prev => {
+                                const newInputs = { ...prev };
+                                delete newInputs[exercise.id];
+                                return newInputs;
+                              });
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.currentTarget.blur();
+                          }
                         }}
                         className="bg-slate-800 border-slate-700 text-white h-8 text-center"
                         placeholder="--"
