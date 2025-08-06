@@ -160,8 +160,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/workout-templates/:id/exercises", async (req, res) => {
     try {
       const templateId = req.params.id;
+      
+      // Converter reps para número se for possível, caso contrário manter como string
+      let processedBody = { ...req.body };
+      if (typeof processedBody.reps === 'string') {
+        // Se reps é uma string simples como "8" ou "10", converter para número
+        // Se é uma faixa como "8-12", manter como string
+        const repsStr = processedBody.reps.trim();
+        if (/^\d+$/.test(repsStr)) {
+          processedBody.reps = parseInt(repsStr);
+        } else {
+          // Para o Supabase, vamos usar apenas o primeiro número da faixa
+          const match = repsStr.match(/^(\d+)/);
+          if (match) {
+            processedBody.reps = parseInt(match[1]);
+          }
+        }
+      }
+      
       const validatedData = insertWorkoutTemplateExerciseSchema.parse({
-        ...req.body,
+        ...processedBody,
         templateId
       });
       
