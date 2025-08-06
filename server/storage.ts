@@ -15,7 +15,6 @@ import {
   workoutLogs, workoutLogExercises, workoutLogSets 
 } from '@shared/schema';
 import { logDatabaseInfo } from './supabase-check';
-import { SupabaseStorage } from './supabase-storage';
 
 export interface IStorage {
   // Users
@@ -682,20 +681,29 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-// Check if Supabase credentials are available, use Supabase; otherwise use database storage
-let storage: IStorage;
-
-try {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.log('🚀 Using Supabase SDK integration');
-    storage = new SupabaseStorage();
-  } else {
-    console.log('🗄️ Using PostgreSQL database storage');
-    storage = new DatabaseStorage();
+// For Replit environment, prioritize Replit's PostgreSQL database
+async function initializeStorage(): Promise<IStorage> {
+  try {
+    // First check if we have Replit's DATABASE_URL or component PostgreSQL variables
+    if (process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE)) {
+      console.log('🗄️ Using PostgreSQL database storage (Replit environment)');
+      return new DatabaseStorage();
+    } else if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('🚀 Using Supabase SDK integration');
+      // Dynamic import to avoid loading Supabase when not needed
+      const { SupabaseStorage } = await import('./supabase-storage');
+      return new SupabaseStorage();
+    } else {
+      console.log('⚠️ No database configured, using in-memory storage (development only)');
+      return new MemStorage();
+    }
+  } catch (error) {
+    console.error('❌ Storage initialization failed, falling back to in-memory storage');
+    console.error('Error details:', error);
+    return new MemStorage();
   }
-} catch (error) {
-  console.error('❌ Storage initialization failed, falling back to database storage');
-  storage = new DatabaseStorage();
 }
+
+const storage = await initializeStorage();
 
 export { storage };
