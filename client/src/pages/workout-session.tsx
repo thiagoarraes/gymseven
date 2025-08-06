@@ -248,23 +248,9 @@ export default function WorkoutSession() {
       {currentExercise && (
         <Card className="glass-card rounded-2xl">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-white">{currentExercise.exercise.name}</h3>
-                <p className="text-sm text-slate-400">{currentExercise.exercise.muscleGroup}</p>
-              </div>
-              {/* Exercise image/video thumbnail */}
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center">
-                {currentExercise.exercise.imageUrl ? (
-                  <img 
-                    src={currentExercise.exercise.imageUrl} 
-                    alt={currentExercise.exercise.name}
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                ) : (
-                  <Dumbbell className="text-blue-400 text-xl w-6 h-6" />
-                )}
-              </div>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-white">{currentExercise.exercise.name}</h3>
+              <p className="text-sm text-slate-400">{currentExercise.exercise.muscleGroup}</p>
             </div>
             
             {/* Sets Tracking */}
