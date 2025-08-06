@@ -346,10 +346,13 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                     <div className="space-y-2">
                       <label className="text-xs text-slate-400 uppercase tracking-wider">Peso (kg)</label>
                       <Input
-                        type="number"
-                        step="0.5"
+                        type="text"
                         value={exercise.weight || ''}
-                        onChange={(e) => handleQuickUpdate(exercise.id, 'weight', e.target.value ? parseFloat(e.target.value) : null)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const numericValue = value === '' ? null : parseFloat(value) || null;
+                          handleQuickUpdate(exercise.id, 'weight', numericValue);
+                        }}
                         className="bg-slate-800 border-slate-700 text-white h-8 text-center"
                         placeholder="--"
                       />
@@ -450,12 +453,14 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                     <FormLabel className="text-slate-200">Peso (kg) - Opcional</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.5"
+                        type="text"
                         placeholder="Ex: 20, 45.5"
                         className="bg-slate-800 border-slate-700 text-white"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? undefined : parseFloat(value) || undefined);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
