@@ -10,9 +10,7 @@ export function Logo() {
         <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
           Gym<span className="text-emerald-400">Seven</span>
         </h1>
-        <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">
-          Treinos Inteligentes
-        </p>
+        <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">gerenciador de treino do @thiagoseven</p>
       </div>
     </div>
   );
