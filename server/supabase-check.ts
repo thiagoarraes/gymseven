@@ -40,6 +40,19 @@ export function checkSupabaseConnection(): {
 
 export function logDatabaseInfo() {
   const info = checkSupabaseConnection();
-  console.log(`🗄️  Database Provider: ${info.provider}`);
+  console.log(`🗄️  Database Provider: ${info.provider.toUpperCase()}`);
+  
+  if (info.isSupabase) {
+    console.log('🎉 Supabase detected - optimized configuration applied!');
+  }
+  
   info.recommendations.forEach(rec => console.log(`   ℹ️  ${rec}`));
+  
+  // Add connection troubleshooting info
+  if (info.isSupabase) {
+    console.log('🔧 Supabase troubleshooting:');
+    console.log('   - Use "Transaction pooler" connection string');
+    console.log('   - Replace [YOUR-PASSWORD] with your actual password');
+    console.log('   - Ensure your Supabase project is active');
+  }
 }

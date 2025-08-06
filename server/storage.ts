@@ -350,13 +350,33 @@ class DatabaseStorage implements IStorage {
       throw new Error('DATABASE_URL is required. Please provide your Supabase connection string.');
     }
 
-    // Configure pool for Supabase compatibility
-    const pool = new Pool({
+    // Enhanced configuration for Supabase and other PostgreSQL providers
+    const isSupabase = connectionString.includes('supabase.com');
+    const isNeon = connectionString.includes('neon.tech');
+    
+    const poolConfig = {
       connectionString,
-      ssl: connectionString.includes('supabase') ? { rejectUnauthorized: false } : false,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      ssl: (isSupabase || isNeon) ? { rejectUnauthorized: false } : false,
+      max: isSupabase ? 15 : 10, // Supabase handles more concurrent connections better
+      min: 2,
+      idleTimeoutMillis: isSupabase ? 60000 : 30000, // Supabase can handle longer idle times
+      connectionTimeoutMillis: isSupabase ? 10000 : 5000, // More time for Supabase connections
+      acquireTimeoutMillis: 30000,
+      statement_timeout: 30000,
+      query_timeout: 30000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+    };
+
+    const pool = new Pool(poolConfig);
+    
+    // Enhanced error handling for pool
+    pool.on('error', (err) => {
+      console.error('Database pool error:', err);
+    });
+    
+    pool.on('connect', () => {
+      console.log('📡 Database connection established');
     });
     
     this.db = drizzle(pool);
@@ -364,16 +384,55 @@ class DatabaseStorage implements IStorage {
     // Log database provider info
     logDatabaseInfo();
     
-    // Initialize with sample data if needed
-    this.initializeSampleData();
+    // Test connection and initialize with retry
+    this.initializeWithRetry();
+  }
+
+  private async initializeWithRetry(maxRetries = 3) {
+    let retries = 0;
+    
+    while (retries < maxRetries) {
+      try {
+        // Test basic connection
+        await this.testConnection();
+        console.log('✅ Database connection verified');
+        
+        // Initialize sample data
+        await this.initializeSampleData();
+        console.log('✅ Database initialization complete');
+        break;
+        
+      } catch (error: any) {
+        retries++;
+        console.error(`❌ Database initialization attempt ${retries}/${maxRetries} failed:`, error.message || error);
+        
+        if (retries >= maxRetries) {
+          console.error('🔥 All database connection attempts failed. Please check your DATABASE_URL.');
+          console.error('🔧 For Supabase: Make sure you are using the "Transaction pooler" connection string');
+          console.error('🔧 Ensure your password is correctly replaced in the connection string');
+        } else {
+          console.log(`⏳ Retrying in ${retries * 2} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, retries * 2000));
+        }
+      }
+    }
+  }
+
+  private async testConnection() {
+    await this.db.execute('SELECT 1 as test');
   }
 
   private async initializeSampleData() {
     try {
       // Check if we already have exercises
       const existingExercises = await this.db.select().from(exercises).limit(1);
-      if (existingExercises.length > 0) return;
+      if (existingExercises.length > 0) {
+        console.log('📚 Sample data already exists');
+        return;
+      }
 
+      console.log('🏗️ Creating sample data...');
+      
       // Sample exercises
       const sampleExercises = [
         {
@@ -410,12 +469,36 @@ class DatabaseStorage implements IStorage {
           description: "Exercício para deltoides",
           imageUrl: null,
           videoUrl: null,
+        },
+        {
+          name: "Leg Press",
+          muscleGroup: "Pernas",
+          description: "Exercício para quadríceps e glúteos",
+          imageUrl: null,
+          videoUrl: null,
+        },
+        {
+          name: "Prancha",
+          muscleGroup: "Core",
+          description: "Fortalecimento do core",
+          imageUrl: null,
+          videoUrl: null,
+        },
+        {
+          name: "Remada Curvada",
+          muscleGroup: "Costas",
+          description: "Desenvolvimento das costas",
+          imageUrl: null,
+          videoUrl: null,
         }
       ];
 
       await this.db.insert(exercises).values(sampleExercises);
+      console.log('✅ Sample exercises created successfully');
+      
     } catch (error) {
-      console.error('Error initializing sample data:', error);
+      console.error('❌ Error creating sample data:', error);
+      throw error;
     }
   }
 
