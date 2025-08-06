@@ -167,8 +167,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const templateExercise = await storage.addExerciseToTemplate(validatedData);
       res.status(201).json(templateExercise);
-    } catch (error) {
-      res.status(400).json({ message: "Dados inválidos para adição do exercício ao treino" });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        const validationErrors = error.errors.map((err: any) => ({
+          field: err.path.join('.'),
+          message: err.message,
+          received: err.received
+        }));
+        
+        res.status(400).json({ 
+          message: "Dados inválidos para adição do exercício ao treino",
+          errors: validationErrors
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Erro interno ao adicionar exercício",
+          error: error.message
+        });
+      }
     }
   });
 

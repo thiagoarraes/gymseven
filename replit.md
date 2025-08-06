@@ -13,6 +13,7 @@ Preferred communication style: Simple, everyday language.
 - ✓ Fixed environment compatibility issues for seamless Replit deployment
 - ✓ Application successfully switched to Supabase database integration
 - ✓ Application running successfully on port 5000 with Supabase PostgreSQL database
+- ✓ Fixed exercise addition to workout templates - resolved table naming conflicts with Supabase
 - ✓ Successfully migrated from Replit Agent to Replit environment
 - ✓ Configured PostgreSQL database with proper schema migrations
 - ✓ Successfully switched from Neon to Supabase database, then back to Neon due to Supabase connection issues
