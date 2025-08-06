@@ -126,28 +126,73 @@
     @apply text-primary;
   }
 
-  /* Confetti Animations */
-  @keyframes confetti-fall {
+  /* Confetti Explosion Animations */
+  @keyframes confetti-explosion {
     0% {
-      transform: translateY(-100vh) rotate(0deg);
+      transform: scale(0) rotate(0deg) translateX(0) translateY(0);
+      opacity: 1;
+    }
+    25% {
+      transform: scale(1) rotate(180deg) translateX(var(--random-x, 200px)) translateY(var(--random-y, -100px));
       opacity: 1;
     }
     100% {
-      transform: translateY(100vh) rotate(720deg);
+      transform: scale(0.3) rotate(720deg) translateX(var(--random-x, 200px)) translateY(calc(var(--random-y, -100px) + 300px));
+      opacity: 0;
+    }
+  }
+
+  @keyframes confetti-float {
+    0% {
+      transform: translateY(0) rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-50px) rotate(180deg) scale(1.2);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(200px) rotate(360deg) scale(0.8);
       opacity: 0;
     }
   }
 
   .confetti-0, .confetti-1, .confetti-2, .confetti-3, .confetti-4, .confetti-5 {
-    animation: confetti-fall 3s linear infinite;
-    font-size: 1.5rem;
+    animation: confetti-explosion 3s ease-out forwards;
+    font-size: 1.8rem;
     user-select: none;
+    --random-x: calc((var(--i) * 73px) - 200px);
+    --random-y: calc((var(--i) * -41px) - 150px);
   }
 
-  .confetti-0 { animation-delay: 0s; }
-  .confetti-1 { animation-delay: 0.1s; }
-  .confetti-2 { animation-delay: 0.2s; }
-  .confetti-3 { animation-delay: 0.3s; }
-  .confetti-4 { animation-delay: 0.4s; }
-  .confetti-5 { animation-delay: 0.5s; }
+  .confetti-0 { 
+    animation-delay: 0s; 
+    --random-x: 150px; 
+    --random-y: -120px;
+  }
+  .confetti-1 { 
+    animation-delay: 0.2s; 
+    --random-x: -180px; 
+    --random-y: -80px;
+  }
+  .confetti-2 { 
+    animation-delay: 0.4s; 
+    --random-x: 220px; 
+    --random-y: -200px;
+  }
+  .confetti-3 { 
+    animation-delay: 0.1s; 
+    --random-x: -150px; 
+    --random-y: -160px;
+  }
+  .confetti-4 { 
+    animation-delay: 0.3s; 
+    --random-x: 100px; 
+    --random-y: -100px;
+  }
+  .confetti-5 { 
+    animation-delay: 0.5s; 
+    --random-x: -200px; 
+    --random-y: -140px;
+  }
 }

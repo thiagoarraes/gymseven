@@ -388,18 +388,18 @@ export default function WorkoutSession() {
 
       {/* Celebration Overlay */}
       {showCelebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          {/* Confetti Animation */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          {/* Confetti Explosion Animation */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 50 }).map((_, i) => (
+            {Array.from({ length: 60 }).map((_, i) => (
               <div
                 key={i}
-                className={`absolute animate-bounce confetti-${i % 6}`}
+                className={`absolute confetti-${i % 6}`}
                 style={{
                   left: `${Math.random() * 100}%`,
-                  top: `-10px`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${2 + Math.random() * 2}s`,
+                  top: `${Math.random() * 30}%`,
+                  animationDelay: `${Math.random() * 1}s`,
+                  animationDuration: `${2.5 + Math.random() * 1.5}s`,
                 }}
               >
                 {['🎉', '🎊', '✨', '🎈', '🏆', '💪'][i % 6]}
@@ -408,10 +408,10 @@ export default function WorkoutSession() {
           </div>
 
           {/* Celebration Message */}
-          <Card className="glass-card rounded-3xl border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-lg max-w-md mx-4 transform animate-pulse">
+          <Card className="glass-card rounded-3xl border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-lg w-full max-w-md mx-auto transform animate-pulse mb-20">
             <CardContent className="p-8 text-center">
               <div className="text-6xl mb-4 animate-bounce">
-                🎉
+                🏆
               </div>
               <h2 className="text-3xl font-bold text-yellow-400 mb-4">
                 Treino Finalizado!
