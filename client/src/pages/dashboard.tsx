@@ -64,7 +64,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-6">
             <div className="relative z-10">
               <h2 className="text-3xl font-black text-white mb-2 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">Olá, Seven!🔥</h2>
-              <p className="text-slate-300 text-lg">Pronto para quebrar recordes hoje?</p>
+              <p className="text-slate-300 text-lg">Pronto para progredir carga hoje?</p>
             </div>
             <div className="text-right relative z-10">
               <div className="flex items-center space-x-2">
