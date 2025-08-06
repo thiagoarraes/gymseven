@@ -10,7 +10,17 @@ import Exercises from "@/pages/exercises";
 import Workouts from "@/pages/workouts";
 import Progress from "@/pages/progress";
 import WorkoutSession from "@/pages/workout-session";
+import WorkoutTemplateEditor from "@/pages/workout-template-editor";
 import NotFound from "@/pages/not-found";
+
+// Route wrapper components to handle params
+function ExercisesRoute() {
+  return <Exercises />;
+}
+
+function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
+  return <WorkoutTemplateEditor templateId={params.id} />;
+}
 
 function Router() {
   return (
@@ -19,8 +29,9 @@ function Router() {
       <main className="pt-20 pb-20">
         <Switch>
           <Route path="/" component={Dashboard} />
-          <Route path="/exercises" component={Exercises} />
+          <Route path="/exercises" component={ExercisesRoute} />
           <Route path="/workouts" component={Workouts} />
+          <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
           <Route path="/progress" component={Progress} />
           <Route path="/workout-session/:id" component={WorkoutSession} />
           <Route component={NotFound} />

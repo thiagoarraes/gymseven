@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Play, Copy, Edit, Clock, Calendar, Dumbbell, Trash2 } from "lucide-react";
+import { Plus, Play, Copy, Edit, Edit3, Clock, Calendar, Dumbbell, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -304,10 +304,10 @@ export default function Workouts() {
                       className="p-2 bg-slate-800/50 rounded-lg hover:bg-slate-700 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEdit(template);
+                        navigate(`/workout-template/${template.id}`);
                       }}
                     >
-                      <Edit className="text-slate-400 w-4 h-4" />
+                      <Edit3 className="text-slate-400 w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"

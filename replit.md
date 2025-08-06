@@ -6,6 +6,13 @@ GymSeven is a mobile-first workout logging application built with modern web tec
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 2025)
+- ✓ Successfully migrated from Replit Agent to Replit environment
+- ✓ Redesigned exercises page with clean, modern interface (removed images and descriptions)
+- ✓ Added exercise selection mode for adding exercises to workout templates
+- ✓ Created workout template editor with exercise management functionality
+- ✓ Enhanced mobile-first design with improved user experience
+
 # System Architecture
 
 ## Frontend Architecture
