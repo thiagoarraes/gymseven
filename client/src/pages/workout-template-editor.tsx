@@ -52,6 +52,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     mutationFn: (exerciseData: any) => workoutTemplateApi.addExercise(templateId!, exerciseData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
       setIsExerciseFormOpen(false);
       setEditingExercise(null);
       toast({
@@ -73,6 +74,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
       workoutTemplateApi.updateExercise(exerciseId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
       toast({
         title: "Exercício atualizado!",
         description: "As alterações foram salvas.",
@@ -91,6 +93,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     mutationFn: (exerciseId: string) => workoutTemplateApi.removeExercise(exerciseId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
       toast({
         title: "Exercício removido!",
         description: "O exercício foi removido do treino.",

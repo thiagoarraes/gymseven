@@ -35,17 +35,24 @@ export default function Workouts() {
 
   // Query to get exercises for each template
   const { data: templatesWithExercises = [] } = useQuery({
-    queryKey: ["/api/workout-templates-with-exercises"],
+    queryKey: ["/api/workout-templates-with-exercises", workoutTemplates.map(t => t.id).sort()],
     queryFn: async () => {
       const templatesWithExercises = await Promise.all(
         workoutTemplates.map(async (template) => {
-          const exercises = await workoutTemplateApi.getExercises(template.id);
-          return { ...template, exercises };
+          try {
+            const exercises = await workoutTemplateApi.getExercises(template.id);
+            return { ...template, exercises };
+          } catch (error) {
+            console.error(`Error loading exercises for template ${template.id}:`, error);
+            return { ...template, exercises: [] };
+          }
         })
       );
       return templatesWithExercises;
     },
     enabled: workoutTemplates.length > 0,
+    staleTime: 0, // Always refetch
+    refetchOnWindowFocus: true,
   });
 
   const createMutation = useMutation({
@@ -289,7 +296,7 @@ export default function Workouts() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {(templatesWithExercises.length > 0 ? templatesWithExercises : workoutTemplates).map((template) => (
+          {(templatesWithExercises.length > 0 ? templatesWithExercises : workoutTemplates).map((template: any) => (
             <Card key={template.id} className="glass-card rounded-2xl hover-lift cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
