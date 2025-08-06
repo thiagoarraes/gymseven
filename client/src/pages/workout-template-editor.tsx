@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -267,166 +267,196 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
           </Card>
         ) : (
           templateExercises.map((exercise: any, index: number) => (
-            <Card key={exercise.id} className="glass-card rounded-xl hover-lift">
-              <CardContent className="p-4">
-                <div className="space-y-4">
-                  {/* Exercise Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center space-x-2 text-slate-500">
-                        <GripVertical className="w-4 h-4" />
-                        <span className="font-mono text-sm">{index + 1}</span>
+            <Card key={exercise.id} className="glass-card rounded-2xl hover-lift border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-lg">
+              <CardContent className="p-6">
+                <div className="space-y-6">
+                  {/* Exercise Header with Visual Hierarchy */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-4">
+                      {/* Exercise Number with Better Visual */}
+                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
+                        <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-white text-lg">
-                          {exercise.name}
-                        </h4>
-                        <span className="text-sm text-blue-400">
-                          {exercise.muscleGroup}
-                        </span>
+                      
+                      {/* Exercise Info */}
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <Dumbbell className="w-4 h-4 text-slate-400" />
+                          <h4 className="font-bold text-white text-xl tracking-tight">
+                            {exercise.name}
+                          </h4>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                          <span className="text-sm text-blue-300 font-medium">
+                            {exercise.muscleGroup}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-2 bg-slate-800/50 rounded-lg hover:bg-red-500/20 transition-colors"
-                      onClick={() => handleRemoveExercise(exercise.id)}
-                    >
-                      <Trash2 className="text-red-400 w-4 h-4" />
-                    </Button>
+
+                    {/* Action Menu */}
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-8 h-8 p-0 hover:bg-slate-700/50 rounded-lg"
+                      >
+                        <GripVertical className="w-4 h-4 text-slate-400" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-8 h-8 p-0 hover:bg-red-500/20 rounded-lg transition-colors"
+                        onClick={() => handleRemoveExercise(exercise.id)}
+                      >
+                        <Trash2 className="text-red-400 w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
-                  {/* Editable Parameters */}
-                  <div className="space-y-4">
-                    {/* First Row: Sets and Reps */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Sets */}
-                      <div className="space-y-2">
-                        <label className="text-xs text-slate-400 uppercase tracking-wider">Séries</label>
+                  {/* Parameters Grid with Modern Cards */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Sets Parameter */}
+                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                      <div className="space-y-3">
                         <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Séries</label>
+                        </div>
+                        <div className="flex items-center justify-center space-x-3">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-8 h-8 p-0 bg-slate-800 border-slate-700"
+                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
                             onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
                             disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                           >
-                            <Minus className="w-3 h-3" />
+                            <Minus className="w-4 h-4" />
                           </Button>
-                          <div className="w-12 text-center">
-                            <Input
-                              type="number"
-                              value={exercise.sets}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value);
-                                if (value >= 1) handleQuickUpdate(exercise.id, 'sets', value);
-                              }}
-                              className="text-center bg-slate-800 border-slate-700 text-white h-8 p-1"
-                              min={1}
-                            />
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-white">{exercise.sets}</div>
+                            <div className="text-xs text-slate-400">séries</div>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-8 h-8 p-0 bg-slate-800 border-slate-700"
+                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
                             onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
                             disabled={updateExerciseMutation.isPending}
                           >
-                            <Plus className="w-3 h-3" />
+                            <Plus className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Reps */}
-                      <div className="space-y-2">
-                        <label className="text-xs text-slate-400 uppercase tracking-wider">Reps</label>
-                        <Input
-                          value={exercise.reps}
-                          onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-white h-8 text-center"
-                          placeholder="8-12"
-                        />
+                    {/* Reps Parameter */}
+                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Repetições</label>
+                        </div>
+                        <div className="text-center">
+                          <Input
+                            value={exercise.reps}
+                            onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                            className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20"
+                            placeholder="8-12"
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Second Row: Weight and Rest Duration */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Weight */}
-                      <div className="space-y-2">
-                        <label className="text-xs text-slate-400 uppercase tracking-wider">Peso (kg)</label>
-                        <Input
-                          type="text"
-                          value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
-                          }}
-                          onBlur={(e) => {
-                            const value = e.target.value.trim();
-                            if (value === '') {
-                              handleQuickUpdate(exercise.id, 'weight', null);
-                              setWeightInputs(prev => {
-                                const newInputs = { ...prev };
-                                delete newInputs[exercise.id];
-                                return newInputs;
-                              });
-                            } else {
-                              const numericValue = parseFloat(value);
-                              if (!isNaN(numericValue)) {
-                                handleQuickUpdate(exercise.id, 'weight', numericValue);
+                    {/* Weight Parameter */}
+                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Peso</label>
+                        </div>
+                        <div className="text-center">
+                          <Input
+                            type="text"
+                            value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
+                            }}
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (value === '') {
+                                handleQuickUpdate(exercise.id, 'weight', null);
                                 setWeightInputs(prev => {
                                   const newInputs = { ...prev };
                                   delete newInputs[exercise.id];
                                   return newInputs;
                                 });
+                              } else {
+                                const numericValue = parseFloat(value);
+                                if (!isNaN(numericValue)) {
+                                  handleQuickUpdate(exercise.id, 'weight', numericValue);
+                                  setWeightInputs(prev => {
+                                    const newInputs = { ...prev };
+                                    delete newInputs[exercise.id];
+                                    return newInputs;
+                                  });
+                                }
                               }
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          className="bg-slate-800 border-slate-700 text-white h-8 text-center"
-                          placeholder="--"
-                        />
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20"
+                            placeholder="kg"
+                          />
+                        </div>
                       </div>
+                    </div>
 
-                      {/* Rest Duration */}
-                      <div className="space-y-2">
-                        <label className="text-xs text-slate-400 uppercase tracking-wider flex items-center">
-                          <Timer className="w-3 h-3 mr-1" />
-                          Descanso
-                        </label>
-                        <div className="flex items-center space-x-1">
+                    {/* Rest Duration Parameter */}
+                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider flex items-center">
+                            <Timer className="w-3 h-3 mr-1" />
+                            Descanso
+                          </label>
+                        </div>
+                        <div className="flex items-center justify-center space-x-3">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-7 h-8 p-0 bg-slate-800 border-slate-700"
+                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
                             onClick={() => {
                               const newRest = Math.max(30, (exercise.restDurationSeconds || 90) - 15);
                               handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                             }}
                             disabled={updateExerciseMutation.isPending}
                           >
-                            <Minus className="w-3 h-3" />
+                            <Minus className="w-4 h-4" />
                           </Button>
-                          <div className="flex-1 text-center">
-                            <div className="text-xs text-orange-400 font-medium">
+                          <div className="text-center">
+                            <div className="text-xl font-bold text-orange-400">
                               {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
                             </div>
+                            <div className="text-xs text-slate-400">minutos</div>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-7 h-8 p-0 bg-slate-800 border-slate-700"
+                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
                             onClick={() => {
                               const newRest = Math.min(300, (exercise.restDurationSeconds || 90) + 15);
                               handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                             }}
                             disabled={updateExerciseMutation.isPending}
                           >
-                            <Plus className="w-3 h-3" />
+                            <Plus className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
