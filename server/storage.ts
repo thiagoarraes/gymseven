@@ -15,6 +15,7 @@ import {
   workoutLogs, workoutLogExercises, workoutLogSets 
 } from '@shared/schema';
 import { logDatabaseInfo } from './supabase-check';
+import { SupabaseStorage } from './supabase-storage';
 
 export interface IStorage {
   // Users
@@ -681,4 +682,26 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Check if Supabase credentials are available, use Supabase; otherwise use database storage
+let storage: IStorage;
+
+try {
+  // For now, use database storage until Supabase tables are created
+  // Uncomment the lines below after creating tables in Supabase dashboard
+  /*
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.log('🚀 Using Supabase SDK integration');
+    storage = new SupabaseStorage();
+  } else {
+  */
+    console.log('🗄️ Using PostgreSQL database storage (Supabase ready but tables need setup)');
+    storage = new DatabaseStorage();
+  /*
+  }
+  */
+} catch (error) {
+  console.error('❌ Storage initialization failed, falling back to database storage');
+  storage = new DatabaseStorage();
+}
+
+export { storage };
