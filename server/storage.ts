@@ -274,8 +274,7 @@ export class MemStorage implements IStorage {
       id,
       templateId: insertLog.templateId || null,
       startTime: new Date(insertLog.startTime),
-      endTime: insertLog.endTime ? new Date(insertLog.endTime) : null,
-      completed: insertLog.completed !== undefined ? insertLog.completed : false
+      endTime: insertLog.endTime ? new Date(insertLog.endTime) : null
     };
     this.workoutLogs.set(id, log);
     return log;
@@ -708,6 +707,7 @@ async function initializeStorage(): Promise<IStorage> {
   }
 }
 
-const storage = await initializeStorage();
+// Initialize storage asynchronously and export a promise
+export const storage = await initializeStorage();
 
-export { storage };
+
