@@ -17,7 +17,7 @@ export function checkSupabaseConnection(): {
       'Connection pooling is optimized for Supabase',
       'You can view your data at: https://supabase.com/dashboard/projects'
     ];
-  } else if (connectionString.includes('neon.tech')) {
+  } else if (connectionString.includes('neon.tech') || connectionString.includes('neon.')) {
     provider = 'neon';
     recommendations = [
       'Using Neon - good choice for development and production',
