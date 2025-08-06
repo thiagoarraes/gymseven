@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(224, 71%, 4%);
+  --foreground: hsl(213, 31%, 91%);
+  --muted: hsl(223, 47%, 11%);
+  --muted-foreground: hsl(215, 20%, 65%);
+  --popover: hsl(224, 71%, 4%);
+  --popover-foreground: hsl(213, 31%, 91%);
+  --card: hsl(224, 71%, 4%);
+  --card-foreground: hsl(213, 31%, 91%);
+  --border: hsl(216, 34%, 17%);
+  --input: hsl(216, 34%, 17%);
+  --primary: hsl(210, 98%, 56%);
+  --primary-foreground: hsl(222, 84%, 5%);
+  --secondary: hsl(222, 47%, 11%);
+  --secondary-foreground: hsl(213, 31%, 91%);
+  --accent: hsl(216, 34%, 17%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --destructive: hsl(359, 51%, 48%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(216, 34%, 17%);
+  --radius: 1rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  html {
+    @apply dark;
+  }
+}
+
+@layer utilities {
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, hsl(215, 28%, 17%) 0%, hsl(222, 84%, 4.9%) 100%);
+  }
+  
+  .gradient-accent {
+    background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(217, 91%, 60%) 100%);
+  }
+  
+  .glass-card {
+    background: rgba(7, 12, 28, 0.75);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .neo-card {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 
+      0 10px 40px rgba(0, 0, 0, 0.5), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 1px 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+  }
+  
+  .loading-skeleton {
+    background: linear-gradient(90deg, hsl(215, 28%, 17%) 25%, hsl(217, 32.6%, 17.5%) 50%, hsl(215, 28%, 17%) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+  
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .nav-active {
+    @apply text-primary;
+  }
+}

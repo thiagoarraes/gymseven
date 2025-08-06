@@ -1,0 +1,104 @@
+# Overview
+
+GymSeven is a mobile-first workout logging application built with modern web technologies. The app allows users to manage exercises, create workout templates, log workout sessions, and track their fitness progress. It features a clean, dark-themed interface optimized for mobile devices with a focus on simplicity and ease of use during workouts.
+
+# User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+# System Architecture
+
+## Frontend Architecture
+
+The client-side is built as a Single Page Application (SPA) using:
+- **React 18** with TypeScript for type safety
+- **Wouter** for lightweight client-side routing
+- **TanStack Query (React Query)** for server state management and caching
+- **Vite** as the build tool and development server
+- **shadcn/ui** component library built on Radix UI primitives
+- **Tailwind CSS** for styling with a dark theme and glassmorphism effects
+
+The app follows a mobile-first design with:
+- Fixed header and bottom navigation for easy mobile access
+- Responsive layout that adapts to different screen sizes
+- Touch-friendly interface elements
+- PWA-ready structure for offline capabilities
+
+## Backend Architecture
+
+The server uses:
+- **Express.js** with TypeScript for the REST API
+- **ESM modules** throughout the codebase
+- Middleware for request logging and error handling
+- RESTful endpoints for exercises, workout templates, and workout logs
+
+The API structure includes:
+- `/api/exercises` - Exercise management (CRUD operations)
+- `/api/workout-templates` - Workout template management
+- `/api/workout-logs` - Workout session tracking
+- Validation using Zod schemas shared between client and server
+
+## Data Management
+
+**Database Layer:**
+- **Drizzle ORM** for database operations and migrations
+- **PostgreSQL** as the primary database (via @neondatabase/serverless)
+- Shared schema definitions between client and server in TypeScript
+
+**Data Models:**
+- Users for authentication
+- Exercises with muscle group categorization
+- Workout templates with associated exercises
+- Workout logs for tracking actual sessions
+- Set tracking for detailed exercise logging
+
+**Client-side Storage:**
+- LocalStorage for offline data persistence
+- TanStack Query cache for optimized data fetching
+- Offline-first approach with sync capabilities
+
+## State Management
+
+- **TanStack Query** handles all server state, caching, and background updates
+- **React Hook Form** with Zod validation for form state management
+- Local component state using React hooks
+- Shared state through React Context where needed
+
+## Development Workflow
+
+The project uses:
+- **TypeScript** throughout for type safety
+- **Vite** for fast development and hot module replacement
+- **ESBuild** for production builds
+- **Path mapping** for clean imports (@/ for client, @shared for shared code)
+- Development middleware integration for seamless full-stack development
+
+# External Dependencies
+
+## UI and Styling
+- **@radix-ui/react-*** - Accessible UI primitives for complex components
+- **tailwindcss** - Utility-first CSS framework with dark theme support
+- **class-variance-authority** - For component variant management
+- **lucide-react** - Icon library for consistent iconography
+
+## Data and API
+- **@neondatabase/serverless** - Serverless PostgreSQL database connection
+- **drizzle-orm** - Type-safe ORM for database operations
+- **drizzle-zod** - Zod integration for schema validation
+- **@tanstack/react-query** - Server state management and caching
+
+## Forms and Validation
+- **react-hook-form** - Performant form library
+- **@hookform/resolvers** - Form validation resolvers
+- **zod** - Schema validation library
+
+## Development Tools
+- **@replit/vite-plugin-runtime-error-modal** - Development error handling
+- **@replit/vite-plugin-cartographer** - Replit-specific development features
+- **tsx** - TypeScript execution for development server
+
+## Utilities
+- **date-fns** - Date manipulation and formatting
+- **clsx** and **tailwind-merge** - Conditional CSS class handling
+- **wouter** - Lightweight routing solution
+- **embla-carousel-react** - Carousel component for UI
