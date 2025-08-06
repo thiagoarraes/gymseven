@@ -80,6 +80,9 @@ export const insertWorkoutTemplateSchema = createInsertSchema(workoutTemplates).
 
 export const insertWorkoutTemplateExerciseSchema = createInsertSchema(workoutTemplateExercises).omit({
   id: true,
+}).extend({
+  // Allow numbers for reps, but convert to string for storage
+  reps: z.union([z.string(), z.number()]).transform((val) => String(val)),
 });
 
 export const insertWorkoutLogSchema = createInsertSchema(workoutLogs).omit({

@@ -164,6 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         templateId
       });
+      
       const templateExercise = await storage.addExerciseToTemplate(validatedData);
       res.status(201).json(templateExercise);
     } catch (error) {
