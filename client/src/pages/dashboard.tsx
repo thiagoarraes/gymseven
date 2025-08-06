@@ -61,19 +61,19 @@ export default function Dashboard() {
       <Card className="neo-card rounded-3xl hover-lift overflow-hidden">
         <CardContent className="p-8 relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
-          <div className="flex items-center justify-between mb-6">
-            <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6 gap-6">
+            <div className="relative z-10 flex-1">
               <h2 className="text-3xl font-black text-white mb-2 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">Olá, Seven!🔥</h2>
               <p className="text-slate-300 text-lg">Pronto para progredir carga hoje?</p>
             </div>
-            <div className="text-right relative z-10">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-                <div className="text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
+            <div className="relative z-10 flex-shrink-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20 p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-center space-x-3 mb-2">
+                <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                <div className="text-4xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
                   {stats.currentStreak}
                 </div>
               </div>
-              <div className="text-sm text-emerald-400 font-medium">dias em sequência</div>
+              <div className="text-sm text-emerald-400 font-semibold text-center tracking-wide">dias em sequência</div>
             </div>
           </div>
           
