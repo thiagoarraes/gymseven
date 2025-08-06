@@ -48,7 +48,6 @@ export default function WorkoutSession() {
   const finishWorkoutMutation = useMutation({
     mutationFn: () => workoutLogApi.update(workoutId!, {
       endTime: new Date(),
-      completed: true,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-logs"] });

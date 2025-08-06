@@ -37,9 +37,6 @@ export function BottomNavigation() {
                       ? "text-blue-400 scale-110" 
                       : "text-slate-500 group-hover:text-slate-300"
                   }`} />
-                  {isActive && (
-                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                  )}
                 </div>
                 <span className={`text-[10px] font-medium mt-1 transition-all duration-200 ${
                   isActive 
