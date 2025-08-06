@@ -42,11 +42,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/exercises", async (req, res) => {
     try {
+      console.log('Received exercise data:', JSON.stringify(req.body, null, 2));
       const validatedData = insertExerciseSchema.parse(req.body);
+      console.log('Validated data:', JSON.stringify(validatedData, null, 2));
       const exercise = await storage.createExercise(validatedData);
       res.status(201).json(exercise);
-    } catch (error) {
-      res.status(400).json({ message: "Dados inválidos para criação do exercício" });
+    } catch (error: any) {
+      console.error('Exercise creation error:', error);
+      
+      if (error.name === 'ZodError') {
+        const validationErrors = error.errors.map((err: any) => ({
+          field: err.path.join('.'),
+          message: err.message,
+          received: err.received
+        }));
+        
+        res.status(400).json({ 
+          message: "Dados inválidos para criação do exercício",
+          errors: validationErrors,
+          receivedData: req.body
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Erro interno do servidor",
+          error: error.message
+        });
+      }
     }
   });
 

@@ -99,10 +99,18 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   });
 
   const onSubmit = (data: ExerciseFormValues) => {
+    // Add optional fields with null values to match backend schema
+    const exerciseData = {
+      ...data,
+      description: null,
+      imageUrl: null,
+      videoUrl: null,
+    };
+
     if (editingExercise) {
-      updateMutation.mutate({ id: editingExercise.id, data });
+      updateMutation.mutate({ id: editingExercise.id, data: exerciseData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(exerciseData);
     }
   };
 

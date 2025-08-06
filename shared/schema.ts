@@ -66,6 +66,11 @@ export const workoutLogSets = pgTable("workout_log_sets", {
 export const insertExerciseSchema = createInsertSchema(exercises).omit({
   id: true,
   createdAt: true,
+}).extend({
+  // Make optional fields truly optional
+  description: z.string().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  videoUrl: z.string().optional().nullable(),
 });
 
 export const insertWorkoutTemplateSchema = createInsertSchema(workoutTemplates).omit({
