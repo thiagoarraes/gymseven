@@ -137,10 +137,6 @@ export default function WorkoutSession() {
       } else {
         // Last set of last exercise - show celebration and finish workout
         setShowCelebration(true);
-        // Automatically finish the workout after celebration
-        setTimeout(() => {
-          finishWorkoutMutation.mutate();
-        }, 4000);
       }
     }
   };
@@ -427,15 +423,19 @@ export default function WorkoutSession() {
               <p className="text-slate-300 mb-4">
                 Mais um treino destruído! Você está cada dia mais forte. Continue assim que logo você vai estar quebrando tudo! 💪
               </p>
-              <div className="flex items-center justify-center space-x-2 text-emerald-400">
+              <div className="flex items-center justify-center space-x-2 text-emerald-400 mb-6">
                 <span className="text-2xl">⏱️</span>
                 <span className="text-xl font-semibold">
                   {formatTime(workoutDuration)}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-2">
-                Redirecionando automaticamente...
-              </p>
+              <Button
+                onClick={() => finishWorkoutMutation.mutate()}
+                className="w-full gradient-accent py-3 text-lg font-semibold rounded-xl hover:scale-105 transition-transform"
+                disabled={finishWorkoutMutation.isPending}
+              >
+                {finishWorkoutMutation.isPending ? "Salvando..." : "Finalizar Treino 🎯"}
+              </Button>
             </CardContent>
           </Card>
         </div>

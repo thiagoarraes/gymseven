@@ -25,6 +25,7 @@ Preferred communication style: Simple, everyday language.
 - ✓ Added exercise name display in workout session header for better context
 - ✓ Implemented automatic workout completion when finishing the last set of the last exercise
 - ✓ Added celebratory completion screen with confetti animation and motivational message
+- ✓ Modified celebration screen to wait for user action instead of auto-redirect
 
 # System Architecture
 
