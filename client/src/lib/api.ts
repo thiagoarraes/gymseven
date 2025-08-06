@@ -73,6 +73,15 @@ export const workoutTemplateApi = {
     const response = await apiRequest("POST", `/api/workout-templates/${templateId}/exercises`, exercise);
     return response.json();
   },
+
+  updateExercise: async (exerciseId: string, updates: any) => {
+    const response = await apiRequest("PUT", `/api/workout-template-exercises/${exerciseId}`, updates);
+    return response.json();
+  },
+
+  removeExercise: async (exerciseId: string): Promise<void> => {
+    await apiRequest("DELETE", `/api/workout-template-exercises/${exerciseId}`);
+  },
 };
 
 export const workoutLogApi = {

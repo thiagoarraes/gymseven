@@ -32,6 +32,8 @@ export interface IStorage {
   // Workout Template Exercises
   getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]>;
   addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise>;
+  updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined>;
+  deleteWorkoutTemplateExercise(id: string): Promise<boolean>;
   removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean>;
   
   // Workout Logs
@@ -215,6 +217,19 @@ export class MemStorage implements IStorage {
     };
     this.workoutTemplateExercises.set(id, templateExercise);
     return templateExercise;
+  }
+
+  async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
+    const templateExercise = this.workoutTemplateExercises.get(id);
+    if (!templateExercise) return undefined;
+    
+    const updated = { ...templateExercise, ...updates };
+    this.workoutTemplateExercises.set(id, updated);
+    return updated;
+  }
+
+  async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {
+    return this.workoutTemplateExercises.delete(id);
   }
 
   async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,43 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     },
   });
 
+  const updateExerciseMutation = useMutation({
+    mutationFn: ({ exerciseId, updates }: { exerciseId: string; updates: any }) => 
+      workoutTemplateApi.updateExercise(exerciseId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
+      toast({
+        title: "Exercício atualizado!",
+        description: "As alterações foram salvas.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o exercício.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeExerciseMutation = useMutation({
+    mutationFn: (exerciseId: string) => workoutTemplateApi.removeExercise(exerciseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
+      toast({
+        title: "Exercício removido!",
+        description: "O exercício foi removido do treino.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o exercício.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
     defaultValues: {
@@ -108,6 +145,19 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
     setSelectedExercises([]);
     setShowExerciseSelector(false);
+  };
+
+  const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
+    updateExerciseMutation.mutate({
+      exerciseId,
+      updates: { [field]: value }
+    });
+  };
+
+  const handleRemoveExercise = (exerciseId: string) => {
+    if (confirm("Tem certeza que deseja remover este exercício?")) {
+      removeExerciseMutation.mutate(exerciseId);
+    }
   };
 
   const onSubmit = (data: ExerciseFormValues) => {
@@ -215,38 +265,96 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
           templateExercises.map((exercise: any, index: number) => (
             <Card key={exercise.id} className="glass-card rounded-xl hover-lift">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2 text-slate-500">
-                    <GripVertical className="w-4 h-4" />
-                    <span className="font-mono text-sm">{index + 1}</span>
+                <div className="space-y-4">
+                  {/* Exercise Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2 text-slate-500">
+                        <GripVertical className="w-4 h-4" />
+                        <span className="font-mono text-sm">{index + 1}</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white text-lg">
+                          {exercise.name}
+                        </h4>
+                        <span className="text-sm text-blue-400">
+                          {exercise.muscleGroup}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-2 bg-slate-800/50 rounded-lg hover:bg-red-500/20 transition-colors"
+                      onClick={() => handleRemoveExercise(exercise.id)}
+                    >
+                      <Trash2 className="text-red-400 w-4 h-4" />
+                    </Button>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-white text-lg">
-                      {exercise.name}
-                    </h4>
-                    <div className="flex items-center space-x-4 text-sm text-slate-400 mt-1">
-                      <span>{exercise.sets} séries</span>
-                      <span>{exercise.reps} reps</span>
-                      {exercise.weight && <span>{exercise.weight}kg</span>}
-                      <span className="text-xs bg-blue-500/20 px-2 py-1 rounded">
-                        {exercise.muscleGroup}
-                      </span>
+
+                  {/* Editable Parameters */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* Sets */}
+                    <div className="space-y-2">
+                      <label className="text-xs text-slate-400 uppercase tracking-wider">Séries</label>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 p-0 bg-slate-800 border-slate-700"
+                          onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
+                          disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <div className="w-12 text-center">
+                          <Input
+                            type="number"
+                            value={exercise.sets}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (value >= 1) handleQuickUpdate(exercise.id, 'sets', value);
+                            }}
+                            className="text-center bg-slate-800 border-slate-700 text-white h-8 p-1"
+                            min={1}
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 p-0 bg-slate-800 border-slate-700"
+                          onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
+                          disabled={updateExerciseMutation.isPending}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Reps */}
+                    <div className="space-y-2">
+                      <label className="text-xs text-slate-400 uppercase tracking-wider">Reps</label>
+                      <Input
+                        value={exercise.reps}
+                        onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                        className="bg-slate-800 border-slate-700 text-white h-8 text-center"
+                        placeholder="8-12"
+                      />
+                    </div>
+
+                    {/* Weight */}
+                    <div className="space-y-2">
+                      <label className="text-xs text-slate-400 uppercase tracking-wider">Peso (kg)</label>
+                      <Input
+                        type="number"
+                        step="0.5"
+                        value={exercise.weight || ''}
+                        onChange={(e) => handleQuickUpdate(exercise.id, 'weight', e.target.value ? parseFloat(e.target.value) : null)}
+                        className="bg-slate-800 border-slate-700 text-white h-8 text-center"
+                        placeholder="--"
+                      />
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 bg-slate-800/50 rounded-lg hover:bg-red-500/20 transition-colors"
-                    onClick={() => {
-                      // TODO: Implement remove exercise
-                      toast({
-                        title: "Em breve",
-                        description: "Funcionalidade de remover exercícios em desenvolvimento.",
-                      });
-                    }}
-                  >
-                    <Trash2 className="text-red-400 w-4 h-4" />
-                  </Button>
                 </div>
               </CardContent>
             </Card>

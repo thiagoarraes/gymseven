@@ -155,6 +155,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/workout-template-exercises/:id", async (req, res) => {
+    try {
+      const updates = insertWorkoutTemplateExerciseSchema.partial().parse(req.body);
+      const templateExercise = await storage.updateWorkoutTemplateExercise(req.params.id, updates);
+      if (!templateExercise) {
+        return res.status(404).json({ message: "Exercício do treino não encontrado" });
+      }
+      res.json(templateExercise);
+    } catch (error) {
+      res.status(400).json({ message: "Dados inválidos para atualização do exercício" });
+    }
+  });
+
+  app.delete("/api/workout-template-exercises/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteWorkoutTemplateExercise(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Exercício do treino não encontrado" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao deletar exercício do treino" });
+    }
+  });
+
   // Workout Log routes
   app.get("/api/workout-logs", async (req, res) => {
     try {
