@@ -204,7 +204,12 @@ export class MemStorage implements IStorage {
 
     return templateExercises.map(te => {
       const exercise = this.exercises.get(te.exerciseId);
-      return { ...te, exercise: exercise! };
+      return { 
+        ...te, 
+        exercise: exercise!,
+        name: exercise!.name,
+        muscleGroup: exercise!.muscleGroup
+      };
     });
   }
 
