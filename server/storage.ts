@@ -14,6 +14,7 @@ import {
   users, exercises, workoutTemplates, workoutTemplateExercises, 
   workoutLogs, workoutLogExercises, workoutLogSets 
 } from '@shared/schema';
+import { logDatabaseInfo } from './supabase-check';
 
 export interface IStorage {
   // Users
@@ -343,10 +344,25 @@ class DatabaseStorage implements IStorage {
   private db;
 
   constructor() {
+    const connectionString = process.env.DATABASE_URL;
+    
+    if (!connectionString) {
+      throw new Error('DATABASE_URL is required. Please provide your Supabase connection string.');
+    }
+
+    // Configure pool for Supabase compatibility
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString,
+      ssl: connectionString.includes('supabase') ? { rejectUnauthorized: false } : false,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
     });
+    
     this.db = drizzle(pool);
+    
+    // Log database provider info
+    logDatabaseInfo();
     
     // Initialize with sample data if needed
     this.initializeSampleData();

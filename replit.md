@@ -8,6 +8,10 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
 - ✓ Successfully migrated from Replit Agent to Replit environment
+- ✓ Configured PostgreSQL database with proper schema migrations
+- ✓ Integrated with Supabase for production-ready database hosting
+- ✓ Added SSL support and connection pooling for Supabase compatibility
+- ✓ Created detailed setup guide for Supabase integration
 - ✓ Redesigned exercises page with clean, modern interface (removed images and descriptions)
 - ✓ Added exercise selection mode for adding exercises to workout templates
 - ✓ Created workout template editor with exercise management functionality
@@ -65,7 +69,8 @@ The API structure includes:
 
 **Database Layer:**
 - **Drizzle ORM** for database operations and migrations
-- **PostgreSQL** as the primary database (via @neondatabase/serverless)
+- **PostgreSQL** as the primary database (compatible with Supabase)
+- **Supabase** for production-ready database hosting and real-time features
 - Shared schema definitions between client and server in TypeScript
 
 **Data Models:**
@@ -105,10 +110,11 @@ The project uses:
 - **lucide-react** - Icon library for consistent iconography
 
 ## Data and API
-- **@neondatabase/serverless** - Serverless PostgreSQL database connection
+- **PostgreSQL** - Primary database (compatible with Supabase, Neon, or any PostgreSQL provider)
 - **drizzle-orm** - Type-safe ORM for database operations
 - **drizzle-zod** - Zod integration for schema validation
 - **@tanstack/react-query** - Server state management and caching
+- **pg** - PostgreSQL client with connection pooling
 
 ## Forms and Validation
 - **react-hook-form** - Performant form library
