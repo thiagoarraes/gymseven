@@ -264,7 +264,8 @@ export class MemStorage implements IStorage {
       ...insertLog, 
       id,
       templateId: insertLog.templateId || null,
-      endTime: insertLog.endTime || null,
+      startTime: new Date(insertLog.startTime),
+      endTime: insertLog.endTime ? new Date(insertLog.endTime) : null,
       completed: insertLog.completed !== undefined ? insertLog.completed : false
     };
     this.workoutLogs.set(id, log);

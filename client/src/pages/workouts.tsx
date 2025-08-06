@@ -111,13 +111,14 @@ export default function Workouts() {
       workoutLogApi.create({
         templateId,
         name: workoutTemplates.find(t => t.id === templateId)?.name || "Treino",
-        startTime: new Date(),
+        startTime: new Date().toISOString(),
         completed: false,
       }),
     onSuccess: (workoutLog) => {
       navigate(`/workout-session/${workoutLog.id}`);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error starting workout:', error);
       toast({
         title: "Erro",
         description: "Não foi possível iniciar o treino.",
