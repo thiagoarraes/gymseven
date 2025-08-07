@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, Edit, Trash2, Dumbbell, Check } from "lucide-react";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("Todos");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<any>(null);
+  const [swipedExercise, setSwipedExercise] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -126,6 +128,18 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const handleDelete = (id: string) => {
     if (confirm("Tem certeza que deseja excluir este exercício?")) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const handleSwipeEnd = (info: any, exerciseId: string) => {
+    const { offset, velocity } = info;
+    const swipeThreshold = -50;
+    const velocityThreshold = -500;
+
+    if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
+      setSwipedExercise(exerciseId);
+    } else {
+      setSwipedExercise(null);
     }
   };
 
@@ -338,66 +352,95 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       ) : (
         <div className="space-y-3">
           {filteredExercises.map((exercise) => (
-            <Card 
-              key={exercise.id} 
-              className={`glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 ${
-                selectionMode && selectedExercises.includes(exercise.id) 
-                  ? "ring-2 ring-blue-500 bg-blue-500/10" 
-                  : ""
-              }`}
-              onClick={() => selectionMode && onExerciseSelect?.(exercise.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Dumbbell className="w-6 h-6 text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-white text-lg">{exercise.name}</h4>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-slate-400">{exercise.muscleGroup}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    {selectionMode && selectedExercises.includes(exercise.id) && (
-                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                    
-                    {!selectionMode && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-2 bg-slate-800/50 rounded-lg hover:bg-slate-700 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(exercise);
-                          }}
-                        >
-                          <Edit className="text-slate-400 w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="p-2 bg-slate-800/50 rounded-lg hover:bg-red-500/20 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(exercise.id);
-                          }}
-                        >
-                          <Trash2 className="text-red-400 w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
+            <div key={exercise.id} className="relative overflow-hidden">
+              {/* Background Action Buttons */}
+              {!selectionMode && (
+                <div 
+                  className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-32 bg-gradient-to-l from-slate-800/90 to-slate-700/90 transition-all duration-300 ${
+                    swipedExercise === exercise.id ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{ zIndex: 1 }}
+                >
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(exercise);
+                        setSwipedExercise(null);
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="flex flex-col items-center justify-center h-12 w-12 text-blue-400 hover:bg-blue-500/20 border-0"
+                    >
+                      <Edit className="w-4 h-4 mb-1" />
+                      <span className="text-xs font-medium">Editar</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(exercise.id);
+                        setSwipedExercise(null);
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="flex flex-col items-center justify-center h-12 w-12 text-red-400 hover:bg-red-500/20 border-0"
+                    >
+                      <Trash2 className="w-4 h-4 mb-1" />
+                      <span className="text-xs font-medium">Apagar</span>
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+              
+              {/* Swipeable Card */}
+              <motion.div
+                drag={!selectionMode ? "x" : false}
+                dragConstraints={{ left: -150, right: 0 }}
+                dragElastic={0.1}
+                onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
+                animate={{ 
+                  x: swipedExercise === exercise.id ? -120 : 0 
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                style={{ zIndex: 2 }}
+                className="relative"
+              >
+                <Card 
+                  className={`glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 ${
+                    selectionMode && selectedExercises.includes(exercise.id) 
+                      ? "ring-2 ring-blue-500 bg-blue-500/10" 
+                      : ""
+                  }`}
+                  onClick={() => selectionMode && onExerciseSelect?.(exercise.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                          <Dumbbell className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-white text-lg">{exercise.name}</h4>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-slate-400">{exercise.muscleGroup}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        {selectionMode && selectedExercises.includes(exercise.id) && (
+                          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           ))}
         </div>
       )}
