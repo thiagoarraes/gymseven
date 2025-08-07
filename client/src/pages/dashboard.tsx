@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -290,8 +290,17 @@ export default function Dashboard() {
       {/* Workout Summary Modal */}
       <Dialog open={showSummaryModal} onOpenChange={setShowSummaryModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
-          <DialogHeader>
-            <DialogTitle className="text-white">Resumo do Treino</DialogTitle>
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <DialogTitle className="text-white text-xl font-semibold">Resumo do Treino</DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeSummaryModal}
+              className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-full transition-colors"
+            >
+              <X className="w-4 h-4" />
+              <span className="sr-only">Fechar</span>
+            </Button>
           </DialogHeader>
           
           {summaryLoading ? (
@@ -405,11 +414,29 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
+
+              {/* Botão Fechar no final */}
+              <div className="flex justify-center pt-4 border-t border-slate-700/50">
+                <Button
+                  onClick={closeSummaryModal}
+                  className="bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-600/50 hover:border-slate-500/50 transition-all duration-200 min-w-[120px]"
+                >
+                  Fechar
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="text-center py-8 text-slate-400">
               <TrendingUp className="w-12 h-12 mx-auto mb-4" />
               <p>Erro ao carregar dados do treino</p>
+              <div className="flex justify-center pt-4">
+                <Button
+                  onClick={closeSummaryModal}
+                  className="bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-600/50 hover:border-slate-500/50 transition-all duration-200"
+                >
+                  Fechar
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
