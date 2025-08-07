@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
+import { motion, PanInfo } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorkoutLog {
   id: string;
@@ -42,6 +44,9 @@ export default function WorkoutHistory() {
   const [, navigate] = useLocation();
   const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [swipedWorkout, setSwipedWorkout] = useState<string | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch workout logs
   const { data: workoutLogs = [], isLoading } = useQuery<WorkoutLog[]>({
@@ -56,6 +61,34 @@ export default function WorkoutHistory() {
       return response.json();
     },
     enabled: !!selectedWorkout && showSummaryModal,
+  });
+
+  // Delete workout mutation
+  const deleteWorkoutMutation = useMutation({
+    mutationFn: async (workoutId: string) => {
+      const response = await fetch(`/api/workout-logs/${workoutId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Erro ao excluir treino');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/workout-logs'] });
+      toast({
+        title: "Treino excluído",
+        description: "O treino foi removido do seu histórico.",
+      });
+      setSwipedWorkout(null);
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o treino. Tente novamente.",
+        variant: "destructive",
+      });
+      setSwipedWorkout(null);
+    },
   });
 
   const formatDate = (dateString: string) => {
@@ -90,8 +123,25 @@ export default function WorkoutHistory() {
   };
 
   const handleWorkoutClick = (workoutId: string) => {
+    if (swipedWorkout === workoutId) return; // Não abrir se estiver no modo swipe
     setSelectedWorkout(workoutId);
     setShowSummaryModal(true);
+  };
+
+  const handleSwipeEnd = (info: PanInfo, workoutId: string) => {
+    const swipeThreshold = -100; // Pixels para ativar o swipe
+    
+    if (info.offset.x < swipeThreshold) {
+      // Swipe para a esquerda - mostrar botão delete
+      setSwipedWorkout(workoutId);
+    } else if (info.offset.x > 50) {
+      // Swipe para a direita - esconder botão delete
+      setSwipedWorkout(null);
+    }
+  };
+
+  const handleDeleteWorkout = (workoutId: string) => {
+    deleteWorkoutMutation.mutate(workoutId);
   };
 
   const closeSummaryModal = () => {
@@ -159,52 +209,89 @@ export default function WorkoutHistory() {
       ) : (
         <div className="space-y-3">
           {workoutLogs.map((workout) => (
-            <Card 
-              key={workout.id} 
-              className="glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200"
-              onClick={() => handleWorkoutClick(workout.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      workout.endTime ? "gradient-accent" : "bg-slate-700/50"
-                    }`}>
-                      {workout.endTime ? (
-                        <CheckCircle className="w-6 h-6 text-white" />
-                      ) : (
-                        <XCircle className="w-6 h-6 text-slate-400" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-white text-lg">{workout.name}</h4>
-                      <div className="flex items-center space-x-4 text-sm text-slate-400">
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-3 h-3" />
-                          <span>{formatDate(workout.startTime)}</span>
+            <div key={workout.id} className="relative overflow-hidden">
+              {/* Background Delete Button */}
+              <div 
+                className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-20 bg-red-500/90 transition-all duration-300 ${
+                  swipedWorkout === workout.id ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ zIndex: 1 }}
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteWorkout(workout.id);
+                  }}
+                  disabled={deleteWorkoutMutation.isPending}
+                  className="flex flex-col items-center justify-center h-full w-full text-white hover:bg-red-600/90 border-0"
+                >
+                  <Trash2 className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Apagar</span>
+                </Button>
+              </div>
+              
+              {/* Swipeable Card */}
+              <motion.div
+                drag="x"
+                dragConstraints={{ left: -120, right: 0 }}
+                dragElastic={0.1}
+                onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
+                animate={{ 
+                  x: swipedWorkout === workout.id ? -80 : 0 
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                style={{ zIndex: 2 }}
+                className="relative"
+              >
+                <Card 
+                  className="glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200"
+                  onClick={() => handleWorkoutClick(workout.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                          workout.endTime ? "gradient-accent" : "bg-slate-700/50"
+                        }`}>
+                          {workout.endTime ? (
+                            <CheckCircle className="w-6 h-6 text-white" />
+                          ) : (
+                            <XCircle className="w-6 h-6 text-slate-400" />
+                          )}
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{calculateDuration(workout.startTime, workout.endTime)}</span>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-white text-lg">{workout.name}</h4>
+                          <div className="flex items-center space-x-4 text-sm text-slate-400">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>{formatDate(workout.startTime)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{calculateDuration(workout.startTime, workout.endTime)}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Badge 
+                          variant={workout.endTime ? "default" : "secondary"}
+                          className={workout.endTime 
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
+                            : "bg-slate-700/50 text-slate-400 border-slate-600/50"
+                          }
+                        >
+                          {workout.endTime ? "Concluído" : "Incompleto"}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Badge 
-                      variant={workout.endTime ? "default" : "secondary"}
-                      className={workout.endTime 
-                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
-                        : "bg-slate-700/50 text-slate-400 border-slate-600/50"
-                      }
-                    >
-                      {workout.endTime ? "Concluído" : "Incompleto"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           ))}
         </div>
       )}

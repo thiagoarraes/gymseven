@@ -7,6 +7,7 @@ GymSeven is a mobile-first workout logging application built with modern web tec
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- ✅ **SWIPE-TO-DELETE IMPLEMENTED: Added swipe gesture to delete workout logs with red delete button (August 2025)**
 - ✓ **MIGRATION 100% COMPLETED: Successfully migrated from Replit Agent to Replit environment (August 2025)**
 - ✓ **Environment Setup: Node.js 20.19.3, npm 10.8.2, and Supabase credentials configured**
 - ✅ **AUTOMATED ENVIRONMENT SETUP: Created .env file loader to persist Supabase credentials automatically (August 2025)**

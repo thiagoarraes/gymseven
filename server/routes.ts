@@ -386,6 +386,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/workout-logs/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteWorkoutLog(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Treino não encontrado" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao deletar treino" });
+    }
+  });
+
   // Workout Log Set routes
   app.get("/api/workout-logs/:id/sets", async (req, res) => {
     try {
