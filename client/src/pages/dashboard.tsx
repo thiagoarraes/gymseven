@@ -296,7 +296,7 @@ export default function Dashboard() {
               variant="ghost"
               size="sm"
               onClick={closeSummaryModal}
-              className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-full transition-colors"
+              className="h-8 w-8 p-0 bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-colors border border-slate-600/50"
             >
               <X className="w-4 h-4" />
               <span className="sr-only">Fechar</span>
@@ -415,28 +415,12 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Botão Fechar no final */}
-              <div className="flex justify-center pt-4 border-t border-slate-700/50">
-                <Button
-                  onClick={closeSummaryModal}
-                  className="bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-600/50 hover:border-slate-500/50 transition-all duration-200 min-w-[120px]"
-                >
-                  Fechar
-                </Button>
-              </div>
+
             </div>
           ) : (
             <div className="text-center py-8 text-slate-400">
               <TrendingUp className="w-12 h-12 mx-auto mb-4" />
               <p>Erro ao carregar dados do treino</p>
-              <div className="flex justify-center pt-4">
-                <Button
-                  onClick={closeSummaryModal}
-                  className="bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-slate-600/50 hover:border-slate-500/50 transition-all duration-200"
-                >
-                  Fechar
-                </Button>
-              </div>
             </div>
           )}
         </DialogContent>
