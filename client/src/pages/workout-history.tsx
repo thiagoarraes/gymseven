@@ -106,7 +106,7 @@ export default function WorkoutHistory() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/")}
           className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

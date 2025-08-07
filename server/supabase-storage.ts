@@ -461,13 +461,17 @@ export class SupabaseStorage implements IStorage {
 
   // Workout Log Set methods
   async getWorkoutLogSets(logId: string): Promise<WorkoutLogSet[]> {
+    // Check table structure first - likely using log_exercise_id instead of logId
     const { data, error } = await supabase
-      .from('workoutLogSets')
+      .from('workout_log_sets')
       .select('*')
-      .eq('logId', logId)
-      .order('setNumber');
+      .eq('log_exercise_id', logId) // This might need to be adjusted based on actual schema
+      .order('set_number');
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching workout log sets:', error);
+      return [];
+    }
     return data || [];
   }
 
