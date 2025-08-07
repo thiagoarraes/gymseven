@@ -273,12 +273,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? calculateDuration(log.startTime, log.endTime)
         : "Em andamento";
 
-      // Simplify for now - return basic data that we know works
-      const exercises: any[] = [];
-      const totalSets = 0;
-      const totalVolume = 0;
+      // Get workout log exercises using Supabase directly to get correct structure
+      const supabaseStorage = storage as any; // Cast to access supabase property
+      const { data: logExercises, error: exercisesError } = await supabaseStorage.supabase
+        .from('workoutLogExercises')
+        .select('*')
+        .eq('logId', req.params.id);
 
-      // Create summary with complete data
+      let exercises: any[] = [];
+      let totalSets = 0;
+      let totalVolume = 0;
+
+      if (logExercises && logExercises.length > 0) {
+        for (const logExercise of logExercises) {
+          // Get exercise details
+          const { data: exercise } = await supabaseStorage.supabase
+            .from('exercises')
+            .select('*')
+            .eq('id', logExercise.exerciseId)
+            .single();
+
+          // Get sets for this exercise
+          const { data: sets } = await supabaseStorage.supabase
+            .from('workoutLogSets')
+            .select('*')
+            .eq('logExerciseId', logExercise.id)
+            .order('setNumber');
+
+          const exerciseData = {
+            id: logExercise.exerciseId,
+            name: exercise?.name || 'Exercício desconhecido',
+            muscleGroup: exercise?.muscleGroup || 'N/A',
+            sets: sets || []
+          };
+
+          exercises.push(exerciseData);
+
+          // Calculate totals
+          if (sets) {
+            totalSets += sets.length;
+            for (const set of sets) {
+              if (set.weight && set.reps && set.completed) {
+                totalVolume += set.weight * set.reps;
+              }
+            }
+          }
+        }
+      }
+
+      // If no log exercises found, try to get data from template
+      if (exercises.length === 0 && log.templateId) {
+        const { data: templateExercises } = await supabaseStorage.supabase
+          .from('workoutTemplateExercises')
+          .select(`
+            *,
+            exercise:exercises(*)
+          `)
+          .eq('templateId', log.templateId)
+          .order('order');
+
+        if (templateExercises) {
+          exercises = templateExercises.map((te: any) => ({
+            id: te.exerciseId,
+            name: te.exercise?.name || 'Exercício',
+            muscleGroup: te.exercise?.muscleGroup || 'N/A',
+            sets: [] // No actual sets performed, just template
+          }));
+        }
+      }
+
       const summary = {
         id: log.id,
         name: log.name,

@@ -10,6 +10,8 @@ import { supabase } from './supabase-client';
 import type { IStorage } from './storage';
 
 export class SupabaseStorage implements IStorage {
+  public supabase = supabase; // Expose supabase client for direct queries
+  
   constructor() {
     console.log('🚀 Initializing Supabase storage...');
     this.initializeSupabase();
