@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -168,9 +168,9 @@ export default function WorkoutHistory() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      workout.completed ? "gradient-accent" : "bg-slate-700/50"
+                      workout.endTime ? "gradient-accent" : "bg-slate-700/50"
                     }`}>
-                      {workout.completed ? (
+                      {workout.endTime ? (
                         <CheckCircle className="w-6 h-6 text-white" />
                       ) : (
                         <XCircle className="w-6 h-6 text-slate-400" />
@@ -193,13 +193,13 @@ export default function WorkoutHistory() {
                   
                   <div className="flex items-center space-x-2">
                     <Badge 
-                      variant={workout.completed ? "default" : "secondary"}
-                      className={workout.completed 
+                      variant={workout.endTime ? "default" : "secondary"}
+                      className={workout.endTime 
                         ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
                         : "bg-slate-700/50 text-slate-400 border-slate-600/50"
                       }
                     >
-                      {workout.completed ? "Concluído" : "Incompleto"}
+                      {workout.endTime ? "Concluído" : "Incompleto"}
                     </Badge>
                   </div>
                 </div>
@@ -214,6 +214,9 @@ export default function WorkoutHistory() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
           <DialogHeader>
             <DialogTitle className="text-white">Resumo do Treino</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Visualize os detalhes completos do seu treino, incluindo exercícios realizados e estatísticas.
+            </DialogDescription>
           </DialogHeader>
           
           {summaryLoading ? (
