@@ -257,206 +257,219 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
             </CardContent>
           </Card>
         ) : (
-          templateExercises.map((exercise: any, index: number) => (
-            <Card key={exercise.id} className="glass-card rounded-2xl hover-lift border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-lg">
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {/* Exercise Header with Visual Hierarchy */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-4">
-                      {/* Exercise Number with Better Visual */}
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
-                        <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
-                      </div>
-                      
-                      {/* Exercise Info */}
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <Dumbbell className="w-4 h-4 text-slate-400" />
-                          <h4 className="font-bold text-white text-xl tracking-tight">
-                            {exercise.name}
-                          </h4>
+          <>
+            {templateExercises.map((exercise: any, index: number) => (
+              <Card key={exercise.id} className="glass-card rounded-2xl hover-lift border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-lg">
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {/* Exercise Header with Visual Hierarchy */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-4">
+                        {/* Exercise Number with Better Visual */}
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
+                          <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                          <span className="text-sm text-blue-300 font-medium">
-                            {exercise.muscleGroup}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Menu */}
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-8 h-8 p-0 hover:bg-slate-700/50 rounded-lg"
-                      >
-                        <GripVertical className="w-4 h-4 text-slate-400" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-8 h-8 p-0 hover:bg-red-500/20 rounded-lg transition-colors"
-                        onClick={() => handleRemoveExercise(exercise.id)}
-                      >
-                        <Trash2 className="text-red-400 w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Parameters Grid with Modern Cards */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Sets Parameter */}
-                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Séries</label>
-                        </div>
-                        <div className="flex items-center justify-center space-x-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
-                            onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
-                            disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-white">{exercise.sets}</div>
-                            <div className="text-xs text-slate-400">séries</div>
+                        
+                        {/* Exercise Info */}
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <Dumbbell className="w-4 h-4 text-slate-400" />
+                            <h4 className="font-bold text-white text-xl tracking-tight">
+                              {exercise.name}
+                            </h4>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
-                            onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
-                            disabled={updateExerciseMutation.isPending}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span className="text-sm text-blue-300 font-medium">
+                              {exercise.muscleGroup}
+                            </span>
+                          </div>
                         </div>
+                      </div>
+
+                      {/* Action Menu */}
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-8 h-8 p-0 hover:bg-slate-700/50 rounded-lg"
+                        >
+                          <GripVertical className="w-4 h-4 text-slate-400" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-8 h-8 p-0 hover:bg-red-500/20 rounded-lg transition-colors"
+                          onClick={() => handleRemoveExercise(exercise.id)}
+                        >
+                          <Trash2 className="text-red-400 w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Reps Parameter */}
-                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Repetições</label>
-                        </div>
-                        <div className="text-center">
-                          <Input
-                            value={exercise.reps}
-                            onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                            className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20"
-                            placeholder="8-12"
-                          />
+                    {/* Parameters Grid with Modern Cards */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Sets Parameter */}
+                      <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                            <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Séries</label>
+                          </div>
+                          <div className="flex items-center justify-center space-x-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                              onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
+                              disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </Button>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">{exercise.sets}</div>
+                              <div className="text-xs text-slate-400">séries</div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                              onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
+                              disabled={updateExerciseMutation.isPending}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Weight Parameter */}
-                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Peso</label>
+                      {/* Reps Parameter */}
+                      <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                            <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Repetições</label>
+                          </div>
+                          <div className="text-center">
+                            <Input
+                              value={exercise.reps}
+                              onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20"
+                              placeholder="8-12"
+                            />
+                          </div>
                         </div>
-                        <div className="text-center">
-                          <Input
-                            type="text"
-                            value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
-                            }}
-                            onBlur={(e) => {
-                              const value = e.target.value.trim();
-                              if (value === '') {
-                                handleQuickUpdate(exercise.id, 'weight', null);
-                                setWeightInputs(prev => {
-                                  const newInputs = { ...prev };
-                                  delete newInputs[exercise.id];
-                                  return newInputs;
-                                });
-                              } else {
-                                const numericValue = parseFloat(value);
-                                if (!isNaN(numericValue)) {
-                                  handleQuickUpdate(exercise.id, 'weight', numericValue);
+                      </div>
+
+                      {/* Weight Parameter */}
+                      <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Peso</label>
+                          </div>
+                          <div className="text-center">
+                            <Input
+                              type="text"
+                              value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
+                              }}
+                              onBlur={(e) => {
+                                const value = e.target.value.trim();
+                                if (value === '') {
+                                  handleQuickUpdate(exercise.id, 'weight', null);
                                   setWeightInputs(prev => {
                                     const newInputs = { ...prev };
                                     delete newInputs[exercise.id];
                                     return newInputs;
                                   });
+                                } else {
+                                  const numericValue = parseFloat(value);
+                                  if (!isNaN(numericValue)) {
+                                    handleQuickUpdate(exercise.id, 'weight', numericValue);
+                                    setWeightInputs(prev => {
+                                      const newInputs = { ...prev };
+                                      delete newInputs[exercise.id];
+                                      return newInputs;
+                                    });
+                                  }
                                 }
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.currentTarget.blur();
-                              }
-                            }}
-                            className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20"
-                            placeholder="kg"
-                          />
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.currentTarget.blur();
+                                }
+                              }}
+                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20"
+                              placeholder="kg"
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Rest Duration Parameter */}
-                    <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                          <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider flex items-center">
-                            <Timer className="w-3 h-3 mr-1" />
-                            Descanso
-                          </label>
-                        </div>
-                        <div className="flex items-center justify-center space-x-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
-                            onClick={() => {
-                              const newRest = Math.max(30, (exercise.restDurationSeconds || 90) - 15);
-                              handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
-                            }}
-                            disabled={updateExerciseMutation.isPending}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                          <div className="text-center">
-                            <div className="text-xl font-bold text-orange-400">
-                              {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
-                            </div>
-                            <div className="text-xs text-slate-400">minutos</div>
+                      {/* Rest Duration Parameter */}
+                      <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                            <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider flex items-center">
+                              <Timer className="w-3 h-3 mr-1" />
+                              Descanso
+                            </label>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
-                            onClick={() => {
-                              const newRest = Math.min(300, (exercise.restDurationSeconds || 90) + 15);
-                              handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
-                            }}
-                            disabled={updateExerciseMutation.isPending}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center justify-center space-x-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                              onClick={() => {
+                                const newRest = Math.max(30, (exercise.restDurationSeconds || 90) - 15);
+                                handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                              }}
+                              disabled={updateExerciseMutation.isPending}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </Button>
+                            <div className="text-center">
+                              <div className="text-xl font-bold text-orange-400">
+                                {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
+                              </div>
+                              <div className="text-xs text-slate-400">minutos</div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                              onClick={() => {
+                                const newRest = Math.min(300, (exercise.restDurationSeconds || 90) + 15);
+                                handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                              }}
+                              disabled={updateExerciseMutation.isPending}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {/* Add More Exercises Button */}
+            <Card className="glass-card rounded-xl border-dashed border-slate-600/50 hover:border-blue-500/50 transition-all duration-200 hover:bg-slate-800/30 cursor-pointer"
+                  onClick={() => setShowExerciseSelector(true)}>
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-blue-400 transition-colors">
+                  <Plus className="w-5 h-5" />
+                  <span className="font-medium">Adicionar mais exercícios</span>
                 </div>
               </CardContent>
             </Card>
-          ))
+          </>
         )}
       </div>
 
