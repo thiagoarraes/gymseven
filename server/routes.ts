@@ -268,12 +268,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
 
+      // Get workout log sets
+      const sets = await storage.getWorkoutLogSets(req.params.id);
+
       // Calculate duration
       const duration = log.endTime 
         ? calculateDuration(log.startTime, log.endTime)
         : "Em andamento";
 
-      // Create basic summary with the available data
+      // Group sets by exercise and get exercise details
+      const exerciseGroups: { [key: string]: any } = {};
+      let totalVolume = 0;
+      let totalSets = sets.length;
+
+      for (const set of sets) {
+        if (!exerciseGroups[set.exerciseId]) {
+          // Get exercise details
+          const exercise = await storage.getExercise(set.exerciseId);
+          exerciseGroups[set.exerciseId] = {
+            id: set.exerciseId,
+            name: exercise?.name || 'Exercício desconhecido',
+            muscleGroup: exercise?.muscleGroup || 'N/A',
+            sets: []
+          };
+        }
+        
+        exerciseGroups[set.exerciseId].sets.push({
+          setNumber: set.setNumber,
+          reps: set.reps,
+          weight: set.weight,
+          completed: set.completed
+        });
+
+        // Calculate volume (weight × reps)
+        if (set.weight && set.reps && set.completed) {
+          totalVolume += set.weight * set.reps;
+        }
+      }
+
+      const exercises = Object.values(exerciseGroups);
+
+      // Create summary with complete data
       const summary = {
         id: log.id,
         name: log.name,
@@ -281,13 +316,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endTime: log.endTime,
         completed: !!log.endTime,
         duration,
-        exercises: [],
-        totalSets: 0,
-        totalVolume: 0,
+        exercises,
+        totalSets,
+        totalVolume,
       };
 
       res.json(summary);
     } catch (error) {
+      console.error('Error getting workout summary:', error);
       res.status(500).json({ message: "Erro ao buscar resumo do treino" });
     }
   });
