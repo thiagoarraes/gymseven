@@ -522,7 +522,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                               size="sm"
                               className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
                               onClick={() => {
-                                const newRest = Math.max(30, (exercise.restDurationSeconds || 90) - 15);
+                                const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
+                                const newRest = Math.max(30, currentRest - 15);
                                 handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                               }}
                               disabled={updateExerciseMutation.isPending}
@@ -531,7 +532,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             </Button>
                             <div className="text-center">
                               <div className="text-xl font-bold text-orange-400">
-                                {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
+                                {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
                               </div>
                               <div className="text-xs text-slate-400">minutos</div>
                             </div>
@@ -540,7 +541,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                               size="sm"
                               className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
                               onClick={() => {
-                                const newRest = Math.min(300, (exercise.restDurationSeconds || 90) + 15);
+                                const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
+                                const newRest = Math.min(300, currentRest + 15);
                                 handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                               }}
                               disabled={updateExerciseMutation.isPending}

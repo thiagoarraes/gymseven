@@ -351,7 +351,14 @@ export class SupabaseStorage implements IStorage {
       .order('order');
     
     if (error) throw error;
-    return data || [];
+    
+    // Map restDuration to restDurationSeconds for consistency
+    const mapped = (data || []).map(item => ({
+      ...item,
+      restDurationSeconds: item.restDuration || item.restDurationSeconds || 90
+    }));
+    
+    return mapped;
   }
 
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
@@ -366,15 +373,29 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
+    // Map restDurationSeconds to restDuration for Supabase compatibility
+    const mappedUpdates: any = { ...updates };
+    if ('restDurationSeconds' in mappedUpdates) {
+      mappedUpdates.restDuration = mappedUpdates.restDurationSeconds;
+      delete mappedUpdates.restDurationSeconds;
+    }
+    
     const { data, error } = await supabase
       .from('workoutTemplateExercises')
-      .update(updates)
+      .update(mappedUpdates)
       .eq('id', id)
       .select()
       .single();
     
     if (error) return undefined;
-    return data;
+    
+    // Map back to restDurationSeconds for consistency
+    const result = {
+      ...data,
+      restDurationSeconds: data.restDuration || data.restDurationSeconds || 90
+    };
+    
+    return result;
   }
 
   async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {

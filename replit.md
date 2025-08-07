@@ -7,6 +7,10 @@ GymSeven is a mobile-first workout logging application built with modern web tec
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- ✅ **MIGRATION COMPLETED: Successfully migrated from Replit Agent to Replit environment with full functionality (August 2025)**
+  - Fixed rest duration editing issue by correcting field mapping between frontend and Supabase backend
+  - Resolved inconsistency between restDurationSeconds (frontend) and restDuration (Supabase) 
+  - All CRUD operations now working perfectly with proper data persistence
 - ✅ **SWIPE GESTURE ENHANCEMENT: Standardized robust swipe configuration across all components (August 2025)**
   - Applied comprehensive drag constraints (top: 0, bottom: 0) to prevent vertical movement
   - Added dragDirectionLock and dragPropagation controls for precise horizontal-only swipes
