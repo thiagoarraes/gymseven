@@ -198,13 +198,17 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       <FormLabel className="text-slate-200">Grupo Muscular</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                            <SelectValue placeholder="Selecione o grupo muscular" />
+                          <SelectTrigger className="glass-card border-slate-700/50 text-white h-11 rounded-xl hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
+                            <SelectValue placeholder="Selecione o grupo muscular" className="text-slate-300" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectContent className="glass-card border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
                           {MUSCLE_GROUPS.map((group) => (
-                            <SelectItem key={group} value={group}>
+                            <SelectItem 
+                              key={group} 
+                              value={group}
+                              className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-500/10 focus:text-blue-300"
+                            >
                               {group}
                             </SelectItem>
                           ))}
