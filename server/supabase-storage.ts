@@ -261,12 +261,80 @@ export class SupabaseStorage implements IStorage {
   }
 
   async deleteWorkoutTemplate(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('workoutTemplates')
-      .delete()
-      .eq('id', id);
+    console.log(`🗑️ Attempting to delete workout template: ${id}`);
     
-    return !error;
+    try {
+      // First check if the template exists
+      const { data: existingTemplate, error: checkError } = await supabase
+        .from('workoutTemplates')
+        .select('id')
+        .eq('id', id)
+        .single();
+      
+      if (checkError || !existingTemplate) {
+        console.log(`❌ Template ${id} not found for deletion`);
+        return false;
+      }
+      
+      console.log(`✅ Template ${id} found, checking dependencies...`);
+      
+      // Check if there are workout logs referencing this template
+      const { data: dependentLogs, error: logCheckError } = await supabase
+        .from('workoutLogs')
+        .select('id')
+        .eq('templateId', id);
+      
+      if (logCheckError) {
+        console.error(`❌ Error checking dependent logs:`, logCheckError);
+        return false;
+      }
+      
+      // If there are dependent workout logs, delete them first
+      if (dependentLogs && dependentLogs.length > 0) {
+        console.log(`🔗 Found ${dependentLogs.length} dependent workout logs, deleting them first...`);
+        
+        for (const log of dependentLogs) {
+          const logDeleted = await this.deleteWorkoutLog(log.id);
+          if (!logDeleted) {
+            console.error(`❌ Failed to delete dependent workout log ${log.id}`);
+            return false;
+          }
+        }
+        
+        console.log(`✅ All dependent workout logs deleted`);
+      }
+      
+      // Delete template exercises first (they should cascade, but let's be explicit)
+      const { error: exerciseDeleteError } = await supabase
+        .from('workoutTemplateExercises')
+        .delete()
+        .eq('templateId', id);
+      
+      if (exerciseDeleteError) {
+        console.error(`❌ Error deleting template exercises:`, exerciseDeleteError);
+        // Continue anyway, as this might cascade
+      } else {
+        console.log(`✅ Template exercises deleted`);
+      }
+      
+      // Now delete the template itself
+      const { error } = await supabase
+        .from('workoutTemplates')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error(`❌ Error deleting template ${id}:`, error);
+        return false;
+      }
+      
+      console.log(`✅ Template ${id} deleted successfully`);
+      return true;
+      
+    } catch (error) {
+      console.error(`❌ Unexpected error during template deletion:`, error);
+      return false;
+    }
   }
 
   // Workout Template Exercise methods
