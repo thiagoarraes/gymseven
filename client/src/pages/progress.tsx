@@ -37,7 +37,7 @@ export default function Progress() {
   // Mock statistics - in real app, calculate from workout logs
   const stats = {
     personalRecord: "85kg",
-    totalWorkouts: workoutLogs.filter(log => log.completed).length,
+    totalWorkouts: workoutLogs.filter(log => log.endTime).length,
     monthlyAverage: "76kg",
     totalVolume: "18.2t",
   };
@@ -261,13 +261,13 @@ export default function Progress() {
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-white">
-                    {workoutLogs.filter(log => log.completed).length}
+                    {workoutLogs.filter(log => log.endTime).length}
                   </div>
                   <div className="text-xs text-slate-400">Treinos completos</div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-white">
-                    {Math.round((workoutLogs.filter(log => log.completed).length / Math.max(workoutLogs.length, 1)) * 100)}%
+                    {Math.round((workoutLogs.filter(log => log.endTime).length / Math.max(workoutLogs.length, 1)) * 100)}%
                   </div>
                   <div className="text-xs text-slate-400">Taxa de conclusão</div>
                 </div>

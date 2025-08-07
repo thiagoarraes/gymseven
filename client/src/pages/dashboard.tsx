@@ -245,7 +245,7 @@ export default function Dashboard() {
                         {workout.endTime ? calculateDuration(workout.startTime, workout.endTime) : "Em andamento"}
                       </div>
                       <div className="text-xs text-slate-500">
-                        {workout.completed ? "Concluído" : "Incompleto"}
+                        {workout.endTime ? "Concluído" : "Incompleto"}
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-400" />
