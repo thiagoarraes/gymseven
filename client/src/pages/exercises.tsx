@@ -406,10 +406,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                 drag={!selectionMode ? "x" : false}
                 dragConstraints={{ left: -160, right: 0 }}
                 dragElastic={0.1}
+                dragDirectionLock={true}
                 onDragStart={() => !selectionMode && handleDragStart(exercise.id)}
                 onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
                 animate={{ 
-                  x: swipedExercise === exercise.id ? -160 : 0 
+                  x: swipedExercise === exercise.id ? -160 : 0,
+                  y: 0
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 style={{ zIndex: 2 }}
