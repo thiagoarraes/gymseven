@@ -264,7 +264,7 @@ export default function WorkoutHistory() {
                 className="relative"
               >
                 <Card 
-                  className="glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 h-20"
+                  className="glass-card rounded-xl cursor-pointer transition-all duration-200 h-20"
                   onClick={() => (swipedWorkout === workout.id || draggedWorkout === workout.id) ? null : handleWorkoutClick(workout.id)}
                 >
                   <CardContent className="p-4 h-20">
