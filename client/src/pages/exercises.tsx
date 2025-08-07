@@ -416,15 +416,15 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                 className="relative"
               >
                 <Card 
-                  className={`glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 ${
+                  className={`glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 min-h-[80px] ${
                     selectionMode && selectedExercises.includes(exercise.id) 
                       ? "ring-2 ring-blue-500 bg-blue-500/10" 
                       : ""
                   }`}
                   onClick={() => selectionMode && onExerciseSelect?.(exercise.id)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-4 h-full flex items-center">
+                    <div className="flex items-center justify-between w-full">
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
                           <Dumbbell className="w-6 h-6 text-blue-400" />
