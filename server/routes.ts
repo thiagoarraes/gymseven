@@ -311,8 +311,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Calculate totals
           if (sets) {
-            totalSets += sets.length;
+            // Count all sets that have been started (have reps or weight)
             for (const set of sets) {
+              if (set.reps || set.weight) {
+                totalSets += 1;
+              }
+              // Only count volume for completed sets
               if (set.weight && set.reps && set.completed) {
                 totalVolume += set.weight * set.reps;
               }
