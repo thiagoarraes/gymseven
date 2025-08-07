@@ -112,7 +112,7 @@ export default function Workouts() {
       const workoutData = {
         templateId,
         name: template?.name || "Treino",
-        startTime: new Date().toISOString(),
+        startTime: new Date(),
         completed: false,
       };
       console.log('Creating workout with data:', workoutData);
@@ -375,7 +375,7 @@ export default function Workouts() {
                       template.exercises.slice(0, 3).map((exercise: any, index: number) => (
                         <div key={exercise.id} className="flex items-center text-xs text-slate-400">
                           <span className="w-4 text-center">{index + 1}</span>
-                          <span className="flex-1 ml-2">{exercise.name}</span>
+                          <span className="flex-1 ml-2">{exercise.exercise?.name || exercise.name || 'Exercício'}</span>
                           <span className="text-blue-400 text-xs">{exercise.sets}×{exercise.reps}</span>
                         </div>
                       ))
