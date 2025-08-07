@@ -129,13 +129,13 @@ export default function WorkoutHistory() {
   };
 
   const handleSwipeEnd = (info: PanInfo, workoutId: string) => {
-    const swipeThreshold = -100; // Pixels para ativar o swipe
-    
-    if (info.offset.x < swipeThreshold) {
-      // Swipe para a esquerda - mostrar botão delete
+    const { offset, velocity } = info;
+    const swipeThreshold = -40;
+    const velocityThreshold = -500;
+
+    if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
       setSwipedWorkout(workoutId);
-    } else if (info.offset.x > 50) {
-      // Swipe para a direita - esconder botão delete
+    } else {
       setSwipedWorkout(null);
     }
   };
@@ -212,7 +212,7 @@ export default function WorkoutHistory() {
             <div key={workout.id} className="relative overflow-hidden">
               {/* Background Delete Button */}
               <div 
-                className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-20 bg-red-500/90 transition-all duration-300 ${
+                className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-20 rounded-xl glass-card bg-red-500/20 border-red-500/30 transition-all duration-300 ${
                   swipedWorkout === workout.id ? 'opacity-100' : 'opacity-0'
                 }`}
                 style={{ zIndex: 1 }}
@@ -225,7 +225,7 @@ export default function WorkoutHistory() {
                     handleDeleteWorkout(workout.id);
                   }}
                   disabled={deleteWorkoutMutation.isPending}
-                  className="flex flex-col items-center justify-center h-full w-full text-white hover:bg-red-600/90 border-0"
+                  className="flex flex-col items-center justify-center h-full w-full text-red-400 hover:bg-red-500/20 border-0"
                 >
                   <Trash2 className="w-5 h-5 mb-1" />
                   <span className="text-xs font-medium">Apagar</span>
@@ -235,7 +235,7 @@ export default function WorkoutHistory() {
               {/* Swipeable Card */}
               <motion.div
                 drag="x"
-                dragConstraints={{ left: -120, right: 0 }}
+                dragConstraints={{ left: -100, right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
                 animate={{ 

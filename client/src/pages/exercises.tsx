@@ -133,7 +133,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
   const handleSwipeEnd = (info: any, exerciseId: string) => {
     const { offset, velocity } = info;
-    const swipeThreshold = -50;
+    const swipeThreshold = -40;
     const velocityThreshold = -500;
 
     if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
@@ -356,12 +356,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               {/* Background Action Buttons */}
               {!selectionMode && (
                 <div 
-                  className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-32 bg-gradient-to-l from-slate-800/90 to-slate-700/90 transition-all duration-300 ${
+                  className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-24 rounded-xl glass-card border-slate-700/50 transition-all duration-300 ${
                     swipedExercise === exercise.id ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{ zIndex: 1 }}
                 >
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1 px-2">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -371,7 +371,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         setSwipedExercise(null);
                       }}
                       disabled={deleteMutation.isPending}
-                      className="flex flex-col items-center justify-center h-12 w-12 text-blue-400 hover:bg-blue-500/20 border-0"
+                      className="flex flex-col items-center justify-center h-10 w-8 text-blue-400 hover:bg-blue-500/20 border-0 p-0"
                     >
                       <Edit className="w-4 h-4 mb-1" />
                       <span className="text-xs font-medium">Editar</span>
@@ -385,7 +385,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         setSwipedExercise(null);
                       }}
                       disabled={deleteMutation.isPending}
-                      className="flex flex-col items-center justify-center h-12 w-12 text-red-400 hover:bg-red-500/20 border-0"
+                      className="flex flex-col items-center justify-center h-10 w-8 text-red-400 hover:bg-red-500/20 border-0 p-0"
                     >
                       <Trash2 className="w-4 h-4 mb-1" />
                       <span className="text-xs font-medium">Apagar</span>
@@ -397,11 +397,11 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               {/* Swipeable Card */}
               <motion.div
                 drag={!selectionMode ? "x" : false}
-                dragConstraints={{ left: -150, right: 0 }}
+                dragConstraints={{ left: -100, right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
                 animate={{ 
-                  x: swipedExercise === exercise.id ? -120 : 0 
+                  x: swipedExercise === exercise.id ? -80 : 0 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 style={{ zIndex: 2 }}
