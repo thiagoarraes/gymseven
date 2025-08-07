@@ -47,13 +47,22 @@ export default function Progress() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Meu Progresso</h2>
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200 w-48">
-            <SelectValue />
+          <SelectTrigger className="glass-card border-slate-700/50 text-white w-48 h-11 rounded-xl hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
+            <SelectValue className="text-slate-200" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
-            <SelectItem value="30">Últimos 30 dias</SelectItem>
-            <SelectItem value="90">Últimos 3 meses</SelectItem>
-            <SelectItem value="365">Último ano</SelectItem>
+          <SelectContent className="glass-card border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
+            <SelectItem value="7" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
+              Semana passada
+            </SelectItem>
+            <SelectItem value="30" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
+              Últimos 30 dias
+            </SelectItem>
+            <SelectItem value="90" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
+              Últimos 3 meses
+            </SelectItem>
+            <SelectItem value="180" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
+              Últimos 6 meses
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
