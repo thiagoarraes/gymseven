@@ -40,6 +40,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<any>(null);
   const [swipedExercise, setSwipedExercise] = useState<string | null>(null);
+  const [draggedExercise, setDraggedExercise] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -141,6 +142,13 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     } else {
       setSwipedExercise(null);
     }
+    
+    // Clear dragged state
+    setDraggedExercise(null);
+  };
+
+  const handleDragStart = (exerciseId: string) => {
+    setDraggedExercise(exerciseId);
   };
 
   const filteredExercises = exercises.filter((exercise) => {
@@ -357,7 +365,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               {!selectionMode && (
                 <div 
                   className={`absolute right-0 top-0 bottom-0 flex transition-all duration-300 ${
-                    swipedExercise === exercise.id ? 'opacity-100' : 'opacity-0'
+                    (swipedExercise === exercise.id || draggedExercise === exercise.id) ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{ zIndex: 1 }}
                 >
@@ -398,6 +406,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                 drag={!selectionMode ? "x" : false}
                 dragConstraints={{ left: -160, right: 0 }}
                 dragElastic={0.1}
+                onDragStart={() => !selectionMode && handleDragStart(exercise.id)}
                 onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
                 animate={{ 
                   x: swipedExercise === exercise.id ? -160 : 0 

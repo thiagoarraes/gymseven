@@ -45,6 +45,7 @@ export default function WorkoutHistory() {
   const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [swipedWorkout, setSwipedWorkout] = useState<string | null>(null);
+  const [draggedWorkout, setDraggedWorkout] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -138,6 +139,13 @@ export default function WorkoutHistory() {
     } else {
       setSwipedWorkout(null);
     }
+    
+    // Clear dragged state
+    setDraggedWorkout(null);
+  };
+
+  const handleDragStart = (workoutId: string) => {
+    setDraggedWorkout(workoutId);
   };
 
   const handleDeleteWorkout = (workoutId: string) => {
@@ -213,7 +221,7 @@ export default function WorkoutHistory() {
               {/* Background Delete Button - WhatsApp Style */}
               <div 
                 className={`absolute right-0 top-0 bottom-0 flex transition-all duration-300 ${
-                  swipedWorkout === workout.id ? 'opacity-100' : 'opacity-0'
+                  (swipedWorkout === workout.id || draggedWorkout === workout.id) ? 'opacity-100' : 'opacity-0'
                 }`}
                 style={{ zIndex: 1 }}
               >
@@ -237,6 +245,7 @@ export default function WorkoutHistory() {
                 drag="x"
                 dragConstraints={{ left: -96, right: 0 }}
                 dragElastic={0.1}
+                onDragStart={() => handleDragStart(workout.id)}
                 onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
                 animate={{ 
                   x: swipedWorkout === workout.id ? -96 : 0 
