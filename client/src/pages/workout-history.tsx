@@ -243,12 +243,21 @@ export default function WorkoutHistory() {
               {/* Swipeable Card */}
               <motion.div
                 drag="x"
-                dragConstraints={{ left: -96, right: 0 }}
-                dragElastic={0.1}
+                dragConstraints={{ left: -96, right: 0, top: 0, bottom: 0 }}
+                dragElastic={{ left: 0.1, right: 0.1, top: 0, bottom: 0 }}
+                dragDirectionLock={true}
+                dragPropagation={false}
                 onDragStart={() => handleDragStart(workout.id)}
                 onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
+                onDrag={(_, info) => {
+                  // Force y position to stay at 0 during drag
+                  if (info.point.y !== 0) {
+                    info.point.y = 0;
+                  }
+                }}
                 animate={{ 
-                  x: swipedWorkout === workout.id ? -96 : 0 
+                  x: swipedWorkout === workout.id ? -96 : 0,
+                  y: 0
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 style={{ zIndex: 2 }}

@@ -7,6 +7,18 @@ GymSeven is a mobile-first workout logging application built with modern web tec
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- ✅ **SWIPE GESTURE ENHANCEMENT: Standardized robust swipe configuration across all components (August 2025)**
+  - Applied comprehensive drag constraints (top: 0, bottom: 0) to prevent vertical movement
+  - Added dragDirectionLock and dragPropagation controls for precise horizontal-only swipes
+  - Implemented onDrag handler to force Y position to remain at 0
+  - Updated both exercises and workout history pages with consistent behavior
+- ✅ **UI CARD IMPROVEMENTS: Fixed card height consistency and button alignment (August 2025)**
+  - Exercise cards now use fixed h-20 (80px) height instead of min-height
+  - Action buttons reduced by 2px (h-[4.75rem]) for better visual proportion
+  - Enhanced swipe gesture reliability with zero vertical movement tolerance
+- ✅ **TOTAL SETS CALCULATION FIX: Corrected workout summary statistics (August 2025)**
+  - Modified API to count all sets with reps or weight data, not just completed ones
+  - Dashboard now accurately displays total series performed in workouts
 - ✅ **REPLIT MIGRATION AUTOMATION: Created robust setup scripts for seamless deployment across any Replit account (August 2025)**
 - ✅ **DEPENDENCY RESOLUTION: Automated fixing of rollup and tsx dependency issues (August 2025)**
 - ✅ **SETUP AUTOMATION: Added setup-replit.mjs for automatic environment configuration (August 2025)**
