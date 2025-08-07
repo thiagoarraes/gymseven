@@ -124,7 +124,8 @@ export const MUSCLE_GROUPS = [
   "Peito",
   "Costas", 
   "Ombros",
-  "Braços",
+  "Bíceps",
+  "Tríceps",
   "Pernas",
   "Core",
   "Cardio"
