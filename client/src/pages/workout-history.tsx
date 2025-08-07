@@ -130,7 +130,7 @@ export default function WorkoutHistory() {
 
   const handleSwipeEnd = (info: PanInfo, workoutId: string) => {
     const { offset, velocity } = info;
-    const swipeThreshold = -30;
+    const swipeThreshold = -40;
     const velocityThreshold = -500;
 
     if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
@@ -210,36 +210,36 @@ export default function WorkoutHistory() {
         <div className="space-y-3">
           {workoutLogs.map((workout) => (
             <div key={workout.id} className="relative overflow-hidden">
-              {/* Background Delete Button */}
+              {/* Background Delete Button - WhatsApp Style */}
               <div 
-                className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-20 rounded-xl glass-card bg-red-500/20 border-red-500/30 transition-all duration-300 ${
+                className={`absolute right-0 top-0 bottom-0 flex transition-all duration-300 ${
                   swipedWorkout === workout.id ? 'opacity-100' : 'opacity-0'
                 }`}
                 style={{ zIndex: 1 }}
               >
-                <Button
-                  size="sm"
-                  variant="ghost"
+                {/* Delete Button Column */}
+                <div
+                  className="flex items-center justify-center w-24 bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteWorkout(workout.id);
                   }}
-                  disabled={deleteWorkoutMutation.isPending}
-                  className="flex flex-col items-center justify-center h-full w-full text-red-400 hover:bg-red-500/20 border-0 min-h-[48px]"
                 >
-                  <Trash2 className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium">Apagar</span>
-                </Button>
+                  <div className="flex flex-col items-center justify-center text-white">
+                    <Trash2 className="w-6 h-6 mb-1" />
+                    <span className="text-sm font-medium">Apagar</span>
+                  </div>
+                </div>
               </div>
               
               {/* Swipeable Card */}
               <motion.div
                 drag="x"
-                dragConstraints={{ left: -80, right: 0 }}
+                dragConstraints={{ left: -96, right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
                 animate={{ 
-                  x: swipedWorkout === workout.id ? -80 : 0 
+                  x: swipedWorkout === workout.id ? -96 : 0 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 style={{ zIndex: 2 }}
