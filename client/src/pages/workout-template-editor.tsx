@@ -199,33 +199,24 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/workouts")}
-            className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              {template?.name || "Novo Treino"}
-            </h1>
-            <p className="text-slate-400 text-sm">
-              {template?.description || "Adicione exercícios ao seu treino"}
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center space-x-4">
         <Button
-          onClick={() => setShowExerciseSelector(true)}
-          className="gradient-accent hover:scale-105 transition-transform"
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/workouts")}
+          className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Exercícios
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
         </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-white">
+            {template?.name || "Novo Treino"}
+          </h1>
+          <p className="text-slate-400 text-sm">
+            {template?.description || "Adicione exercícios ao seu treino"}
+          </p>
+        </div>
       </div>
 
       {/* Template Exercises */}
