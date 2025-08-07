@@ -1,6 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { loadEnv } from "./env";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Load environment variables from .env file first
+loadEnv();
 
 const app = express();
 app.use(express.json());
