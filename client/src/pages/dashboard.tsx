@@ -4,7 +4,7 @@ import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, C
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { workoutLogApi, exerciseApi } from "@/lib/api";
 import { useLocation } from "wouter";
 
@@ -290,17 +290,11 @@ export default function Dashboard() {
       {/* Workout Summary Modal */}
       <Dialog open={showSummaryModal} onOpenChange={setShowSummaryModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
-          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <DialogHeader className="pb-4">
             <DialogTitle className="text-white text-xl font-semibold">Resumo do Treino</DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={closeSummaryModal}
-              className="h-8 w-8 p-0 bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-colors border border-slate-600/50"
-            >
-              <X className="w-4 h-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
+            <DialogDescription className="text-slate-400">
+              Visualize os detalhes completos do seu treino, incluindo exercícios realizados e estatísticas.
+            </DialogDescription>
           </DialogHeader>
           
           {summaryLoading ? (
