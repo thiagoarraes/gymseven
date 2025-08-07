@@ -283,6 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let exercises: any[] = [];
       let totalSets = 0;
       let totalVolume = 0;
+      let hasActualSets = false;
 
       if (logExercises && logExercises.length > 0) {
         for (const logExercise of logExercises) {
@@ -310,7 +311,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           exercises.push(exerciseData);
 
           // Calculate totals
-          if (sets) {
+          if (sets && sets.length > 0) {
+            hasActualSets = true;
             // Count all sets that have been started (have reps or weight)
             for (const set of sets) {
               if (set.reps || set.weight) {
@@ -325,8 +327,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // If no log exercises found, try to get data from template
-      if (exercises.length === 0 && log.templateId) {
+      // If no log exercises found OR no actual sets were performed, use template data
+      if ((exercises.length === 0 || !hasActualSets) && log.templateId) {
         const { data: templateExercises } = await supabaseStorage.supabase
           .from('workoutTemplateExercises')
           .select(`
@@ -337,12 +339,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .order('order');
 
         if (templateExercises) {
-          exercises = templateExercises.map((te: any) => ({
-            id: te.exerciseId,
-            name: te.exercise?.name || 'Exercício',
-            muscleGroup: te.exercise?.muscleGroup || 'N/A',
-            sets: [] // No actual sets performed, just template
-          }));
+          // If no exercises at all, populate from template
+          if (exercises.length === 0) {
+            exercises = templateExercises.map((te: any) => ({
+              id: te.exerciseId,
+              name: te.exercise?.name || 'Exercício',
+              muscleGroup: te.exercise?.muscleGroup || 'N/A',
+              sets: [] // No actual sets performed, just template
+            }));
+          }
+          
+          // Always count sets from template when no actual sets recorded
+          if (!hasActualSets) {
+            totalSets = 0; // Reset to avoid double counting
+            for (const te of templateExercises) {
+              totalSets += te.sets || 0;
+            }
+          }
         }
       }
 
