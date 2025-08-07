@@ -182,7 +182,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       <FormControl>
                         <Input
                           placeholder="Ex: Supino Reto"
-                          className="bg-slate-800 border-slate-700 text-white"
+                          className="glass-card border-slate-700/50 text-white h-11 rounded-xl hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-slate-400"
                           {...field}
                         />
                       </FormControl>
