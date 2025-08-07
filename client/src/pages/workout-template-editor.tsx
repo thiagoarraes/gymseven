@@ -33,6 +33,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   const [editingExercise, setEditingExercise] = useState<any>(null);
   const [isExerciseFormOpen, setIsExerciseFormOpen] = useState(false);
   const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
+  const [isEditingTemplateName, setIsEditingTemplateName] = useState(false);
+  const [tempTemplateName, setTempTemplateName] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -108,6 +110,31 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     },
   });
 
+  const updateTemplateNameMutation = useMutation({
+    mutationFn: (newName: string) => 
+      fetch(`/api/workout-templates/${templateId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName })
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates"] });
+      setIsEditingTemplateName(false);
+      toast({
+        title: "Nome atualizado!",
+        description: "O nome do treino foi alterado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível alterar o nome do treino.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
     defaultValues: {
@@ -116,6 +143,31 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
       weight: undefined,
     },
   });
+
+  // Sync template name when data changes
+  useEffect(() => {
+    if (template?.name && !isEditingTemplateName) {
+      setTempTemplateName(template.name);
+    }
+  }, [template?.name, isEditingTemplateName]);
+
+  const handleTemplateNameEdit = () => {
+    setTempTemplateName(template?.name || "");
+    setIsEditingTemplateName(true);
+  };
+
+  const handleTemplateNameSave = () => {
+    if (tempTemplateName.trim() && tempTemplateName !== template?.name) {
+      updateTemplateNameMutation.mutate(tempTemplateName.trim());
+    } else {
+      setIsEditingTemplateName(false);
+    }
+  };
+
+  const handleTemplateNameCancel = () => {
+    setTempTemplateName(template?.name || "");
+    setIsEditingTemplateName(false);
+  };
 
   const handleExerciseSelect = (exerciseId: string) => {
     setSelectedExercises(prev => 
@@ -209,10 +261,55 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-white">
-            {template?.name || "Novo Treino"}
-          </h1>
+        <div className="flex-1">
+          {isEditingTemplateName ? (
+            <div className="flex items-center space-x-2">
+              <Input
+                value={tempTemplateName}
+                onChange={(e) => setTempTemplateName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleTemplateNameSave();
+                  } else if (e.key === 'Escape') {
+                    handleTemplateNameCancel();
+                  }
+                }}
+                className="text-2xl font-bold bg-slate-800 border-slate-700 text-white h-12"
+                placeholder="Nome do treino"
+                autoFocus
+              />
+              <Button
+                size="sm"
+                onClick={handleTemplateNameSave}
+                className="gradient-accent"
+                disabled={updateTemplateNameMutation.isPending}
+              >
+                <Save className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleTemplateNameCancel}
+                className="border-slate-700 text-slate-300"
+              >
+                ✕
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2 group">
+              <h1 className="text-2xl font-bold text-white">
+                {template?.name || "Novo Treino"}
+              </h1>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleTemplateNameEdit}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white"
+              >
+                <Edit3 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
           <p className="text-slate-400 text-sm">
             {template?.description || "Adicione exercícios ao seu treino"}
           </p>
