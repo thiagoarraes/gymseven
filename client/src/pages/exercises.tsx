@@ -133,7 +133,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
   const handleSwipeEnd = (info: any, exerciseId: string) => {
     const { offset, velocity } = info;
-    const swipeThreshold = -60;
+    const swipeThreshold = -70;
     const velocityThreshold = -500;
 
     if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
@@ -396,11 +396,11 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               {/* Swipeable Card */}
               <motion.div
                 drag={!selectionMode ? "x" : false}
-                dragConstraints={{ left: -140, right: 0 }}
+                dragConstraints={{ left: -160, right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
                 animate={{ 
-                  x: swipedExercise === exercise.id ? -140 : 0 
+                  x: swipedExercise === exercise.id ? -160 : 0 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 style={{ zIndex: 2 }}
