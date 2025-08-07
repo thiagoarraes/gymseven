@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { workoutLogApi, exerciseApi } from "@/lib/api";
 import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
+  const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
     queryKey: ["/api/workout-logs", "recent"],
@@ -17,6 +22,23 @@ export default function Dashboard() {
     queryKey: ["/api/exercises"],
     queryFn: exerciseApi.getAll,
   });
+
+  // Fetch workout summary when modal opens
+  const { data: workoutSummary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['/api/workout-logs', selectedWorkout, 'summary'],
+    queryFn: () => workoutLogApi.getSummary(selectedWorkout!),
+    enabled: !!selectedWorkout && showSummaryModal,
+  });
+
+  const handleWorkoutClick = (workoutId: string) => {
+    setSelectedWorkout(workoutId);
+    setShowSummaryModal(true);
+  };
+
+  const closeSummaryModal = () => {
+    setShowSummaryModal(false);
+    setSelectedWorkout(null);
+  };
 
   // Calculate stats from recent workouts
   const stats = {
@@ -172,7 +194,7 @@ export default function Dashboard() {
               variant="ghost" 
               size="sm" 
               className="text-blue-400 hover:text-blue-300"
-              onClick={() => navigate("/progress")}
+              onClick={() => navigate("/workout-history")}
             >
               Ver todos
             </Button>
@@ -206,7 +228,7 @@ export default function Dashboard() {
                 <div 
                   key={workout.id} 
                   className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl border border-slate-700/50 hover-lift cursor-pointer"
-                  onClick={() => navigate(`/workout-session/${workout.id}`)}
+                  onClick={() => handleWorkoutClick(workout.id)}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 gradient-accent rounded-lg flex items-center justify-center">
@@ -264,6 +286,134 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Workout Summary Modal */}
+      <Dialog open={showSummaryModal} onOpenChange={setShowSummaryModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Resumo do Treino</DialogTitle>
+          </DialogHeader>
+          
+          {summaryLoading ? (
+            <div className="space-y-4">
+              <div className="loading-skeleton h-8 rounded w-3/4"></div>
+              <div className="loading-skeleton h-20 rounded"></div>
+              <div className="loading-skeleton h-32 rounded"></div>
+            </div>
+          ) : workoutSummary ? (
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto">
+              {/* Workout Info */}
+              <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                <h3 className="font-semibold text-white text-lg mb-3">{workoutSummary.name}</h3>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-bold text-blue-400">{workoutSummary.exercises?.length || 0}</div>
+                    <div className="text-xs text-slate-400">Exercícios</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-emerald-400">{workoutSummary.totalSets || 0}</div>
+                    <div className="text-xs text-slate-400">Total de séries</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-purple-400">{workoutSummary.totalVolume || 0}kg</div>
+                    <div className="text-xs text-slate-400">Volume total</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-orange-400">{workoutSummary.duration || "N/A"}</div>
+                    <div className="text-xs text-slate-400">Duração</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Simple workout info when full summary not available */}
+              {!workoutSummary.exercises && (
+                <div className="space-y-3">
+                  <h4 className="font-medium text-slate-200">Informações do Treino</h4>
+                  <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                        workoutSummary.completed ? "gradient-accent" : "bg-slate-700/50"
+                      }`}>
+                        {workoutSummary.completed ? (
+                          <CheckCircle className="w-6 h-6 text-white" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-slate-400" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-white">{workoutSummary.name}</div>
+                        <div className="text-sm text-slate-400">
+                          {workoutSummary.startTime ? formatDate(workoutSummary.startTime) : "Data não disponível"}
+                        </div>
+                        <Badge 
+                          variant={workoutSummary.completed ? "default" : "secondary"}
+                          className={workoutSummary.completed 
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
+                            : "bg-slate-700/50 text-slate-400 border-slate-600/50"
+                          }
+                        >
+                          {workoutSummary.completed ? "Concluído" : "Incompleto"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Exercises - if available */}
+              {workoutSummary.exercises && workoutSummary.exercises.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium text-slate-200">Exercícios realizados</h4>
+                  {workoutSummary.exercises.map((exercise: any, index: number) => (
+                    <div key={exercise.id || index} className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
+                          <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-white">{exercise.name}</h5>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span className="text-sm text-blue-300">{exercise.muscleGroup}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sets */}
+                      {exercise.sets && exercise.sets.length > 0 && (
+                        <div className="space-y-2">
+                          {exercise.sets.map((set: any) => (
+                            <div key={set.setNumber} className="flex items-center justify-between py-2 px-3 bg-slate-700/30 rounded-lg">
+                              <span className="text-sm text-slate-300">Série {set.setNumber}</span>
+                              <div className="flex items-center space-x-4 text-sm">
+                                {set.reps && (
+                                  <span className="text-yellow-400">{set.reps} reps</span>
+                                )}
+                                {set.weight && (
+                                  <span className="text-purple-400">{set.weight}kg</span>
+                                )}
+                                <div className={`w-2 h-2 rounded-full ${
+                                  set.completed ? "bg-emerald-400" : "bg-slate-500"
+                                }`}></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-400">
+              <TrendingUp className="w-12 h-12 mx-auto mb-4" />
+              <p>Erro ao carregar dados do treino</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

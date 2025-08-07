@@ -114,4 +114,9 @@ export const workoutLogApi = {
     const response = await apiRequest("GET", `/api/workout-logs/${logId}/sets`);
     return response.json();
   },
+
+  getSummary: async (id: string) => {
+    const response = await apiRequest("GET", `/api/workout-logs/${id}/summary`);
+    return response.json();
+  },
 };

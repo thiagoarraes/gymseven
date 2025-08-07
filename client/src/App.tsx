@@ -11,6 +11,7 @@ import Workouts from "@/pages/workouts";
 import Progress from "@/pages/progress";
 import WorkoutSession from "@/pages/workout-session";
 import WorkoutTemplateEditor from "@/pages/workout-template-editor";
+import WorkoutHistory from "@/pages/workout-history";
 import NotFound from "@/pages/not-found";
 
 // Route wrapper components to handle params
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
           <Route path="/progress" component={Progress} />
           <Route path="/workout-session/:id" component={WorkoutSession} />
+          <Route path="/workout-history" component={WorkoutHistory} />
           <Route component={NotFound} />
         </Switch>
       </main>

@@ -261,6 +261,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/workout-logs/:id/summary", async (req, res) => {
+    try {
+      const log = await storage.getWorkoutLog(req.params.id);
+      if (!log) {
+        return res.status(404).json({ message: "Treino não encontrado" });
+      }
+
+      // Calculate duration
+      const duration = log.endTime 
+        ? calculateDuration(log.startTime, log.endTime)
+        : "Em andamento";
+
+      // Create basic summary with the available data
+      const summary = {
+        id: log.id,
+        name: log.name,
+        startTime: log.startTime,
+        endTime: log.endTime,
+        completed: !!log.endTime,
+        duration,
+        exercises: [],
+        totalSets: 0,
+        totalVolume: 0,
+      };
+
+      res.json(summary);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar resumo do treino" });
+    }
+  });
+
   app.post("/api/workout-logs", async (req, res) => {
     try {
       console.log("Creating workout log with data:", req.body);
@@ -318,6 +349,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: "Dados inválidos para atualização da série" });
     }
   });
+
+  // Helper function to calculate duration
+  function calculateDuration(start: Date | string, end?: Date | string) {
+    if (!end) return "Em andamento";
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    const diffMs = endTime.getTime() - startTime.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  }
 
   const httpServer = createServer(app);
   return httpServer;
