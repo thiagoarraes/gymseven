@@ -459,14 +459,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const startTime = new Date(start);
     const endTime = new Date(end);
     const diffMs = endTime.getTime() - startTime.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    const hours = Math.floor(diffMinutes / 60);
-    const minutes = diffMinutes % 60;
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
     
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
+    return `${hours}h ${minutes}m ${seconds}s`;
   }
 
   const httpServer = createServer(app);
