@@ -364,14 +364,14 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               {/* Background Action Buttons - WhatsApp Style */}
               {!selectionMode && (
                 <div 
-                  className={`absolute right-0 top-0 bottom-0 flex transition-all duration-300 ${
+                  className={`absolute right-0 top-0 flex transition-all duration-300 h-full ${
                     (swipedExercise === exercise.id || draggedExercise === exercise.id) ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{ zIndex: 1 }}
                 >
                   {/* Edit Button Column */}
                   <div
-                    className="flex items-center justify-center w-20 bg-blue-500 rounded-l-xl cursor-pointer hover:bg-blue-600 transition-colors"
+                    className="flex items-center justify-center w-20 h-full bg-blue-500 rounded-l-xl cursor-pointer hover:bg-blue-600 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(exercise);
@@ -386,7 +386,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   
                   {/* Delete Button Column */}
                   <div
-                    className="flex items-center justify-center w-20 bg-red-500 rounded-r-xl cursor-pointer hover:bg-red-600 transition-colors"
+                    className="flex items-center justify-center w-20 h-full bg-red-500 rounded-r-xl cursor-pointer hover:bg-red-600 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(exercise.id);
