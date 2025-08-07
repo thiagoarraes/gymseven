@@ -195,7 +195,7 @@ export default function WorkoutSession() {
               </p>
               {currentExercise && (
                 <p className="text-sm text-blue-300 font-medium mt-1">
-                  {currentExercise.exercise.name}
+                  {currentExercise.exercise?.name || currentExercise.name || 'Exercício'}
                 </p>
               )}
             </div>
@@ -242,8 +242,8 @@ export default function WorkoutSession() {
         <Card className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white">{currentExercise.exercise.name}</h3>
-              <p className="text-sm text-slate-400">{currentExercise.exercise.muscleGroup}</p>
+              <h3 className="text-lg font-semibold text-white">{currentExercise.exercise?.name || currentExercise.name || 'Exercício'}</h3>
+              <p className="text-sm text-slate-400">{currentExercise.exercise?.muscleGroup || currentExercise.muscleGroup || 'Grupo muscular'}</p>
             </div>
             
             {/* Sets Tracking */}

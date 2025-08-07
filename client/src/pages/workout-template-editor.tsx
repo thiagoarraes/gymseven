@@ -275,13 +275,13 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                           <div className="flex items-center space-x-2">
                             <Dumbbell className="w-4 h-4 text-slate-400" />
                             <h4 className="font-bold text-white text-xl tracking-tight">
-                              {exercise.name}
+                              {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
                             </h4>
                           </div>
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span className="text-sm text-blue-300 font-medium">
-                              {exercise.muscleGroup}
+                              {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
                             </span>
                           </div>
                         </div>
