@@ -227,7 +227,7 @@ export default function WorkoutHistory() {
               >
                 {/* Delete Button Column */}
                 <div
-                  className="flex items-center justify-center w-24 bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors"
+                  className="flex items-center justify-center w-24 h-[4.75rem] bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteWorkout(workout.id);
@@ -264,10 +264,10 @@ export default function WorkoutHistory() {
                 className="relative"
               >
                 <Card 
-                  className="glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200"
-                  onClick={() => handleWorkoutClick(workout.id)}
+                  className="glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 h-20"
+                  onClick={() => (swipedWorkout === workout.id || draggedWorkout === workout.id) ? null : handleWorkoutClick(workout.id)}
                 >
-                  <CardContent className="p-4">
+                  <CardContent className="p-4 h-20">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
