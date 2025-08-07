@@ -349,11 +349,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }));
           }
           
-          // Always count sets from template when no actual sets recorded
+          // Always count sets and volume from template when no actual sets recorded
           if (!hasActualSets) {
             totalSets = 0; // Reset to avoid double counting
+            totalVolume = 0; // Reset to avoid double counting
             for (const te of templateExercises) {
               totalSets += te.sets || 0;
+              // Calculate estimated volume: sets × reps × weight
+              if (te.sets && te.reps && te.weight) {
+                totalVolume += (te.sets * te.reps * te.weight);
+              }
             }
           }
         }
