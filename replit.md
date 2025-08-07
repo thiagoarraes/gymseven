@@ -7,6 +7,9 @@ GymSeven is a mobile-first workout logging application built with modern web tec
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
+- ✅ **REPLIT MIGRATION AUTOMATION: Created robust setup scripts for seamless deployment across any Replit account (August 2025)**
+- ✅ **DEPENDENCY RESOLUTION: Automated fixing of rollup and tsx dependency issues (August 2025)**
+- ✅ **SETUP AUTOMATION: Added setup-replit.mjs for automatic environment configuration (August 2025)**
 - ✅ **SWIPE GESTURES IMPLEMENTED: Added swipe-left gesture for exercises page revealing edit and delete buttons (August 2025)**
 - ✅ **SWIPE-TO-DELETE IMPLEMENTED: Added swipe gesture to delete workout logs with red delete button (August 2025)**
 - ✓ **MIGRATION 100% COMPLETED: Successfully migrated from Replit Agent to Replit environment (August 2025)**
@@ -134,6 +137,71 @@ The project uses:
 - **ESBuild** for production builds
 - **Path mapping** for clean imports (@/ for client, @shared for shared code)
 - Development middleware integration for seamless full-stack development
+
+# Replit Deployment Automation
+
+## Automated Setup Scripts
+O projeto inclui scripts robustos para garantir funcionamento em qualquer conta do Replit:
+
+### Scripts de Configuração
+- **setup-replit.mjs**: Configuração completa automática
+  - Instala todas as dependências necessárias
+  - Resolve problemas de rollup e tsx automaticamente
+  - Configura wrappers robustos para tsx
+  - Verifica credenciais Supabase
+  - Cria scripts de inicialização alternativos
+
+- **install-packages.mjs**: Instalação robusta de pacotes
+  - Múltiplas tentativas de instalação
+  - Compatibilidade com diferentes versões do npm
+  - Configuração automática de dependências opcionais
+
+- **fix-rollup.mjs**: Correção específica para rollup
+  - Instala @rollup/rollup-linux-x64-gnu automaticamente
+  - Resolve problemas de dependências nativas
+  - Compatibilidade com arquitetura x64
+
+- **start-robust.mjs**: Inicialização alternativa
+  - Wrapper robusto para tsx
+  - Reinicialização automática em caso de falha
+  - Configuração de ambiente otimizada
+
+### Comandos Disponíveis
+```bash
+# Configuração completa (execute uma vez)
+node setup-replit.mjs
+
+# Inicialização padrão
+npm run dev
+
+# Inicialização robusta (se houver problemas)
+node start-robust.mjs
+
+# Reinstalação de dependências
+node install-packages.mjs
+
+# Correção específica do rollup
+node fix-rollup.mjs
+```
+
+### Configuração de Credenciais
+O projeto requer credenciais Supabase configuradas nos Replit Secrets:
+- `SUPABASE_URL`: URL do projeto Supabase
+- `SUPABASE_SERVICE_ROLE_KEY`: Chave de serviço
+
+### Documentação
+- **README_REPLIT.md**: Guia completo de configuração
+- Instruções passo a passo para nova instalação
+- Solução de problemas comuns
+- Configuração manual alternativa
+
+## Compatibilidade Replit
+- ✅ Node.js 20.19.3+ compatível
+- ✅ Dependências automaticamente resolvidas
+- ✅ Scripts de configuração automática
+- ✅ Documentação completa incluída
+- ✅ Suporte a múltiplas contas Replit
+- ✅ Configuração de segredos simplificada
 
 # External Dependencies
 
