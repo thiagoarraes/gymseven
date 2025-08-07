@@ -304,7 +304,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                 size="sm"
                 variant="ghost"
                 onClick={handleTemplateNameEdit}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white"
+                className="opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-all duration-300 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
               >
                 <Edit3 className="w-4 h-4" />
               </Button>
