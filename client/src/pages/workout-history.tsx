@@ -130,7 +130,7 @@ export default function WorkoutHistory() {
 
   const handleSwipeEnd = (info: PanInfo, workoutId: string) => {
     const { offset, velocity } = info;
-    const swipeThreshold = -40;
+    const swipeThreshold = -30;
     const velocityThreshold = -500;
 
     if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
@@ -212,7 +212,7 @@ export default function WorkoutHistory() {
             <div key={workout.id} className="relative overflow-hidden">
               {/* Background Delete Button */}
               <div 
-                className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-20 rounded-xl glass-card bg-red-500/20 border-red-500/30 transition-all duration-300 ${
+                className={`absolute right-0 top-0 bottom-0 flex items-center justify-center w-16 rounded-xl glass-card bg-red-500/20 border-red-500/30 transition-all duration-300 ${
                   swipedWorkout === workout.id ? 'opacity-100' : 'opacity-0'
                 }`}
                 style={{ zIndex: 1 }}
@@ -227,7 +227,7 @@ export default function WorkoutHistory() {
                   disabled={deleteWorkoutMutation.isPending}
                   className="flex flex-col items-center justify-center h-full w-full text-red-400 hover:bg-red-500/20 border-0"
                 >
-                  <Trash2 className="w-5 h-5 mb-1" />
+                  <Trash2 className="w-4 h-4 mb-1" />
                   <span className="text-xs font-medium">Apagar</span>
                 </Button>
               </div>
@@ -235,11 +235,11 @@ export default function WorkoutHistory() {
               {/* Swipeable Card */}
               <motion.div
                 drag="x"
-                dragConstraints={{ left: -100, right: 0 }}
+                dragConstraints={{ left: -60, right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
                 animate={{ 
-                  x: swipedWorkout === workout.id ? -80 : 0 
+                  x: swipedWorkout === workout.id ? -60 : 0 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 style={{ zIndex: 2 }}
