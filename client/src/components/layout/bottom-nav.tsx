@@ -45,9 +45,6 @@ export function BottomNavigation() {
                 }`}>
                   {item.label}
                 </span>
-                {isActive && (
-                  <div className="absolute -top-px left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full"></div>
-                )}
               </button>
             );
           })}
