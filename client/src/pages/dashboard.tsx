@@ -14,8 +14,8 @@ export default function Dashboard() {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
-    queryKey: ["/api/workout-logs", "recent"],
-    queryFn: workoutLogApi.getRecent,
+    queryKey: ["/api/workout-logs"],
+    queryFn: workoutLogApi.getAll,
   });
 
   const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
