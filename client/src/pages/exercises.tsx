@@ -404,11 +404,18 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               {/* Swipeable Card */}
               <motion.div
                 drag={!selectionMode ? "x" : false}
-                dragConstraints={{ left: -160, right: 0 }}
-                dragElastic={0.1}
+                dragConstraints={{ left: -160, right: 0, top: 0, bottom: 0 }}
+                dragElastic={{ left: 0.1, right: 0.1, top: 0, bottom: 0 }}
                 dragDirectionLock={true}
+                dragPropagation={false}
                 onDragStart={() => !selectionMode && handleDragStart(exercise.id)}
                 onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
+                onDrag={(_, info) => {
+                  // Force y position to stay at 0 during drag
+                  if (info.point.y !== 0) {
+                    info.point.y = 0;
+                  }
+                }}
                 animate={{ 
                   x: swipedExercise === exercise.id ? -160 : 0,
                   y: 0
