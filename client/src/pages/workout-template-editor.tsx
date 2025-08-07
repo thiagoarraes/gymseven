@@ -356,7 +356,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
         ) : (
           <>
             {templateExercises.map((exercise: any, index: number) => (
-              <Card key={exercise.id} className="glass-card rounded-2xl hover-lift border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-lg">
+              <Card key={exercise.id} className="glass-card rounded-2xl border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-lg">
                 <CardContent className="p-6">
                   <div className="space-y-6">
                     {/* Exercise Header with Visual Hierarchy */}

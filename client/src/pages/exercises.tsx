@@ -425,7 +425,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                 className="relative"
               >
                 <Card 
-                  className={`glass-card rounded-xl hover-lift cursor-pointer transition-all duration-200 h-20 ${
+                  className={`glass-card rounded-xl cursor-pointer transition-all duration-200 h-20 ${
                     selectionMode && selectedExercises.includes(exercise.id) 
                       ? "ring-2 ring-blue-500 bg-blue-500/10" 
                       : ""

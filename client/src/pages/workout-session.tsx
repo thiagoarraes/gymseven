@@ -219,7 +219,7 @@ export default function WorkoutSession() {
           <div className="flex space-x-3">
             <Button
               variant="outline"
-              className="flex-1 glass-card border-slate-700 py-2 rounded-lg font-medium text-slate-300 hover-lift"
+              className="flex-1 glass-card border-slate-700 py-2 rounded-lg font-medium text-slate-300"
               onClick={() => setIsPaused(!isPaused)}
             >
               {isPaused ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
@@ -227,7 +227,7 @@ export default function WorkoutSession() {
             </Button>
             <Button
               variant="outline"
-              className="flex-1 glass-card border-slate-700 py-2 rounded-lg font-medium text-slate-300 hover-lift"
+              className="flex-1 glass-card border-slate-700 py-2 rounded-lg font-medium text-slate-300"
               onClick={handleFinishWorkout}
             >
               <Square className="w-4 h-4 mr-2" />
@@ -369,7 +369,7 @@ export default function WorkoutSession() {
       <div className="flex space-x-3">
         <Button
           variant="outline"
-          className="flex-1 glass-card border-slate-700 py-4 rounded-xl font-semibold text-slate-300 hover-lift"
+          className="flex-1 glass-card border-slate-700 py-4 rounded-xl font-semibold text-slate-300"
           onClick={handlePrevExercise}
           disabled={currentExerciseIndex === 0}
         >

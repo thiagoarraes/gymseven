@@ -89,7 +89,7 @@ export default function Progress() {
                 className={`whitespace-nowrap ${
                   selectedExercise === exercise
                     ? "gradient-accent text-white"
-                    : "glass-card border-slate-700 text-slate-300 hover-lift"
+                    : "glass-card border-slate-700 text-slate-300"
                 }`}
                 onClick={() => setSelectedExercise(exercise)}
               >
@@ -192,7 +192,7 @@ export default function Progress() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="glass-card rounded-xl hover-lift">
+        <Card className="glass-card rounded-xl">
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-emerald-400 mb-1">{stats.personalRecord}</div>
@@ -202,7 +202,7 @@ export default function Progress() {
           </CardContent>
         </Card>
         
-        <Card className="glass-card rounded-xl hover-lift">
+        <Card className="glass-card rounded-xl">
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-400 mb-1">{stats.totalWorkouts}</div>
@@ -212,7 +212,7 @@ export default function Progress() {
           </CardContent>
         </Card>
         
-        <Card className="glass-card rounded-xl hover-lift">
+        <Card className="glass-card rounded-xl">
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-400 mb-1">{stats.monthlyAverage}</div>
@@ -222,7 +222,7 @@ export default function Progress() {
           </CardContent>
         </Card>
         
-        <Card className="glass-card rounded-xl hover-lift">
+        <Card className="glass-card rounded-xl">
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-400 mb-1">{stats.totalVolume}</div>
