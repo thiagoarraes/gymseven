@@ -680,29 +680,35 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-// Database selection priority: Supabase > PostgreSQL > In-memory
+// **PERMANENT SUPABASE CONFIGURATION** - Always prioritize Supabase as primary database
 async function initializeStorage(): Promise<IStorage> {
   try {
-    // First priority: Supabase if credentials are available
+    // PRIORITY 1: Supabase - Production database (ALWAYS PREFERRED)
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK integration');
+      console.log('🚀 Using Supabase SDK integration (PRODUCTION DATABASE)');
+      console.log('✅ Supabase configured as permanent primary database');
       // Dynamic import to avoid loading Supabase when not needed
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
     } 
-    // Second priority: PostgreSQL (Replit/Neon)
-    else if (process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE)) {
-      console.log('🗄️ Using PostgreSQL database storage (Replit environment)');
-      return new DatabaseStorage();
-    } 
-    // Fallback: In-memory storage
-    else {
-      console.log('⚠️ No database configured, using in-memory storage (development only)');
-      return new MemStorage();
+    
+    // ERROR: Supabase credentials missing
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('🔥 CRITICAL: Supabase credentials not found!');
+      console.error('🔧 Required: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+      console.error('⚠️ This application is configured to ALWAYS use Supabase');
+      throw new Error('Supabase credentials required - this app is configured for permanent Supabase integration');
     }
+    
+    // Fallback only for development/testing (NOT RECOMMENDED)
+    console.log('⚠️ DEVELOPMENT FALLBACK: Using in-memory storage');
+    console.log('🔧 For production, configure Supabase credentials');
+    return new MemStorage();
+    
   } catch (error) {
-    console.error('❌ Storage initialization failed, falling back to in-memory storage');
+    console.error('❌ Storage initialization failed');
     console.error('Error details:', error);
+    console.log('⚠️ Using emergency fallback storage (data will not persist)');
     return new MemStorage();
   }
 }

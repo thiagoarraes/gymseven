@@ -8,7 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (August 2025)
 - ✓ **MIGRATION COMPLETED: Successfully migrated from Replit Agent to Replit environment (August 2025)**
-- ✓ **SUPABASE INTEGRATION PERMANENTLY CONFIGURED: Full production-ready Supabase integration active**
+- ✓ **SUPABASE INTEGRATION PERMANENTLY CONFIGURED: Application ALWAYS uses Supabase as primary database**
+- ✓ **CONFIGURED SUPABASE AS PERMANENT PRIMARY DATABASE: No fallback to other providers**
 - ✓ Configured PostgreSQL database integration with automatic provider fallback
 - ✓ Set up proper database schema migrations using Drizzle ORM
 - ✓ Fixed environment compatibility issues for seamless Replit deployment
@@ -89,9 +90,10 @@ The API structure includes:
 ## Data Management
 
 **Database Layer:**
-- **Drizzle ORM** for database operations and migrations
-- **PostgreSQL** as the primary database (compatible with Supabase)
-- **Supabase** for production-ready database hosting and real-time features
+- **Supabase** as the PERMANENT primary database (PostgreSQL-based)
+- **@supabase/supabase-js** SDK for all database operations
+- **Production-ready** hosting with real-time features and authentication
+- **Always prioritized** - application configured to require Supabase
 - Shared schema definitions between client and server in TypeScript
 
 **Data Models:**
