@@ -360,7 +360,7 @@ export default function Workouts() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs text-blue-400 hover:text-blue-300 p-1"
+                      className="text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg px-2 py-1 transition-all duration-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/workout-template/${template.id}`);
