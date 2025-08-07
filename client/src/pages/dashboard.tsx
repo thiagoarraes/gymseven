@@ -193,7 +193,7 @@ export default function Dashboard() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-blue-400 hover:text-blue-300"
+              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all duration-200 rounded-lg px-3 py-1.5 border border-transparent hover:border-blue-500/30"
               onClick={() => navigate("/workout-history")}
             >
               Ver todos
