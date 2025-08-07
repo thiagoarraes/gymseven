@@ -8,6 +8,110 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { workoutLogApi, exerciseApi } from "@/lib/api";
 
+// Daily Volume Chart Component
+function DailyVolumeChart() {
+  const { data: dailyData, isLoading } = useQuery({
+    queryKey: ['/api/workout-logs-daily-volume'],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="loading-skeleton h-8 rounded"></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!dailyData || !Array.isArray(dailyData) || dailyData.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
+        <p className="text-slate-400">Nenhum dados de volume ainda</p>
+        <p className="text-sm text-slate-500 mt-1">
+          Complete alguns treinos para ver seu gráfico de volume diário
+        </p>
+      </div>
+    );
+  }
+
+  const maxVolume = Array.isArray(dailyData) ? Math.max(...dailyData.map((d: any) => d.volume)) : 0;
+  const volumeSteps = [0, maxVolume * 0.25, maxVolume * 0.5, maxVolume * 0.75, maxVolume];
+
+  return (
+    <div className="space-y-6">
+      {/* Chart */}
+      <div className="relative">
+        <div className="relative h-80">
+          {/* X-axis labels (Volume) */}
+          <div className="absolute top-0 left-16 right-4 flex justify-between text-xs text-slate-500 mb-4">
+            {volumeSteps.map((step, i) => (
+              <span key={i}>{Math.round(step)}kg</span>
+            ))}
+          </div>
+          
+          {/* Chart area */}
+          <div className="mt-8 ml-16 mr-4 space-y-3">
+            {/* Grid lines */}
+            <div className="absolute left-16 right-4 top-8 bottom-0">
+              {volumeSteps.slice(1).map((_, i) => (
+                <div key={i} className="absolute border-l border-slate-700/50" style={{ left: `${(i + 1) * 25}%` }}></div>
+              ))}
+            </div>
+            
+            {/* Data points */}
+            {Array.isArray(dailyData) && dailyData.map((day: any, index: number) => {
+              const widthPercentage = maxVolume > 0 ? (day.volume / maxVolume) * 100 : 0;
+              const isHighest = day.volume === maxVolume;
+              
+              return (
+                <div key={index} className="relative flex items-center h-8">
+                  {/* Day label (Y-axis) */}
+                  <div className="absolute -left-16 w-14 text-xs text-slate-400 text-right">
+                    {day.dayName}
+                  </div>
+                  
+                  {/* Volume bar */}
+                  <div className="relative w-full">
+                    <div 
+                      className={`h-6 rounded-r-full transition-all duration-500 ${
+                        isHighest 
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-lg shadow-emerald-500/30' 
+                          : 'bg-gradient-to-r from-blue-500 to-blue-400'
+                      }`}
+                      style={{ width: `${widthPercentage}%` }}
+                    >
+                      {/* Volume label */}
+                      {day.volume > 0 && (
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-white font-medium">
+                          {day.volume}kg
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      
+      {/* Legend */}
+      <div className="flex items-center justify-center space-x-6 text-xs">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded bg-blue-500"></div>
+          <span className="text-slate-400">Volume Normal</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded bg-emerald-500"></div>
+          <span className="text-slate-400">Volume Máximo</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Progress() {
   const [selectedExercise, setSelectedExercise] = useState("Supino Reto");
   const [timeRange, setTimeRange] = useState("30");
@@ -122,71 +226,12 @@ export default function Progress() {
         </CardContent>
       </Card>
 
-      {/* Progress Chart */}
+      {/* Daily Volume Chart - Horizontal */}
       <Card className="glass-card rounded-2xl">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-white">
-                {selectedExercise} - Evolução da Carga
-              </h3>
-              <p className="text-sm text-slate-400">Carga máxima por treino</p>
-            </div>
-            <div className="text-right">
-              <div className="text-xl font-bold text-emerald-400">+15kg</div>
-              <div className="text-xs text-slate-500">vs. mês passado</div>
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-white mb-4">Volume Diário de Treino</h3>
           
-          <div className="h-64 bg-slate-800/30 rounded-xl border border-slate-700/50 relative overflow-hidden">
-            {/* Chart implementation placeholder */}
-            <div className="absolute inset-4">
-              {/* Y-axis labels */}
-              <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-slate-500">
-                <span>100kg</span>
-                <span>90kg</span>
-                <span>80kg</span>
-                <span>70kg</span>
-                <span>60kg</span>
-              </div>
-              
-              {/* Chart area */}
-              <div className="ml-8 mr-4 h-full relative">
-                {/* Grid lines */}
-                <div className="absolute inset-0 flex flex-col justify-between">
-                  <div className="border-t border-slate-700/50"></div>
-                  <div className="border-t border-slate-700/50"></div>
-                  <div className="border-t border-slate-700/50"></div>
-                  <div className="border-t border-slate-700/50"></div>
-                  <div className="border-t border-slate-700/50"></div>
-                </div>
-                
-                {/* Data points */}
-                <div className="absolute inset-0 flex items-end justify-between">
-                  <div className="w-2 bg-blue-500 rounded-t" style={{ height: "40%" }}></div>
-                  <div className="w-2 bg-blue-500 rounded-t" style={{ height: "45%" }}></div>
-                  <div className="w-2 bg-blue-500 rounded-t" style={{ height: "50%" }}></div>
-                  <div className="w-2 bg-blue-500 rounded-t" style={{ height: "55%" }}></div>
-                  <div className="w-2 bg-blue-500 rounded-t" style={{ height: "60%" }}></div>
-                  <div className="w-2 bg-blue-500 rounded-t" style={{ height: "65%" }}></div>
-                  <div className="w-2 bg-emerald-500 rounded-t" style={{ height: "70%" }}></div>
-                  <div className="w-2 bg-emerald-500 rounded-t shadow-lg shadow-emerald-500/30" style={{ height: "75%" }}></div>
-                </div>
-              </div>
-              
-              {/* X-axis labels */}
-              <div className="absolute bottom-0 left-8 right-4 flex justify-between text-xs text-slate-500 mt-2">
-                <span>Jan</span>
-                <span>Fev</span>
-                <span>Mar</span>
-                <span>Abr</span>
-                <span>Mai</span>
-                <span>Jun</span>
-                <span>Jul</span>
-                <span>Ago</span>
-              </div>
-            </div>
-          </div>
+          <DailyVolumeChart />
         </CardContent>
       </Card>
 
