@@ -326,7 +326,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
       </div>
 
       {/* Template Exercises */}
-      <div className="space-y-4 pb-32">
+      <div className="space-y-4">
         {exercisesLoading ? (
           [...Array(3)].map((_, i) => (
             <Card key={i} className="glass-card rounded-xl">
@@ -577,30 +577,21 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Save Workout Button */}
+            <div className="flex justify-center pt-6">
+              <Button
+                onClick={handleSaveWorkout}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 flex items-center space-x-2"
+              >
+                <Save className="w-5 h-5" />
+                <span>Salvar Treino</span>
+              </Button>
+            </div>
           </>
         )}
       </div>
 
-      {/* Save Workout Button - Fixed at bottom */}
-      {templateExercises.length > 0 && (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[60]">
-          <div className="flex items-center space-x-4 bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-full px-6 py-3 shadow-2xl">
-            {recentlyUpdated === 'success' && (
-              <div className="flex items-center space-x-2 text-green-400">
-                <CheckCircle2 className="w-5 h-5" />
-                <span className="text-sm font-medium">Salvo automaticamente</span>
-              </div>
-            )}
-            <Button
-              onClick={handleSaveWorkout}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-300 flex items-center space-x-2"
-            >
-              <Save className="w-5 h-5" />
-              <span>Salvar Treino</span>
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
