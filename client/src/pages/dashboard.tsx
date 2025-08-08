@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -298,106 +298,169 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
-      {/* Progress Chart */}
-      <Card className="glass-card rounded-2xl hover-lift">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Progresso de Peso</h3>
-            <div className="relative">
-              <Select 
-                value={selectedExerciseId || firstExerciseId || ""} 
-                onValueChange={setSelectedExerciseId}
-              >
-                <SelectTrigger className="w-48 bg-slate-800 border border-slate-700 text-slate-200 transition-all duration-200">
-                  <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
-                </SelectTrigger>
-                <SelectContent 
-                  className="bg-slate-800 border-slate-700 max-h-60 overflow-auto"
-                  sideOffset={4}
-                >
-                  {exercises.map((exercise) => (
-                    <SelectItem 
-                      key={exercise.id} 
-                      value={exercise.id}
-                      className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
-                    >
-                      {exercise.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="h-48 bg-slate-800/30 rounded-xl border border-slate-700/50 relative overflow-hidden">
-            {chartLoading ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-slate-400">
-                  <div className="loading-skeleton h-6 w-24 mb-2 mx-auto"></div>
-                  <div className="loading-skeleton h-32 w-full"></div>
+      {/* Enhanced Progress Section */}
+      <div className="space-y-4">
+        {/* Progress Header Card */}
+        <Card className="glass-card rounded-2xl hover-lift">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Progresso de Treino</h3>
+                  <p className="text-sm text-slate-400">Acompanhe sua evolução</p>
                 </div>
               </div>
-            ) : chartData.length > 0 ? (
-              <div className="h-full p-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                    <defs>
-                      <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis 
-                      dataKey="date" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 11, fill: '#94A3B8' }}
-                    />
-                    <YAxis 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 11, fill: '#94A3B8' }}
-                      domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: '#1E293B',
-                        border: '1px solid #475569',
-                        borderRadius: '8px',
-                        color: '#F1F5F9'
-                      }}
-                      formatter={(value) => [`${value}kg`, 'Peso Máximo']}
-                      labelFormatter={(label) => `Data: ${label}`}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="weight"
-                      stroke="#3B82F6"
-                      strokeWidth={2}
-                      fill="url(#weightGradient)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              
+              <div className="relative">
+                <Select 
+                  value={selectedExerciseId || firstExerciseId || ""} 
+                  onValueChange={setSelectedExerciseId}
+                >
+                  <SelectTrigger className="w-56 bg-slate-800/50 border border-slate-700 text-slate-200 transition-all duration-200 hover:bg-slate-700/50">
+                    <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
+                  </SelectTrigger>
+                  <SelectContent 
+                    className="bg-slate-800 border-slate-700 max-h-60 overflow-auto backdrop-blur-md"
+                    sideOffset={4}
+                  >
+                    {exercises.map((exercise) => (
+                      <SelectItem 
+                        key={exercise.id} 
+                        value={exercise.id}
+                        className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
+                      >
+                        {exercise.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-slate-400">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-3 text-blue-400" />
-                  <p className="text-sm font-medium">Nenhum treino com peso registrado</p>
-                  <p className="text-xs mt-2">
-                    Para ver o progresso:
-                  </p>
-                  <p className="text-xs text-blue-300 mt-1">
-                    1. Inicie um treino<br/>
-                    2. Registre o peso nas séries<br/>
-                    3. Finalize o treino
-                  </p>
+            </div>
+
+            {/* Progress Stats */}
+            {chartData.length > 0 && (
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-4 border border-blue-500/20">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-blue-400" />
+                    </div>
+                    <span className="text-sm font-medium text-blue-400">Peso Atual</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{chartData[0]?.weight || 0}kg</div>
+                  <div className="text-xs text-slate-400">Último treino</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 border border-emerald-500/20">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <Target className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <span className="text-sm font-medium text-emerald-400">Total Sessões</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{chartData.length}</div>
+                  <div className="text-xs text-slate-400">Treinos registrados</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 border border-purple-500/20">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 text-purple-400" />
+                    </div>
+                    <span className="text-sm font-medium text-purple-400">Progresso</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white">
+                    {chartData.length > 1 
+                      ? `+${Math.max(0, (chartData[0]?.weight || 0) - (chartData[chartData.length - 1]?.weight || 0))}kg`
+                      : "0kg"
+                    }
+                  </div>
+                  <div className="text-xs text-slate-400">Ganho total</div>
                 </div>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+            
+            {/* Progress Chart */}
+            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+              <div className="h-64 relative overflow-hidden">
+                {chartLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-slate-400">
+                      <div className="loading-skeleton h-6 w-24 mb-2 mx-auto"></div>
+                      <div className="loading-skeleton h-40 w-full"></div>
+                    </div>
+                  </div>
+                ) : chartData.length > 0 ? (
+                  <div className="h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
+                        <defs>
+                          <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                            <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: '#94A3B8' }}
+                        />
+                        <YAxis 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: '#94A3B8' }}
+                          domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: '#1E293B',
+                            border: '1px solid #475569',
+                            borderRadius: '12px',
+                            color: '#F1F5F9',
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+                          }}
+                          formatter={(value) => [`${value}kg`, 'Peso Máximo']}
+                          labelFormatter={(label) => `Data: ${label}`}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="weight"
+                          stroke="#3B82F6"
+                          strokeWidth={3}
+                          fill="url(#weightGradient)"
+                          dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2, fill: '#fff' }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-slate-400">
+                      <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/5 flex items-center justify-center border border-blue-500/20">
+                        <TrendingUp className="w-10 h-10 text-blue-400" />
+                      </div>
+                      <p className="text-lg font-medium text-slate-300 mb-2">Nenhum progresso registrado</p>
+                      <p className="text-sm text-slate-500 mb-4">
+                        Complete treinos com peso para visualizar sua evolução
+                      </p>
+                      <div className="inline-flex items-center space-x-2 text-xs text-blue-300 bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20">
+                        <Play className="w-3 h-3" />
+                        <span>Inicie um treino para começar</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Workout Summary Modal */}
       <Dialog open={showSummaryModal} onOpenChange={setShowSummaryModal}>
