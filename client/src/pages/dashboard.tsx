@@ -303,25 +303,30 @@ export default function Dashboard() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Progresso de Peso</h3>
-            <Select 
-              value={selectedExerciseId || firstExerciseId || ""} 
-              onValueChange={setSelectedExerciseId}
-            >
-              <SelectTrigger className="w-48 bg-slate-800 border border-slate-700 text-slate-200">
-                <SelectValue placeholder={selectedExerciseName} />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {exercises.map((exercise) => (
-                  <SelectItem 
-                    key={exercise.id} 
-                    value={exercise.id}
-                    className="text-slate-200 focus:bg-slate-700 focus:text-white"
-                  >
-                    {exercise.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="relative">
+              <Select 
+                value={selectedExerciseId || firstExerciseId || ""} 
+                onValueChange={setSelectedExerciseId}
+              >
+                <SelectTrigger className="w-48 bg-slate-800 border border-slate-700 text-slate-200 transition-all duration-200">
+                  <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
+                </SelectTrigger>
+                <SelectContent 
+                  className="bg-slate-800 border-slate-700 max-h-60 overflow-auto"
+                  sideOffset={4}
+                >
+                  {exercises.map((exercise) => (
+                    <SelectItem 
+                      key={exercise.id} 
+                      value={exercise.id}
+                      className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
+                    >
+                      {exercise.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="h-48 bg-slate-800/30 rounded-xl border border-slate-700/50 relative overflow-hidden">

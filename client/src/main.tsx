@@ -2,26 +2,65 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// Suppress ResizeObserver errors that are common with charts
+// Comprehensive ResizeObserver error suppression
 const originalError = console.error;
+const originalWarn = console.warn;
+
+// Suppress console errors and warnings
 console.error = (...args) => {
-  // Handle string error messages
-  if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
-    return;
-  }
-  // Handle error objects
-  if (args[0] && typeof args[0] === 'object' && args[0].message && args[0].message.includes('ResizeObserver loop completed with undelivered notifications')) {
+  const message = args[0];
+  if (
+    (typeof message === 'string' && message.includes('ResizeObserver')) ||
+    (message && typeof message === 'object' && message.message && message.message.includes('ResizeObserver'))
+  ) {
     return;
   }
   originalError.apply(console, args);
 };
 
-// Also suppress window error events for ResizeObserver
+console.warn = (...args) => {
+  const message = args[0];
+  if (typeof message === 'string' && message.includes('ResizeObserver')) {
+    return;
+  }
+  originalWarn.apply(console, args);
+};
+
+// Suppress window error events for ResizeObserver
 window.addEventListener('error', (event) => {
-  if (event.message && event.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+  if (event.message && event.message.includes('ResizeObserver')) {
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+  }
+}, true);
+
+// Also suppress unhandled promise rejections related to ResizeObserver
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason && event.reason.message && event.reason.message.includes('ResizeObserver')) {
     event.preventDefault();
     return false;
   }
 });
+
+// Override ResizeObserver to prevent the error loop
+if (typeof ResizeObserver !== 'undefined') {
+  const OriginalResizeObserver = ResizeObserver;
+  window.ResizeObserver = class extends OriginalResizeObserver {
+    constructor(callback) {
+      super((entries, observer) => {
+        try {
+          callback(entries, observer);
+        } catch (error) {
+          if (error.message && error.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+            // Silently ignore this specific error
+            return;
+          }
+          throw error;
+        }
+      });
+    }
+  };
+}
 
 createRoot(document.getElementById("root")!).render(<App />);
