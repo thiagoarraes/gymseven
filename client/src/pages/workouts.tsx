@@ -303,7 +303,7 @@ export default function Workouts() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(templatesWithExercises.length > 0 ? templatesWithExercises : workoutTemplates).map((template: any) => (
             <Card key={template.id} className="glass-card rounded-2xl cursor-pointer">
-              <CardContent className="p-6 pb-4">
+              <CardContent className="p-6 pb-4 flex flex-col h-full">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-1">{template.name}</h3>
@@ -351,7 +351,7 @@ export default function Workouts() {
                 </div>
                 
                 {/* Exercise List */}
-                <div className="space-y-3 mb-2">
+                <div className="space-y-3 flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-slate-300">
                       <Dumbbell className="text-blue-400 mr-2 w-4 h-4" />
@@ -399,14 +399,16 @@ export default function Workouts() {
                   </div>
                 </div>
                 
-                <Button
-                  className="w-full gradient-accent py-3 rounded-xl font-semibold text-white hover:scale-105 transition-transform"
-                  onClick={() => handleStartWorkout(template.id)}
-                  disabled={startWorkoutMutation.isPending}
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Começar Treino
-                </Button>
+                <div className="mt-4">
+                  <Button
+                    className="w-full gradient-accent py-3 rounded-xl font-semibold text-white hover:scale-105 transition-transform"
+                    onClick={() => handleStartWorkout(template.id)}
+                    disabled={startWorkoutMutation.isPending}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Começar Treino
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
