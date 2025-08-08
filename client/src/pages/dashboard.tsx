@@ -488,19 +488,33 @@ export default function Dashboard() {
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   <div>
-                    <div className="text-lg font-bold text-blue-400">{workoutSummary.exercises?.length || 0}</div>
+                    <div className="text-lg font-bold text-blue-400">
+                      {workoutSummary.exercises ? 
+                        workoutSummary.exercises.filter((exercise: any, index: number, arr: any[]) => {
+                          const firstIndex = arr.findIndex(e => e.id === exercise.id && e.name === exercise.name);
+                          return firstIndex === index;
+                        }).length 
+                        : 0
+                      }
+                    </div>
                     <div className="text-xs text-slate-400">Exercícios</div>
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-emerald-400">{workoutSummary.totalSets || 0}</div>
+                    <div className="text-lg font-bold text-emerald-400">
+                      {Math.max(0, workoutSummary.totalSets || 0)}
+                    </div>
                     <div className="text-xs text-slate-400">Total de séries</div>
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-purple-400">{workoutSummary.totalVolume || 0}kg</div>
+                    <div className="text-lg font-bold text-purple-400">
+                      {Math.max(0, Math.round((workoutSummary.totalVolume || 0) * 100) / 100)}kg
+                    </div>
                     <div className="text-xs text-slate-400">Volume total</div>
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-orange-400">{workoutSummary.duration || "N/A"}</div>
+                    <div className="text-lg font-bold text-orange-400">
+                      {workoutSummary.duration || "00:00:00"}
+                    </div>
                     <div className="text-xs text-slate-400">Duração</div>
                   </div>
                 </div>
@@ -545,44 +559,66 @@ export default function Dashboard() {
               {workoutSummary.exercises && workoutSummary.exercises.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="font-medium text-slate-200">Exercícios realizados</h4>
-                  {workoutSummary.exercises.map((exercise: any, index: number) => (
-                    <div key={exercise.id || index} className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
-                          <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
-                        </div>
-                        <div>
-                          <h5 className="font-medium text-white">{exercise.name}</h5>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                            <span className="text-sm text-blue-300">{exercise.muscleGroup}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Sets */}
-                      {exercise.sets && exercise.sets.length > 0 && (
-                        <div className="space-y-2">
-                          {exercise.sets.map((set: any) => (
-                            <div key={set.setNumber} className="flex items-center justify-between py-2 px-3 bg-slate-700/30 rounded-lg">
-                              <span className="text-sm text-slate-300">Série {set.setNumber}</span>
-                              <div className="flex items-center space-x-4 text-sm">
-                                {set.reps && (
-                                  <span className="text-yellow-400">{set.reps} reps</span>
-                                )}
-                                {set.weight && (
-                                  <span className="text-purple-400">{set.weight}kg</span>
-                                )}
-                                <div className={`w-2 h-2 rounded-full ${
-                                  set.completed ? "bg-emerald-400" : "bg-slate-500"
-                                }`}></div>
+                  {workoutSummary.exercises
+                    .filter((exercise: any, index: number, arr: any[]) => {
+                      // Remove duplicates based on exercise ID and name
+                      const firstIndex = arr.findIndex(e => e.id === exercise.id && e.name === exercise.name);
+                      return firstIndex === index;
+                    })
+                    .map((exercise: any, index: number) => {
+                      const uniqueKey = `${exercise.id || 'unknown'}-${exercise.name || 'unnamed'}-${index}`;
+                      return (
+                        <div key={uniqueKey} className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
+                              <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
+                            </div>
+                            <div>
+                              <h5 className="font-medium text-white">{exercise.name || 'Exercício sem nome'}</h5>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                                <span className="text-sm text-blue-300">{exercise.muscleGroup || 'Grupo não especificado'}</span>
                               </div>
                             </div>
-                          ))}
+                          </div>
+
+                          {/* Sets */}
+                          {exercise.sets && exercise.sets.length > 0 ? (
+                            <div className="space-y-2">
+                              {exercise.sets
+                                .filter((set: any, setIndex: number, setArr: any[]) => {
+                                  // Remove duplicate sets based on setNumber
+                                  const firstSetIndex = setArr.findIndex(s => s.setNumber === set.setNumber);
+                                  return firstSetIndex === setIndex;
+                                })
+                                .map((set: any, setIndex: number) => {
+                                  const setKey = `${uniqueKey}-set-${set.setNumber || setIndex}-${setIndex}`;
+                                  return (
+                                    <div key={setKey} className="flex items-center justify-between py-2 px-3 bg-slate-700/30 rounded-lg">
+                                      <span className="text-sm text-slate-300">Série {set.setNumber || (setIndex + 1)}</span>
+                                      <div className="flex items-center space-x-4 text-sm">
+                                        {set.reps && set.reps > 0 && (
+                                          <span className="text-yellow-400">{set.reps} reps</span>
+                                        )}
+                                        {set.weight && set.weight > 0 && (
+                                          <span className="text-purple-400">{set.weight}kg</span>
+                                        )}
+                                        <div className={`w-2 h-2 rounded-full ${
+                                          set.completed ? "bg-emerald-400" : "bg-slate-500"
+                                        }`}></div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          ) : (
+                            <div className="text-center py-3 text-slate-400 text-sm">
+                              <span>Nenhuma série registrada</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               )}
 
