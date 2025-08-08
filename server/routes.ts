@@ -275,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (sets && sets.length > 0) {
           // Find the maximum weight used in this workout
-          const maxWeight = Math.max(...sets.map(set => set.weight || 0));
+          const maxWeight = Math.max(...sets.map((set: any) => set.weight || 0));
           
           if (maxWeight > 0) {
             weightHistory.push({
@@ -352,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               hasData = true;
               sessionCount++;
               if (!lastWeight) {
-                lastWeight = Math.max(...sets.map(set => set.weight || 0));
+                lastWeight = Math.max(...sets.map((set: any) => set.weight || 0));
               }
             }
           }
