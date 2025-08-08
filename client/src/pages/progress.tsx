@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { exerciseProgressApi, exerciseApi } from "@/lib/api";
+import { exerciseProgressApi, exerciseApi, workoutLogApi } from "@/lib/api";
 import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine } from "recharts";
 
 // Weight Progression Chart Component with Area Chart
@@ -173,6 +173,7 @@ function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: stri
 export default function Progress() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<{id: string, name: string} | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
     queryKey: ["/api/exercises"],
@@ -184,16 +185,55 @@ export default function Progress() {
     queryFn: exerciseProgressApi.getExercisesWeightSummary,
   });
 
+  const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
+    queryKey: ["/api/workout-logs", "recent"],
+    queryFn: () => workoutLogApi.getRecent(),
+  });
+
   // Filter exercises that have weight data
   const exercisesWithData = exercises.filter((exercise: any) => 
     exercisesSummary.some((summary: any) => summary.exerciseId === exercise.id)
   );
 
-  // Filter based on search term
-  const filteredExercises = exercisesWithData.filter((exercise: any) =>
-    exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Get recently used exercises from recent workouts
+  const recentlyUsedExercises = useMemo(() => {
+    const exerciseIds = new Set();
+    const recentExercises: any[] = [];
+
+    for (const workout of recentWorkouts.slice(0, 10)) {
+      // Get exercises from workout templates or logs
+      exercises.forEach((exercise: any) => {
+        if (!exerciseIds.has(exercise.id) && exercisesWithData.some(e => e.id === exercise.id)) {
+          exerciseIds.add(exercise.id);
+          const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
+          if (summary) {
+            recentExercises.push({
+              ...exercise,
+              lastWeight: summary.lastWeight,
+              sessionCount: summary.sessionCount
+            });
+          }
+        }
+      });
+      if (recentExercises.length >= 5) break;
+    }
+    return recentExercises.slice(0, 5);
+  }, [recentWorkouts, exercises, exercisesWithData, exercisesSummary]);
+
+  // Filter exercises for autocomplete
+  const filteredExercises = useMemo(() => {
+    if (!searchTerm) return exercisesWithData.slice(0, 8); // Show top 8 when no search
+    return exercisesWithData.filter((exercise: any) =>
+      exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 8);
+  }, [searchTerm, exercisesWithData]);
+
+  const handleExerciseSelect = (exercise: any) => {
+    setSelectedExercise({ id: exercise.id, name: exercise.name });
+    setSearchTerm("");
+    setShowSuggestions(false);
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -208,26 +248,85 @@ export default function Progress() {
         </p>
       </div>
 
-      {/* Search bar */}
+      {/* Search bar with autocomplete */}
       <div className="relative max-w-md mx-auto">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
         <Input
           type="text"
           placeholder="Buscar exercício..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder-slate-400"
         />
+        
+        {/* Autocomplete dropdown */}
+        {showSuggestions && searchTerm && filteredExercises.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+            {filteredExercises.map((exercise: any) => {
+              const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
+              return (
+                <button
+                  key={exercise.id}
+                  onClick={() => handleExerciseSelect(exercise)}
+                  className="w-full px-4 py-3 text-left hover:bg-slate-700 border-b border-slate-700 last:border-b-0 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-white font-medium">{exercise.name}</div>
+                      <div className="text-xs text-slate-400">{exercise.muscleGroup}</div>
+                    </div>
+                    {summary && (
+                      <div className="text-xs text-slate-300">
+                        {summary.lastWeight}kg
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Exercise buttons */}
-      {filteredExercises.length > 0 && (
+      {/* Quick access buttons for recent exercises */}
+      {recentlyUsedExercises.length > 0 && !selectedExercise && (
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-slate-400" />
+            <h3 className="text-sm font-semibold text-slate-300">Exercícios Recentes</h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentlyUsedExercises.map((exercise: any) => (
+              <Button
+                key={exercise.id}
+                variant="outline"
+                size="sm"
+                onClick={() => handleExerciseSelect(exercise)}
+                className="bg-slate-800/50 hover:bg-slate-700 border-slate-600 text-white"
+              >
+                <div className="flex items-center gap-2">
+                  <span>{exercise.name}</span>
+                  <span className="text-xs text-slate-400">({exercise.lastWeight}kg)</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* All exercises grid - shown when searching or when no recent exercises */}
+      {(searchTerm || recentlyUsedExercises.length === 0) && exercisesWithData.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-slate-300">
-            Exercícios com Dados de Peso
+            {searchTerm ? 'Resultados da Busca' : 'Todos os Exercícios com Dados'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredExercises.map((exercise: any) => {
+            {(searchTerm ? filteredExercises : exercisesWithData).map((exercise: any) => {
               const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
               return (
                 <Button
@@ -238,7 +337,7 @@ export default function Progress() {
                       ? 'bg-blue-600 hover:bg-blue-700 border-blue-500' 
                       : 'bg-slate-800/50 hover:bg-slate-700 border-slate-600'
                   }`}
-                  onClick={() => setSelectedExercise({ id: exercise.id, name: exercise.name })}
+                  onClick={() => handleExerciseSelect(exercise)}
                 >
                   <div className="w-full">
                     <div className="flex items-center gap-2 mb-1">
@@ -301,9 +400,14 @@ export default function Progress() {
               Escolha um exercício acima para ver o progresso de cargas das últimas 10 sessões
             </p>
             {exercisesWithData.length === 0 && (
-              <p className="text-sm text-slate-500">
-                Complete alguns treinos com pesos para ver dados de progresso
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm text-slate-500">
+                  Complete alguns treinos com pesos para ver dados de progresso
+                </p>
+                <p className="text-xs text-slate-600">
+                  💡 Use a busca acima ou os botões de exercícios recentes para acesso rápido
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>
