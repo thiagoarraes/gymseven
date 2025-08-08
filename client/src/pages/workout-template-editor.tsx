@@ -603,7 +603,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
       {/* Save Workout Button - Fixed at bottom */}
       {templateExercises.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[60]">
           <div className="flex items-center space-x-4 bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-full px-6 py-3 shadow-2xl">
             {recentlyUpdated === 'success' && (
               <div className="flex items-center space-x-2 text-green-400">
