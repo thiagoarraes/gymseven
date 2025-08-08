@@ -335,7 +335,7 @@ export default function Dashboard() {
             ) : chartData.length > 0 ? (
               <div className="h-full p-2">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
                     <defs>
                       <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
@@ -346,13 +346,13 @@ export default function Dashboard() {
                       dataKey="date" 
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#94A3B8' }}
+                      tick={{ fontSize: 11, fill: '#94A3B8' }}
                     />
                     <YAxis 
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: '#94A3B8' }}
-                      domain={['dataMin - 5', 'dataMax + 5']}
+                      tick={{ fontSize: 11, fill: '#94A3B8' }}
+                      domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -361,8 +361,8 @@ export default function Dashboard() {
                         borderRadius: '8px',
                         color: '#F1F5F9'
                       }}
-                      formatter={(value, name) => [`${value}kg`, 'Peso']}
-                      labelFormatter={(label) => `Sessão: ${label}`}
+                      formatter={(value) => [`${value}kg`, 'Peso Máximo']}
+                      labelFormatter={(label) => `Data: ${label}`}
                     />
                     <Area
                       type="monotone"
@@ -377,9 +377,16 @@ export default function Dashboard() {
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-slate-400">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-2 text-blue-400" />
-                  <p className="text-sm">Sem dados de peso</p>
-                  <p className="text-xs">Complete treinos para ver o progresso</p>
+                  <TrendingUp className="w-12 h-12 mx-auto mb-3 text-blue-400" />
+                  <p className="text-sm font-medium">Nenhum treino com peso registrado</p>
+                  <p className="text-xs mt-2">
+                    Para ver o progresso:
+                  </p>
+                  <p className="text-xs text-blue-300 mt-1">
+                    1. Inicie um treino<br/>
+                    2. Registre o peso nas séries<br/>
+                    3. Finalize o treino
+                  </p>
                 </div>
               </div>
             )}
