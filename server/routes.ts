@@ -6,6 +6,7 @@ import {
   insertWorkoutTemplateSchema,
   insertWorkoutTemplateExerciseSchema,
   insertWorkoutLogSchema,
+  insertWorkoutLogExerciseSchema,
   insertWorkoutLogSetSchema 
 } from "@shared/schema";
 
@@ -305,14 +306,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { logId, exerciseId, order } = req.body;
       
+      // First, get the exercise name from the exercises table
       const supabaseStorage = storage as any;
+      const { data: exercise, error: exerciseError } = await supabaseStorage.supabase
+        .from('exercises')
+        .select('name')
+        .eq('id', exerciseId)
+        .single();
+      
+      if (exerciseError || !exercise) {
+        return res.status(404).json({ message: "Exercício não encontrado" });
+      }
+      
+      const logExerciseData = {
+        logId,
+        exerciseId,
+        exerciseName: exercise.name,
+        order: order || 1
+      };
+      
+      const validatedData = insertWorkoutLogExerciseSchema.parse(logExerciseData);
+      
       const { data, error } = await supabaseStorage.supabase
         .from('workoutLogExercises')
-        .insert({
-          logId,
-          exerciseId,
-          order: order || 1
-        })
+        .insert(validatedData)
         .select()
         .single();
       
@@ -321,6 +338,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error creating workout log exercise:', error);
       res.status(400).json({ message: "Erro ao criar exercício do treino" });
+    }
+  });
+
+  // Create workout log set
+  app.post("/api/workout-log-sets", async (req, res) => {
+    try {
+      const validatedData = insertWorkoutLogSetSchema.parse(req.body);
+      const result = await storage.createWorkoutLogSet(validatedData);
+      res.status(201).json(result);
+    } catch (error: any) {
+      console.error('Error creating workout log set:', error);
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos para criação da série",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro ao criar série do treino" });
+      }
     }
   });
 

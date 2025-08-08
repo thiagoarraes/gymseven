@@ -49,7 +49,9 @@ export const workoutLogExercises = pgTable("workout_log_exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   logId: varchar("log_id").notNull().references(() => workoutLogs.id, { onDelete: "cascade" }),
   exerciseId: varchar("exercise_id").notNull().references(() => exercises.id),
+  exerciseName: text("exercise_name").notNull(),
   order: integer("order").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const workoutLogSets = pgTable("workout_log_sets", {
@@ -91,6 +93,11 @@ export const insertWorkoutLogSchema = createInsertSchema(workoutLogs).omit({
   endTime: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
 });
 
+export const insertWorkoutLogExerciseSchema = createInsertSchema(workoutLogExercises).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertWorkoutLogSetSchema = createInsertSchema(workoutLogSets).omit({
   id: true,
 });
@@ -107,6 +114,9 @@ export type WorkoutTemplateExercise = typeof workoutTemplateExercises.$inferSele
 
 export type InsertWorkoutLog = z.infer<typeof insertWorkoutLogSchema>;
 export type WorkoutLog = typeof workoutLogs.$inferSelect;
+
+export type InsertWorkoutLogExercise = z.infer<typeof insertWorkoutLogExerciseSchema>;
+export type WorkoutLogExercise = typeof workoutLogExercises.$inferSelect;
 
 export type InsertWorkoutLogSet = z.infer<typeof insertWorkoutLogSetSchema>;
 export type WorkoutLogSet = typeof workoutLogSets.$inferSelect;
