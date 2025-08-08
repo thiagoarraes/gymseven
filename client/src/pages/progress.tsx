@@ -11,7 +11,7 @@ import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine } fro
 function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: string; exerciseName: string }) {
   const { data: weightHistory = [], isLoading } = useQuery({
     queryKey: ['/api/exercise-weight-history', exerciseId],
-    queryFn: () => exerciseProgressApi.getWeightHistory(exerciseId, 10),
+    queryFn: () => exerciseProgressApi.getWeightHistory(exerciseId, 5),
   });
 
   if (isLoading) {
@@ -87,7 +87,7 @@ function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: stri
 
       {/* Modern Area Chart */}
       <div className="space-y-4">
-        <h4 className="text-sm font-semibold text-slate-300">Progresso de Carga Máxima - Últimas {weightHistory.length} Sessões</h4>
+        <h4 className="text-sm font-semibold text-slate-300">Progresso de Carga Máxima - Últimos 5 Dias</h4>
         
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -210,14 +210,14 @@ export default function Progress() {
     });
   }, [exercisesWithData, exercisesSummary]);
 
-  // Filter exercises for autocomplete
+  // Filter exercises for autocomplete - show ALL exercises, not just ones with weight data
   const filteredExercises = useMemo(() => {
     if (!searchTerm || searchTerm.length < 1) return [];
-    return exercisesWithData.filter((exercise: any) =>
+    return exercises.filter((exercise: any) =>
       exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
     ).slice(0, 8);
-  }, [searchTerm, exercisesWithData]);
+  }, [searchTerm, exercises]);
 
   const handleExerciseSelect = (exercise: any) => {
     setSelectedExercise({ id: exercise.id, name: exercise.name });
@@ -258,30 +258,36 @@ export default function Progress() {
         />
         
         {/* Autocomplete dropdown */}
-        {showSuggestions && searchTerm.length >= 1 && filteredExercises.length > 0 && (
+        {showSuggestions && searchTerm.length >= 1 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-            {filteredExercises.map((exercise: any) => {
-              const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
-              return (
-                <button
-                  key={exercise.id}
-                  onClick={() => handleExerciseSelect(exercise)}
-                  className="w-full px-4 py-3 text-left hover:bg-slate-700 border-b border-slate-700 last:border-b-0 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-white font-medium">{exercise.name}</div>
-                      <div className="text-xs text-slate-400">{exercise.muscleGroup}</div>
-                    </div>
-                    {summary && (
-                      <div className="text-xs text-slate-300">
-                        {summary.lastWeight}kg
+            {filteredExercises.length === 0 ? (
+              <div className="px-4 py-3 text-slate-400 text-sm">
+                Nenhum exercício encontrado para "{searchTerm}"
+              </div>
+            ) : (
+              filteredExercises.map((exercise: any) => {
+                const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
+                return (
+                  <button
+                    key={exercise.id}
+                    onClick={() => handleExerciseSelect(exercise)}
+                    className="w-full px-4 py-3 text-left hover:bg-slate-700 border-b border-slate-700 last:border-b-0 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-white font-medium">{exercise.name}</div>
+                        <div className="text-xs text-slate-400">{exercise.muscleGroup}</div>
                       </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                      {summary && (
+                        <div className="text-xs text-slate-300">
+                          {summary.lastWeight}kg
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         )}
       </div>
@@ -390,7 +396,7 @@ export default function Progress() {
               Selecione um Exercício
             </h3>
             <p className="text-slate-400 mb-6">
-              Escolha um exercício acima para ver o progresso de cargas das últimas 10 sessões
+              Escolha um exercício acima para ver o progresso de cargas dos últimos 5 dias
             </p>
             {exercisesWithData.length === 0 && (
               <div className="space-y-2">
