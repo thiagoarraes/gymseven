@@ -680,29 +680,27 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-// **PERMANENT SUPABASE CONFIGURATION** - Always prioritize Supabase as primary database
+// Database storage initialization with PostgreSQL as primary
 async function initializeStorage(): Promise<IStorage> {
   try {
-    // PRIORITY 1: Supabase - Production database (ALWAYS PREFERRED)
+    // PRIORITY 1: PostgreSQL database (Replit built-in or external)
+    if (process.env.DATABASE_URL) {
+      console.log('🚀 Using PostgreSQL database');
+      return new DatabaseStorage();
+    }
+    
+    // PRIORITY 2: Supabase - Alternative database option
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK integration (PRODUCTION DATABASE)');
-      console.log('✅ Supabase configured as permanent primary database');
+      console.log('🚀 Using Supabase SDK integration');
+      console.log('✅ Supabase configured as database');
       // Dynamic import to avoid loading Supabase when not needed
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
     } 
     
-    // ERROR: Supabase credentials missing
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('🔥 CRITICAL: Supabase credentials not found!');
-      console.error('🔧 Required: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
-      console.error('⚠️ This application is configured to ALWAYS use Supabase');
-      throw new Error('Supabase credentials required - this app is configured for permanent Supabase integration');
-    }
-    
-    // Fallback only for development/testing (NOT RECOMMENDED)
+    // Fallback for development/testing
     console.log('⚠️ DEVELOPMENT FALLBACK: Using in-memory storage');
-    console.log('🔧 For production, configure Supabase credentials');
+    console.log('🔧 For production, configure DATABASE_URL or Supabase credentials');
     return new MemStorage();
     
   } catch (error) {
