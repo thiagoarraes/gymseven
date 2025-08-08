@@ -28,6 +28,9 @@ export default function WorkoutSession() {
   const [restTimer, setRestTimer] = useState(0);
   const [workoutDuration, setWorkoutDuration] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [currentWeight, setCurrentWeight] = useState("");
+  const [currentReps, setCurrentReps] = useState("");
+  const [logExerciseIds, setLogExerciseIds] = useState<{[key: string]: string}>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,6 +47,32 @@ export default function WorkoutSession() {
     queryFn: () => workoutTemplateApi.getExercises(workoutLog!.templateId!),
     enabled: !!workoutLog?.templateId,
   });
+
+  // Create workout log exercises when template exercises are loaded
+  useEffect(() => {
+    if (!templateExercises.length || !workoutId || Object.keys(logExerciseIds).length > 0) return;
+
+    const createLogExercises = async () => {
+      const newLogExerciseIds: {[key: string]: string} = {};
+      
+      for (const templateExercise of templateExercises) {
+        try {
+          const logExercise = await workoutLogApi.createExercise({
+            logId: workoutId,
+            exerciseId: templateExercise.exerciseId,
+            order: templateExercise.order
+          });
+          newLogExerciseIds[templateExercise.exerciseId] = logExercise.id;
+        } catch (error) {
+          console.error('Error creating log exercise:', error);
+        }
+      }
+      
+      setLogExerciseIds(newLogExerciseIds);
+    };
+
+    createLogExercises();
+  }, [templateExercises, workoutId, logExerciseIds]);
 
   const finishWorkoutMutation = useMutation({
     mutationFn: () => workoutLogApi.update(workoutId!, {
@@ -116,11 +145,32 @@ export default function WorkoutSession() {
     }
   };
 
-  const handleCompleteSet = () => {
+  const handleCompleteSet = async () => {
     const currentExercise = templateExercises[currentExerciseIndex];
+    const logExerciseId = logExerciseIds[currentExercise?.exerciseId];
+    
+    // Save the set data if we have weight/reps
+    if (logExerciseId && (currentWeight || currentReps)) {
+      try {
+        await workoutLogApi.createSet({
+          logExerciseId,
+          setNumber: currentSetIndex + 1,
+          weight: currentWeight ? parseFloat(currentWeight) : null,
+          reps: currentReps ? parseInt(currentReps) : null
+        });
+        console.log(`Set ${currentSetIndex + 1} saved: ${currentWeight}kg x ${currentReps} reps`);
+      } catch (error) {
+        console.error('Error saving set:', error);
+      }
+    }
+
+    // Clear input fields
+    setCurrentWeight("");
+    setCurrentReps("");
+    
     if (currentSetIndex < currentExercise?.sets - 1) {
       setCurrentSetIndex(prev => prev + 1);
-      setRestTimer(currentExercise?.restDurationSeconds || 90); // Use custom rest duration
+      setRestTimer(currentExercise?.restDurationSeconds || 90);
       toast({
         title: "Série concluída!",
         description: "Ótimo trabalho, continue assim.",
@@ -262,6 +312,8 @@ export default function WorkoutSession() {
                     <label className="text-xs text-slate-400 block mb-1">Peso (kg)</label>
                     <Input 
                       type="number" 
+                      value={currentWeight}
+                      onChange={(e) => setCurrentWeight(e.target.value)}
                       placeholder={currentExercise.weight?.toString() || "0"}
                       className="w-full bg-slate-800 border-slate-700 text-white text-center"
                     />
@@ -270,7 +322,9 @@ export default function WorkoutSession() {
                     <label className="text-xs text-slate-400 block mb-1">Reps</label>
                     <Input 
                       type="number" 
-                      placeholder={currentExercise.reps || "12"}
+                      value={currentReps}
+                      onChange={(e) => setCurrentReps(e.target.value)}
+                      placeholder={currentExercise.reps?.toString() || "12"}
                       className="w-full bg-slate-800 border-slate-700 text-white text-center"
                     />
                   </div>

@@ -119,6 +119,18 @@ export const workoutLogApi = {
     const response = await apiRequest("GET", `/api/workout-logs/${id}/summary`);
     return response.json();
   },
+
+  // Workout log exercises API
+  createExercise: async (data: any) => {
+    const response = await apiRequest("POST", "/api/workout-log-exercises", data);
+    return response.json();
+  },
+
+  // Workout log sets API
+  createSet: async (data: any) => {
+    const response = await apiRequest("POST", "/api/workout-log-sets", data);
+    return response.json();
+  },
 };
 
 export const exerciseProgressApi = {

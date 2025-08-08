@@ -300,6 +300,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create workout log exercise
+  app.post("/api/workout-log-exercises", async (req, res) => {
+    try {
+      const { logId, exerciseId, order } = req.body;
+      
+      const supabaseStorage = storage as any;
+      const { data, error } = await supabaseStorage.supabase
+        .from('workoutLogExercises')
+        .insert({
+          logId,
+          exerciseId,
+          order: order || 1
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error creating workout log exercise:', error);
+      res.status(400).json({ message: "Erro ao criar exercício do treino" });
+    }
+  });
+
+  // Create workout log set
+  app.post("/api/workout-log-sets", async (req, res) => {
+    try {
+      const { logExerciseId, setNumber, weight, reps } = req.body;
+      
+      const supabaseStorage = storage as any;
+      const { data, error } = await supabaseStorage.supabase
+        .from('workoutLogSets')
+        .insert({
+          logExerciseId,
+          setNumber: setNumber || 1,
+          weight: weight || null,
+          reps: reps || null
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error creating workout log set:', error);
+      res.status(400).json({ message: "Erro ao criar série do treino" });
+    }
+  });
+
   // Get all exercises with their recent weight progression
   app.get('/api/exercises-weight-summary', async (req, res) => {
     try {
