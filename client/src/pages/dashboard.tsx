@@ -326,9 +326,9 @@ export default function Dashboard() {
                     className="bg-slate-800 border-slate-700 max-h-60 overflow-auto backdrop-blur-md"
                     sideOffset={4}
                   >
-                    {exercises.map((exercise) => (
+                    {exercises.map((exercise, index) => (
                       <SelectItem 
-                        key={exercise.id} 
+                        key={`exercise-select-${exercise.id}-${index}`} 
                         value={exercise.id}
                         className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
                       >

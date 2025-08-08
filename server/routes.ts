@@ -601,9 +601,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (set.reps || set.weight) {
                 totalSets += 1;
               }
-              // Only count volume for completed sets
-              if ((set as any).weight && (set as any).reps && (set as any).completed) {
-                totalVolume += set.weight * set.reps;
+              // Count volume for ALL sets that have weight and reps (not just completed)
+              if ((set as any).weight && (set as any).reps) {
+                const weight = parseFloat(set.weight) || 0;
+                const reps = parseInt(set.reps) || 0;
+                if (weight > 0 && reps > 0) {
+                  totalVolume += weight * reps;
+                }
               }
             }
           }
