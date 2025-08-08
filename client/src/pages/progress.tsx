@@ -188,6 +188,8 @@ export default function Progress() {
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
     queryKey: ["/api/workout-logs", "recent"],
     queryFn: () => workoutLogApi.getRecent(),
+    retry: 1,
+    staleTime: 30000,
   });
 
   // Filter exercises that have weight data
@@ -195,34 +197,22 @@ export default function Progress() {
     exercisesSummary.some((summary: any) => summary.exerciseId === exercise.id)
   );
 
-  // Get recently used exercises from recent workouts
+  // Get recently used exercises from exercises with data (simplified for now)
   const recentlyUsedExercises = useMemo(() => {
-    const exerciseIds = new Set();
-    const recentExercises: any[] = [];
-
-    for (const workout of recentWorkouts.slice(0, 10)) {
-      // Get exercises from workout templates or logs
-      exercises.forEach((exercise: any) => {
-        if (!exerciseIds.has(exercise.id) && exercisesWithData.some(e => e.id === exercise.id)) {
-          exerciseIds.add(exercise.id);
-          const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
-          if (summary) {
-            recentExercises.push({
-              ...exercise,
-              lastWeight: summary.lastWeight,
-              sessionCount: summary.sessionCount
-            });
-          }
-        }
-      });
-      if (recentExercises.length >= 5) break;
-    }
-    return recentExercises.slice(0, 5);
-  }, [recentWorkouts, exercises, exercisesWithData, exercisesSummary]);
+    // For now, show first 5 exercises with weight data as "recent"
+    return exercisesWithData.slice(0, 5).map((exercise: any) => {
+      const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
+      return {
+        ...exercise,
+        lastWeight: summary?.lastWeight || 0,
+        sessionCount: summary?.sessionCount || 0
+      };
+    });
+  }, [exercisesWithData, exercisesSummary]);
 
   // Filter exercises for autocomplete
   const filteredExercises = useMemo(() => {
-    if (!searchTerm) return exercisesWithData.slice(0, 8); // Show top 8 when no search
+    if (!searchTerm || searchTerm.length < 1) return [];
     return exercisesWithData.filter((exercise: any) =>
       exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
@@ -256,16 +246,19 @@ export default function Progress() {
           placeholder="Buscar exercício..."
           value={searchTerm}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setShowSuggestions(true);
+            const value = e.target.value;
+            setSearchTerm(value);
+            setShowSuggestions(value.length >= 1);
           }}
-          onFocus={() => setShowSuggestions(true)}
+          onFocus={() => {
+            if (searchTerm.length >= 1) setShowSuggestions(true);
+          }}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder-slate-400"
         />
         
         {/* Autocomplete dropdown */}
-        {showSuggestions && searchTerm && filteredExercises.length > 0 && (
+        {showSuggestions && searchTerm.length >= 1 && filteredExercises.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
             {filteredExercises.map((exercise: any) => {
               const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);

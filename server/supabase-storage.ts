@@ -475,10 +475,13 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workoutLogs')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('startTime', { ascending: false })
       .limit(limit);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error getting recent workout logs:', error);
+      throw error;
+    }
     return data || [];
   }
 
