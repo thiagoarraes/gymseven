@@ -326,7 +326,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
       </div>
 
       {/* Template Exercises */}
-      <div className="space-y-4">
+      <div className="space-y-4 pb-32">
         {exercisesLoading ? (
           [...Array(3)].map((_, i) => (
             <Card key={i} className="glass-card rounded-xl">
