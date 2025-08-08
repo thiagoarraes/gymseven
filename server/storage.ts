@@ -680,27 +680,28 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-// Database storage initialization with PostgreSQL as primary
+// **PRIORITY SUPABASE CONFIGURATION** - Supabase as primary database
 async function initializeStorage(): Promise<IStorage> {
   try {
-    // PRIORITY 1: PostgreSQL database (Replit built-in or external)
-    if (process.env.DATABASE_URL) {
-      console.log('🚀 Using PostgreSQL database');
-      return new DatabaseStorage();
-    }
-    
-    // PRIORITY 2: Supabase - Alternative database option
+    // PRIORITY 1: Supabase - Primary production database (PREFERRED)
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK integration');
-      console.log('✅ Supabase configured as database');
+      console.log('🚀 Using Supabase SDK integration (PRIMARY DATABASE)');
+      console.log('✅ Supabase configured as primary database');
       // Dynamic import to avoid loading Supabase when not needed
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
-    } 
+    }
     
-    // Fallback for development/testing
+    // PRIORITY 2: PostgreSQL database - Fallback option
+    if (process.env.DATABASE_URL) {
+      console.log('🔄 Using PostgreSQL database (Supabase not available)');
+      console.log('💡 Configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for optimal experience');
+      return new DatabaseStorage();
+    }
+    
+    // Final fallback for development/testing
     console.log('⚠️ DEVELOPMENT FALLBACK: Using in-memory storage');
-    console.log('🔧 For production, configure DATABASE_URL or Supabase credentials');
+    console.log('🔧 For production, configure Supabase credentials (preferred) or DATABASE_URL');
     return new MemStorage();
     
   } catch (error) {

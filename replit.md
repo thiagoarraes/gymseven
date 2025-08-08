@@ -18,7 +18,7 @@ The server is built with Express.js and TypeScript, utilizing ESM modules. It pr
 
 ## Data Management
 
-The **PERMANENT primary database** is **Supabase** (PostgreSQL-based), with all operations handled via the `@supabase/supabase-js` SDK. The application is configured to always prioritize and require Supabase for data persistence. Shared schema definitions are maintained in TypeScript. Data models include users, exercises, workout templates, workout logs, and detailed set tracking. Client-side storage uses LocalStorage for offline data persistence and TanStack Query for optimized data fetching, supporting an offline-first approach with sync capabilities.
+The **PRIMARY database** is **Supabase** (PostgreSQL-based), with all operations handled via the `@supabase/supabase-js` SDK. The application is configured to prioritize Supabase as the primary database with PostgreSQL as fallback. Supabase credentials are securely stored in Replit Secrets for seamless deployment. Shared schema definitions are maintained in TypeScript. Data models include users, exercises, workout templates, workout logs, and detailed set tracking. Client-side storage uses LocalStorage for offline data persistence and TanStack Query for optimized data fetching, supporting an offline-first approach with sync capabilities.
 
 ## State Management
 
