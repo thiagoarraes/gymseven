@@ -432,14 +432,9 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
-                            <div className="text-center relative">
+                            <div className="text-center">
                               <div className="text-2xl font-bold text-white">{exercise.sets}</div>
                               <div className="text-xs text-slate-400">séries</div>
-                              {recentlyUpdated === exercise.id && (
-                                <div className="absolute -top-1 -right-1">
-                                  <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
-                                </div>
-                              )}
                             </div>
                             <Button
                               variant="outline"
@@ -461,18 +456,13 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
                             <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Repetições</label>
                           </div>
-                          <div className="text-center relative">
+                          <div className="text-center">
                             <Input
                               value={exercise.reps}
                               onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20 transition-all"
+                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20"
                               placeholder="8-12"
                             />
-                            {recentlyUpdated === exercise.id && (
-                              <div className="absolute top-1 right-1">
-                                <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -484,7 +474,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             <div className="w-2 h-2 rounded-full bg-purple-400"></div>
                             <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Peso</label>
                           </div>
-                          <div className="text-center relative">
+                          <div className="text-center">
                             <Input
                               type="text"
                               value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
@@ -518,14 +508,9 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                   e.currentTarget.blur();
                                 }
                               }}
-                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20 transition-all"
+                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20"
                               placeholder="kg"
                             />
-                            {recentlyUpdated === exercise.id && (
-                              <div className="absolute top-1 right-1">
-                                <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -554,16 +539,11 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
-                            <div className="text-center relative">
+                            <div className="text-center">
                               <div className="text-xl font-bold text-orange-400">
                                 {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
                               </div>
                               <div className="text-xs text-slate-400">minutos</div>
-                              {recentlyUpdated === exercise.id && (
-                                <div className="absolute -top-1 -right-1">
-                                  <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
-                                </div>
-                              )}
                             </div>
                             <Button
                               variant="outline"
