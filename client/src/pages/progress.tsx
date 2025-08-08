@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { exerciseProgressApi, exerciseApi } from "@/lib/api";
+import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine } from "recharts";
 
-// Weight Progression Chart Component
+// Weight Progression Chart Component with Area Chart
 function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: string; exerciseName: string }) {
   const { data: weightHistory = [], isLoading } = useQuery({
     queryKey: ['/api/exercise-weight-history', exerciseId],
@@ -31,15 +32,24 @@ function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: stri
         <p className="text-sm text-slate-500 mt-1">
           Complete treinos com pesos para ver o progresso
         </p>
+        <p className="text-xs text-slate-500 mt-2">
+          💡 Dica: Registre o peso usado em cada série durante o treino
+        </p>
       </div>
     );
   }
 
-  // Reverse to show oldest to newest (left to right)
-  const reversedHistory = [...weightHistory].reverse();
+  // Prepare data for area chart (oldest to newest)
+  const chartData = [...weightHistory].reverse().map((entry: any, index: number) => ({
+    session: index + 1,
+    weight: entry.maxWeight,
+    date: new Date(entry.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
+    workoutName: entry.workoutName,
+    fullDate: entry.date
+  }));
+
   const maxWeight = Math.max(...weightHistory.map((entry: any) => entry.maxWeight));
   const minWeight = Math.min(...weightHistory.map((entry: any) => entry.maxWeight));
-  const weightRange = maxWeight - minWeight;
 
   // Calculate trend
   const latestWeight = weightHistory[0]?.maxWeight || 0;
@@ -75,95 +85,64 @@ function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: stri
         </div>
       </div>
 
-      {/* Weight Progression Chart */}
+      {/* Modern Area Chart */}
       <div className="space-y-4">
-        <h4 className="text-sm font-semibold text-slate-300">Últimas 10 Sessões</h4>
+        <h4 className="text-sm font-semibold text-slate-300">Progresso de Carga Máxima - Últimas {weightHistory.length} Sessões</h4>
         
-        <div className="relative">
-          {/* Grid lines and weight scale */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 flex flex-col justify-between text-xs text-slate-500">
-            <span>{maxWeight}kg</span>
-            <span>{Math.round((maxWeight + minWeight) / 2)}kg</span>
-            <span>{minWeight}kg</span>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <defs>
+                <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="date" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                dy={10}
+              />
+              <YAxis 
+                domain={[Math.max(0, minWeight - 5), maxWeight + 5]}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tickFormatter={(value) => `${value}kg`}
+              />
+              <ReferenceLine 
+                y={maxWeight} 
+                stroke="#10b981" 
+                strokeDasharray="3 3" 
+                strokeOpacity={0.7}
+                label={{ value: "Recorde", position: "insideTopRight", fontSize: 10, fill: "#10b981" }}
+              />
+              <Area
+                type="monotone"
+                dataKey="weight"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                fill="url(#weightGradient)"
+                dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#1e293b" }}
+                activeDot={{ r: 6, fill: "#10b981", strokeWidth: 2, stroke: "#1e293b" }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        
+        {/* Session details */}
+        <div className="grid grid-cols-2 gap-4 text-xs text-slate-400">
+          <div>
+            <span className="text-slate-300">Total de sessões:</span> {weightHistory.length}
           </div>
-          
-          {/* Chart area */}
-          <div className="ml-20 relative h-40">
-            {/* Background grid */}
-            <div className="absolute inset-0 border-l border-slate-700/50">
-              <div className="h-full border-b border-slate-700/50"></div>
-              <div className="absolute top-0 left-0 right-0 border-b border-slate-700/30"></div>
-              <div className="absolute top-1/2 left-0 right-0 border-b border-slate-700/30"></div>
-            </div>
-            
-            {/* Data points and line */}
-            <div className="absolute inset-0 flex items-end">
-              {reversedHistory.map((entry: any, index: number) => {
-                const heightPercentage = weightRange > 0 
-                  ? ((entry.maxWeight - minWeight) / weightRange) * 100 
-                  : 50;
-                const leftPercentage = (index / Math.max(reversedHistory.length - 1, 1)) * 100;
-                
-                return (
-                  <div key={index} className="absolute flex flex-col items-center">
-                    <div 
-                      className="absolute"
-                      style={{ 
-                        left: `${leftPercentage}%`,
-                        bottom: `${heightPercentage}%`,
-                        transform: 'translateX(-50%)'
-                      }}
-                    >
-                      {/* Data point */}
-                      <div className={`w-3 h-3 rounded-full ${
-                        entry.maxWeight === maxWeight 
-                          ? 'bg-emerald-400 ring-2 ring-emerald-400/50' 
-                          : 'bg-blue-400'
-                      } relative z-10`}>
-                        {/* Tooltip on hover */}
-                        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                          <div className="font-semibold">{entry.maxWeight}kg</div>
-                          <div className="text-slate-300">
-                            {new Date(entry.date).toLocaleDateString('pt-BR', { 
-                              day: '2-digit', 
-                              month: '2-digit' 
-                            })}
-                          </div>
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800"></div>
-                        </div>
-                      </div>
-                      
-                      {/* Connection line to next point */}
-                      {index < reversedHistory.length - 1 && (
-                        <div className="absolute top-1/2 left-full w-full h-0.5 bg-gradient-to-r from-blue-400 to-blue-400/30 transform -translate-y-1/2 z-0"></div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          
-          {/* X-axis labels (dates) */}
-          <div className="ml-20 mt-2 flex justify-between text-xs text-slate-500">
-            {reversedHistory.map((entry: any, index: number) => {
-              // Show only every 2nd or 3rd date to avoid crowding
-              if (reversedHistory.length <= 5 || index % Math.ceil(reversedHistory.length / 5) === 0) {
-                return (
-                  <span key={index}>
-                    {new Date(entry.date).toLocaleDateString('pt-BR', { 
-                      day: '2-digit', 
-                      month: '2-digit' 
-                    })}
-                  </span>
-                );
-              }
-              return null;
-            })}
+          <div>
+            <span className="text-slate-300">Variação:</span> {minWeight}kg - {maxWeight}kg
           </div>
         </div>
 
-        {/* Session Details */}
+        {/* Recent Sessions List */}
         <div className="space-y-2 max-h-48 overflow-y-auto">
           <h5 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detalhes das Sessões</h5>
           {weightHistory.slice(0, 5).map((entry: any, index: number) => (
@@ -205,102 +184,97 @@ export default function Progress() {
     queryFn: exerciseProgressApi.getExercisesWeightSummary,
   });
 
-  const filteredExercises = exercises.filter(exercise =>
-    exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter exercises that have weight data
+  const exercisesWithData = exercises.filter((exercise: any) => 
+    exercisesSummary.some((summary: any) => summary.exerciseId === exercise.id)
   );
 
-  // Get exercises that have weight data for quick selection
-  const exercisesWithData = exercisesSummary.filter((summary: any) => summary.sessionCount > 0);
+  // Filter based on search term
+  const filteredExercises = exercisesWithData.filter((exercise: any) =>
+    exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Progresso de Cargas</h2>
-        <div className="text-sm text-slate-400">
-          Últimas 10 sessões por exercício
-        </div>
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
+          <TrendingUp className="w-8 h-8 text-blue-400" />
+          Progresso
+        </h1>
+        <p className="text-slate-400">
+          Acompanhe a evolução das suas cargas por exercício
+        </p>
       </div>
 
-      {/* Exercise Selection */}
-      <Card className="glass-card rounded-2xl">
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-3 mb-4">
-            <Search className="text-slate-400 w-4 h-4" />
-            <Input
-              placeholder="Buscar exercício para ver progresso de peso..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 bg-transparent border-none text-white placeholder-slate-400 focus-visible:ring-0"
-            />
-          </div>
-          
-          {/* Quick selection for exercises with data */}
-          {!searchTerm && exercisesWithData.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-slate-300">Exercícios com Dados</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {exercisesWithData.map((summary: any) => (
-                  <Button
-                    key={summary.id}
-                    variant="ghost"
-                    className="glass-card border-slate-700 text-left p-4 h-auto hover:bg-slate-800/50 transition-colors"
-                    onClick={() => setSelectedExercise({id: summary.id, name: summary.name})}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="space-y-1">
-                        <div className="font-medium text-white">{summary.name}</div>
-                        <div className="text-xs text-slate-400">{summary.muscleGroup}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-blue-400">{summary.lastWeight}kg</div>
-                        <div className="text-xs text-slate-500">{summary.sessionCount} sessões</div>
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Search bar */}
+      <div className="relative max-w-md mx-auto">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <Input
+          type="text"
+          placeholder="Buscar exercício..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder-slate-400"
+        />
+      </div>
 
-          {/* Search results */}
-          {searchTerm && (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {filteredExercises.slice(0, 8).map((exercise) => (
+      {/* Exercise buttons */}
+      {filteredExercises.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-slate-300">
+            Exercícios com Dados de Peso
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredExercises.map((exercise: any) => {
+              const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
+              return (
                 <Button
                   key={exercise.id}
-                  variant="ghost"
-                  className="w-full justify-start text-slate-300 hover:bg-slate-800/50"
-                  onClick={() => {
-                    setSelectedExercise({id: exercise.id, name: exercise.name});
-                    setSearchTerm("");
-                  }}
+                  variant={selectedExercise?.id === exercise.id ? "default" : "outline"}
+                  className={`p-4 h-auto text-left justify-start space-y-2 ${
+                    selectedExercise?.id === exercise.id 
+                      ? 'bg-blue-600 hover:bg-blue-700 border-blue-500' 
+                      : 'bg-slate-800/50 hover:bg-slate-700 border-slate-600'
+                  }`}
+                  onClick={() => setSelectedExercise({ id: exercise.id, name: exercise.name })}
                 >
-                  <Dumbbell className="w-4 h-4 mr-3 text-slate-400" />
-                  {exercise.name}
-                  <span className="ml-auto text-xs text-slate-500">
-                    {exercise.muscleGroup}
-                  </span>
+                  <div className="w-full">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Dumbbell className="w-4 h-4" />
+                      <span className="font-medium">{exercise.name}</span>
+                    </div>
+                    <div className="text-xs opacity-75">
+                      {exercise.muscleGroup}
+                    </div>
+                    {summary && (
+                      <div className="text-xs opacity-75 mt-1">
+                        Último: {summary.lastWeight}kg
+                      </div>
+                    )}
+                  </div>
                 </Button>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      {/* Selected Exercise Progress */}
+      {/* Progress chart */}
       {selectedExercise ? (
         <Card className="glass-card rounded-2xl">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-white flex items-center space-x-3">
-                <Dumbbell className="w-5 h-5 text-blue-400" />
-                <span>{selectedExercise.name}</span>
+              <CardTitle className="text-xl text-white flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-400" />
+                {selectedExercise.name}
               </CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedExercise(null)}
-                className="text-slate-400 hover:text-white hover:bg-slate-800/50"
+                className="text-slate-400 hover:text-white"
               >
                 ✕
               </Button>
