@@ -616,7 +616,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
               className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-300 flex items-center space-x-2"
             >
               <Save className="w-5 h-5" />
-              <span>Finalizar Treino</span>
+              <span>Salvar Treino</span>
             </Button>
           </div>
         </div>
