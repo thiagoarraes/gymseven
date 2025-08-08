@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { workoutLogApi, exerciseApi } from "@/lib/api";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { workoutLogApi, exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
   const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
     queryKey: ["/api/workout-logs"],
@@ -22,6 +25,44 @@ export default function Dashboard() {
     queryKey: ["/api/exercises"],
     queryFn: exerciseApi.getAll,
   });
+
+  // Auto-select first exercise for progress chart
+  const firstExerciseId = useMemo(() => {
+    if (exercises.length > 0 && !selectedExerciseId) {
+      return exercises[0].id;
+    }
+    return selectedExerciseId;
+  }, [exercises, selectedExerciseId]);
+
+  // Fetch weight history for selected exercise
+  const { data: weightHistory = [], isLoading: chartLoading } = useQuery({
+    queryKey: ['/api/exercise-weight-history', firstExerciseId],
+    queryFn: () => exerciseProgressApi.getWeightHistory(firstExerciseId!, 10),
+    enabled: !!firstExerciseId,
+  });
+
+  // Find selected exercise name
+  const selectedExercise = exercises.find(e => e.id === (selectedExerciseId || firstExerciseId));
+  const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
+
+  // Process chart data
+  const chartData = useMemo(() => {
+    if (!weightHistory || weightHistory.length === 0) return [];
+    
+    // Sort by date and prepare data for area chart
+    return [...weightHistory]
+      .reverse() // Oldest to newest for chronological display
+      .map((entry, index) => ({
+        session: index + 1,
+        weight: entry.maxWeight,
+        date: new Date(entry.date).toLocaleDateString('pt-BR', { 
+          month: 'short', 
+          day: 'numeric' 
+        }),
+        fullDate: entry.date,
+        workoutName: entry.workoutName
+      }));
+  }, [weightHistory]);
 
   // Fetch workout summary when modal opens
   const { data: workoutSummary, isLoading: summaryLoading } = useQuery({
@@ -261,29 +302,87 @@ export default function Dashboard() {
       <Card className="glass-card rounded-2xl hover-lift">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Progresso Semanal</h3>
-            <select className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-sm text-slate-200">
-              <option>Supino</option>
-              <option>Agachamento</option>
-              <option>Deadlift</option>
-            </select>
+            <h3 className="text-lg font-semibold text-white">Progresso de Peso</h3>
+            <Select 
+              value={selectedExerciseId || firstExerciseId || ""} 
+              onValueChange={setSelectedExerciseId}
+            >
+              <SelectTrigger className="w-48 bg-slate-800 border border-slate-700 text-slate-200">
+                <SelectValue placeholder={selectedExerciseName} />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {exercises.map((exercise) => (
+                  <SelectItem 
+                    key={exercise.id} 
+                    value={exercise.id}
+                    className="text-slate-200 focus:bg-slate-700 focus:text-white"
+                  >
+                    {exercise.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="h-48 bg-slate-800/30 rounded-xl border border-slate-700/50 relative overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-slate-400">
-                <TrendingUp className="w-12 h-12 mx-auto mb-2 text-blue-400" />
-                <p className="text-sm">Gráfico de progressão</p>
-                <p className="text-xs">Carga × Tempo</p>
+            {chartLoading ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-slate-400">
+                  <div className="loading-skeleton h-6 w-24 mb-2 mx-auto"></div>
+                  <div className="loading-skeleton h-32 w-full"></div>
+                </div>
               </div>
-            </div>
-            <div className="absolute bottom-4 left-4 right-4 flex justify-between">
-              <div className="w-2 h-12 bg-blue-500/30 rounded-t"></div>
-              <div className="w-2 h-16 bg-blue-500/50 rounded-t"></div>
-              <div className="w-2 h-20 bg-blue-500/70 rounded-t"></div>
-              <div className="w-2 h-24 bg-blue-500 rounded-t"></div>
-              <div className="w-2 h-28 bg-emerald-500 rounded-t"></div>
-            </div>
+            ) : chartData.length > 0 ? (
+              <div className="h-full p-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#94A3B8' }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#94A3B8' }}
+                      domain={['dataMin - 5', 'dataMax + 5']}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#1E293B',
+                        border: '1px solid #475569',
+                        borderRadius: '8px',
+                        color: '#F1F5F9'
+                      }}
+                      formatter={(value, name) => [`${value}kg`, 'Peso']}
+                      labelFormatter={(label) => `Sessão: ${label}`}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="weight"
+                      stroke="#3B82F6"
+                      strokeWidth={2}
+                      fill="url(#weightGradient)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-slate-400">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-2 text-blue-400" />
+                  <p className="text-sm">Sem dados de peso</p>
+                  <p className="text-xs">Complete treinos para ver o progresso</p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
