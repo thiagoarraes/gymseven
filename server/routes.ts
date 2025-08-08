@@ -601,12 +601,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (set.reps || set.weight) {
                 totalSets += 1;
               }
-              // Count volume for ALL sets that have weight and reps (not just completed)
-              if ((set as any).weight && (set as any).reps) {
+              // Count volume as sum of all weights used (not weight × reps)
+              if ((set as any).weight) {
                 const weight = parseFloat(set.weight) || 0;
-                const reps = parseInt(set.reps) || 0;
-                if (weight > 0 && reps > 0) {
-                  totalVolume += weight * reps;
+                if (weight > 0) {
+                  totalVolume += weight;
                 }
               }
             }
@@ -642,9 +641,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalVolume = 0; // Reset to avoid double counting
             for (const te of templateExercises) {
               totalSets += te.sets || 0;
-              // Calculate estimated volume: sets × reps × weight
-              if (te.sets && te.reps && te.weight) {
-                totalVolume += (te.sets * te.reps * te.weight);
+              // Calculate estimated volume: sets × weight (sum of weights)
+              if (te.sets && te.weight) {
+                totalVolume += (te.sets * te.weight);
               }
             }
           }
