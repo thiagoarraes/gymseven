@@ -431,7 +431,13 @@ export class SupabaseStorage implements IStorage {
   async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
     const { data, error } = await supabase
       .from('workoutLogs')
-      .select('*')
+      .select(`
+        *,
+        exercises:workoutLogExercises(
+          *,
+          sets:workoutLogSets(*)
+        )
+      `)
       .eq('id', id)
       .single();
     

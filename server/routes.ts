@@ -279,13 +279,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const maxWeight = Math.max(...sets.map((set: any) => set.weight || 0));
           
           if (maxWeight > 0) {
-            weightHistory.push({
-              date: logExercise.workoutLog.startTime,
+            const dataPoint = {
+              date: new Date(logExercise.workoutLog.startTime).toLocaleDateString('pt-BR'),
+              weight: maxWeight,
               workoutName: logExercise.workoutLog.name,
-              maxWeight,
               totalSets: sets.length,
               allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
-            });
+            };
+            
+            weightHistory.push(dataPoint);
           }
         }
       }
