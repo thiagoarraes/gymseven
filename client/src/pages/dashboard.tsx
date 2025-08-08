@@ -351,7 +351,10 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-blue-400">Peso Máximo</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
-                    {Math.max(...chartData.map(d => d.weight || 0))}kg
+                    {chartData.length > 0 && chartData.some(d => d.weight > 0) 
+                      ? Math.max(...chartData.filter(d => d.weight > 0).map(d => d.weight))
+                      : 0
+                    }kg
                   </div>
                   <div className="text-xs text-slate-400">Maior peso atingido</div>
                 </div>
@@ -375,8 +378,8 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-purple-400">Progresso</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
-                    {chartData.length > 1 
-                      ? `+${Math.max(0, Math.max(...chartData.map(d => d.weight || 0)) - Math.min(...chartData.map(d => d.weight || 0)))}kg`
+                    {chartData.length > 1 && chartData.some(d => d.weight > 0)
+                      ? `+${Math.max(0, Math.max(...chartData.filter(d => d.weight > 0).map(d => d.weight)) - Math.min(...chartData.filter(d => d.weight > 0).map(d => d.weight)))}kg`
                       : "0kg"
                     }
                   </div>
