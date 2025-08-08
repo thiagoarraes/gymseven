@@ -348,10 +348,12 @@ export default function Dashboard() {
                     <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <TrendingUp className="w-4 h-4 text-blue-400" />
                     </div>
-                    <span className="text-sm font-medium text-blue-400">Peso Atual</span>
+                    <span className="text-sm font-medium text-blue-400">Peso Máximo</span>
                   </div>
-                  <div className="text-2xl font-bold text-white">{chartData[0]?.weight || 0}kg</div>
-                  <div className="text-xs text-slate-400">Último treino</div>
+                  <div className="text-2xl font-bold text-white">
+                    {Math.max(...chartData.map(d => d.weight || 0))}kg
+                  </div>
+                  <div className="text-xs text-slate-400">Maior peso atingido</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 border border-emerald-500/20">
@@ -374,11 +376,11 @@ export default function Dashboard() {
                   </div>
                   <div className="text-2xl font-bold text-white">
                     {chartData.length > 1 
-                      ? `+${Math.max(0, (chartData[0]?.weight || 0) - (chartData[chartData.length - 1]?.weight || 0))}kg`
+                      ? `+${Math.max(0, Math.max(...chartData.map(d => d.weight || 0)) - Math.min(...chartData.map(d => d.weight || 0)))}kg`
                       : "0kg"
                     }
                   </div>
-                  <div className="text-xs text-slate-400">Ganho total</div>
+                  <div className="text-xs text-slate-400">Evolução total</div>
                 </div>
               </div>
             )}
