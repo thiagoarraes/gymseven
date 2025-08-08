@@ -74,6 +74,15 @@ export default function WorkoutSession() {
     createLogExercises();
   }, [templateExercises, workoutId, logExerciseIds]);
 
+  // Initialize weight and reps when first exercise loads
+  useEffect(() => {
+    if (templateExercises.length > 0 && currentExerciseIndex === 0 && !currentWeight && !currentReps) {
+      const firstExercise = templateExercises[0];
+      setCurrentWeight(firstExercise?.weight?.toString() || "");
+      setCurrentReps(firstExercise?.reps?.toString() || "");
+    }
+  }, [templateExercises, currentExerciseIndex, currentWeight, currentReps]);
+
   const finishWorkoutMutation = useMutation({
     mutationFn: () => workoutLogApi.update(workoutId!, {
       endTime: new Date(),
@@ -135,6 +144,10 @@ export default function WorkoutSession() {
       setCurrentSetIndex(0);
       const nextExercise = templateExercises[currentExerciseIndex + 1];
       setRestTimer(nextExercise?.restDurationSeconds || 90);
+      
+      // Initialize weight and reps with template defaults for the new exercise
+      setCurrentWeight(nextExercise?.weight?.toString() || "");
+      setCurrentReps(nextExercise?.reps?.toString() || "");
     }
   };
 
@@ -142,6 +155,11 @@ export default function WorkoutSession() {
     if (currentExerciseIndex > 0) {
       setCurrentExerciseIndex(prev => prev - 1);
       setCurrentSetIndex(0);
+      
+      // Initialize weight and reps with template defaults for the previous exercise
+      const prevExercise = templateExercises[currentExerciseIndex - 1];
+      setCurrentWeight(prevExercise?.weight?.toString() || "");
+      setCurrentReps(prevExercise?.reps?.toString() || "");
     }
   };
 
@@ -164,13 +182,12 @@ export default function WorkoutSession() {
       }
     }
 
-    // Clear input fields
-    setCurrentWeight("");
-    setCurrentReps("");
-    
     if (currentSetIndex < currentExercise?.sets - 1) {
+      // Move to next set and reset to template defaults
       setCurrentSetIndex(prev => prev + 1);
       setRestTimer(currentExercise?.restDurationSeconds || 90);
+      setCurrentWeight(currentExercise?.weight?.toString() || "");
+      setCurrentReps(currentExercise?.reps?.toString() || "");
       toast({
         title: "Série concluída!",
         description: "Ótimo trabalho, continue assim.",
