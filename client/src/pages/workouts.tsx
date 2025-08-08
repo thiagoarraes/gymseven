@@ -303,7 +303,7 @@ export default function Workouts() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(templatesWithExercises.length > 0 ? templatesWithExercises : workoutTemplates).map((template: any) => (
             <Card key={template.id} className="glass-card rounded-2xl cursor-pointer">
-              <CardContent className="p-6">
+              <CardContent className="p-6 pb-4">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-1">{template.name}</h3>
