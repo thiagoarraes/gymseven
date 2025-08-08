@@ -1,111 +1,190 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, TrendingUp, Trophy, Target, Zap, Calendar } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress as ProgressBar } from "@/components/ui/progress";
-import { workoutLogApi, exerciseApi } from "@/lib/api";
+import { exerciseProgressApi, exerciseApi } from "@/lib/api";
 
-// Daily Volume Chart Component
-function DailyVolumeChart() {
-  const { data: dailyData, isLoading } = useQuery({
-    queryKey: ['/api/workout-logs-daily-volume'],
+// Weight Progression Chart Component
+function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: string; exerciseName: string }) {
+  const { data: weightHistory = [], isLoading } = useQuery({
+    queryKey: ['/api/exercise-weight-history', exerciseId],
+    queryFn: () => exerciseProgressApi.getWeightHistory(exerciseId, 10),
   });
 
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="loading-skeleton h-8 rounded"></div>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="loading-skeleton h-16 rounded"></div>
         ))}
       </div>
     );
   }
 
-  if (!dailyData || !Array.isArray(dailyData) || dailyData.length === 0) {
+  if (!weightHistory || weightHistory.length === 0) {
     return (
       <div className="text-center py-8">
         <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-        <p className="text-slate-400">Nenhum dados de volume ainda</p>
+        <p className="text-slate-400">Nenhum dado de peso para {exerciseName}</p>
         <p className="text-sm text-slate-500 mt-1">
-          Complete alguns treinos para ver seu gráfico de volume diário
+          Complete treinos com pesos para ver o progresso
         </p>
       </div>
     );
   }
 
-  const maxVolume = Array.isArray(dailyData) ? Math.max(...dailyData.map((d: any) => d.volume)) : 0;
-  const volumeSteps = [0, maxVolume * 0.25, maxVolume * 0.5, maxVolume * 0.75, maxVolume];
+  // Reverse to show oldest to newest (left to right)
+  const reversedHistory = [...weightHistory].reverse();
+  const maxWeight = Math.max(...weightHistory.map((entry: any) => entry.maxWeight));
+  const minWeight = Math.min(...weightHistory.map((entry: any) => entry.maxWeight));
+  const weightRange = maxWeight - minWeight;
+
+  // Calculate trend
+  const latestWeight = weightHistory[0]?.maxWeight || 0;
+  const previousWeight = weightHistory[1]?.maxWeight || latestWeight;
+  const weightChange = latestWeight - previousWeight;
 
   return (
     <div className="space-y-6">
-      {/* Chart */}
-      <div className="relative">
-        <div className="relative h-80">
-          {/* X-axis labels (Volume) */}
-          <div className="absolute top-0 left-16 right-4 flex justify-between text-xs text-slate-500 mb-4">
-            {volumeSteps.map((step, i) => (
-              <span key={i}>{Math.round(step)}kg</span>
-            ))}
-          </div>
-          
-          {/* Chart area */}
-          <div className="mt-8 ml-16 mr-4 space-y-3">
-            {/* Grid lines */}
-            <div className="absolute left-16 right-4 top-8 bottom-0">
-              {volumeSteps.slice(1).map((_, i) => (
-                <div key={i} className="absolute border-l border-slate-700/50" style={{ left: `${(i + 1) * 25}%` }}></div>
-              ))}
-            </div>
-            
-            {/* Data points */}
-            {Array.isArray(dailyData) && dailyData.map((day: any, index: number) => {
-              const widthPercentage = maxVolume > 0 ? (day.volume / maxVolume) * 100 : 0;
-              const isHighest = day.volume === maxVolume;
-              
-              return (
-                <div key={index} className="relative flex items-center h-8">
-                  {/* Day label (Y-axis) */}
-                  <div className="absolute -left-16 w-14 text-xs text-slate-400 text-right">
-                    {day.dayName}
-                  </div>
-                  
-                  {/* Volume bar */}
-                  <div className="relative w-full">
-                    <div 
-                      className={`h-6 rounded-r-full transition-all duration-500 ${
-                        isHighest 
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-lg shadow-emerald-500/30' 
-                          : 'bg-gradient-to-r from-blue-500 to-blue-400'
-                      }`}
-                      style={{ width: `${widthPercentage}%` }}
-                    >
-                      {/* Volume label */}
-                      {day.volume > 0 && (
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-white font-medium">
-                          {day.volume}kg
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Stats Header */}
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div>
+          <div className="text-2xl font-bold text-blue-400">{latestWeight}kg</div>
+          <div className="text-xs text-slate-400">Último Peso</div>
+        </div>
+        <div>
+          <div className="text-2xl font-bold text-emerald-400">{maxWeight}kg</div>
+          <div className="text-xs text-slate-400">Recorde</div>
+        </div>
+        <div className="flex items-center justify-center space-x-1">
+          {weightChange > 0 ? (
+            <ArrowUp className="w-4 h-4 text-emerald-400" />
+          ) : weightChange < 0 ? (
+            <ArrowDown className="w-4 h-4 text-red-400" />
+          ) : (
+            <Minus className="w-4 h-4 text-slate-400" />
+          )}
+          <div className={`text-lg font-bold ${
+            weightChange > 0 ? 'text-emerald-400' : 
+            weightChange < 0 ? 'text-red-400' : 'text-slate-400'
+          }`}>
+            {weightChange > 0 ? '+' : ''}{weightChange}kg
           </div>
         </div>
       </div>
-      
-      {/* Legend */}
-      <div className="flex items-center justify-center space-x-6 text-xs">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded bg-blue-500"></div>
-          <span className="text-slate-400">Volume Normal</span>
+
+      {/* Weight Progression Chart */}
+      <div className="space-y-4">
+        <h4 className="text-sm font-semibold text-slate-300">Últimas 10 Sessões</h4>
+        
+        <div className="relative">
+          {/* Grid lines and weight scale */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 flex flex-col justify-between text-xs text-slate-500">
+            <span>{maxWeight}kg</span>
+            <span>{Math.round((maxWeight + minWeight) / 2)}kg</span>
+            <span>{minWeight}kg</span>
+          </div>
+          
+          {/* Chart area */}
+          <div className="ml-20 relative h-40">
+            {/* Background grid */}
+            <div className="absolute inset-0 border-l border-slate-700/50">
+              <div className="h-full border-b border-slate-700/50"></div>
+              <div className="absolute top-0 left-0 right-0 border-b border-slate-700/30"></div>
+              <div className="absolute top-1/2 left-0 right-0 border-b border-slate-700/30"></div>
+            </div>
+            
+            {/* Data points and line */}
+            <div className="absolute inset-0 flex items-end">
+              {reversedHistory.map((entry: any, index: number) => {
+                const heightPercentage = weightRange > 0 
+                  ? ((entry.maxWeight - minWeight) / weightRange) * 100 
+                  : 50;
+                const leftPercentage = (index / Math.max(reversedHistory.length - 1, 1)) * 100;
+                
+                return (
+                  <div key={index} className="absolute flex flex-col items-center">
+                    <div 
+                      className="absolute"
+                      style={{ 
+                        left: `${leftPercentage}%`,
+                        bottom: `${heightPercentage}%`,
+                        transform: 'translateX(-50%)'
+                      }}
+                    >
+                      {/* Data point */}
+                      <div className={`w-3 h-3 rounded-full ${
+                        entry.maxWeight === maxWeight 
+                          ? 'bg-emerald-400 ring-2 ring-emerald-400/50' 
+                          : 'bg-blue-400'
+                      } relative z-10`}>
+                        {/* Tooltip on hover */}
+                        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                          <div className="font-semibold">{entry.maxWeight}kg</div>
+                          <div className="text-slate-300">
+                            {new Date(entry.date).toLocaleDateString('pt-BR', { 
+                              day: '2-digit', 
+                              month: '2-digit' 
+                            })}
+                          </div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800"></div>
+                        </div>
+                      </div>
+                      
+                      {/* Connection line to next point */}
+                      {index < reversedHistory.length - 1 && (
+                        <div className="absolute top-1/2 left-full w-full h-0.5 bg-gradient-to-r from-blue-400 to-blue-400/30 transform -translate-y-1/2 z-0"></div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* X-axis labels (dates) */}
+          <div className="ml-20 mt-2 flex justify-between text-xs text-slate-500">
+            {reversedHistory.map((entry: any, index: number) => {
+              // Show only every 2nd or 3rd date to avoid crowding
+              if (reversedHistory.length <= 5 || index % Math.ceil(reversedHistory.length / 5) === 0) {
+                return (
+                  <span key={index}>
+                    {new Date(entry.date).toLocaleDateString('pt-BR', { 
+                      day: '2-digit', 
+                      month: '2-digit' 
+                    })}
+                  </span>
+                );
+              }
+              return null;
+            })}
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded bg-emerald-500"></div>
-          <span className="text-slate-400">Volume Máximo</span>
+
+        {/* Session Details */}
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          <h5 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detalhes das Sessões</h5>
+          {weightHistory.slice(0, 5).map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between bg-slate-800/30 rounded-lg p-3">
+              <div className="flex items-center space-x-3">
+                <div className={`w-3 h-3 rounded-full ${
+                  entry.maxWeight === maxWeight ? 'bg-emerald-400' : 'bg-blue-400'
+                }`}></div>
+                <div>
+                  <div className="text-sm font-medium text-white">
+                    {new Date(entry.date).toLocaleDateString('pt-BR')}
+                  </div>
+                  <div className="text-xs text-slate-400">{entry.workoutName}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-bold text-white">{entry.maxWeight}kg</div>
+                <div className="text-xs text-slate-400">{entry.totalSets} séries</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -113,62 +192,33 @@ function DailyVolumeChart() {
 }
 
 export default function Progress() {
-  const [selectedExercise, setSelectedExercise] = useState("Supino Reto");
-  const [timeRange, setTimeRange] = useState("30");
   const [searchTerm, setSearchTerm] = useState("");
-
-  const { data: workoutLogs = [], isLoading: logsLoading } = useQuery({
-    queryKey: ["/api/workout-logs"],
-    queryFn: workoutLogApi.getAll,
-  });
+  const [selectedExercise, setSelectedExercise] = useState<{id: string, name: string} | null>(null);
 
   const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
     queryKey: ["/api/exercises"],
     queryFn: exerciseApi.getAll,
   });
 
+  const { data: exercisesSummary = [], isLoading: summaryLoading } = useQuery({
+    queryKey: ["/api/exercises-weight-summary"],
+    queryFn: exerciseProgressApi.getExercisesWeightSummary,
+  });
+
   const filteredExercises = exercises.filter(exercise =>
     exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const popularExercises = [
-    "Supino Reto",
-    "Agachamento",
-    "Deadlift",
-    "Puxada",
-  ];
-
-  // Mock statistics - in real app, calculate from workout logs
-  const stats = {
-    personalRecord: "85kg",
-    totalWorkouts: workoutLogs.filter(log => log.endTime).length,
-    monthlyAverage: "76kg",
-    totalVolume: "18.2t",
-  };
+  // Get exercises that have weight data for quick selection
+  const exercisesWithData = exercisesSummary.filter((summary: any) => summary.sessionCount > 0);
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Meu Progresso</h2>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="glass-card border-slate-700/50 text-white w-48 h-11 rounded-xl hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
-            <SelectValue className="text-slate-200" />
-          </SelectTrigger>
-          <SelectContent className="glass-card border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
-            <SelectItem value="7" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
-              Semana passada
-            </SelectItem>
-            <SelectItem value="30" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
-              Últimos 30 dias
-            </SelectItem>
-            <SelectItem value="90" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
-              Últimos 3 meses
-            </SelectItem>
-            <SelectItem value="180" className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors">
-              Últimos 6 meses
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <h2 className="text-2xl font-bold text-white">Progresso de Cargas</h2>
+        <div className="text-sm text-slate-400">
+          Últimas 10 sessões por exercício
+        </div>
       </div>
 
       {/* Exercise Selection */}
@@ -177,44 +227,55 @@ export default function Progress() {
           <div className="flex items-center space-x-3 mb-4">
             <Search className="text-slate-400 w-4 h-4" />
             <Input
-              placeholder="Buscar exercício para ver progresso..."
+              placeholder="Buscar exercício para ver progresso de peso..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1 bg-transparent border-none text-white placeholder-slate-400 focus-visible:ring-0"
             />
           </div>
           
-          <div className="flex overflow-x-auto space-x-2 pb-2">
-            {popularExercises.map((exercise) => (
-              <Button
-                key={exercise}
-                variant={selectedExercise === exercise ? "default" : "outline"}
-                size="sm"
-                className={`whitespace-nowrap ${
-                  selectedExercise === exercise
-                    ? "gradient-accent text-white"
-                    : "glass-card border-slate-700 text-slate-300"
-                }`}
-                onClick={() => setSelectedExercise(exercise)}
-              >
-                {exercise}
-              </Button>
-            ))}
-          </div>
+          {/* Quick selection for exercises with data */}
+          {!searchTerm && exercisesWithData.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-slate-300">Exercícios com Dados</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {exercisesWithData.map((summary: any) => (
+                  <Button
+                    key={summary.id}
+                    variant="ghost"
+                    className="glass-card border-slate-700 text-left p-4 h-auto hover:bg-slate-800/50 transition-colors"
+                    onClick={() => setSelectedExercise({id: summary.id, name: summary.name})}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="space-y-1">
+                        <div className="font-medium text-white">{summary.name}</div>
+                        <div className="text-xs text-slate-400">{summary.muscleGroup}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-blue-400">{summary.lastWeight}kg</div>
+                        <div className="text-xs text-slate-500">{summary.sessionCount} sessões</div>
+                      </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
-          {/* Filtered exercises dropdown */}
+          {/* Search results */}
           {searchTerm && (
-            <div className="mt-3 max-h-32 overflow-y-auto">
-              {filteredExercises.slice(0, 5).map((exercise) => (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {filteredExercises.slice(0, 8).map((exercise) => (
                 <Button
                   key={exercise.id}
                   variant="ghost"
                   className="w-full justify-start text-slate-300 hover:bg-slate-800/50"
                   onClick={() => {
-                    setSelectedExercise(exercise.name);
+                    setSelectedExercise({id: exercise.id, name: exercise.name});
                     setSearchTerm("");
                   }}
                 >
+                  <Dumbbell className="w-4 h-4 mr-3 text-slate-400" />
                   {exercise.name}
                   <span className="ml-auto text-xs text-slate-500">
                     {exercise.muscleGroup}
@@ -226,101 +287,67 @@ export default function Progress() {
         </CardContent>
       </Card>
 
-      {/* Daily Volume Chart - Horizontal */}
-      <Card className="glass-card rounded-2xl">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Volume Diário de Treino</h3>
-          
-          <DailyVolumeChart />
-        </CardContent>
-      </Card>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="glass-card rounded-xl">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-emerald-400 mb-1">{stats.personalRecord}</div>
-              <div className="text-xs text-slate-400">Recorde Pessoal</div>
-              <div className="text-xs text-emerald-400 mt-1">+5kg este mês</div>
+      {/* Selected Exercise Progress */}
+      {selectedExercise ? (
+        <Card className="glass-card rounded-2xl">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex items-center space-x-3">
+                <Dumbbell className="w-5 h-5 text-blue-400" />
+                <span>{selectedExercise.name}</span>
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedExercise(null)}
+                className="text-slate-400 hover:text-white hover:bg-slate-800/50"
+              >
+                ✕
+              </Button>
             </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <WeightProgressionChart 
+              exerciseId={selectedExercise.id} 
+              exerciseName={selectedExercise.name}
+            />
           </CardContent>
         </Card>
-        
-        <Card className="glass-card rounded-xl">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400 mb-1">{stats.totalWorkouts}</div>
-              <div className="text-xs text-slate-400">Treinos</div>
-              <div className="text-xs text-blue-400 mt-1">+{Math.max(0, stats.totalWorkouts - 21)} vs. passado</div>
+      ) : (
+        // Empty state when no exercise selected
+        <Card className="glass-card rounded-2xl">
+          <CardContent className="p-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
+              <TrendingUp className="w-8 h-8 text-slate-400" />
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card rounded-xl">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400 mb-1">{stats.monthlyAverage}</div>
-              <div className="text-xs text-slate-400">Média do Mês</div>
-              <div className="text-xs text-purple-400 mt-1">+2kg médio</div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card rounded-xl">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400 mb-1">{stats.totalVolume}</div>
-              <div className="text-xs text-slate-400">Volume Total</div>
-              <div className="text-xs text-orange-400 mt-1">+2.1t este mês</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* All Time Stats */}
-      <Card className="glass-card rounded-2xl">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Histórico Geral</h3>
-          
-          {logsLoading ? (
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="loading-skeleton h-16 rounded"></div>
-              ))}
-            </div>
-          ) : workoutLogs.length === 0 ? (
-            <div className="text-center py-8">
-              <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-              <p className="text-slate-400">Nenhum dados de progresso ainda</p>
-              <p className="text-sm text-slate-500 mt-1">
-                Complete alguns treinos para ver seus gráficos de progresso
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Selecione um Exercício
+            </h3>
+            <p className="text-slate-400 mb-6">
+              Escolha um exercício acima para ver o progresso de cargas das últimas 10 sessões
+            </p>
+            {exercisesWithData.length === 0 && (
+              <p className="text-sm text-slate-500">
+                Complete alguns treinos com pesos para ver dados de progresso
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-lg font-semibold text-white">{workoutLogs.length}</div>
-                  <div className="text-xs text-slate-400">Total de treinos</div>
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-white">
-                    {workoutLogs.filter(log => log.endTime).length}
-                  </div>
-                  <div className="text-xs text-slate-400">Treinos completos</div>
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-white">
-                    {Math.round((workoutLogs.filter(log => log.endTime).length / Math.max(workoutLogs.length, 1)) * 100)}%
-                  </div>
-                  <div className="text-xs text-slate-400">Taxa de conclusão</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Loading states */}
+      {(exercisesLoading || summaryLoading) && !selectedExercise && (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="glass-card rounded-2xl">
+              <CardContent className="p-6">
+                <div className="loading-skeleton h-6 rounded mb-4 w-3/4"></div>
+                <div className="loading-skeleton h-32 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

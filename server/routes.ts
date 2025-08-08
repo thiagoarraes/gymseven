@@ -231,6 +231,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get exercise weight progression data for progress charts
+  app.get('/api/exercise-weight-history/:exerciseId', async (req, res) => {
+    try {
+      const { exerciseId } = req.params;
+      const { limit = 10 } = req.query;
+      
+      const supabaseStorage = storage as any;
+      
+      // Get workout log exercises for this specific exercise
+      const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
+        .from('workoutLogExercises')
+        .select(`
+          *,
+          workoutLog:workoutLogs(*)
+        `)
+        .eq('exerciseId', exerciseId)
+        .order('order');
+
+      if (logExercisesError) {
+        console.error('Error fetching log exercises:', logExercisesError);
+        throw logExercisesError;
+      }
+
+      if (!logExercises || logExercises.length === 0) {
+        return res.json([]);
+      }
+
+      // Get weight history for each workout session
+      const weightHistory = [];
+      
+      for (const logExercise of logExercises) {
+        // Only include completed workouts
+        if (!logExercise.workoutLog?.endTime) continue;
+        
+        // Get sets for this exercise in this workout
+        const { data: sets } = await supabaseStorage.supabase
+          .from('workoutLogSets')
+          .select('*')
+          .eq('logExerciseId', logExercise.id)
+          .not('weight', 'is', null)
+          .order('setNumber');
+        
+        if (sets && sets.length > 0) {
+          // Find the maximum weight used in this workout
+          const maxWeight = Math.max(...sets.map(set => set.weight || 0));
+          
+          if (maxWeight > 0) {
+            weightHistory.push({
+              date: logExercise.workoutLog.startTime,
+              workoutName: logExercise.workoutLog.name,
+              maxWeight,
+              totalSets: sets.length,
+              allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
+            });
+          }
+        }
+      }
+      
+      // Sort by date (most recent first) and limit results
+      weightHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const limitedHistory = weightHistory.slice(0, parseInt(limit as string));
+      
+      res.json(limitedHistory);
+    } catch (error) {
+      console.error('Error fetching exercise weight history:', error);
+      res.status(500).json({ message: "Erro ao buscar histórico de peso do exercício" });
+    }
+  });
+
+  // Get all exercises with their recent weight progression
+  app.get('/api/exercises-weight-summary', async (req, res) => {
+    try {
+      const supabaseStorage = storage as any;
+      
+      // Get all exercises
+      const { data: exercises, error: exercisesError } = await supabaseStorage.supabase
+        .from('exercises')
+        .select('*')
+        .order('name');
+
+      if (exercisesError) {
+        throw exercisesError;
+      }
+
+      if (!exercises) {
+        return res.json([]);
+      }
+
+      // For each exercise, get recent weight data
+      const exerciseSummaries = [];
+      
+      for (const exercise of exercises) {
+        // Get recent workout log exercises for this exercise
+        const { data: logExercises } = await supabaseStorage.supabase
+          .from('workoutLogExercises')
+          .select(`
+            *,
+            workoutLog:workoutLogs(*)
+          `)
+          .eq('exerciseId', exercise.id)
+          .not('workoutLog.endTime', 'is', null) // Only completed workouts
+          .order('workoutLog.startTime', { ascending: false })
+          .limit(3); // Get last 3 sessions for summary
+
+        let hasData = false;
+        let lastWeight = null;
+        let sessionCount = 0;
+        
+        if (logExercises && logExercises.length > 0) {
+          for (const logExercise of logExercises) {
+            // Get sets for this exercise in this workout
+            const { data: sets } = await supabaseStorage.supabase
+              .from('workoutLogSets')
+              .select('*')
+              .eq('logExerciseId', logExercise.id)
+              .not('weight', 'is', null);
+            
+            if (sets && sets.length > 0) {
+              hasData = true;
+              sessionCount++;
+              if (!lastWeight) {
+                lastWeight = Math.max(...sets.map(set => set.weight || 0));
+              }
+            }
+          }
+        }
+        
+        if (hasData) {
+          exerciseSummaries.push({
+            id: exercise.id,
+            name: exercise.name,
+            muscleGroup: exercise.muscleGroup,
+            lastWeight,
+            sessionCount
+          });
+        }
+      }
+      
+      res.json(exerciseSummaries);
+    } catch (error) {
+      console.error('Error fetching exercises weight summary:', error);
+      res.status(500).json({ message: "Erro ao buscar resumo de pesos dos exercícios" });
+    }
+  });
+
   // Get daily volume data for progress charts (must be before parameterized routes)
   app.get('/api/workout-logs-daily-volume', async (req, res) => {
     try {
@@ -365,12 +510,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (sets && sets.length > 0) {
             hasActualSets = true;
             // Count all sets that have been started (have reps or weight)
-            for (const set of sets) {
+            for (const set of sets as any[]) {
               if (set.reps || set.weight) {
                 totalSets += 1;
               }
               // Only count volume for completed sets
-              if (set.weight && set.reps && set.completed) {
+              if ((set as any).weight && (set as any).reps && (set as any).completed) {
                 totalVolume += set.weight * set.reps;
               }
             }

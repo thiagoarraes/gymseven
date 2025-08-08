@@ -120,3 +120,15 @@ export const workoutLogApi = {
     return response.json();
   },
 };
+
+export const exerciseProgressApi = {
+  getWeightHistory: async (exerciseId: string, limit: number = 10) => {
+    const response = await apiRequest("GET", `/api/exercise-weight-history/${exerciseId}?limit=${limit}`);
+    return response.json();
+  },
+    
+  getExercisesWeightSummary: async () => {
+    const response = await apiRequest("GET", '/api/exercises-weight-summary');
+    return response.json();
+  },
+};
