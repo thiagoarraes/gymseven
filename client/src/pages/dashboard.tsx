@@ -54,7 +54,7 @@ export default function Dashboard() {
       .reverse() // Oldest to newest for chronological display
       .map((entry, index) => ({
         session: index + 1,
-        weight: entry.maxWeight,
+        weight: entry.weight || entry.maxWeight || 0, // Use 'weight' field from API
         date: new Date(entry.date).toLocaleDateString('pt-BR', { 
           month: 'short', 
           day: 'numeric' 

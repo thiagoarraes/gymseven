@@ -263,8 +263,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const weightHistory = [];
       
       for (const logExercise of logExercises) {
-        // Only include completed workouts
-        if (!logExercise.workoutLog?.endTime) continue;
+        // Include all workouts (not just completed ones) to show progress
+        // if (!logExercise.workoutLog?.endTime) continue;
         
         // Get sets for this exercise in this workout
         const { data: sets } = await supabaseStorage.supabase
