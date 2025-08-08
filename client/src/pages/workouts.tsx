@@ -351,7 +351,7 @@ export default function Workouts() {
                 </div>
                 
                 {/* Exercise List */}
-                <div className="space-y-3 mb-4">
+                <div className="space-y-3 mb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-slate-300">
                       <Dumbbell className="text-blue-400 mr-2 w-4 h-4" />
