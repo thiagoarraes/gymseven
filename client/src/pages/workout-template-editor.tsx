@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical, Check, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
   const [isEditingTemplateName, setIsEditingTemplateName] = useState(false);
   const [tempTemplateName, setTempTemplateName] = useState("");
+  const [recentlyUpdated, setRecentlyUpdated] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -77,10 +78,9 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
-      toast({
-        title: "Exercício atualizado!",
-        description: "As alterações foram salvas.",
-      });
+      // Visual feedback for successful update
+      setRecentlyUpdated('success');
+      setTimeout(() => setRecentlyUpdated(null), 2000);
     },
     onError: () => {
       toast({
@@ -204,10 +204,19 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   };
 
   const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
+    setRecentlyUpdated(exerciseId);
     updateExerciseMutation.mutate({
       exerciseId,
       updates: { [field]: value }
     });
+  };
+
+  const handleSaveWorkout = () => {
+    toast({
+      title: "Treino salvo com sucesso!",
+      description: "Todas as configurações foram aplicadas.",
+    });
+    navigate("/workouts");
   };
 
   const handleRemoveExercise = (exerciseId: string) => {
@@ -423,9 +432,14 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
-                            <div className="text-center">
+                            <div className="text-center relative">
                               <div className="text-2xl font-bold text-white">{exercise.sets}</div>
                               <div className="text-xs text-slate-400">séries</div>
+                              {recentlyUpdated === exercise.id && (
+                                <div className="absolute -top-1 -right-1">
+                                  <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
+                                </div>
+                              )}
                             </div>
                             <Button
                               variant="outline"
@@ -447,13 +461,18 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
                             <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Repetições</label>
                           </div>
-                          <div className="text-center">
+                          <div className="text-center relative">
                             <Input
                               value={exercise.reps}
                               onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20"
+                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-yellow-400/50 focus:ring-yellow-400/20 transition-all"
                               placeholder="8-12"
                             />
+                            {recentlyUpdated === exercise.id && (
+                              <div className="absolute top-1 right-1">
+                                <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -465,7 +484,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             <div className="w-2 h-2 rounded-full bg-purple-400"></div>
                             <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Peso</label>
                           </div>
-                          <div className="text-center">
+                          <div className="text-center relative">
                             <Input
                               type="text"
                               value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
@@ -499,9 +518,14 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                   e.currentTarget.blur();
                                 }
                               }}
-                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20"
+                              className="text-center bg-slate-700/50 border-slate-600/50 text-white text-lg font-semibold h-12 focus:border-purple-400/50 focus:ring-purple-400/20 transition-all"
                               placeholder="kg"
                             />
+                            {recentlyUpdated === exercise.id && (
+                              <div className="absolute top-1 right-1">
+                                <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -530,11 +554,16 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
-                            <div className="text-center">
+                            <div className="text-center relative">
                               <div className="text-xl font-bold text-orange-400">
                                 {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
                               </div>
                               <div className="text-xs text-slate-400">minutos</div>
+                              {recentlyUpdated === exercise.id && (
+                                <div className="absolute -top-1 -right-1">
+                                  <CheckCircle2 className="w-4 h-4 text-green-400 animate-pulse" />
+                                </div>
+                              )}
                             </div>
                             <Button
                               variant="outline"
@@ -571,6 +600,27 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
           </>
         )}
       </div>
+
+      {/* Save Workout Button - Fixed at bottom */}
+      {templateExercises.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="flex items-center space-x-4 bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-full px-6 py-3 shadow-2xl">
+            {recentlyUpdated === 'success' && (
+              <div className="flex items-center space-x-2 text-green-400">
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="text-sm font-medium">Salvo automaticamente</span>
+              </div>
+            )}
+            <Button
+              onClick={handleSaveWorkout}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-300 flex items-center space-x-2"
+            >
+              <Save className="w-5 h-5" />
+              <span>Finalizar Treino</span>
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
