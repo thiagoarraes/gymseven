@@ -10,32 +10,32 @@ import type {
 
 export const exerciseApi = {
   getAll: async (): Promise<Exercise[]> => {
-    const response = await apiRequest("GET", "/api/exercises");
+    const response = await apiRequest("GET", "/api/exercicios");
     return response.json();
   },
 
   getById: async (id: string): Promise<Exercise> => {
-    const response = await apiRequest("GET", `/api/exercises/${id}`);
+    const response = await apiRequest("GET", `/api/exercicios/${id}`);
     return response.json();
   },
 
   getByMuscleGroup: async (muscleGroup: string): Promise<Exercise[]> => {
-    const response = await apiRequest("GET", `/api/exercises?muscleGroup=${encodeURIComponent(muscleGroup)}`);
+    const response = await apiRequest("GET", `/api/exercicios?muscleGroup=${encodeURIComponent(muscleGroup)}`);
     return response.json();
   },
 
   create: async (exercise: InsertExercise): Promise<Exercise> => {
-    const response = await apiRequest("POST", "/api/exercises", exercise);
+    const response = await apiRequest("POST", "/api/exercicios", exercise);
     return response.json();
   },
 
   update: async (id: string, updates: Partial<InsertExercise>): Promise<Exercise> => {
-    const response = await apiRequest("PUT", `/api/exercises/${id}`, updates);
+    const response = await apiRequest("PUT", `/api/exercicios/${id}`, updates);
     return response.json();
   },
 
   delete: async (id: string): Promise<void> => {
-    await apiRequest("DELETE", `/api/exercises/${id}`);
+    await apiRequest("DELETE", `/api/exercicios/${id}`);
   },
 };
 

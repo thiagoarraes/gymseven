@@ -12,7 +12,7 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Exercise routes
-  app.get("/api/exercises", async (req, res) => {
+  app.get("/api/exercicios", async (req, res) => {
     try {
       const { muscleGroup } = req.query;
       let exercises;
@@ -29,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/exercises/:id", async (req, res) => {
+  app.get("/api/exercicios/:id", async (req, res) => {
     try {
       const exercise = await storage.getExercise(req.params.id);
       if (!exercise) {
@@ -41,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/exercises", async (req, res) => {
+  app.post("/api/exercicios", async (req, res) => {
     try {
       const validatedData = insertExerciseSchema.parse(req.body);
       const exercise = await storage.createExercise(validatedData);
@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/exercises/:id", async (req, res) => {
+  app.put("/api/exercicios/:id", async (req, res) => {
     try {
       const updates = insertExerciseSchema.partial().parse(req.body);
       const exercise = await storage.updateExercise(req.params.id, updates);
@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/exercises/:id", async (req, res) => {
+  app.delete("/api/exercicios/:id", async (req, res) => {
     try {
       const deleted = await storage.deleteExercise(req.params.id);
       if (!deleted) {

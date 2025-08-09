@@ -183,7 +183,7 @@ export default function Progress() {
 
   // Also fetch all exercises for fallback
   const { data: allExercises = [] } = useQuery({
-    queryKey: ["/api/exercises"],
+    queryKey: ["/api/exercicios"],
     queryFn: exerciseApi.getAll,
   });
 

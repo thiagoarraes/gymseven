@@ -45,14 +45,14 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const queryClient = useQueryClient();
 
   const { data: exercises = [], isLoading } = useQuery({
-    queryKey: ["/api/exercises"],
+    queryKey: ["/api/exercicios"],
     queryFn: exerciseApi.getAll,
   });
 
   const createMutation = useMutation({
     mutationFn: exerciseApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
       setIsDialogOpen(false);
       toast({
         title: "Exercício criado!",
@@ -72,7 +72,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     mutationFn: ({ id, data }: { id: string; data: Partial<ExerciseFormValues> }) =>
       exerciseApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
       setIsDialogOpen(false);
       setEditingExercise(null);
       toast({
@@ -85,7 +85,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const deleteMutation = useMutation({
     mutationFn: exerciseApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
       toast({
         title: "Exercício excluído!",
         description: "O exercício foi removido com sucesso.",
