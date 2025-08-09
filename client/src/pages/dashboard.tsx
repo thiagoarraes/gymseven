@@ -527,8 +527,9 @@ export default function Dashboard() {
                             color: '#F1F5F9',
                             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
                           }}
-                          formatter={(value) => [`${value}kg`, '']}
+                          formatter={(value) => [`${value}kg`]}
                           labelFormatter={(label) => label}
+                          separator=""
                         />
                         <Area
                           type="monotone"

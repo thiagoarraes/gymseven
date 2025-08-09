@@ -464,10 +464,10 @@ export default function Progress() {
                       }}
                       labelStyle={{ color: '#94A3B8' }}
                       formatter={(value: any, name: any) => [
-                        <span style={{ color: '#3B82F6', fontWeight: 'bold' }}>{value}kg</span>,
-                        ''
+                        <span style={{ color: '#3B82F6', fontWeight: 'bold' }}>{value}kg</span>
                       ]}
                       labelFormatter={(label: any) => label}
+                      separator=""
                     />
                     <Area
                       type="monotone"
