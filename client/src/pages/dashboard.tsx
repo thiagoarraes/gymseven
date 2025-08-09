@@ -21,16 +21,17 @@ export default function Dashboard() {
     queryFn: workoutLogApi.getAll,
   });
 
+  // Get exercises with actual progress data
   const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/exercises"],
-    queryFn: exerciseApi.getAll,
+    queryKey: ["/api/exercises-with-progress"],
+    queryFn: exerciseProgressApi.getExercisesWithProgress,
   });
 
-  // Auto-select first exercise for progress chart, prefer Supino reto
+  // Auto-select first exercise for progress chart from exercises with progress
   const firstExerciseId = useMemo(() => {
     if (exercises.length > 0 && !selectedExerciseId) {
-      // Prefer "Supino reto" as it has known data, otherwise use first exercise
-      const supinoReto = exercises.find(e => e.name === "Supino reto");
+      // Prefer "Supino reto" if available, otherwise use first exercise with progress
+      const supinoReto = exercises.find((e: any) => e.name === "Supino reto");
       return supinoReto ? supinoReto.id : exercises[0].id;
     }
     return selectedExerciseId;
@@ -44,7 +45,7 @@ export default function Dashboard() {
   });
 
   // Find selected exercise name
-  const selectedExercise = exercises.find(e => e.id === (selectedExerciseId || firstExerciseId));
+  const selectedExercise = exercises.find((e: any) => e.id === (selectedExerciseId || firstExerciseId));
   const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
 
   // Process chart data
@@ -52,7 +53,7 @@ export default function Dashboard() {
     if (!weightHistory || weightHistory.length === 0) return [];
     
     // Data already comes from API in chronological order (oldest to newest)
-    return weightHistory.map((entry, index) => {
+    return weightHistory.map((entry: any, index: number) => {
         // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
         const dateParts = entry.date.split('/');
         let formattedDate = entry.date;
@@ -342,13 +343,16 @@ export default function Dashboard() {
                     className="bg-slate-800 border-slate-700 max-h-60 overflow-auto backdrop-blur-md"
                     sideOffset={4}
                   >
-                    {exercises.map((exercise, index) => (
+                    {exercises.map((exercise: any, index: number) => (
                       <SelectItem 
                         key={`exercise-select-${exercise.id}-${index}`} 
                         value={exercise.id}
                         className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
                       >
-                        {exercise.name}
+                        <div className="flex items-center justify-between w-full">
+                          <span>{exercise.name}</span>
+                          <span className="text-xs text-slate-400 ml-2">{exercise.lastWeight}kg</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -367,8 +371,8 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-blue-400">Peso Máximo</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
-                    {chartData.length > 0 && chartData.some(d => d.weight > 0) 
-                      ? Math.max(...chartData.filter(d => d.weight > 0).map(d => d.weight))
+                    {chartData.length > 0 && chartData.some((d: any) => d.weight > 0) 
+                      ? Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight))
                       : 0
                     }kg
                   </div>
@@ -394,8 +398,8 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-purple-400">Progresso</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
-                    {chartData.length > 1 && chartData.some(d => d.weight > 0)
-                      ? `+${Math.max(0, Math.max(...chartData.filter(d => d.weight > 0).map(d => d.weight)) - Math.min(...chartData.filter(d => d.weight > 0).map(d => d.weight)))}kg`
+                    {chartData.length > 1 && chartData.some((d: any) => d.weight > 0)
+                      ? `+${Math.max(0, Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight)) - Math.min(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight)))}kg`
                       : "0kg"
                     }
                   </div>

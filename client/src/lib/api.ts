@@ -143,4 +143,9 @@ export const exerciseProgressApi = {
     const response = await apiRequest("GET", '/api/exercises-weight-summary');
     return response.json();
   },
+
+  getExercisesWithProgress: async () => {
+    const response = await apiRequest("GET", '/api/exercises-with-progress');
+    return response.json();
+  },
 };
