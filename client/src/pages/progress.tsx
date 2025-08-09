@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus, Clock } from "lucide-react";
+import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus, Clock, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -175,20 +175,25 @@ export default function Progress() {
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
+  // Fetch exercises that have progress data (used in completed workouts)
+  const { data: exercisesWithProgress = [], isLoading: exercisesLoading } = useQuery({
+    queryKey: ["/api/exercises-with-progress"],
+    queryFn: () => fetch("/api/exercises-with-progress").then(res => res.json()),
+  });
+
+  // Also fetch all exercises for fallback
+  const { data: allExercises = [] } = useQuery({
     queryKey: ["/api/exercises"],
     queryFn: exerciseApi.getAll,
   });
 
-  // Auto-select first exercise for progress chart, prefer Supino reto
+  // Auto-select first exercise for progress chart from exercises with progress
   const firstExerciseId = useMemo(() => {
-    if (exercises.length > 0 && !selectedExerciseId) {
-      // Prefer "Supino reto" as it has known data, otherwise use first exercise
-      const supinoReto = exercises.find(e => e.name === "Supino reto");
-      return supinoReto ? supinoReto.id : exercises[0].id;
+    if (exercisesWithProgress.length > 0 && !selectedExerciseId) {
+      return exercisesWithProgress[0].id;
     }
     return selectedExerciseId;
-  }, [exercises, selectedExerciseId]);
+  }, [exercisesWithProgress, selectedExerciseId]);
 
   // Fetch weight history for selected exercise
   const { data: weightHistory = [], isLoading: chartLoading } = useQuery({
@@ -198,7 +203,8 @@ export default function Progress() {
   });
 
   // Find selected exercise name
-  const selectedExercise = exercises.find(e => e.id === (selectedExerciseId || firstExerciseId));
+  const selectedExercise = exercisesWithProgress.find(e => e.id === (selectedExerciseId || firstExerciseId)) || 
+                          allExercises.find(e => e.id === (selectedExerciseId || firstExerciseId));
   const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
 
   // Process chart data
@@ -236,14 +242,17 @@ export default function Progress() {
       });
   }, [weightHistory]);
 
-  // Filter exercises for autocomplete - show ALL exercises
+  // Filter exercises for autocomplete - prioritize exercises with progress
   const filteredExercises = useMemo(() => {
-    if (!searchTerm || searchTerm.length < 1) return [];
-    return exercises.filter((exercise: any) =>
+    if (!searchTerm || searchTerm.length < 1) return exercisesWithProgress.slice(0, 8);
+    
+    const filtered = exercisesWithProgress.filter((exercise: any) =>
       exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 8);
-  }, [searchTerm, exercises]);
+    );
+    
+    return filtered.slice(0, 8);
+  }, [searchTerm, exercisesWithProgress]);
 
   const handleExerciseSelect = (exercise: any) => {
     setSelectedExerciseId(exercise.id);
@@ -292,7 +301,6 @@ export default function Progress() {
               </div>
             ) : (
               filteredExercises.map((exercise: any) => {
-                const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
                 return (
                   <button
                     key={exercise.id}
@@ -304,9 +312,9 @@ export default function Progress() {
                         <div className="text-white font-medium">{exercise.name}</div>
                         <div className="text-xs text-slate-400">{exercise.muscleGroup}</div>
                       </div>
-                      {summary && (
+                      {exercise.lastWeight && (
                         <div className="text-xs text-slate-300">
-                          {summary.lastWeight}kg
+                          {exercise.lastWeight}kg
                         </div>
                       )}
                     </div>
@@ -318,34 +326,63 @@ export default function Progress() {
         )}
       </div>
 
-      {/* Quick access buttons for exercises with data */}
-      {exercises.length > 0 && (
+      {/* Quick access buttons for exercises with progress data */}
+      {exercisesWithProgress.length > 0 && (
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
-            <Dumbbell className="w-4 h-4 text-slate-400" />
-            <h3 className="text-sm font-semibold text-slate-300">Exercícios Disponíveis</h3>
+            <Filter className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-semibold text-slate-300">Exercícios com Progresso</h3>
+            <div className="text-xs text-slate-400">({exercisesWithProgress.length} exercícios)</div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {exercises.slice(0, 12).map((exercise: any) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {exercisesWithProgress.map((exercise: any) => (
               <Button
                 key={exercise.id}
                 variant={selectedExerciseId === exercise.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => handleExerciseSelect(exercise)}
-                className={`p-3 h-auto text-left justify-start ${
+                className={`p-4 h-auto text-left justify-start ${
                   selectedExerciseId === exercise.id 
                     ? 'bg-blue-600 hover:bg-blue-700 border-blue-500' 
                     : 'bg-slate-800/50 hover:bg-slate-700 border-slate-600 text-white'
                 }`}
               >
-                <div className="w-full">
-                  <div className="font-medium text-sm truncate">{exercise.name}</div>
-                  <div className="text-xs opacity-75 truncate">{exercise.muscleGroup}</div>
+                <div className="w-full flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm truncate">{exercise.name}</div>
+                    <div className="text-xs opacity-75 truncate">{exercise.muscleGroup}</div>
+                  </div>
+                  {exercise.lastWeight > 0 && (
+                    <div className="text-right ml-2">
+                      <div className="text-sm font-bold text-emerald-400">{exercise.lastWeight}kg</div>
+                      <div className="text-xs text-slate-400">última</div>
+                    </div>
+                  )}
                 </div>
               </Button>
             ))}
           </div>
         </div>
+      )}
+
+      {/* Show message if no exercises with progress */}
+      {exercisesWithProgress.length === 0 && !exercisesLoading && (
+        <Card className="glass-card rounded-2xl max-w-md mx-auto">
+          <CardContent className="text-center py-8">
+            <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
+            <h3 className="text-lg font-semibold text-white mb-2">Nenhum progresso ainda</h3>
+            <p className="text-slate-400 text-sm mb-4">
+              Complete alguns treinos com peso para ver seu progresso aqui
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/workouts'}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Iniciar Treino
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Progress chart - sempre mostra um exercício */}
@@ -362,9 +399,9 @@ export default function Progress() {
                 onChange={(e) => setSelectedExerciseId(e.target.value)}
                 className="bg-slate-800/50 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm"
               >
-                {exercises.map((exercise: any) => (
+                {exercisesWithProgress.map((exercise: any) => (
                   <option key={exercise.id} value={exercise.id}>
-                    {exercise.name}
+                    {exercise.name} {exercise.lastWeight > 0 && `(${exercise.lastWeight}kg)`}
                   </option>
                 ))}
               </select>

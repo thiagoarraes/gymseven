@@ -232,6 +232,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get exercises that have been used in completed workouts
+  app.get('/api/exercises-with-progress', async (req, res) => {
+    try {
+      const supabaseStorage = storage as any;
+      
+      // Get all exercises that have been used in workout logs
+      const { data: exercisesWithLogs, error } = await supabaseStorage.supabase
+        .from('workoutLogExercises')
+        .select(`
+          exerciseId,
+          exerciseName,
+          exercise:exercises(*),
+          workoutLog:workoutLogs!inner(*)
+        `)
+        .not('workoutLogs.endTime', 'is', null); // Only completed workouts
+      
+      if (error) {
+        console.error('Error fetching exercises with progress:', error);
+        throw error;
+      }
+      
+      // Group by exercise and get the latest data
+      const exerciseMap = new Map();
+      
+      for (const logExercise of exercisesWithLogs || []) {
+        const exerciseId = logExercise.exerciseId;
+        
+        if (!exerciseMap.has(exerciseId) && logExercise.exercise) {
+          // Get the latest weight for this exercise
+          const { data: latestSets } = await supabaseStorage.supabase
+            .from('workoutLogSets')
+            .select(`
+              weight,
+              workoutLogExercise:workoutLogExercises!inner(
+                workoutLog:workoutLogs!inner(startTime)
+              )
+            `)
+            .eq('workoutLogExercises.exerciseId', exerciseId)
+            .not('weight', 'is', null)
+            .order('workoutLogExercises.workoutLogs.startTime', { ascending: false })
+            .limit(1);
+          
+          const latestWeight = latestSets?.[0]?.weight || 0;
+          
+          exerciseMap.set(exerciseId, {
+            ...logExercise.exercise,
+            lastWeight: latestWeight,
+            lastUsed: logExercise.workoutLog.startTime
+          });
+        }
+      }
+      
+      const exercisesWithProgress = Array.from(exerciseMap.values())
+        .sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime());
+      
+      res.json(exercisesWithProgress);
+    } catch (error) {
+      console.error('Error fetching exercises with progress:', error);
+      res.status(500).json({ message: "Erro ao buscar exercícios com progresso" });
+    }
+  });
+
   // Get exercise weight progression data for progress charts
   app.get('/api/exercise-weight-history/:exerciseId', async (req, res) => {
     try {
