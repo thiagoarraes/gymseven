@@ -216,10 +216,16 @@ export default function Dashboard() {
       <Card className="neo-card rounded-3xl hover-lift overflow-hidden">
         <CardContent className="p-8 relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
-          <div className="flex items-center justify-between mb-6 gap-6">
-            <div className="relative z-10 flex-1">
-              <h2 className="text-3xl font-black text-white mb-2 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">Olá, Seven!🔥</h2>
-              <p className="text-slate-300 text-lg">Pronto para progredir carga hoje?</p>
+          
+          {/* Header Section with better spacing */}
+          <div className="flex items-start justify-between mb-8 gap-6">
+            <div className="relative z-10 flex-1 space-y-3">
+              <h2 className="text-3xl font-black text-white bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">
+                Olá, Seven!🔥
+              </h2>
+              <p className="text-slate-300 text-lg font-medium">
+                Pronto para progredir carga hoje?
+              </p>
             </div>
             <div className="relative z-10 flex-shrink-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20 p-4 backdrop-blur-sm">
               <div className="flex items-center justify-center space-x-3 mb-2">
@@ -228,27 +234,58 @@ export default function Dashboard() {
                   {stats.currentStreak}
                 </div>
               </div>
-              <div className="text-sm text-emerald-400 font-semibold text-center tracking-wide">dias em sequência</div>
+              <div className="text-sm text-emerald-400 font-semibold text-center tracking-wide whitespace-nowrap">dias em sequência</div>
             </div>
           </div>
-          
-          {/* Quick Action Buttons */}
-          <div className="grid grid-cols-2 gap-4 relative z-10">
-            <Button 
-              className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:via-blue-400 hover:to-indigo-500 rounded-2xl py-4 px-6 font-bold text-white hover:scale-105 transition-all duration-300 shadow-2xl shadow-blue-500/25 border border-blue-400/30"
-              onClick={() => navigate("/workouts")}
-            >
-              <Play className="w-5 h-5 mr-3" />
-              Iniciar Treino
-            </Button>
-            <Button 
-              variant="outline"
-              className="neo-card rounded-2xl py-4 px-6 font-bold text-slate-100 hover-lift border-slate-600/50 hover:border-blue-500/50 transition-all duration-300"
-              onClick={() => navigate("/exercises")}
-            >
-              <List className="w-5 h-5 mr-3" />
-              Exercícios
-            </Button>
+
+          {/* Last Workout Info */}
+          <div className="relative z-10">
+            {recentWorkouts.length > 0 ? (
+              <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-6 border border-slate-600/30">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
+                    <Play className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="text-sm text-slate-400">Último treino foi de</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                        {recentWorkouts[0]?.name || "Treino Personalizado"}
+                      </span>
+                    </div>
+                    <div className="text-slate-300 font-medium">
+                      {formatDate(recentWorkouts[0]?.startTime)} • {
+                        recentWorkouts[0]?.endTime ? 
+                        calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
+                        "Em andamento"
+                      }
+                    </div>
+                  </div>
+                  <Button 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-6 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25"
+                    onClick={() => navigate("/workouts")}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Iniciar Novo
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-6 border border-slate-600/30 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700/50 flex items-center justify-center">
+                  <Play className="w-8 h-8 text-slate-400" />
+                </div>
+                <p className="text-slate-300 font-medium mb-1">Nenhum treino registrado ainda</p>
+                <p className="text-slate-400 text-sm mb-6">Comece sua jornada fitness hoje mesmo!</p>
+                <Button 
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25"
+                  onClick={() => navigate("/workouts")}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Começar Primeiro Treino
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
