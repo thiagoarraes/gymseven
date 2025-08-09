@@ -30,7 +30,7 @@ function Router() {
       <main className="pt-20 pb-20">
         <Switch>
           <Route path="/" component={Dashboard} />
-          <Route path="/exercises" component={ExercisesRoute} />
+          <Route path="/exercicios" component={ExercisesRoute} />
           <Route path="/workouts" component={Workouts} />
           <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
           <Route path="/progress" component={Progress} />
