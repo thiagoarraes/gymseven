@@ -212,7 +212,7 @@ export default function Progress() {
     if (!weightHistory || weightHistory.length === 0) return [];
     
     // Data already comes from API in chronological order (oldest to newest)
-    return weightHistory.map((entry, index) => {
+    return weightHistory.map((entry: any, index: number) => {
         // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
         const dateParts = entry.date.split('/');
         let formattedDate = entry.date;

@@ -475,22 +475,68 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-white">
                     {chartData.length > 0 
                       ? (() => {
-                          // Get the most recent date from chartData
-                          const sortedData = chartData.sort((a: any, b: any) => new Date(b.fullDate || b.date).getTime() - new Date(a.fullDate || a.date).getTime());
-                          const lastDate = sortedData[0]?.fullDate || sortedData[0]?.date;
-                          if (lastDate) {
-                            const date = new Date(lastDate);
-                            const today = new Date();
-                            const diffTime = Math.abs(today.getTime() - date.getTime());
-                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                          try {
+                            // Get the most recent date from chartData
+                            const sortedData = [...chartData].sort((a: any, b: any) => {
+                              const dateA = new Date(a.fullDate || a.date);
+                              const dateB = new Date(b.fullDate || b.date);
+                              return dateB.getTime() - dateA.getTime();
+                            });
                             
-                            if (diffDays === 1) return "Hoje";
-                            if (diffDays === 2) return "Ontem";
-                            if (diffDays <= 7) return `${diffDays - 1} dias atrás`;
-                            const weeks = Math.floor((diffDays - 1) / 7);
-                            return weeks === 1 ? "1 semana atrás" : `${weeks} semanas atrás`;
+                            const lastDate = sortedData[0]?.fullDate || sortedData[0]?.date;
+                            if (lastDate) {
+                              // Try to parse the date correctly
+                              let date: Date;
+                              
+                              // If it's in DD/MM/YYYY format, convert to proper Date
+                              if (typeof lastDate === 'string' && lastDate.includes('/')) {
+                                const parts = lastDate.split('/');
+                                if (parts.length === 3) {
+                                  // Convert DD/MM/YYYY to MM/DD/YYYY for Date constructor
+                                  date = new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
+                                } else {
+                                  date = new Date(lastDate);
+                                }
+                              } else {
+                                date = new Date(lastDate);
+                              }
+                              
+                              // Check if date is valid
+                              if (isNaN(date.getTime())) {
+                                return "Data inválida";
+                              }
+                              
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0); // Reset time for accurate day comparison
+                              date.setHours(0, 0, 0, 0);
+                              
+                              const diffTime = today.getTime() - date.getTime();
+                              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                              
+                              if (diffDays === 0) return "Hoje";
+                              if (diffDays === 1) return "Ontem";
+                              if (diffDays < 7) return `${diffDays} dias atrás`;
+                              if (diffDays < 30) {
+                                const weeks = Math.floor(diffDays / 7);
+                                return weeks === 1 ? "1 semana atrás" : `${weeks} semanas atrás`;
+                              }
+                              
+                              // For older dates, show format like "12 de junho"
+                              const months = [
+                                'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                                'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+                              ];
+                              
+                              const day = date.getDate();
+                              const month = months[date.getMonth()];
+                              
+                              return `${day} de ${month}`;
+                            }
+                            return "N/A";
+                          } catch (error) {
+                            console.error('Error processing last workout date:', error);
+                            return "Erro na data";
                           }
-                          return "N/A";
                         })()
                       : "Nunca"
                     }
