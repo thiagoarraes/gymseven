@@ -203,8 +203,8 @@ export default function Progress() {
   });
 
   // Find selected exercise name
-  const selectedExercise = exercisesWithProgress.find(e => e.id === (selectedExerciseId || firstExerciseId)) || 
-                          allExercises.find(e => e.id === (selectedExerciseId || firstExerciseId));
+  const selectedExercise = exercisesWithProgress.find((e: any) => e.id === (selectedExerciseId || firstExerciseId)) || 
+                          allExercises.find((e: any) => e.id === (selectedExerciseId || firstExerciseId));
   const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
 
   // Process chart data
@@ -366,7 +366,7 @@ export default function Progress() {
       )}
 
       {/* Show message if no exercises with progress */}
-      {exercisesWithProgress.length === 0 && !exercisesLoading && (
+      {exercisesWithProgress.length === 0 && !exercisesLoading && allExercises.length > 0 && (
         <Card className="glass-card rounded-2xl max-w-md mx-auto">
           <CardContent className="text-center py-8">
             <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
