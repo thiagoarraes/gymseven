@@ -427,10 +427,7 @@ export default function Dashboard() {
                         value={exercise.id}
                         className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
                       >
-                        <div className="flex items-center justify-between w-full">
-                          <span>{exercise.name}</span>
-                          <span className="text-xs text-slate-400 ml-2">{exercise.lastWeight}kg</span>
-                        </div>
+                        {exercise.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
