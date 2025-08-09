@@ -99,17 +99,72 @@ export default function Dashboard() {
   };
 
   // Calculate stats from recent workouts
-  const stats = {
-    weeklyWorkouts: recentWorkouts.filter(w => {
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return new Date(w.startTime) >= weekAgo;
-    }).length,
-    totalWeight: "2.5t", // Would calculate from actual data
-    avgDuration: "1h 15m",
-    personalRecords: 3,
-    currentStreak: 7,
-  };
+  const stats = useMemo(() => {
+    // Calculate workouts this week (Sunday to Saturday)
+    const now = new Date();
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    const workoutsThisWeek = recentWorkouts.filter(w => {
+      if (!w.startTime) return false;
+      const workoutDate = new Date(w.startTime);
+      return workoutDate >= startOfWeek && workoutDate <= endOfWeek && w.endTime; // completed workouts have endTime
+    });
+
+    // Calculate total weight from completed workouts
+    const totalVolume = recentWorkouts
+      .filter(w => w.endTime) // completed workouts have endTime
+      .reduce((sum, w) => sum + 0, 0); // TODO: Add totalVolume to schema
+
+    // Calculate average duration
+    const completedWorkouts = recentWorkouts.filter(w => w.endTime && w.startTime);
+    const avgDurationMs = completedWorkouts.length > 0 
+      ? completedWorkouts.reduce((sum, w) => {
+          const duration = new Date(w.endTime!).getTime() - new Date(w.startTime).getTime();
+          return sum + duration;
+        }, 0) / completedWorkouts.length
+      : 0;
+
+    const avgHours = Math.floor(avgDurationMs / (1000 * 60 * 60));
+    const avgMinutes = Math.floor((avgDurationMs % (1000 * 60 * 60)) / (1000 * 60));
+    const avgDurationStr = avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`;
+
+    // Calculate current streak (consecutive days with workouts)
+    const sortedWorkouts = recentWorkouts
+      .filter(w => w.endTime && w.startTime) // completed workouts have endTime
+      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < 30; i++) { // Check last 30 days
+      const checkDate = new Date(today);
+      checkDate.setDate(today.getDate() - i);
+      
+      const hasWorkout = sortedWorkouts.some(w => {
+        const workoutDate = new Date(w.startTime);
+        workoutDate.setHours(0, 0, 0, 0);
+        return workoutDate.getTime() === checkDate.getTime();
+      });
+      
+      if (hasWorkout) {
+        streak++;
+      } else if (i > 0) { // Allow today to not have a workout yet
+        break;
+      }
+    }
+
+    return {
+      weeklyWorkouts: workoutsThisWeek.length,
+      totalWeight: totalVolume > 0 ? `${Math.round(totalVolume / 1000 * 10) / 10}t` : "0kg",
+      avgDuration: avgDurationStr || "0m",
+      personalRecords: 3, // TODO: Calculate from actual data
+      currentStreak: streak,
+    };
+  }, [recentWorkouts]);
 
   const formatDate = (date: string | Date) => {
     const d = new Date(date);
@@ -204,11 +259,11 @@ export default function Dashboard() {
                 <Flame className="text-orange-400 w-5 h-5" />
               </div>
               <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20">
-                +15kg
+                Esta semana
               </span>
             </div>
-            <div className="text-3xl font-black text-white mb-1">{stats.totalWeight}</div>
-            <div className="text-sm text-slate-400 font-medium">Volume total</div>
+            <div className="text-3xl font-black text-white mb-1">{stats.weeklyWorkouts}</div>
+            <div className="text-sm text-slate-400 font-medium">Treinos esta semana</div>
           </CardContent>
         </Card>
         
