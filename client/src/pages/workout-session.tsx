@@ -236,7 +236,7 @@ export default function WorkoutSession() {
       <div className="container mx-auto px-4 py-6">
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-white mb-4">Treino não encontrado</h2>
-          <Button onClick={() => navigate("/workouts")}>
+          <Button onClick={() => navigate("/treinos")}>
             Voltar aos treinos
           </Button>
         </div>
