@@ -4,6 +4,7 @@ import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus, Clock, Filter 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { exerciseProgressApi, exerciseApi, workoutLogApi } from "@/lib/api";
 import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine, Tooltip } from "recharts";
 
@@ -373,7 +374,7 @@ export default function Progress() {
               Complete alguns treinos com peso para ver seu progresso aqui
             </p>
             <Button 
-              onClick={() => window.location.href = '/workouts'}
+              onClick={() => window.location.href = '/treinos'}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Clock className="w-4 h-4 mr-2" />
@@ -392,17 +393,28 @@ export default function Progress() {
               Progresso de {selectedExerciseName}
             </CardTitle>
             <div className="relative">
-              <select 
+              <Select 
                 value={selectedExerciseId || firstExerciseId || ""} 
-                onChange={(e) => setSelectedExerciseId(e.target.value)}
-                className="bg-slate-800/50 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm"
+                onValueChange={(value) => setSelectedExerciseId(value)}
               >
-                {exercisesWithProgress.map((exercise: any) => (
-                  <option key={exercise.id} value={exercise.id}>
-                    {exercise.name} {exercise.lastWeight > 0 && `(${exercise.lastWeight}kg)`}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-56 bg-slate-800/50 border border-slate-700 text-slate-200 transition-all duration-200 hover:bg-slate-700/50">
+                  <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
+                </SelectTrigger>
+                <SelectContent 
+                  className="bg-slate-800 border-slate-700 max-h-60 overflow-auto backdrop-blur-md"
+                  sideOffset={4}
+                >
+                  {exercisesWithProgress.map((exercise: any, index: number) => (
+                    <SelectItem 
+                      key={`exercise-select-${exercise.id}-${index}`} 
+                      value={exercise.id}
+                      className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
+                    >
+                      {exercise.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
