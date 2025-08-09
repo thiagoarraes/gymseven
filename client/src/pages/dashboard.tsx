@@ -661,13 +661,33 @@ export default function Dashboard() {
               {workoutSummary.exercises && workoutSummary.exercises.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="font-medium text-slate-200">Exercícios realizados</h4>
-                  {workoutSummary.exercises
-                    .filter((exercise: any, index: number, arr: any[]) => {
-                      // Remove duplicates based on exercise ID and name
-                      const firstIndex = arr.findIndex(e => e.id === exercise.id && e.name === exercise.name);
-                      return firstIndex === index;
-                    })
-                    .map((exercise: any, index: number) => {
+                  {(() => {
+                    // Group exercises by ID and name, combining their sets
+                    const exerciseGroups = workoutSummary.exercises.reduce((acc: any, exercise: any) => {
+                      const key = `${exercise.id}-${exercise.name}`;
+                      if (!acc[key]) {
+                        acc[key] = {
+                          ...exercise,
+                          sets: []
+                        };
+                      }
+                      // Combine sets from all instances of this exercise
+                      if (exercise.sets && exercise.sets.length > 0) {
+                        acc[key].sets.push(...exercise.sets);
+                      }
+                      return acc;
+                    }, {});
+
+                    // Convert back to array and remove duplicate sets
+                    const uniqueExercises = Object.values(exerciseGroups).map((exercise: any) => ({
+                      ...exercise,
+                      sets: exercise.sets.filter((set: any, index: number, arr: any[]) => {
+                        const firstSetIndex = arr.findIndex((s: any) => s.setNumber === set.setNumber && s.id === set.id);
+                        return firstSetIndex === index;
+                      }).sort((a: any, b: any) => a.setNumber - b.setNumber)
+                    }));
+
+                    return uniqueExercises.map((exercise: any, index: number) => {
                       const uniqueKey = `${exercise.id || 'unknown'}-${exercise.name || 'unnamed'}-${index}`;
                       return (
                         <div key={uniqueKey} className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
@@ -687,31 +707,25 @@ export default function Dashboard() {
                           {/* Sets */}
                           {exercise.sets && exercise.sets.length > 0 ? (
                             <div className="space-y-2">
-                              {exercise.sets
-                                .filter((set: any, setIndex: number, setArr: any[]) => {
-                                  // Remove duplicate sets based on setNumber
-                                  const firstSetIndex = setArr.findIndex(s => s.setNumber === set.setNumber);
-                                  return firstSetIndex === setIndex;
-                                })
-                                .map((set: any, setIndex: number) => {
-                                  const setKey = `${uniqueKey}-set-${set.setNumber || setIndex}-${setIndex}`;
-                                  return (
-                                    <div key={setKey} className="flex items-center justify-between py-2 px-3 bg-slate-700/30 rounded-lg">
-                                      <span className="text-sm text-slate-300">Série {set.setNumber || (setIndex + 1)}</span>
-                                      <div className="flex items-center space-x-4 text-sm">
-                                        {set.reps && set.reps > 0 && (
-                                          <span className="text-yellow-400">{set.reps} reps</span>
-                                        )}
-                                        {set.weight && set.weight > 0 && (
-                                          <span className="text-purple-400">{set.weight}kg</span>
-                                        )}
-                                        <div className={`w-2 h-2 rounded-full ${
-                                          set.completed ? "bg-emerald-400" : "bg-slate-500"
-                                        }`}></div>
-                                      </div>
+                              {exercise.sets.map((set: any, setIndex: number) => {
+                                const setKey = `${uniqueKey}-set-${set.id || setIndex}`;
+                                return (
+                                  <div key={setKey} className="flex items-center justify-between py-2 px-3 bg-slate-700/30 rounded-lg">
+                                    <span className="text-sm text-slate-300">Série {set.setNumber || (setIndex + 1)}</span>
+                                    <div className="flex items-center space-x-4 text-sm">
+                                      {set.reps && set.reps > 0 && (
+                                        <span className="text-yellow-400">{set.reps} reps</span>
+                                      )}
+                                      {set.weight && set.weight > 0 && (
+                                        <span className="text-purple-400">{set.weight}kg</span>
+                                      )}
+                                      <div className={`w-2 h-2 rounded-full ${
+                                        set.completed ? "bg-emerald-400" : "bg-slate-500"
+                                      }`}></div>
                                     </div>
-                                  );
-                                })}
+                                  </div>
+                                );
+                              })}
                             </div>
                           ) : (
                             <div className="text-center py-3 text-slate-400 text-sm">
@@ -720,7 +734,8 @@ export default function Dashboard() {
                           )}
                         </div>
                       );
-                    })}
+                    });
+                  })()}
                 </div>
               )}
 
