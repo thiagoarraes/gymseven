@@ -329,8 +329,8 @@ export default function Progress() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <Filter className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-semibold text-slate-300">Exercícios com Progresso</h3>
-            <div className="text-xs text-slate-400">({exercisesWithProgress.length} exercícios)</div>
+            <h3 className="text-sm font-semibold text-slate-300">Exercícios Recentes</h3>
+            <div className="text-xs text-slate-400">({exercisesWithProgress.length} últimos exercícios)</div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {exercisesWithProgress.map((exercise: any) => (

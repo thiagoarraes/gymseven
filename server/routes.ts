@@ -310,7 +310,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
           })
           .filter((exercise: any) => exercise.lastWeight > 0) // Only exercises with actual weight data
-          .sort((a: any, b: any) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime());
+          .sort((a: any, b: any) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
+          .slice(0, 12); // Limit to the 12 most recent exercises
         
         res.json(exercisesWithProgress);
       } else {
