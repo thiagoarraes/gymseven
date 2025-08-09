@@ -262,12 +262,12 @@ export default function Dashboard() {
               <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
                 <Calendar className="text-blue-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20">
+              <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20 whitespace-nowrap">
                 Esta semana
               </span>
             </div>
             <div className="text-3xl font-black text-white mb-1">{stats.weeklyWorkouts}</div>
-            <div className="text-sm text-slate-400 font-medium">Treinos esta semana</div>
+            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Treinos esta semana</div>
           </CardContent>
         </Card>
 
@@ -279,12 +279,12 @@ export default function Dashboard() {
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20">
                 <Flame className="text-purple-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20">
+              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 whitespace-nowrap">
                 Melhor dia
               </span>
             </div>
             <div className="text-3xl font-black text-white mb-1">{stats.bestVolumeDay}</div>
-            <div className="text-sm text-slate-400 font-medium">Maior volume</div>
+            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Maior volume</div>
           </CardContent>
         </Card>
 
@@ -296,12 +296,12 @@ export default function Dashboard() {
               <div className="p-2 bg-green-500/10 rounded-xl border border-green-500/20">
                 <Clock className="text-green-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-green-400 font-bold bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
+              <span className="text-xs text-green-400 font-bold bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20 whitespace-nowrap">
                 Média geral
               </span>
             </div>
             <div className="text-3xl font-black text-white mb-1">{stats.avgDuration}</div>
-            <div className="text-sm text-slate-400 font-medium">Tempo médio</div>
+            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Tempo médio</div>
           </CardContent>
         </Card>
         
@@ -313,12 +313,12 @@ export default function Dashboard() {
               <div className="p-2 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
                 <TrendingUp className="text-yellow-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-yellow-400 font-bold bg-yellow-500/10 px-2 py-1 rounded-full border border-yellow-500/20 animate-pulse">
+              <span className="text-xs text-yellow-400 font-bold bg-yellow-500/10 px-2 py-1 rounded-full border border-yellow-500/20 animate-pulse whitespace-nowrap">
                 Progresso
               </span>
             </div>
             <div className="text-3xl font-black text-white mb-1">{stats.exercisesWithIncrease}</div>
-            <div className="text-sm text-slate-400 font-medium">Pesos aumentados</div>
+            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Pesos aumentados</div>
           </CardContent>
         </Card>
       </div>
@@ -443,7 +443,7 @@ export default function Dashboard() {
                     <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <TrendingUp className="w-4 h-4 text-blue-400" />
                     </div>
-                    <span className="text-sm font-medium text-blue-400">Peso Máximo</span>
+                    <span className="text-sm font-medium text-blue-400 whitespace-nowrap">Peso Máximo</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
                     {chartData.length > 0 && chartData.some((d: any) => d.weight > 0) 
@@ -451,7 +451,7 @@ export default function Dashboard() {
                       : 0
                     }kg
                   </div>
-                  <div className="text-xs text-slate-400">Maior peso atingido</div>
+                  <div className="text-xs text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis">Maior peso atingido</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 border border-emerald-500/20">
@@ -459,10 +459,10 @@ export default function Dashboard() {
                     <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <Target className="w-4 h-4 text-emerald-400" />
                     </div>
-                    <span className="text-sm font-medium text-emerald-400">Total Sessões</span>
+                    <span className="text-sm font-medium text-emerald-400 whitespace-nowrap">Total Sessões</span>
                   </div>
                   <div className="text-2xl font-bold text-white">{chartData.length}</div>
-                  <div className="text-xs text-slate-400">Treinos registrados</div>
+                  <div className="text-xs text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis">Treinos registrados</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 border border-purple-500/20">
@@ -470,7 +470,7 @@ export default function Dashboard() {
                     <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <Calendar className="w-4 h-4 text-purple-400" />
                     </div>
-                    <span className="text-sm font-medium text-purple-400">Último Treino</span>
+                    <span className="text-sm font-medium text-purple-400 whitespace-nowrap">Último Treino</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
                     {chartData.length > 0 
@@ -541,7 +541,7 @@ export default function Dashboard() {
                       : "Nunca"
                     }
                   </div>
-                  <div className="text-xs text-slate-400">Última execução</div>
+                  <div className="text-xs text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis">Última execução</div>
                 </div>
               </div>
             )}
