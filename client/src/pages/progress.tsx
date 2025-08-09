@@ -172,7 +172,7 @@ function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: stri
 
 export default function Progress() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedExercise, setSelectedExercise] = useState<{id: string, name: string} | null>(null);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
@@ -180,37 +180,63 @@ export default function Progress() {
     queryFn: exerciseApi.getAll,
   });
 
-  const { data: exercisesSummary = [], isLoading: summaryLoading } = useQuery({
-    queryKey: ["/api/exercises-weight-summary"],
-    queryFn: exerciseProgressApi.getExercisesWeightSummary,
+  // Auto-select first exercise for progress chart, prefer Supino reto
+  const firstExerciseId = useMemo(() => {
+    if (exercises.length > 0 && !selectedExerciseId) {
+      // Prefer "Supino reto" as it has known data, otherwise use first exercise
+      const supinoReto = exercises.find(e => e.name === "Supino reto");
+      return supinoReto ? supinoReto.id : exercises[0].id;
+    }
+    return selectedExerciseId;
+  }, [exercises, selectedExerciseId]);
+
+  // Fetch weight history for selected exercise
+  const { data: weightHistory = [], isLoading: chartLoading } = useQuery({
+    queryKey: ['/api/exercise-weight-history', firstExerciseId],
+    queryFn: () => exerciseProgressApi.getWeightHistory(firstExerciseId!, 10),
+    enabled: !!firstExerciseId,
   });
 
-  const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
-    queryKey: ["/api/workout-logs", "recent"],
-    queryFn: () => workoutLogApi.getRecent(),
-    retry: 1,
-    staleTime: 30000,
-  });
+  // Find selected exercise name
+  const selectedExercise = exercises.find(e => e.id === (selectedExerciseId || firstExerciseId));
+  const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
 
-  // Filter exercises that have weight data
-  const exercisesWithData = exercises.filter((exercise: any) => 
-    exercisesSummary.some((summary: any) => summary.exerciseId === exercise.id)
-  );
+  // Process chart data
+  const chartData = useMemo(() => {
+    if (!weightHistory || weightHistory.length === 0) return [];
+    
+    // Sort by date and prepare data for area chart
+    return [...weightHistory]
+      .reverse() // Oldest to newest for chronological display
+      .map((entry, index) => {
+        // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
+        const dateParts = entry.date.split('/');
+        let formattedDate = entry.date;
+        
+        // Try to create a proper date if the format is DD/MM/YYYY
+        if (dateParts.length === 3) {
+          const day = dateParts[0];
+          const month = dateParts[1];
+          const year = dateParts[2];
+          
+          // Create date object and format it
+          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          if (!isNaN(dateObj.getTime())) {
+            formattedDate = `${day}/${month}`;
+          }
+        }
+        
+        return {
+          session: index + 1,
+          weight: entry.weight || entry.maxWeight || 0,
+          date: formattedDate,
+          fullDate: entry.date,
+          workoutName: entry.workoutName
+        };
+      });
+  }, [weightHistory]);
 
-  // Get recently used exercises from exercises with data (simplified for now)
-  const recentlyUsedExercises = useMemo(() => {
-    // For now, show first 5 exercises with weight data as "recent"
-    return exercisesWithData.slice(0, 5).map((exercise: any) => {
-      const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
-      return {
-        ...exercise,
-        lastWeight: summary?.lastWeight || 0,
-        sessionCount: summary?.sessionCount || 0
-      };
-    });
-  }, [exercisesWithData, exercisesSummary]);
-
-  // Filter exercises for autocomplete - show ALL exercises, not just ones with weight data
+  // Filter exercises for autocomplete - show ALL exercises
   const filteredExercises = useMemo(() => {
     if (!searchTerm || searchTerm.length < 1) return [];
     return exercises.filter((exercise: any) =>
@@ -220,7 +246,7 @@ export default function Progress() {
   }, [searchTerm, exercises]);
 
   const handleExerciseSelect = (exercise: any) => {
-    setSelectedExercise({ id: exercise.id, name: exercise.name });
+    setSelectedExerciseId(exercise.id);
     setSearchTerm("");
     setShowSuggestions(false);
   };
@@ -292,25 +318,29 @@ export default function Progress() {
         )}
       </div>
 
-      {/* Quick access buttons for recent exercises */}
-      {recentlyUsedExercises.length > 0 && !selectedExercise && (
+      {/* Quick access buttons for exercises with data */}
+      {exercises.length > 0 && (
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-slate-400" />
-            <h3 className="text-sm font-semibold text-slate-300">Exercícios Recentes</h3>
+            <Dumbbell className="w-4 h-4 text-slate-400" />
+            <h3 className="text-sm font-semibold text-slate-300">Exercícios Disponíveis</h3>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {recentlyUsedExercises.map((exercise: any) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {exercises.slice(0, 12).map((exercise: any) => (
               <Button
                 key={exercise.id}
-                variant="outline"
+                variant={selectedExerciseId === exercise.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => handleExerciseSelect(exercise)}
-                className="bg-slate-800/50 hover:bg-slate-700 border-slate-600 text-white"
+                className={`p-3 h-auto text-left justify-start ${
+                  selectedExerciseId === exercise.id 
+                    ? 'bg-blue-600 hover:bg-blue-700 border-blue-500' 
+                    : 'bg-slate-800/50 hover:bg-slate-700 border-slate-600 text-white'
+                }`}
               >
-                <div className="flex items-center gap-2">
-                  <span>{exercise.name}</span>
-                  <span className="text-xs text-slate-400">({exercise.lastWeight}kg)</span>
+                <div className="w-full">
+                  <div className="font-medium text-sm truncate">{exercise.name}</div>
+                  <div className="text-xs opacity-75 truncate">{exercise.muscleGroup}</div>
                 </div>
               </Button>
             ))}
@@ -318,102 +348,125 @@ export default function Progress() {
         </div>
       )}
 
-      {/* All exercises grid - shown when searching or when no recent exercises */}
-      {(searchTerm || recentlyUsedExercises.length === 0) && exercisesWithData.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-slate-300">
-            {searchTerm ? 'Resultados da Busca' : 'Todos os Exercícios com Dados'}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(searchTerm ? filteredExercises : exercisesWithData).map((exercise: any) => {
-              const summary = exercisesSummary.find((s: any) => s.exerciseId === exercise.id);
-              return (
-                <Button
-                  key={exercise.id}
-                  variant={selectedExercise?.id === exercise.id ? "default" : "outline"}
-                  className={`p-4 h-auto text-left justify-start space-y-2 ${
-                    selectedExercise?.id === exercise.id 
-                      ? 'bg-blue-600 hover:bg-blue-700 border-blue-500' 
-                      : 'bg-slate-800/50 hover:bg-slate-700 border-slate-600'
-                  }`}
-                  onClick={() => handleExerciseSelect(exercise)}
-                >
-                  <div className="w-full">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Dumbbell className="w-4 h-4" />
-                      <span className="font-medium">{exercise.name}</span>
-                    </div>
-                    <div className="text-xs opacity-75">
-                      {exercise.muscleGroup}
-                    </div>
-                    {summary && (
-                      <div className="text-xs opacity-75 mt-1">
-                        Último: {summary.lastWeight}kg
-                      </div>
-                    )}
-                  </div>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Progress chart */}
-      {selectedExercise ? (
-        <Card className="glass-card rounded-2xl">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
-                {selectedExercise.name}
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedExercise(null)}
-                className="text-slate-400 hover:text-white"
+      {/* Progress chart - sempre mostra um exercício */}
+      <Card className="glass-card rounded-2xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-blue-400" />
+              Progresso de {selectedExerciseName}
+            </CardTitle>
+            <div className="relative">
+              <select 
+                value={selectedExerciseId || firstExerciseId || ""} 
+                onChange={(e) => setSelectedExerciseId(e.target.value)}
+                className="bg-slate-800/50 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm"
               >
-                ✕
-              </Button>
+                {exercises.map((exercise: any) => (
+                  <option key={exercise.id} value={exercise.id}>
+                    {exercise.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <WeightProgressionChart 
-              exerciseId={selectedExercise.id} 
-              exerciseName={selectedExercise.name}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        // Empty state when no exercise selected
-        <Card className="glass-card rounded-2xl">
-          <CardContent className="p-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
-              <TrendingUp className="w-8 h-8 text-slate-400" />
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {chartLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="loading-skeleton h-16 rounded"></div>
+              ))}
             </div>
-            <h3 className="text-lg font-semibold text-white mb-2">
-              Selecione um Exercício
-            </h3>
-            <p className="text-slate-400 mb-6">
-              Escolha um exercício acima para ver o progresso de cargas dos últimos 5 dias
-            </p>
-            {exercisesWithData.length === 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-slate-500">
-                  Complete alguns treinos com pesos para ver dados de progresso
-                </p>
-                <p className="text-xs text-slate-600">
-                  💡 Use a busca acima ou os botões de exercícios recentes para acesso rápido
-                </p>
+          ) : chartData.length > 0 ? (
+            <div className="space-y-6">
+              {/* Stats Header */}
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-400">{chartData[chartData.length - 1]?.weight || 0}kg</div>
+                  <div className="text-xs text-slate-400">Último Peso</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-emerald-400">{Math.max(...chartData.map(d => d.weight))}kg</div>
+                  <div className="text-xs text-slate-400">Recorde</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-400">{chartData.length}</div>
+                  <div className="text-xs text-slate-400">Sessões</div>
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {/* Chart */}
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <defs>
+                      <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                        <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#94A3B8' }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#94A3B8' }}
+                      domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="weight"
+                      stroke="#3B82F6"
+                      strokeWidth={3}
+                      fill="url(#weightGradient)"
+                      dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2, fill: '#fff' }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Session details */}
+              <div className="space-y-2">
+                <h5 className="text-sm font-semibold text-slate-300">Histórico Recente</h5>
+                {chartData.slice(-5).reverse().map((entry: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between bg-slate-800/30 rounded-lg p-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                      <div>
+                        <div className="text-sm font-medium text-white">{entry.date}</div>
+                        <div className="text-xs text-slate-400">{entry.workoutName}</div>
+                      </div>
+                    </div>
+                    <div className="text-lg font-bold text-white">{entry.weight}kg</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
+              <p className="text-slate-400">Nenhum dado de peso para {selectedExerciseName}</p>
+              <p className="text-sm text-slate-500 mt-1">
+                Complete treinos com pesos para ver o progresso
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      {/* Empty state when no exercise selected - NOT NEEDED ANYMORE */}
+      {false && (
+        <div></div>
       )}
 
       {/* Loading states */}
-      {(exercisesLoading || summaryLoading) && !selectedExercise && (
+      {(exercisesLoading || chartLoading) && (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <Card key={i} className="glass-card rounded-2xl">
