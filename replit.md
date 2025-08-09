@@ -18,7 +18,13 @@ The server is built with Express.js and TypeScript, utilizing ESM modules. It pr
 
 ## Data Management
 
-The **PRIMARY database** is **Supabase** (PostgreSQL-based), with all operations handled via the `@supabase/supabase-js` SDK. The application is configured to prioritize Supabase as the primary database with PostgreSQL as fallback. Supabase credentials are securely stored in Replit Secrets for seamless deployment. Shared schema definitions are maintained in TypeScript. Data models include users, exercises, workout templates, workout logs, and detailed set tracking. Client-side storage uses LocalStorage for offline data persistence and TanStack Query for optimized data fetching, supporting an offline-first approach with sync capabilities.
+The **PRIMARY database** is **Supabase** (PostgreSQL-based), with all operations handled via the `@supabase/supabase-js` SDK. The application uses priority-based storage configuration:
+
+1. **Supabase SDK** (Primary) - Uses SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+2. **PostgreSQL Direct** (Fallback) - Uses DATABASE_URL for direct database connection
+3. **Memory Storage** (Development) - In-memory fallback for testing
+
+The SupabaseStorage class implements all CRUD operations using the Supabase SDK, providing real-time capabilities, automatic backups, and cloud persistence. Supabase credentials are securely stored in Replit Secrets. The application can extract Supabase configuration from DATABASE_URL when SDK-specific environment variables are not available. Shared schema definitions are maintained in TypeScript. Data models include users, exercises, workout templates, workout logs, and detailed set tracking. Client-side storage uses LocalStorage for offline data persistence and TanStack Query for optimized data fetching, supporting an offline-first approach with sync capabilities.
 
 ## State Management
 
@@ -42,7 +48,7 @@ The project uses TypeScript for type safety, Vite for fast development with hot 
 - **drizzle-zod**: Zod integration for schema validation.
 - **@tanstack/react-query**: Server state management and caching.
 - **pg**: PostgreSQL client.
-- **@supabase/supabase-js**: Supabase SDK for database operations.
+- **@supabase/supabase-js**: Primary Supabase SDK for all database operations with real-time features.
 
 ## Forms and Validation
 - **react-hook-form**: Performant form library.
