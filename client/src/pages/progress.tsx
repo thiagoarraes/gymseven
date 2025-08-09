@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { exerciseProgressApi, exerciseApi, workoutLogApi } from "@/lib/api";
-import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine } from "recharts";
+import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine, Tooltip } from "recharts";
 
 // Weight Progression Chart Component with Area Chart
 function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: string; exerciseName: string }) {
@@ -422,7 +422,7 @@ export default function Progress() {
                   <div className="text-xs text-slate-400">Último Peso</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-emerald-400">{Math.max(...chartData.map(d => d.weight))}kg</div>
+                  <div className="text-2xl font-bold text-emerald-400">{Math.max(...chartData.map((d: any) => d.weight))}kg</div>
                   <div className="text-xs text-slate-400">Recorde</div>
                 </div>
                 <div>
@@ -453,6 +453,21 @@ export default function Progress() {
                       tickLine={false}
                       tick={{ fontSize: 12, fill: '#94A3B8' }}
                       domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#1E293B',
+                        border: '1px solid #475569',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        color: '#F1F5F9'
+                      }}
+                      labelStyle={{ color: '#94A3B8' }}
+                      formatter={(value: any, name: any) => [
+                        <span style={{ color: '#3B82F6', fontWeight: 'bold' }}>{value}kg</span>,
+                        'Peso'
+                      ]}
+                      labelFormatter={(label: any) => `Data: ${label}`}
                     />
                     <Area
                       type="monotone"
