@@ -5,6 +5,7 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Database priority: Supabase is mandatory as the primary database.
 
 # System Architecture
 
@@ -18,11 +19,11 @@ The server is built with Express.js and TypeScript, utilizing ESM modules. It pr
 
 ## Data Management
 
-The **PRIMARY database** is **Supabase** (PostgreSQL-based), with all operations handled via the `@supabase/supabase-js` SDK. The application uses priority-based storage configuration:
+The **MANDATORY database** is **Supabase** (PostgreSQL-based). Supabase is the ONLY supported database for this project, with all operations handled via the `@supabase/supabase-js` SDK. The application requires Supabase configuration:
 
-1. **Supabase SDK** (Primary) - Uses SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
-2. **PostgreSQL Direct** (Fallback) - Uses DATABASE_URL for direct database connection
-3. **Memory Storage** (Development) - In-memory fallback for testing
+1. **Supabase SDK** (REQUIRED) - Uses SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+2. **PostgreSQL Direct** (Limited fallback) - Uses DATABASE_URL for basic functionality
+3. **Memory Storage** (Emergency only) - Temporary storage when no database is configured
 
 The SupabaseStorage class implements all CRUD operations using the Supabase SDK, providing real-time capabilities, automatic backups, and cloud persistence. Supabase credentials are securely stored in Replit Secrets. The application can extract Supabase configuration from DATABASE_URL when SDK-specific environment variables are not available. Shared schema definitions are maintained in TypeScript. Data models include users, exercises, workout templates, workout logs, and detailed set tracking. Client-side storage uses LocalStorage for offline data persistence and TanStack Query for optimized data fetching, supporting an offline-first approach with sync capabilities.
 

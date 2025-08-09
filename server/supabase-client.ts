@@ -30,15 +30,23 @@ function extractSupabaseCredentials(): { url: string | null, key: string | null 
 
 const { url: supabaseUrl, key: supabaseKey } = extractSupabaseCredentials();
 
+// Se não tiver credenciais específicas, verifica se pode extrair do DATABASE_URL
+if (!supabaseUrl && process.env.DATABASE_URL) {
+  console.log('⚠️ Supabase é prioritário mas credenciais não encontradas');
+  console.log('💡 Para usar Supabase SDK, configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY');
+  console.log('📋 Ou forneça DATABASE_URL do Supabase');
+  throw new Error('Supabase configuration missing - please provide credentials');
+}
+
 if (!supabaseUrl || !supabaseKey) {
   throw new Error(`
-  Missing Supabase configuration. Please provide either:
-  1. SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables, OR
-  2. DATABASE_URL with Supabase connection string
+  🔴 SUPABASE É OBRIGATÓRIO NESTE PROJETO
   
-  For Supabase setup:
-  - SUPABASE_URL: https://your-project.supabase.co
-  - SUPABASE_SERVICE_ROLE_KEY: your service role key from Supabase dashboard
+  Configure as credenciais do Supabase:
+  1. SUPABASE_URL: https://seu-projeto.supabase.co
+  2. SUPABASE_SERVICE_ROLE_KEY: sua chave de serviço
+  
+  OU forneça DATABASE_URL com string de conexão do Supabase
   `);
 }
 
@@ -47,8 +55,14 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'gymseven-replit'
+    }
   }
 });
 
-console.log('✅ Supabase client initialized successfully');
-console.log(`🔗 Connected to: ${supabaseUrl}`);
+console.log('✅ Supabase client inicializado com sucesso');
+console.log(`🔗 Conectado a: ${supabaseUrl}`);
+console.log('🎯 Supabase SDK configurado como banco principal');
