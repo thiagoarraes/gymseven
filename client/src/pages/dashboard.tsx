@@ -227,7 +227,7 @@ export default function Dashboard() {
                 Pronto para progredir carga hoje?
               </p>
             </div>
-            <div className="relative z-10 flex-shrink-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20 p-3 sm:p-4 backdrop-blur-sm w-full sm:w-auto">
+            <div className="relative z-10 flex-shrink-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20 p-3 sm:p-4 backdrop-blur-sm">
               <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
                 <div className="text-3xl sm:text-4xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
@@ -248,9 +248,9 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                      <span className="text-sm text-slate-400 whitespace-nowrap">Último treino foi de</span>
+                      <span className="text-sm text-slate-400 whitespace-nowrap">Último treino de</span>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20 w-fit">
-                        {recentWorkouts[0]?.name || "Treino Personalizado"}
+                        Peito, ombro e tríceps
                       </span>
                     </div>
                     <div className="text-slate-300 font-medium text-sm sm:text-base">
