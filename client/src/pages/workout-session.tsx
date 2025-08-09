@@ -460,33 +460,39 @@ export default function WorkoutSession() {
       {/* Celebration Overlay */}
       {showCelebration && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          {/* Celebration Message */}
-          <Card className="glass-card rounded-3xl border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-lg w-full max-w-md mx-auto mb-20">
-            <CardContent className="p-8 text-center">
-              <div className="text-6xl mb-4">
-                🏆
+          {/* Completion Modal */}
+          <Card className="glass-card rounded-2xl border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-blue-500/5 backdrop-blur-lg w-full max-w-sm mx-auto mb-20">
+            <CardContent className="p-6 text-center space-y-6">
+              <div className="space-y-3">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-white">Treino Concluído</h2>
+                <p className="text-slate-400 text-sm">
+                  Parabéns! Mais um passo em direção aos seus objetivos.
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-                Treino Finalizado!
-              </h2>
-              <p className="text-lg text-white mb-2">
-                🔥 Parabéns, guerreiro(a)! 🔥
-              </p>
-              <p className="text-slate-300 mb-4">
-                Mais um treino destruído! Você está cada dia mais forte. Continue assim que logo você vai estar quebrando tudo! 💪
-              </p>
-              <div className="flex items-center justify-center space-x-2 text-emerald-400 mb-6">
-                <span className="text-2xl">⏱️</span>
-                <span className="text-xl font-semibold">
-                  {formatTime(workoutDuration)}
-                </span>
+              
+              <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                <div className="flex items-center justify-center space-x-2 text-blue-300">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-lg font-medium">
+                    {formatTime(workoutDuration)}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 mt-1">Duração total</div>
               </div>
+              
               <Button
                 onClick={() => finishWorkoutMutation.mutate()}
-                className="w-full gradient-accent py-3 text-lg font-semibold rounded-xl hover:scale-105 transition-transform"
+                className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 py-3 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-lg"
                 disabled={finishWorkoutMutation.isPending}
               >
-                {finishWorkoutMutation.isPending ? "Salvando..." : "Finalizar Treino 🎯"}
+                {finishWorkoutMutation.isPending ? "Finalizando..." : "Finalizar Treino"}
               </Button>
             </CardContent>
           </Card>
