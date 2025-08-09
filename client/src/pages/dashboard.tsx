@@ -486,8 +486,9 @@ export default function Dashboard() {
                             
                             if (diffDays === 1) return "Hoje";
                             if (diffDays === 2) return "Ontem";
-                            if (diffDays <= 7) return `${diffDays - 1} dias`;
-                            return `${Math.floor((diffDays - 1) / 7)} sem`;
+                            if (diffDays <= 7) return `${diffDays - 1} dias atrás`;
+                            const weeks = Math.floor((diffDays - 1) / 7);
+                            return weeks === 1 ? "1 semana atrás" : `${weeks} semanas atrás`;
                           }
                           return "N/A";
                         })()
