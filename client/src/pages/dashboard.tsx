@@ -468,17 +468,33 @@ export default function Dashboard() {
                 <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 border border-purple-500/20">
                   <div className="flex items-center space-x-2 mb-2">
                     <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                      <BarChart3 className="w-4 h-4 text-purple-400" />
+                      <Calendar className="w-4 h-4 text-purple-400" />
                     </div>
-                    <span className="text-sm font-medium text-purple-400">Progresso</span>
+                    <span className="text-sm font-medium text-purple-400">Último Treino</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
-                    {chartData.length > 1 && chartData.some((d: any) => d.weight > 0)
-                      ? `+${Math.max(0, Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight)) - Math.min(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight)))}kg`
-                      : "0kg"
+                    {chartData.length > 0 
+                      ? (() => {
+                          // Get the most recent date from chartData
+                          const sortedData = chartData.sort((a: any, b: any) => new Date(b.fullDate || b.date).getTime() - new Date(a.fullDate || a.date).getTime());
+                          const lastDate = sortedData[0]?.fullDate || sortedData[0]?.date;
+                          if (lastDate) {
+                            const date = new Date(lastDate);
+                            const today = new Date();
+                            const diffTime = Math.abs(today.getTime() - date.getTime());
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDays === 1) return "Hoje";
+                            if (diffDays === 2) return "Ontem";
+                            if (diffDays <= 7) return `${diffDays - 1} dias`;
+                            return `${Math.floor((diffDays - 1) / 7)} sem`;
+                          }
+                          return "N/A";
+                        })()
+                      : "Nunca"
                     }
                   </div>
-                  <div className="text-xs text-slate-400">Evolução total</div>
+                  <div className="text-xs text-slate-400">Última execução</div>
                 </div>
               </div>
             )}
