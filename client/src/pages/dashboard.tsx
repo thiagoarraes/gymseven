@@ -242,18 +242,21 @@ export default function Dashboard() {
           <div className="relative z-10">
             {recentWorkouts.length > 0 ? (
               <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-4 sm:p-6 border border-slate-600/30">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-4 items-start lg:items-center">
+                  {/* Icon */}
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
                     <Play className="w-6 h-6 text-blue-400" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                      <span className="text-sm text-slate-400 whitespace-nowrap">Último treino de</span>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20 w-fit">
+                  
+                  {/* Content */}
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm text-slate-400">Último treino de</span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
                         Peito, ombro e tríceps
                       </span>
                     </div>
-                    <div className="text-slate-300 font-medium text-sm sm:text-base">
+                    <div className="text-slate-300 font-medium text-sm lg:text-base">
                       {formatDate(recentWorkouts[0]?.startTime)} • {
                         recentWorkouts[0]?.endTime ? 
                         calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
@@ -261,13 +264,17 @@ export default function Dashboard() {
                       }
                     </div>
                   </div>
-                  <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-4 sm:px-6 py-2 sm:py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full sm:w-auto flex-shrink-0"
-                    onClick={() => navigate("/workouts")}
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    <span className="whitespace-nowrap">Iniciar Novo</span>
-                  </Button>
+                  
+                  {/* Button */}
+                  <div className="justify-self-start lg:justify-self-end">
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-6 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25"
+                      onClick={() => navigate("/workouts")}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      <span className="whitespace-nowrap">Iniciar Novo</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
