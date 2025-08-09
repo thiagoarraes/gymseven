@@ -211,10 +211,8 @@ export default function Progress() {
   const chartData = useMemo(() => {
     if (!weightHistory || weightHistory.length === 0) return [];
     
-    // Sort by date and prepare data for area chart
-    return [...weightHistory]
-      .reverse() // Oldest to newest for chronological display
-      .map((entry, index) => {
+    // Data already comes from API in chronological order (oldest to newest)
+    return weightHistory.map((entry, index) => {
         // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
         const dateParts = entry.date.split('/');
         let formattedDate = entry.date;

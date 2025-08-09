@@ -377,9 +377,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Sort by date (most recent first) and limit results
-      weightHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      const limitedHistory = weightHistory.slice(0, parseInt(limit as string));
+      // Sort by date (oldest first) for chronological chart display
+      weightHistory.sort((a, b) => {
+        const dateA = a.date.split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+        const dateB = b.date.split('/').reverse().join('-');
+        return new Date(dateA).getTime() - new Date(dateB).getTime();
+      });
+      const limitedHistory = weightHistory.slice(-parseInt(limit as string)); // Take the most recent N entries
       
       res.json(limitedHistory);
     } catch (error) {
