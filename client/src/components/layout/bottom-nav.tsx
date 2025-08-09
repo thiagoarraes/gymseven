@@ -8,7 +8,7 @@ export function BottomNavigation() {
     { id: "dashboard", label: "Início", icon: Home, path: "/" },
     { id: "exercises", label: "Exercícios", icon: Dumbbell, path: "/exercicios" },
     { id: "workouts", label: "Treinos", icon: List, path: "/treinos" },
-    { id: "progress", label: "Progresso", icon: TrendingUp, path: "/progress" },
+    { id: "progress", label: "Progresso", icon: TrendingUp, path: "/progresso" },
   ];
 
   return (

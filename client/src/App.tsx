@@ -33,7 +33,7 @@ function Router() {
           <Route path="/exercicios" component={ExercisesRoute} />
           <Route path="/treinos" component={Workouts} />
           <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
-          <Route path="/progress" component={Progress} />
+          <Route path="/progresso" component={Progress} />
           <Route path="/workout-session/:id" component={WorkoutSession} />
           <Route path="/workout-history" component={WorkoutHistory} />
           <Route component={NotFound} />
