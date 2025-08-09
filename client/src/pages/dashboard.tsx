@@ -218,42 +218,42 @@ export default function Dashboard() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
           
           {/* Header Section with better spacing */}
-          <div className="flex items-start justify-between mb-8 gap-6">
-            <div className="relative z-10 flex-1 space-y-3">
-              <h2 className="text-3xl font-black text-white bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">
+          <div className="flex flex-col sm:flex-row items-start justify-between mb-6 sm:mb-8 gap-4 sm:gap-6">
+            <div className="relative z-10 flex-1 space-y-2 sm:space-y-3">
+              <h2 className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text">
                 Olá, Seven!🔥
               </h2>
-              <p className="text-slate-300 text-lg font-medium">
+              <p className="text-slate-300 text-base sm:text-lg font-medium">
                 Pronto para progredir carga hoje?
               </p>
             </div>
-            <div className="relative z-10 flex-shrink-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20 p-4 backdrop-blur-sm">
-              <div className="flex items-center justify-center space-x-3 mb-2">
-                <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
-                <div className="text-4xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
+            <div className="relative z-10 flex-shrink-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 rounded-2xl border border-emerald-500/20 p-3 sm:p-4 backdrop-blur-sm w-full sm:w-auto">
+              <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                <div className="text-3xl sm:text-4xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
                   {stats.currentStreak}
                 </div>
               </div>
-              <div className="text-sm text-emerald-400 font-semibold text-center tracking-wide whitespace-nowrap">dias em sequência</div>
+              <div className="text-xs sm:text-sm text-emerald-400 font-semibold text-center tracking-wide whitespace-nowrap">dias em sequência</div>
             </div>
           </div>
 
           {/* Last Workout Info */}
           <div className="relative z-10">
             {recentWorkouts.length > 0 ? (
-              <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-6 border border-slate-600/30">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
+              <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-4 sm:p-6 border border-slate-600/30">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
                     <Play className="w-6 h-6 text-blue-400" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm text-slate-400">Último treino foi de</span>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
+                      <span className="text-sm text-slate-400 whitespace-nowrap">Último treino foi de</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20 w-fit">
                         {recentWorkouts[0]?.name || "Treino Personalizado"}
                       </span>
                     </div>
-                    <div className="text-slate-300 font-medium">
+                    <div className="text-slate-300 font-medium text-sm sm:text-base">
                       {formatDate(recentWorkouts[0]?.startTime)} • {
                         recentWorkouts[0]?.endTime ? 
                         calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
@@ -262,27 +262,27 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-6 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-4 sm:px-6 py-2 sm:py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full sm:w-auto flex-shrink-0"
                     onClick={() => navigate("/workouts")}
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    Iniciar Novo
+                    <span className="whitespace-nowrap">Iniciar Novo</span>
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-6 border border-slate-600/30 text-center">
+              <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-4 sm:p-6 border border-slate-600/30 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700/50 flex items-center justify-center">
                   <Play className="w-8 h-8 text-slate-400" />
                 </div>
-                <p className="text-slate-300 font-medium mb-1">Nenhum treino registrado ainda</p>
+                <p className="text-slate-300 font-medium mb-1 text-sm sm:text-base">Nenhum treino registrado ainda</p>
                 <p className="text-slate-400 text-sm mb-6">Comece sua jornada fitness hoje mesmo!</p>
                 <Button 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-6 sm:px-8 py-2 sm:py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full sm:w-auto"
                   onClick={() => navigate("/workouts")}
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Começar Primeiro Treino
+                  <span className="whitespace-nowrap">Começar Primeiro Treino</span>
                 </Button>
               </div>
             )}
