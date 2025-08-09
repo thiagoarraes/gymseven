@@ -235,82 +235,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get exercises that have been used in completed workouts with weight data
   app.get('/api/exercises-with-progress', async (req, res) => {
     try {
-      const supabaseStorage = storage as any;
-      
-      // Get exercises with actual weight data in completed workouts
-      const { data: exercisesWithWeights, error } = await supabaseStorage.supabase
-        .from('workoutLogSets')
-        .select(`
-          weight,
-          workoutLogExercise:workoutLogExercises!inner(
-            exerciseId,
-            exercise:exercises(*),
-            workoutLog:workoutLogs!inner(startTime, endTime, name)
-          )
-        `)
-        .gt('weight', 0)
-        .not('workoutLogExercises.workoutLogs.endTime', 'is', null); // Only completed workouts
-      
-      if (error) {
-        console.error('Error fetching exercises with weights:', error);
-        throw error;
-      }
-      
-      // Group by exercise and calculate stats
-      const exerciseMap = new Map();
-      
-      for (const set of exercisesWithWeights || []) {
-        const exerciseId = set.workoutLogExercise.exerciseId;
-        const exercise = set.workoutLogExercise.exercise;
-        const workoutDate = set.workoutLogExercise.workoutLog.startTime;
-        const weight = set.weight;
+      // Check if we have Supabase storage
+      if ('supabase' in storage) {
+        const supabaseStorage = storage as any;
         
-        if (exercise && weight > 0) {
-          if (!exerciseMap.has(exerciseId)) {
-            exerciseMap.set(exerciseId, {
-              ...exercise,
-              weights: [],
-              lastUsed: workoutDate
-            });
-          }
-          
-          const exerciseData = exerciseMap.get(exerciseId);
-          exerciseData.weights.push({
+        // Get exercises with actual weight data in completed workouts
+        const { data: exercisesWithWeights, error } = await supabaseStorage.supabase
+          .from('workoutLogSets')
+          .select(`
             weight,
-            date: workoutDate
-          });
+            workoutLogExercise:workoutLogExercises!inner(
+              exerciseId,
+              exercise:exercises(*),
+              workoutLog:workoutLogs!inner(startTime, endTime, name)
+            )
+          `)
+          .gt('weight', 0)
+          .not('workoutLogExercises.workoutLogs.endTime', 'is', null); // Only completed workouts
+        
+        if (error) {
+          console.error('Error fetching exercises with weights:', error);
+          throw error;
+        }
+        
+        // Group by exercise and calculate stats
+        const exerciseMap = new Map();
+        
+        for (const set of exercisesWithWeights || []) {
+          const exerciseId = set.workoutLogExercise.exerciseId;
+          const exercise = set.workoutLogExercise.exercise;
+          const workoutDate = set.workoutLogExercise.workoutLog.startTime;
+          const weight = set.weight;
           
-          // Update last used date if this workout is more recent
-          if (new Date(workoutDate) > new Date(exerciseData.lastUsed)) {
-            exerciseData.lastUsed = workoutDate;
+          if (exercise && weight > 0) {
+            if (!exerciseMap.has(exerciseId)) {
+              exerciseMap.set(exerciseId, {
+                ...exercise,
+                weights: [],
+                lastUsed: workoutDate
+              });
+            }
+            
+            const exerciseData = exerciseMap.get(exerciseId);
+            exerciseData.weights.push({
+              weight,
+              date: workoutDate
+            });
+            
+            // Update last used date if this workout is more recent
+            if (new Date(workoutDate) > new Date(exerciseData.lastUsed)) {
+              exerciseData.lastUsed = workoutDate;
+            }
           }
         }
+        
+        // Calculate latest weight for each exercise
+        const exercisesWithProgress = Array.from(exerciseMap.values())
+          .map((exercise: any) => {
+            // Sort weights by date and get the latest
+            const sortedWeights = exercise.weights.sort((a: any, b: any) => 
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+            
+            return {
+              id: exercise.id,
+              name: exercise.name,
+              muscleGroup: exercise.muscleGroup,
+              description: exercise.description,
+              imageUrl: exercise.imageUrl,
+              videoUrl: exercise.videoUrl,
+              createdAt: exercise.createdAt,
+              lastWeight: sortedWeights[0].weight,
+              lastUsed: exercise.lastUsed
+            };
+          })
+          .filter((exercise: any) => exercise.lastWeight > 0) // Only exercises with actual weight data
+          .sort((a: any, b: any) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime());
+        
+        res.json(exercisesWithProgress);
+      } else {
+        // Fallback for non-Supabase storage: return all exercises without weight data
+        const exercises = await storage.getAllExercises();
+        res.json(exercises.map(exercise => ({
+          ...exercise,
+          lastWeight: 0,
+          lastUsed: exercise.createdAt || new Date().toISOString()
+        })));
       }
-      
-      // Calculate latest weight for each exercise
-      const exercisesWithProgress = Array.from(exerciseMap.values())
-        .map((exercise: any) => {
-          // Sort weights by date and get the latest
-          const sortedWeights = exercise.weights.sort((a: any, b: any) => 
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
-          
-          return {
-            id: exercise.id,
-            name: exercise.name,
-            muscleGroup: exercise.muscleGroup,
-            description: exercise.description,
-            imageUrl: exercise.imageUrl,
-            videoUrl: exercise.videoUrl,
-            createdAt: exercise.createdAt,
-            lastWeight: sortedWeights[0].weight,
-            lastUsed: exercise.lastUsed
-          };
-        })
-        .filter((exercise: any) => exercise.lastWeight > 0) // Only exercises with actual weight data
-        .sort((a: any, b: any) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime());
-      
-      res.json(exercisesWithProgress);
     } catch (error) {
       console.error('Error fetching exercises with progress:', error);
       res.status(500).json({ message: "Erro ao buscar exercícios com progresso" });
@@ -323,69 +334,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { exerciseId } = req.params;
       const { limit = 10 } = req.query;
       
-      const supabaseStorage = storage as any;
-      
-      // Get workout log exercises for this specific exercise
-      const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
-        .from('workoutLogExercises')
-        .select(`
-          *,
-          workoutLog:workoutLogs(*)
-        `)
-        .eq('exerciseId', exerciseId)
-        .order('order');
-
-      if (logExercisesError) {
-        console.error('Error fetching log exercises:', logExercisesError);
-        throw logExercisesError;
-      }
-
-      if (!logExercises || logExercises.length === 0) {
-        return res.json([]);
-      }
-
-      // Get weight history for each workout session
-      const weightHistory = [];
-      
-      for (const logExercise of logExercises) {
-        // Include all workouts (not just completed ones) to show progress
-        // if (!logExercise.workoutLog?.endTime) continue;
+      // Check if we have Supabase storage
+      if ('supabase' in storage) {
+        const supabaseStorage = storage as any;
         
-        // Get sets for this exercise in this workout
-        const { data: sets } = await supabaseStorage.supabase
-          .from('workoutLogSets')
-          .select('*')
-          .eq('logExerciseId', logExercise.id)
-          .not('weight', 'is', null)
-          .order('setNumber');
+        // Get workout log exercises for this specific exercise
+        const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
+          .from('workoutLogExercises')
+          .select(`
+            *,
+            workoutLog:workoutLogs(*)
+          `)
+          .eq('exerciseId', exerciseId)
+          .order('order');
+
+        if (logExercisesError) {
+          console.error('Error fetching log exercises:', logExercisesError);
+          throw logExercisesError;
+        }
+
+        if (!logExercises || logExercises.length === 0) {
+          return res.json([]);
+        }
+
+        // Get weight history for each workout session
+        const weightHistory = [];
         
-        if (sets && sets.length > 0) {
-          // Find the maximum weight used in this workout
-          const maxWeight = Math.max(...sets.map((set: any) => set.weight || 0));
+        for (const logExercise of logExercises) {
+          // Include all workouts (not just completed ones) to show progress
+          // if (!logExercise.workoutLog?.endTime) continue;
           
-          if (maxWeight > 0) {
-            const dataPoint = {
-              date: new Date(logExercise.workoutLog.startTime).toLocaleDateString('pt-BR'),
-              weight: maxWeight,
-              workoutName: logExercise.workoutLog.name,
-              totalSets: sets.length,
-              allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
-            };
+          // Get sets for this exercise in this workout
+          const { data: sets } = await supabaseStorage.supabase
+            .from('workoutLogSets')
+            .select('*')
+            .eq('logExerciseId', logExercise.id)
+            .not('weight', 'is', null)
+            .order('setNumber');
+          
+          if (sets && sets.length > 0) {
+            // Find the maximum weight used in this workout
+            const maxWeight = Math.max(...sets.map((set: any) => set.weight || 0));
             
-            weightHistory.push(dataPoint);
+            if (maxWeight > 0) {
+              const dataPoint = {
+                date: new Date(logExercise.workoutLog.startTime).toLocaleDateString('pt-BR'),
+                weight: maxWeight,
+                workoutName: logExercise.workoutLog.name,
+                totalSets: sets.length,
+                allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
+              };
+              
+              weightHistory.push(dataPoint);
+            }
           }
         }
+        
+        // Sort by date (oldest first) for chronological chart display
+        weightHistory.sort((a, b) => {
+          const dateA = a.date.split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+          const dateB = b.date.split('/').reverse().join('-');
+          return new Date(dateA).getTime() - new Date(dateB).getTime();
+        });
+        const limitedHistory = weightHistory.slice(-parseInt(limit as string)); // Take the most recent N entries
+        
+        res.json(limitedHistory);
+      } else {
+        // Fallback for non-Supabase storage: return empty array
+        res.json([]);
       }
-      
-      // Sort by date (oldest first) for chronological chart display
-      weightHistory.sort((a, b) => {
-        const dateA = a.date.split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
-        const dateB = b.date.split('/').reverse().join('-');
-        return new Date(dateA).getTime() - new Date(dateB).getTime();
-      });
-      const limitedHistory = weightHistory.slice(-parseInt(limit as string)); // Take the most recent N entries
-      
-      res.json(limitedHistory);
     } catch (error) {
       console.error('Error fetching exercise weight history:', error);
       res.status(500).json({ message: "Erro ao buscar histórico de peso do exercício" });
