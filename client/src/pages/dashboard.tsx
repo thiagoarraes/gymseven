@@ -671,20 +671,23 @@ export default function Dashboard() {
                           sets: []
                         };
                       }
-                      // Combine sets from all instances of this exercise
+                      // Combine sets from all instances of this exercise, avoiding duplicates
                       if (exercise.sets && exercise.sets.length > 0) {
-                        acc[key].sets.push(...exercise.sets);
+                        exercise.sets.forEach((set: any) => {
+                          // Only add if not already present (check by set ID)
+                          const exists = acc[key].sets.find((existingSet: any) => existingSet.id === set.id);
+                          if (!exists) {
+                            acc[key].sets.push(set);
+                          }
+                        });
                       }
                       return acc;
                     }, {});
 
-                    // Convert back to array and remove duplicate sets
+                    // Convert back to array and sort sets by setNumber
                     const uniqueExercises = Object.values(exerciseGroups).map((exercise: any) => ({
                       ...exercise,
-                      sets: exercise.sets.filter((set: any, index: number, arr: any[]) => {
-                        const firstSetIndex = arr.findIndex((s: any) => s.setNumber === set.setNumber && s.id === set.id);
-                        return firstSetIndex === index;
-                      }).sort((a: any, b: any) => a.setNumber - b.setNumber)
+                      sets: exercise.sets.sort((a: any, b: any) => a.setNumber - b.setNumber)
                     }));
 
                     return uniqueExercises.map((exercise: any, index: number) => {
