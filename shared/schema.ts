@@ -121,13 +121,12 @@ export type WorkoutLogExercise = typeof workoutLogExercises.$inferSelect;
 export type InsertWorkoutLogSet = z.infer<typeof insertWorkoutLogSetSchema>;
 export type WorkoutLogSet = typeof workoutLogSets.$inferSelect;
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
 
 // Muscle groups enum
 export const MUSCLE_GROUPS = [
