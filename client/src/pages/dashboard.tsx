@@ -54,16 +54,32 @@ export default function Dashboard() {
     // Sort by date and prepare data for area chart
     return [...weightHistory]
       .reverse() // Oldest to newest for chronological display
-      .map((entry, index) => ({
-        session: index + 1,
-        weight: entry.weight || entry.maxWeight || 0, // Use 'weight' field from API
-        date: new Date(entry.date).toLocaleDateString('pt-BR', { 
-          month: 'short', 
-          day: 'numeric' 
-        }),
-        fullDate: entry.date,
-        workoutName: entry.workoutName
-      }));
+      .map((entry, index) => {
+        // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
+        const dateParts = entry.date.split('/');
+        let formattedDate = entry.date;
+        
+        // Try to create a proper date if the format is DD/MM/YYYY
+        if (dateParts.length === 3) {
+          const day = dateParts[0];
+          const month = dateParts[1];
+          const year = dateParts[2];
+          
+          // Create date object and format it
+          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          if (!isNaN(dateObj.getTime())) {
+            formattedDate = `${day}/${month}`;
+          }
+        }
+        
+        return {
+          session: index + 1,
+          weight: entry.weight || entry.maxWeight || 0,
+          date: formattedDate,
+          fullDate: entry.date,
+          workoutName: entry.workoutName
+        };
+      });
   }, [weightHistory]);
 
   // Fetch workout summary when modal opens
