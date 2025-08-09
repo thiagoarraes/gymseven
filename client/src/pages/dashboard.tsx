@@ -527,8 +527,8 @@ export default function Dashboard() {
                             color: '#F1F5F9',
                             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
                           }}
-                          formatter={(value) => [`${value}kg`, 'Peso Máximo']}
-                          labelFormatter={(label) => `Data: ${label}`}
+                          formatter={(value) => [`${value}kg`, '']}
+                          labelFormatter={(label) => label}
                         />
                         <Area
                           type="monotone"

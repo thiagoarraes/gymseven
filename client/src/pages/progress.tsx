@@ -465,9 +465,9 @@ export default function Progress() {
                       labelStyle={{ color: '#94A3B8' }}
                       formatter={(value: any, name: any) => [
                         <span style={{ color: '#3B82F6', fontWeight: 'bold' }}>{value}kg</span>,
-                        'Peso'
+                        ''
                       ]}
-                      labelFormatter={(label: any) => `Data: ${label}`}
+                      labelFormatter={(label: any) => label}
                     />
                     <Area
                       type="monotone"
