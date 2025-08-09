@@ -26,10 +26,12 @@ export default function Dashboard() {
     queryFn: exerciseApi.getAll,
   });
 
-  // Auto-select first exercise for progress chart
+  // Auto-select first exercise for progress chart, prefer Supino reto
   const firstExerciseId = useMemo(() => {
     if (exercises.length > 0 && !selectedExerciseId) {
-      return exercises[0].id;
+      // Prefer "Supino reto" as it has known data, otherwise use first exercise
+      const supinoReto = exercises.find(e => e.name === "Supino reto");
+      return supinoReto ? supinoReto.id : exercises[0].id;
     }
     return selectedExerciseId;
   }, [exercises, selectedExerciseId]);
@@ -317,7 +319,7 @@ export default function Dashboard() {
               <div className="relative">
                 <Select 
                   value={selectedExerciseId || firstExerciseId || ""} 
-                  onValueChange={setSelectedExerciseId}
+                  onValueChange={(value) => setSelectedExerciseId(value)}
                 >
                   <SelectTrigger className="w-56 bg-slate-800/50 border border-slate-700 text-slate-200 transition-all duration-200 hover:bg-slate-700/50">
                     <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
