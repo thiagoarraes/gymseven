@@ -226,108 +226,98 @@ export default function Dashboard() {
               Pronto para progredir carga hoje?
             </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Last Workout & Streak Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Last Workout Card */}
-        <Card className="neo-card rounded-2xl hover-lift overflow-hidden">
-          <CardContent className="p-6 relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-xl"></div>
-            
-            {recentWorkouts.length > 0 ? (
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
-                    <Play className="w-6 h-6 text-blue-400" />
+          {/* Last Workout & Streak Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
+            {/* Last Workout Card */}
+            <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-5 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200">
+              {recentWorkouts.length > 0 ? (
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
+                      <Play className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white">Último Treino</h3>
+                      <p className="text-xs text-slate-400">Suas atividades recentes</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">Último Treino</h3>
-                    <p className="text-sm text-slate-400">Suas atividades recentes</p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm text-slate-400">Treino de</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                        {recentWorkouts[0]?.name || "Peito, ombro e tríceps"}
+                      </span>
+                    </div>
+                    <div className="text-slate-300 font-medium text-sm">
+                      {formatDate(recentWorkouts[0]?.startTime)} • {
+                        recentWorkouts[0]?.endTime ? 
+                        calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
+                        "Em andamento"
+                      }
+                    </div>
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg px-4 py-2 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-sm"
+                      onClick={() => navigate("/treinos")}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Iniciar Novo Treino
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm text-slate-400">Treino de</span>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
-                      {recentWorkouts[0]?.name || "Peito, ombro e tríceps"}
-                    </span>
+              ) : (
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center">
+                    <Play className="w-6 h-6 text-slate-400" />
                   </div>
-                  <div className="text-slate-300 font-medium">
-                    {formatDate(recentWorkouts[0]?.startTime)} • {
-                      recentWorkouts[0]?.endTime ? 
-                      calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
-                      "Em andamento"
-                    }
-                  </div>
+                  <h3 className="text-base font-bold text-white mb-2">Primeiro Treino</h3>
+                  <p className="text-slate-400 text-xs mb-3">Comece sua jornada fitness hoje!</p>
                   <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-6 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full mt-4"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg px-4 py-2 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-sm"
                     onClick={() => navigate("/treinos")}
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    Iniciar Novo Treino
+                    Começar Primeiro Treino
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="relative z-10 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center">
-                  <Play className="w-8 h-8 text-slate-400" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Primeiro Treino</h3>
-                <p className="text-slate-400 text-sm mb-4">Comece sua jornada fitness hoje!</p>
-                <Button 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-6 py-3 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full"
-                  onClick={() => navigate("/treinos")}
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Começar Primeiro Treino
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </div>
 
-        {/* Streak Card */}
-        <Card className="neo-card rounded-2xl hover-lift overflow-hidden">
-          <CardContent className="p-6 relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-full blur-xl"></div>
-            
-            <div className="relative z-10">
+            {/* Streak Card */}
+            <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-5 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-200">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-emerald-500/30">
-                  <Flame className="w-6 h-6 text-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-emerald-500/30">
+                  <Flame className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Sequência</h3>
-                  <p className="text-sm text-slate-400">Dias consecutivos</p>
+                  <h3 className="text-base font-bold text-white">Sequência</h3>
+                  <p className="text-xs text-slate-400">Dias consecutivos</p>
                 </div>
               </div>
               
-              <div className="text-center py-4">
-                <div className="flex items-center justify-center space-x-3 mb-3">
-                  <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
-                  <div className="text-4xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
+              <div className="text-center py-3">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                  <div className="text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
                     {stats.currentStreak}
                   </div>
-                  <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
                 </div>
-                <div className="text-sm text-emerald-400 font-semibold tracking-wide">
+                <div className="text-xs text-emerald-400 font-semibold tracking-wide mb-2">
                   dias em sequência
                 </div>
                 {stats.currentStreak > 0 && (
-                  <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                     Continue assim! 💪
                   </div>
                 )}
               </div>
               
-              <div className="mt-4 pt-4 border-t border-slate-700/50">
+              <div className="mt-3 pt-3 border-t border-slate-700/50">
                 <div className="text-center">
                   <div className="text-xs text-slate-400 mb-1">Próximo objetivo</div>
-                  <div className="text-sm font-medium text-slate-300">
+                  <div className="text-xs font-medium text-slate-300">
                     {stats.currentStreak < 7 ? `${7 - stats.currentStreak} dias para 1 semana` :
                      stats.currentStreak < 30 ? `${30 - stats.currentStreak} dias para 1 mês` :
                      'Mantenha o ritmo!'}
@@ -335,9 +325,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Card 1: Treinos desta semana */}
