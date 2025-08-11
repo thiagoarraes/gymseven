@@ -65,6 +65,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.put('/api/auth/profile', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const updateData = updateUserSchema.parse(req.body);
+      
+      const updatedUser = await storage.updateUser(req.user!.id, updateData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json({ user: userWithoutPassword });
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: 'Dados inválidos', 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   app.post("/api/auth/change-password", authenticateToken, async (req: AuthRequest, res) => {
     try {
       await changeUserPassword(req.user!.id, req.body);

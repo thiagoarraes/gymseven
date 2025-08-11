@@ -13,6 +13,8 @@ import Progress from "@/pages/progress";
 import WorkoutSession from "@/pages/workout-session";
 import WorkoutTemplateEditor from "@/pages/workout-template-editor";
 import WorkoutHistory from "@/pages/workout-history";
+import Profile from "@/pages/profile";
+import Settings from "@/pages/settings";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import NotFound from "@/pages/not-found";
@@ -39,6 +41,8 @@ function AuthenticatedRouter() {
           <Route path="/progresso" component={Progress} />
           <Route path="/workout-session/:id" component={WorkoutSession} />
           <Route path="/workout-history" component={WorkoutHistory} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/settings" component={Settings} />
           <Route path="/login" component={Dashboard} />
           <Route path="/register" component={Dashboard} />
           <Route component={NotFound} />

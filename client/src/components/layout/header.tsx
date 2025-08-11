@@ -1,4 +1,5 @@
 import { User, Settings, LogOut } from "lucide-react";
+import { Link } from "wouter";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -58,14 +59,18 @@ export function Header() {
                   <p className="text-xs text-slate-400">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator className="bg-slate-700" />
-                <DropdownMenuItem className="text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Perfil</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configurações</span>
-                </DropdownMenuItem>
+                <Link href="/profile">
+                  <DropdownMenuItem className="text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Perfil</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/settings">
+                  <DropdownMenuItem className="text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Configurações</span>
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator className="bg-slate-700" />
                 <DropdownMenuItem 
                   className="text-red-400 hover:bg-red-900/20 hover:text-red-300 cursor-pointer"
