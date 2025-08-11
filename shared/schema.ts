@@ -5,8 +5,61 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  dateOfBirth: timestamp("date_of_birth"),
+  height: real("height"), // em cm
+  weight: real("weight"), // em kg
+  activityLevel: text("activity_level").default("moderado"), // sedentário, leve, moderado, intenso, atleta
+  fitnessGoals: text("fitness_goals").array().default(sql`ARRAY[]::text[]`), // ganhar massa, perder peso, manter forma, etc.
+  profileImageUrl: text("profile_image_url"),
+  experienceLevel: text("experience_level").default("iniciante"), // iniciante, intermediário, avançado
+  preferredWorkoutDuration: integer("preferred_workout_duration").default(60), // em minutos
+  isActive: boolean("is_active").default(true),
+  emailVerified: boolean("email_verified").default(false),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tabela para histórico de peso
+export const weightHistory = pgTable("weight_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  weight: real("weight").notNull(),
+  date: timestamp("date").defaultNow(),
+  notes: text("notes"),
+});
+
+// Tabela para objetivos pessoais
+export const userGoals = pgTable("user_goals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // weight_loss, muscle_gain, strength, endurance
+  targetValue: real("target_value"),
+  currentValue: real("current_value"),
+  unit: text("unit"), // kg, lbs, reps, etc.
+  targetDate: timestamp("target_date"),
+  isCompleted: boolean("is_completed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tabela para preferências do usuário
+export const userPreferences = pgTable("user_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  theme: text("theme").default("dark"), // dark, light, auto
+  units: text("units").default("metric"), // metric, imperial
+  language: text("language").default("pt-BR"),
+  notifications: boolean("notifications").default(true),
+  soundEffects: boolean("sound_effects").default(true),
+  restTimerAutoStart: boolean("rest_timer_auto_start").default(true),
+  defaultRestTime: integer("default_rest_time").default(90), // em segundos
+  weekStartsOn: integer("week_starts_on").default(1), // 0=domingo, 1=segunda
+  trackingData: text("tracking_data").default("all"), // all, weight_only, none
 });
 
 export const exercises = pgTable("exercises", {
@@ -121,14 +174,88 @@ export type WorkoutLogExercise = typeof workoutLogExercises.$inferSelect;
 export type InsertWorkoutLogSet = z.infer<typeof insertWorkoutLogSetSchema>;
 export type WorkoutLogSet = typeof workoutLogSets.$inferSelect;
 
+// User schemas
 export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
+  height: z.number().min(100).max(250).optional(),
+  weight: z.number().min(30).max(300).optional(),
+  dateOfBirth: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
+});
+
+export const updateUserSchema = insertUserSchema.partial().omit({ password: true });
+
+export const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
+});
+
+export const registerSchema = z.object({
+  email: z.string().email("Email inválido"),
+  username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+  newPassword: z.string().min(6, "Nova senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Senhas não coincidem",
+  path: ["confirmPassword"],
+});
+
+// Weight History schemas
+export const insertWeightHistorySchema = createInsertSchema(weightHistory).omit({
+  id: true,
+}).extend({
+  weight: z.number().min(30).max(300),
+  date: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
+});
+
+// User Goals schemas  
+export const insertUserGoalSchema = createInsertSchema(userGoals).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  targetValue: z.number().optional(),
+  currentValue: z.number().optional(),
+  targetDate: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
+});
+
+// User Preferences schemas
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
   id: true,
 });
 
+export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ userId: true });
+
+// Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpdateUser = z.infer<typeof updateUserSchema>;
+export type LoginUser = z.infer<typeof loginSchema>;
+export type RegisterUser = z.infer<typeof registerSchema>;
+export type ChangePassword = z.infer<typeof changePasswordSchema>;
 
-// Muscle groups enum
+export type WeightHistory = typeof weightHistory.$inferSelect;
+export type InsertWeightHistory = z.infer<typeof insertWeightHistorySchema>;
+
+export type UserGoal = typeof userGoals.$inferSelect;
+export type InsertUserGoal = z.infer<typeof insertUserGoalSchema>;
+
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type UpdateUserPreferences = z.infer<typeof updateUserPreferencesSchema>;
+
+// Constants
 export const MUSCLE_GROUPS = [
   "Peito",
   "Costas", 
@@ -140,4 +267,48 @@ export const MUSCLE_GROUPS = [
   "Cardio"
 ] as const;
 
+export const ACTIVITY_LEVELS = [
+  "sedentário",
+  "leve", 
+  "moderado",
+  "intenso",
+  "atleta"
+] as const;
+
+export const EXPERIENCE_LEVELS = [
+  "iniciante",
+  "intermediário",
+  "avançado"
+] as const;
+
+export const FITNESS_GOALS = [
+  "Ganhar massa muscular",
+  "Perder peso",
+  "Manter forma física",
+  "Aumentar força",
+  "Melhorar resistência",
+  "Reabilitação",
+  "Bem-estar geral"
+] as const;
+
+export const GOAL_TYPES = [
+  "weight_loss",
+  "muscle_gain", 
+  "strength",
+  "endurance",
+  "body_fat",
+  "measurement"
+] as const;
+
+export const THEMES = ["dark", "light", "auto"] as const;
+export const UNITS = ["metric", "imperial"] as const;
+export const LANGUAGES = ["pt-BR", "en-US", "es-ES"] as const;
+
 export type MuscleGroup = typeof MUSCLE_GROUPS[number];
+export type ActivityLevel = typeof ACTIVITY_LEVELS[number];
+export type ExperienceLevel = typeof EXPERIENCE_LEVELS[number];
+export type FitnessGoal = typeof FITNESS_GOALS[number];
+export type GoalType = typeof GOAL_TYPES[number];
+export type Theme = typeof THEMES[number];
+export type Units = typeof UNITS[number];
+export type Language = typeof LANGUAGES[number];

@@ -4,7 +4,10 @@ import {
   type WorkoutTemplate, type InsertWorkoutTemplate,
   type WorkoutTemplateExercise, type InsertWorkoutTemplateExercise,
   type WorkoutLog, type InsertWorkoutLog,
-  type WorkoutLogSet, type InsertWorkoutLogSet
+  type WorkoutLogSet, type InsertWorkoutLogSet,
+  type WeightHistory, type InsertWeightHistory,
+  type UserGoal, type InsertUserGoal,
+  type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences
 } from "@shared/schema";
 import { supabase } from './supabase-client';
 import type { IStorage } from './storage';
@@ -141,6 +144,17 @@ export class SupabaseStorage implements IStorage {
     return data;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+    
+    if (error) return undefined;
+    return data;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const { data, error } = await supabase
       .from('users')
@@ -149,6 +163,158 @@ export class SupabaseStorage implements IStorage {
       .single();
     
     if (error) throw error;
+    return data;
+  }
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ ...updates, updatedAt: new Date() })
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) return undefined;
+    return data;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+    
+    return !error;
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    await supabase
+      .from('users')
+      .update({ lastLoginAt: new Date() })
+      .eq('id', id);
+  }
+
+  // Weight History methods
+  async getWeightHistory(userId: string, limit = 50): Promise<WeightHistory[]> {
+    const { data, error } = await supabase
+      .from('weight_history')
+      .select('*')
+      .eq('userId', userId)
+      .order('date', { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async addWeightEntry(entry: InsertWeightHistory): Promise<WeightHistory> {
+    const { data, error } = await supabase
+      .from('weight_history')
+      .insert(entry)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateWeightEntry(id: string, updates: Partial<InsertWeightHistory>): Promise<WeightHistory | undefined> {
+    const { data, error } = await supabase
+      .from('weight_history')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) return undefined;
+    return data;
+  }
+
+  async deleteWeightEntry(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('weight_history')
+      .delete()
+      .eq('id', id);
+    
+    return !error;
+  }
+
+  // User Goals methods
+  async getUserGoals(userId: string): Promise<UserGoal[]> {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('userId', userId)
+      .order('createdAt', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async createUserGoal(goal: InsertUserGoal): Promise<UserGoal> {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .insert(goal)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserGoal(id: string, updates: Partial<InsertUserGoal>): Promise<UserGoal | undefined> {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) return undefined;
+    return data;
+  }
+
+  async deleteUserGoal(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('user_goals')
+      .delete()
+      .eq('id', id);
+    
+    return !error;
+  }
+
+  // User Preferences methods
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('*')
+      .eq('userId', userId)
+      .single();
+    
+    if (error) return undefined;
+    return data;
+  }
+
+  async createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences> {
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .insert(prefs)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined> {
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .update(updates)
+      .eq('userId', userId)
+      .select()
+      .single();
+    
+    if (error) return undefined;
     return data;
   }
 

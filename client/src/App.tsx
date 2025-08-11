@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layout/header";
 import { BottomNavigation } from "@/components/layout/bottom-nav";
+import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import Dashboard from "@/pages/dashboard";
 import Exercises from "@/pages/exercises";
 import Workouts from "@/pages/workouts";
@@ -12,6 +13,8 @@ import Progress from "@/pages/progress";
 import WorkoutSession from "@/pages/workout-session";
 import WorkoutTemplateEditor from "@/pages/workout-template-editor";
 import WorkoutHistory from "@/pages/workout-history";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
 import NotFound from "@/pages/not-found";
 
 // Route wrapper components to handle params
@@ -23,7 +26,7 @@ function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
   return <WorkoutTemplateEditor templateId={params.id} />;
 }
 
-function Router() {
+function AuthenticatedRouter() {
   return (
     <div className="min-h-screen bg-slate-950">
       <Header />
@@ -36,6 +39,8 @@ function Router() {
           <Route path="/progresso" component={Progress} />
           <Route path="/workout-session/:id" component={WorkoutSession} />
           <Route path="/workout-history" component={WorkoutHistory} />
+          <Route path="/login" component={Dashboard} />
+          <Route path="/register" component={Dashboard} />
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -44,13 +49,45 @@ function Router() {
   );
 }
 
+function UnauthenticatedRouter() {
+  return (
+    <div className="min-h-screen bg-slate-950">
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/" component={Login} />
+        <Route component={Login} />
+      </Switch>
+    </div>
+  );
+}
+
+function Router() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-slate-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <AuthenticatedRouter /> : <UnauthenticatedRouter />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

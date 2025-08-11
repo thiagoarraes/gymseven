@@ -7,10 +7,282 @@ import {
   insertWorkoutTemplateExerciseSchema,
   insertWorkoutLogSchema,
   insertWorkoutLogExerciseSchema,
-  insertWorkoutLogSetSchema 
+  insertWorkoutLogSetSchema,
+  registerSchema,
+  loginSchema,
+  changePasswordSchema,
+  updateUserSchema,
+  insertWeightHistorySchema,
+  insertUserGoalSchema,
+  updateUserPreferencesSchema
 } from "@shared/schema";
+import { registerUser, loginUser, changeUserPassword, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const result = await registerUser(req.body);
+      res.status(201).json(result);
+    } catch (error: any) {
+      if (error.message.includes('já está em uso')) {
+        res.status(409).json({ message: error.message });
+      } else if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const result = await loginUser(req.body);
+      res.json(result);
+    } catch (error: any) {
+      if (error.message.includes('incorretos')) {
+        res.status(401).json({ message: error.message });
+      } else if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.get("/api/auth/me", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { password, ...userWithoutPassword } = req.user!;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.post("/api/auth/change-password", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      await changeUserPassword(req.user!.id, req.body);
+      res.json({ message: "Senha alterada com sucesso" });
+    } catch (error: any) {
+      if (error.message.includes('incorreta')) {
+        res.status(400).json({ message: error.message });
+      } else if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.put("/api/auth/profile", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = updateUserSchema.parse(req.body);
+      const updatedUser = await storage.updateUser(req.user!.id, validatedData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json({ user: userWithoutPassword });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  // Weight History routes
+  app.get("/api/weight-history", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const history = await storage.getWeightHistory(req.user!.id, limit);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar histórico de peso" });
+    }
+  });
+
+  app.post("/api/weight-history", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertWeightHistorySchema.parse({
+        ...req.body,
+        userId: req.user!.id
+      });
+      const entry = await storage.addWeightEntry(validatedData);
+      res.status(201).json(entry);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.put("/api/weight-history/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertWeightHistorySchema.partial().parse(req.body);
+      const entry = await storage.updateWeightEntry(req.params.id, validatedData);
+      
+      if (!entry) {
+        return res.status(404).json({ message: "Entrada não encontrada" });
+      }
+      
+      res.json(entry);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.delete("/api/weight-history/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const success = await storage.deleteWeightEntry(req.params.id);
+      if (!success) {
+        return res.status(404).json({ message: "Entrada não encontrada" });
+      }
+      res.json({ message: "Entrada removida com sucesso" });
+    } catch (error) {
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // User Goals routes
+  app.get("/api/goals", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const goals = await storage.getUserGoals(req.user!.id);
+      res.json(goals);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar objetivos" });
+    }
+  });
+
+  app.post("/api/goals", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertUserGoalSchema.parse({
+        ...req.body,
+        userId: req.user!.id
+      });
+      const goal = await storage.createUserGoal(validatedData);
+      res.status(201).json(goal);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.put("/api/goals/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertUserGoalSchema.partial().parse(req.body);
+      const goal = await storage.updateUserGoal(req.params.id, validatedData);
+      
+      if (!goal) {
+        return res.status(404).json({ message: "Objetivo não encontrado" });
+      }
+      
+      res.json(goal);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  app.delete("/api/goals/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const success = await storage.deleteUserGoal(req.params.id);
+      if (!success) {
+        return res.status(404).json({ message: "Objetivo não encontrado" });
+      }
+      res.json({ message: "Objetivo removido com sucesso" });
+    } catch (error) {
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // User Preferences routes
+  app.get("/api/preferences", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const preferences = await storage.getUserPreferences(req.user!.id);
+      if (!preferences) {
+        // Create default preferences if they don't exist
+        const defaultPrefs = await storage.createUserPreferences({
+          userId: req.user!.id,
+          theme: 'dark',
+          units: 'metric',
+          language: 'pt-BR',
+          notifications: true,
+          soundEffects: true,
+          restTimerAutoStart: true,
+          defaultRestTime: 90,
+          weekStartsOn: 1,
+          trackingData: 'all'
+        });
+        return res.json(defaultPrefs);
+      }
+      res.json(preferences);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar preferências" });
+    }
+  });
+
+  app.put("/api/preferences", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = updateUserPreferencesSchema.parse(req.body);
+      const preferences = await storage.updateUserPreferences(req.user!.id, validatedData);
+      
+      if (!preferences) {
+        return res.status(404).json({ message: "Preferências não encontradas" });
+      }
+      
+      res.json(preferences);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
   // Exercise routes
   app.get("/api/exercicios", async (req, res) => {
     try {

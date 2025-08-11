@@ -1,10 +1,13 @@
 import { 
-  type User, type InsertUser,
+  type User, type InsertUser, type RegisterUser, type LoginUser,
   type Exercise, type InsertExercise,
   type WorkoutTemplate, type InsertWorkoutTemplate,
   type WorkoutTemplateExercise, type InsertWorkoutTemplateExercise,
   type WorkoutLog, type InsertWorkoutLog,
-  type WorkoutLogSet, type InsertWorkoutLogSet
+  type WorkoutLogSet, type InsertWorkoutLogSet,
+  type WeightHistory, type InsertWeightHistory,
+  type UserGoal, type InsertUserGoal,
+  type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -12,15 +15,37 @@ import { Pool } from 'pg';
 import { eq, desc, and } from 'drizzle-orm';
 import { 
   users, exercises, workoutTemplates, workoutTemplateExercises, 
-  workoutLogs, workoutLogExercises, workoutLogSets 
+  workoutLogs, workoutLogExercises, workoutLogSets,
+  weightHistory, userGoals, userPreferences
 } from '@shared/schema';
 import { logDatabaseInfo } from './supabase-check';
 
 export interface IStorage {
-  // Users
+  // Auth & Users
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
+  deleteUser(id: string): Promise<boolean>;
+  updateLastLogin(id: string): Promise<void>;
+  
+  // Weight History
+  getWeightHistory(userId: string, limit?: number): Promise<WeightHistory[]>;
+  addWeightEntry(entry: InsertWeightHistory): Promise<WeightHistory>;
+  updateWeightEntry(id: string, updates: Partial<InsertWeightHistory>): Promise<WeightHistory | undefined>;
+  deleteWeightEntry(id: string): Promise<boolean>;
+  
+  // User Goals
+  getUserGoals(userId: string): Promise<UserGoal[]>;
+  createUserGoal(goal: InsertUserGoal): Promise<UserGoal>;
+  updateUserGoal(id: string, updates: Partial<InsertUserGoal>): Promise<UserGoal | undefined>;
+  deleteUserGoal(id: string): Promise<boolean>;
+  
+  // User Preferences
+  getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
+  createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences>;
+  updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined>;
   
   // Exercises
   getAllExercises(): Promise<Exercise[]>;
