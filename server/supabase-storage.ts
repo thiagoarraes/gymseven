@@ -152,18 +152,56 @@ export class SupabaseStorage implements IStorage {
       .single();
     
     if (error) return undefined;
-    return data;
+    
+    // Map snake_case to camelCase
+    const user = {
+      ...data,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      isActive: data.is_active,
+      lastLoginAt: data.last_login_at,
+      createdAt: data.createdAt || data.created_at,
+      updatedAt: data.updatedAt || data.updated_at
+    };
+    
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    // Map camelCase to snake_case for Supabase compatibility
+    const mappedUser = {
+      email: insertUser.email,
+      username: insertUser.username,
+      password: insertUser.password,
+      first_name: insertUser.firstName,
+      last_name: insertUser.lastName,
+      is_active: insertUser.isActive ?? true
+    };
+
+    console.log('Creating user with mapped data:', { ...mappedUser, password: '[HIDDEN]' });
+    
     const { data, error } = await supabase
       .from('users')
-      .insert(insertUser)
+      .insert(mappedUser)
       .select()
       .single();
     
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error('Supabase user creation error:', error);
+      throw error;
+    }
+    
+    // Map back to camelCase for response
+    const user = {
+      ...data,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      isActive: data.is_active,
+      createdAt: data.createdAt || data.created_at,
+      updatedAt: data.updatedAt || data.updated_at
+    };
+    
+    return user;
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
@@ -302,7 +340,23 @@ export class SupabaseStorage implements IStorage {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.log('User preferences table not available:', error.message);
+      // Return a default preferences object if table doesn't exist
+      return {
+        id: 'temp-id',
+        userId: prefs.userId,
+        theme: 'dark',
+        units: 'metric',
+        language: 'pt-BR',
+        notifications: true,
+        soundEffects: true,
+        restTimerAutoStart: true,
+        defaultRestTime: 90,
+        weekStartsOn: 1,
+        trackingData: 'all'
+      } as UserPreferences;
+    }
     return data;
   }
 

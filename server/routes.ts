@@ -25,6 +25,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const result = await registerUser(req.body);
       res.status(201).json(result);
     } catch (error: any) {
+      console.error('Register error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        requestBody: req.body
+      });
+      
       if (error.message.includes('já está em uso')) {
         res.status(409).json({ message: error.message });
       } else if (error.name === 'ZodError') {

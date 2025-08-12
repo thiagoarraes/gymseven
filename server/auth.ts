@@ -81,19 +81,8 @@ export async function registerUser(userData: RegisterUser): Promise<{ user: Omit
     password: hashedPassword,
   });
   
-  // Create default preferences
-  await storage.createUserPreferences({
-    userId: newUser.id,
-    theme: 'dark',
-    units: 'metric',
-    language: 'pt-BR',
-    notifications: true,
-    soundEffects: true,
-    restTimerAutoStart: true,
-    defaultRestTime: 90,
-    weekStartsOn: 1,
-    trackingData: 'all'
-  });
+  // Skip user preferences creation for now (table doesn't exist in current Supabase setup)
+  console.log('Skipping user preferences creation - using basic user registration');
   
   // Generate token
   const token = generateToken(newUser.id);
