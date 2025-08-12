@@ -91,6 +91,9 @@ export class MemStorage implements IStorage {
   private workoutLogs: Map<string, WorkoutLog>;
   private workoutLogExercises: Map<string, any>;
   private workoutLogSets: Map<string, WorkoutLogSet>;
+  private weightHistory?: Map<string, WeightHistory>;
+  private userGoals?: Map<string, UserGoal>;
+  private userPreferences?: Map<string, UserPreferences>;
 
   constructor() {
     this.users = new Map();
@@ -149,11 +152,54 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      firstName: insertUser.firstName || null,
+      lastName: insertUser.lastName || null,
+      dateOfBirth: insertUser.dateOfBirth || null,
+      height: insertUser.height || null,
+      weight: insertUser.weight || null,
+      activityLevel: insertUser.activityLevel || "moderado",
+      fitnessGoals: insertUser.fitnessGoals || [],
+      profileImageUrl: insertUser.profileImageUrl || null,
+      experienceLevel: insertUser.experienceLevel || "iniciante",
+      preferredWorkoutDuration: insertUser.preferredWorkoutDuration || 60,
+      isActive: insertUser.isActive !== undefined ? insertUser.isActive : true,
+      emailVerified: insertUser.emailVerified !== undefined ? insertUser.emailVerified : false,
+      lastLoginAt: insertUser.lastLoginAt || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updated = { ...user, ...updates, updatedAt: new Date() };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    return this.users.delete(id);
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    const user = this.users.get(id);
+    if (user) {
+      user.lastLoginAt = new Date();
+      this.users.set(id, user);
+    }
   }
 
   // Exercise methods
@@ -358,6 +404,121 @@ export class MemStorage implements IStorage {
     
     const updated = { ...set, ...updates };
     this.workoutLogSets.set(id, updated);
+    return updated;
+  }
+
+  // Weight History methods
+  async getWeightHistory(userId: string, limit?: number): Promise<WeightHistory[]> {
+    const history = Array.from(this.weightHistory?.values() || [])
+      .filter(entry => entry.userId === userId)
+      .sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+      });
+    
+    return limit ? history.slice(0, limit) : history;
+  }
+
+  async addWeightEntry(entry: InsertWeightHistory): Promise<WeightHistory> {
+    const id = randomUUID();
+    const weightEntry: WeightHistory = { 
+      ...entry, 
+      id,
+      date: entry.date || new Date(),
+      notes: entry.notes || null
+    };
+    if (!this.weightHistory) this.weightHistory = new Map();
+    this.weightHistory.set(id, weightEntry);
+    return weightEntry;
+  }
+
+  async updateWeightEntry(id: string, updates: Partial<InsertWeightHistory>): Promise<WeightHistory | undefined> {
+    if (!this.weightHistory) return undefined;
+    const entry = this.weightHistory.get(id);
+    if (!entry) return undefined;
+    
+    const updated = { ...entry, ...updates };
+    this.weightHistory.set(id, updated);
+    return updated;
+  }
+
+  async deleteWeightEntry(id: string): Promise<boolean> {
+    if (!this.weightHistory) return false;
+    return this.weightHistory.delete(id);
+  }
+
+  // User Goals methods
+  async getUserGoals(userId: string): Promise<UserGoal[]> {
+    return Array.from(this.userGoals?.values() || [])
+      .filter(goal => goal.userId === userId);
+  }
+
+  async createUserGoal(goal: InsertUserGoal): Promise<UserGoal> {
+    const id = randomUUID();
+    const userGoal: UserGoal = { 
+      ...goal, 
+      id,
+      createdAt: new Date(),
+      isCompleted: goal.isCompleted || false,
+      currentValue: goal.currentValue || null,
+      targetValue: goal.targetValue || null,
+      unit: goal.unit || null,
+      targetDate: goal.targetDate || null
+    };
+    if (!this.userGoals) this.userGoals = new Map();
+    this.userGoals.set(id, userGoal);
+    return userGoal;
+  }
+
+  async updateUserGoal(id: string, updates: Partial<InsertUserGoal>): Promise<UserGoal | undefined> {
+    if (!this.userGoals) return undefined;
+    const goal = this.userGoals.get(id);
+    if (!goal) return undefined;
+    
+    const updated = { ...goal, ...updates };
+    this.userGoals.set(id, updated);
+    return updated;
+  }
+
+  async deleteUserGoal(id: string): Promise<boolean> {
+    if (!this.userGoals) return false;
+    return this.userGoals.delete(id);
+  }
+
+  // User Preferences methods
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    return Array.from(this.userPreferences?.values() || [])
+      .find(prefs => prefs.userId === userId);
+  }
+
+  async createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences> {
+    const id = randomUUID();
+    const userPrefs: UserPreferences = { 
+      ...prefs, 
+      id,
+      theme: prefs.theme || "dark",
+      units: prefs.units || "metric",
+      language: prefs.language || "pt-BR",
+      notifications: prefs.notifications !== undefined ? prefs.notifications : true,
+      soundEffects: prefs.soundEffects !== undefined ? prefs.soundEffects : true,
+      restTimerAutoStart: prefs.restTimerAutoStart !== undefined ? prefs.restTimerAutoStart : true,
+      defaultRestTime: prefs.defaultRestTime || 90,
+      weekStartsOn: prefs.weekStartsOn || 1,
+      trackingData: prefs.trackingData || "all"
+    };
+    if (!this.userPreferences) this.userPreferences = new Map();
+    this.userPreferences.set(id, userPrefs);
+    return userPrefs;
+  }
+
+  async updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined> {
+    if (!this.userPreferences) return undefined;
+    const existing = Array.from(this.userPreferences.values()).find(prefs => prefs.userId === userId);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...updates };
+    this.userPreferences.set(existing.id, updated);
     return updated;
   }
 }
@@ -701,6 +862,95 @@ class DatabaseStorage implements IStorage {
 
   async updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined> {
     const result = await this.db.update(workoutLogSets).set(set).where(eq(workoutLogSets.id, id)).returning();
+    return result[0];
+  }
+
+  // User auth methods
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await this.db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const result = await this.db.update(users).set({
+      ...updates,
+      updatedAt: new Date()
+    }).where(eq(users.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await this.db.delete(users).where(eq(users.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    await this.db.update(users).set({
+      lastLoginAt: new Date()
+    }).where(eq(users.id, id));
+  }
+
+  // Weight History methods
+  async getWeightHistory(userId: string, limit?: number): Promise<WeightHistory[]> {
+    const query = this.db.select().from(weightHistory)
+      .where(eq(weightHistory.userId, userId))
+      .orderBy(desc(weightHistory.date));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    
+    return await query;
+  }
+
+  async addWeightEntry(entry: InsertWeightHistory): Promise<WeightHistory> {
+    const result = await this.db.insert(weightHistory).values(entry).returning();
+    return result[0];
+  }
+
+  async updateWeightEntry(id: string, updates: Partial<InsertWeightHistory>): Promise<WeightHistory | undefined> {
+    const result = await this.db.update(weightHistory).set(updates).where(eq(weightHistory.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteWeightEntry(id: string): Promise<boolean> {
+    const result = await this.db.delete(weightHistory).where(eq(weightHistory.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // User Goals methods
+  async getUserGoals(userId: string): Promise<UserGoal[]> {
+    return await this.db.select().from(userGoals).where(eq(userGoals.userId, userId));
+  }
+
+  async createUserGoal(goal: InsertUserGoal): Promise<UserGoal> {
+    const result = await this.db.insert(userGoals).values(goal).returning();
+    return result[0];
+  }
+
+  async updateUserGoal(id: string, updates: Partial<InsertUserGoal>): Promise<UserGoal | undefined> {
+    const result = await this.db.update(userGoals).set(updates).where(eq(userGoals.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteUserGoal(id: string): Promise<boolean> {
+    const result = await this.db.delete(userGoals).where(eq(userGoals.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // User Preferences methods
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    const result = await this.db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences> {
+    const result = await this.db.insert(userPreferences).values(prefs).returning();
+    return result[0];
+  }
+
+  async updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined> {
+    const result = await this.db.update(userPreferences).set(updates).where(eq(userPreferences.userId, userId)).returning();
     return result[0];
   }
 }

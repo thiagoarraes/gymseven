@@ -47,11 +47,11 @@ window.addEventListener('unhandledrejection', (event) => {
 if (typeof ResizeObserver !== 'undefined') {
   const OriginalResizeObserver = ResizeObserver;
   window.ResizeObserver = class extends OriginalResizeObserver {
-    constructor(callback) {
+    constructor(callback: ResizeObserverCallback) {
       super((entries, observer) => {
         try {
           callback(entries, observer);
-        } catch (error) {
+        } catch (error: any) {
           if (error.message && error.message.includes('ResizeObserver loop completed with undelivered notifications')) {
             // Silently ignore this specific error
             return;
