@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm install && npx vite build"
   functions = "netlify/functions"
   publish = "dist/public"
 
@@ -13,13 +13,7 @@
   status = 200
   force = true
 
-# Handle React Router (SPA routing)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[dev]
-  command = "npm run dev"
-  targetPort = 5000
-  autoLaunch = false
