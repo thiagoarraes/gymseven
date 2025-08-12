@@ -64,6 +64,7 @@ export const userPreferences = pgTable("user_preferences", {
 
 export const exercises = pgTable("exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   muscleGroup: text("muscle_group").notNull(),
   description: text("description"),
@@ -74,6 +75,7 @@ export const exercises = pgTable("exercises", {
 
 export const workoutTemplates = pgTable("workout_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -92,6 +94,7 @@ export const workoutTemplateExercises = pgTable("workout_template_exercises", {
 
 export const workoutLogs = pgTable("workout_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   templateId: varchar("template_id").references(() => workoutTemplates.id),
   name: text("name").notNull(),
   startTime: timestamp("start_time").notNull(),
