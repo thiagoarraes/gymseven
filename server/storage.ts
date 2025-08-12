@@ -18,7 +18,7 @@ import {
   workoutLogs, workoutLogExercises, workoutLogSets,
   weightHistory, userGoals, userPreferences
 } from '@shared/schema';
-import { logDatabaseInfo } from './supabase-check';
+
 
 export interface IStorage {
   // Auth & Users
