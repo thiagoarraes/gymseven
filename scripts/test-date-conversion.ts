@@ -1,56 +1,102 @@
-// Test date conversion functions
-const formatDateForInput = (date: string | Date | undefined): string => {
-  if (!date) return '';
-  const d = new Date(date);
-  // Use local timezone to avoid date shifting
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+import { supabase } from '../server/supabase-client';
 
-const parseDate = (dateStr: string): Date | undefined => {
-  if (!dateStr) return undefined;
-  // Parse as local date to avoid timezone issues
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
-const formatDateForDisplay = (date: string | Date | undefined): string => {
-  if (!date) return '';
+async function testDirectInsert() {
   try {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  } catch {
-    return '';
+    console.log('🧪 Teste direto de inserção...');
+
+    // Buscar um workout log específico
+    const { data: log } = await supabase
+      .from('workoutLogs')
+      .select('*')
+      .limit(1)
+      .single();
+
+    if (!log) {
+      console.log('❌ Nenhum log encontrado');
+      return;
+    }
+
+    console.log(`📊 Log: ${log.name} (ID: ${log.id})`);
+    console.log(`🎯 Template ID: ${log.templateId}`);
+
+    // Buscar exercícios do template
+    const { data: templateExercises, error: teError } = await supabase
+      .from('workoutTemplateExercises')
+      .select('*, exercises(*)')
+      .eq('templateId', log.templateId);
+
+    if (teError) {
+      console.error('❌ Erro buscando template exercises:', teError);
+      return;
+    }
+
+    if (!templateExercises || templateExercises.length === 0) {
+      console.log('❌ Nenhum exercício no template');
+      return;
+    }
+
+    console.log(`💪 ${templateExercises.length} exercícios no template`);
+
+    // Tentar inserir um logExercise manualmente
+    const firstTemplateExercise = templateExercises[0];
+    console.log(`🎯 Testando exercício: ${firstTemplateExercise.exercises.name}`);
+
+    const { data: insertedLogExercise, error: insertError } = await supabase
+      .from('workoutLogExercises')
+      .insert({
+        logId: log.id,
+        exerciseId: firstTemplateExercise.exerciseId,
+        exerciseName: firstTemplateExercise.exercises.name,
+        order: 1
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('❌ Erro inserindo logExercise:', insertError);
+      return;
+    }
+
+    console.log(`✅ LogExercise criado: ${insertedLogExercise.id}`);
+
+    // Tentar inserir um set
+    const { data: insertedSet, error: setError } = await supabase
+      .from('workoutLogSets')
+      .insert({
+        logExerciseId: insertedLogExercise.id,
+        setNumber: 1,
+        reps: 12,
+        weight: 60,
+        completed: true
+      })
+      .select()
+      .single();
+
+    if (setError) {
+      console.error('❌ Erro inserindo set:', setError);
+      return;
+    }
+
+    console.log(`✅ Set criado: ${insertedSet.id}`);
+
+    // Verificar se foram criados
+    const { data: verifyLogExercises } = await supabase
+      .from('workoutLogExercises')
+      .select('*')
+      .eq('logId', log.id);
+
+    console.log(`🔍 LogExercises no banco: ${verifyLogExercises?.length || 0}`);
+
+    const { data: verifySets } = await supabase
+      .from('workoutLogSets')
+      .select('*')
+      .eq('logExerciseId', insertedLogExercise.id);
+
+    console.log(`🔍 Sets no banco: ${verifySets?.length || 0}`);
+
+  } catch (error) {
+    console.error('❌ Erro:', error);
   }
-};
+}
 
-// Test the conversion
-console.log('🧪 Testando conversão de datas...');
-
-// Test case: 21/02/1982
-const testDate = new Date(1982, 1, 21); // Month is 0-indexed
-console.log('📅 Data original:', testDate);
-console.log('📅 Data original toString:', testDate.toString());
-
-const inputFormat = formatDateForInput(testDate);
-console.log('🔄 Formato para input:', inputFormat);
-
-const parsedBack = parseDate(inputFormat);
-console.log('🔄 Parsed de volta:', parsedBack);
-console.log('🔄 Parsed toString:', parsedBack?.toString());
-
-const displayFormat = formatDateForDisplay(parsedBack);
-console.log('📺 Formato para exibição:', displayFormat);
-
-// Test with string date
-const stringDate = '1982-02-21';
-console.log('\n🧪 Testando com string date:', stringDate);
-const parsedString = parseDate(stringDate);
-console.log('🔄 Parsed da string:', parsedString);
-const displayFromString = formatDateForDisplay(parsedString);
-console.log('📺 Display da string:', displayFromString);
+testDirectInsert().then(() => process.exit(0)).catch(() => process.exit(1));

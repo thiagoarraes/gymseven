@@ -1056,16 +1056,15 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           // Calculate totals
           if (sets && sets.length > 0) {
             hasActualSets = true;
-            // Count all sets that have been started (have reps or weight)
+            // Count all sets that are completed
             for (const set of sets as any[]) {
-              if (set.reps || set.weight) {
+              if (set.completed || set.reps > 0) {
                 totalSets += 1;
-              }
-              // Count volume as sum of all weights used (not weight × reps)
-              if ((set as any).weight) {
+                // Calculate volume as weight × reps for proper volume calculation
                 const weight = parseFloat(set.weight) || 0;
-                if (weight > 0) {
-                  totalVolume += weight;
+                const reps = parseInt(set.reps) || 0;
+                if (weight > 0 && reps > 0) {
+                  totalVolume += weight * reps;
                 }
               }
             }
@@ -1101,9 +1100,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
             totalVolume = 0; // Reset to avoid double counting
             for (const te of templateExercises) {
               totalSets += te.sets || 0;
-              // Calculate estimated volume: sets × weight (sum of weights)
-              if (te.sets && te.weight) {
-                totalVolume += (te.sets * te.weight);
+              // Calculate estimated volume: sets × reps × estimated weight
+              if (te.sets && te.reps) {
+                const estimatedWeight = getEstimatedWeight(te.exercise?.muscleGroup || 'Unknown');
+                totalVolume += (te.sets * te.reps * estimatedWeight);
               }
             }
           }
@@ -1128,6 +1128,19 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       res.status(500).json({ message: "Erro ao buscar resumo do treino" });
     }
   });
+
+  // Helper function to estimate weight based on muscle group
+  function getEstimatedWeight(muscleGroup: string): number {
+    const estimatedWeights: Record<string, number> = {
+      'Peito': 65,
+      'Costas': 60, 
+      'Pernas': 100,
+      'Ombros': 30,
+      'Braços': 25,
+      'Core': 0
+    };
+    return estimatedWeights[muscleGroup] || 50;
+  }
 
   app.post("/api/workout-logs", async (req, res) => {
     try {
