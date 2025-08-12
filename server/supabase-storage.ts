@@ -205,15 +205,41 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    // Map camelCase to snake_case for Supabase compatibility
+    const mappedUpdates: any = {};
+    
+    if (updates.email) mappedUpdates.email = updates.email;
+    if (updates.username) mappedUpdates.username = updates.username;
+    if (updates.firstName) mappedUpdates.first_name = updates.firstName;
+    if (updates.lastName) mappedUpdates.last_name = updates.lastName;
+    if (updates.dateOfBirth) mappedUpdates.dateOfBirth = updates.dateOfBirth;
+    if (updates.activityLevel) mappedUpdates.activityLevel = updates.activityLevel;
+    if (updates.isActive !== undefined) mappedUpdates.is_active = updates.isActive;
+    
     const { data, error } = await supabase
       .from('users')
-      .update({ ...updates, updatedAt: new Date() })
+      .update(mappedUpdates)
       .eq('id', id)
       .select()
       .single();
     
-    if (error) return undefined;
-    return data;
+    if (error) {
+      console.error('Supabase user update error:', error);
+      return undefined;
+    }
+    
+    // Map back to camelCase for response
+    const user = {
+      ...data,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      isActive: data.is_active,
+      lastLoginAt: data.last_login_at,
+      createdAt: data.createdAt || data.created_at,
+      updatedAt: data.updatedAt || data.updated_at
+    };
+    
+    return user;
   }
 
   async deleteUser(id: string): Promise<boolean> {

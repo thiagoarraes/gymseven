@@ -185,10 +185,17 @@ export const insertUserSchema = createInsertSchema(users).omit({
   username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
   height: z.number().min(100).max(250).optional(),
   weight: z.number().min(30).max(300).optional(),
-  dateOfBirth: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
+  dateOfBirth: z.string().optional(),
 });
 
-export const updateUserSchema = insertUserSchema.partial().omit({ password: true });
+export const updateUserSchema = insertUserSchema.partial().omit({ 
+  password: true,
+  height: true, 
+  weight: true 
+}).extend({
+  email: z.string().email("Email inválido").optional(),
+  username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres").optional(),
+});
 
 export const loginSchema = z.object({
   email: z.string().email("Email inválido"),

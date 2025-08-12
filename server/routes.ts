@@ -75,6 +75,21 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Update user profile
   app.put('/api/auth/profile', authenticateToken, async (req: AuthRequest, res) => {
     try {
+      // Check if email is being changed and if it's already in use
+      if (req.body.email && req.body.email !== req.user!.email) {
+        const existingUser = await storage.getUserByEmail(req.body.email);
+        if (existingUser && existingUser.id !== req.user!.id) {
+          return res.status(409).json({ message: "Email já está em uso" });
+        }
+      }
+      
+      // Check if username is being changed and if it's already in use
+      if (req.body.username && req.body.username !== req.user!.username) {
+        const existingUser = await storage.getUserByUsername(req.body.username);
+        if (existingUser && existingUser.id !== req.user!.id) {
+          return res.status(409).json({ message: "Nome de usuário já está em uso" });
+        }
+      }
       const updateData = updateUserSchema.parse(req.body);
       
       const updatedUser = await storage.updateUser(req.user!.id, updateData);

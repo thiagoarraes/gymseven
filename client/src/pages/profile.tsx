@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User, Camera, Save, Calendar, Ruler, Weight } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { User, Camera, Save, Calendar, Mail, AtSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,14 +18,31 @@ export default function Profile() {
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 
+  // Format date helpers
+  const formatDateForInput = (date: string | Date | undefined): string => {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  };
+
+  const formatDateForDisplay = (date: string | Date | undefined): string => {
+    if (!date) return '';
+    try {
+      const d = new Date(date);
+      return format(d, 'dd/MM/yyyy', { locale: ptBR });
+    } catch {
+      return '';
+    }
+  };
+
   const form = useForm<UpdateUser>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
+      email: user?.email || '',
+      username: user?.username || '',
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
-      dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : undefined,
-      height: user?.height || undefined,
-      weight: user?.weight || undefined,
+      dateOfBirth: user?.dateOfBirth ? formatDateForInput(user.dateOfBirth) : undefined,
       activityLevel: user?.activityLevel || 'moderado',
     },
   });
@@ -100,6 +119,53 @@ export default function Profile() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  {/* Email e Username */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 flex items-center">
+                          <Mail className="mr-2 h-4 w-4" />
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            type="email"
+                            className="bg-slate-800/50 border-slate-700 text-white"
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 flex items-center">
+                          <AtSign className="mr-2 h-4 w-4" />
+                          Nome de usuário
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            className="bg-slate-800/50 border-slate-700 text-white"
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Nome e Sobrenome */}
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -140,6 +206,7 @@ export default function Profile() {
                     />
                   </div>
 
+                  {/* Data de Nascimento com formato brasileiro */}
                   <FormField
                     control={form.control}
                     name="dateOfBirth"
@@ -147,75 +214,27 @@ export default function Profile() {
                       <FormItem>
                         <FormLabel className="text-slate-300 flex items-center">
                           <Calendar className="mr-2 h-4 w-4" />
-                          Data de Nascimento
+                          Data de Nascimento (dd/mm/aaaa)
                         </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
-                            value={field.value || ''}
+                            value={field.value ? (typeof field.value === 'string' ? field.value : formatDateForInput(field.value)) : ''}
                             type="date"
-                            className="bg-slate-800/50 border-slate-700 text-white"
+                            className="bg-slate-800/50 border-slate-700 text-white [&::-webkit-calendar-picker-indicator]:brightness-200"
                             disabled={loading}
+                            lang="pt-BR"
                           />
                         </FormControl>
                         <FormMessage />
+                        {user?.dateOfBirth && (
+                          <p className="text-xs text-slate-400 mt-1">
+                            Atual: {formatDateForDisplay(user.dateOfBirth)}
+                          </p>
+                        )}
                       </FormItem>
                     )}
                   />
-
-
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="height"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 flex items-center">
-                            <Ruler className="mr-2 h-4 w-4" />
-                            Altura (cm)
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                              type="number"
-                              placeholder="175"
-                              className="bg-slate-800/50 border-slate-700 text-white"
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="weight"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 flex items-center">
-                            <Weight className="mr-2 h-4 w-4" />
-                            Peso (kg)
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                              type="number"
-                              placeholder="70"
-                              className="bg-slate-800/50 border-slate-700 text-white"
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
 
                   <Button
                     type="submit"
