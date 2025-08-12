@@ -39,6 +39,7 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Display preferences: Use username (nickname) instead of firstName for user greetings and display.
 Database priority: Supabase is mandatory as the primary database.
 
 # System Architecture

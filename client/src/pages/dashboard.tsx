@@ -222,7 +222,7 @@ export default function Dashboard() {
           {/* Header Section */}
           <div className="relative z-10 text-center mb-6">
             <h2 className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text mb-2">
-              Olá, {user?.firstName || user?.username || 'Usuário'}!🔥
+              Olá, {user?.username || 'Usuário'}!🔥
             </h2>
             <p className="text-slate-300 text-base sm:text-lg font-medium">
               Pronto para progredir carga hoje?
