@@ -254,6 +254,77 @@ export default function Profile() {
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0 bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border border-slate-600/50 shadow-2xl rounded-xl backdrop-blur-sm" align="start">
                             <div className="p-4">
+                              {/* Header personalizado com seletores */}
+                              <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-700/50">
+                                <button
+                                  type="button"
+                                  className="h-8 w-8 bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm"
+                                  onClick={() => {
+                                    const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
+                                    const newDate = new Date(currentDate);
+                                    newDate.setMonth(newDate.getMonth() - 1);
+                                    field.onChange(formatDateForInput(newDate));
+                                  }}
+                                >
+                                  ‹
+                                </button>
+                                
+                                <div className="flex gap-3 items-center">
+                                  <div className="flex flex-col">
+                                    <label className="text-xs text-slate-400 mb-1">Mês</label>
+                                    <select
+                                      value={(field.value ? parseDate(field.value) : new Date(1990, 0)).getMonth()}
+                                      onChange={(e) => {
+                                        const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
+                                        const newDate = new Date(currentDate);
+                                        newDate.setMonth(parseInt(e.target.value));
+                                        field.onChange(formatDateForInput(newDate));
+                                      }}
+                                      className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[120px]"
+                                    >
+                                      {Array.from({ length: 12 }, (_, i) => (
+                                        <option key={i} value={i}>
+                                          {format(new Date(2000, i, 1), 'MMMM', { locale: ptBR })}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  
+                                  <div className="flex flex-col">
+                                    <label className="text-xs text-slate-400 mb-1">Ano</label>
+                                    <select
+                                      value={(field.value ? parseDate(field.value) : new Date(1990, 0)).getFullYear()}
+                                      onChange={(e) => {
+                                        const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
+                                        const newDate = new Date(currentDate);
+                                        newDate.setFullYear(parseInt(e.target.value));
+                                        field.onChange(formatDateForInput(newDate));
+                                      }}
+                                      className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[90px]"
+                                    >
+                                      {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => (
+                                        <option key={i} value={1900 + i}>
+                                          {1900 + i}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                                
+                                <button
+                                  type="button"
+                                  className="h-8 w-8 bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm"
+                                  onClick={() => {
+                                    const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
+                                    const newDate = new Date(currentDate);
+                                    newDate.setMonth(newDate.getMonth() + 1);
+                                    field.onChange(formatDateForInput(newDate));
+                                  }}
+                                >
+                                  ›
+                                </button>
+                              </div>
+
                               <CalendarComponent
                                 mode="single"
                                 selected={field.value ? parseDate(field.value) : undefined}
@@ -264,25 +335,22 @@ export default function Profile() {
                                 disabled={(date) =>
                                   date > new Date() || date < new Date("1900-01-01")
                                 }
-                                defaultMonth={field.value ? parseDate(field.value) : new Date(1990, 0)}
-                                captionLayout="dropdown-buttons"
-                                fromYear={1900}
-                                toYear={new Date().getFullYear()}
+                                month={field.value ? parseDate(field.value) : new Date(1990, 0)}
                                 locale={ptBR}
                                 className="bg-transparent text-white"
                                 classNames={{
                                   months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                                   month: "space-y-4",
-                                  caption: "flex justify-center pb-2 relative items-center text-white mb-4 border-b border-slate-700/50",
-                                  caption_label: "text-lg font-semibold text-white hidden",
-                                  caption_dropdowns: "flex gap-3 items-center",
-                                  dropdown: "bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[100px]",
-                                  dropdown_month: "bg-slate-700/80 border border-slate-600/50 text-white",
-                                  dropdown_year: "bg-slate-700/80 border border-slate-600/50 text-white",
-                                  nav: "space-x-2 flex items-center",
-                                  nav_button: "h-8 w-8 bg-slate-700/50 p-0 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm",
-                                  nav_button_previous: "absolute left-1",
-                                  nav_button_next: "absolute right-1",
+                                  caption: "hidden",
+                                  caption_label: "hidden",
+                                  caption_dropdowns: "hidden",
+                                  dropdown: "hidden",
+                                  dropdown_month: "hidden", 
+                                  dropdown_year: "hidden",
+                                  nav: "hidden",
+                                  nav_button: "hidden",
+                                  nav_button_previous: "hidden",
+                                  nav_button_next: "hidden",
                                   table: "w-full border-collapse mt-2",
                                   head_row: "flex mb-3",
                                   head_cell: "text-slate-400 rounded-lg w-11 h-9 font-medium text-xs text-center flex items-center justify-center uppercase tracking-wider",
