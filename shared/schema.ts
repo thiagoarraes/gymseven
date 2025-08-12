@@ -94,7 +94,7 @@ export const workoutTemplateExercises = pgTable("workout_template_exercises", {
 
 export const workoutLogs = pgTable("workout_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   templateId: varchar("template_id").references(() => workoutTemplates.id),
   name: text("name").notNull(),
   startTime: timestamp("start_time").notNull(),

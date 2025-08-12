@@ -1142,10 +1142,22 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     return estimatedWeights[muscleGroup] || 50;
   }
 
-  app.post("/api/workout-logs", async (req, res) => {
+  app.post("/api/workout-logs", authenticateToken, async (req: AuthRequest, res) => {
     try {
       console.log("Creating workout log with data:", req.body);
-      const validatedData = insertWorkoutLogSchema.parse(req.body);
+      
+      // Check if user is authenticated
+      if (!req.user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      
+      // Add userId from authenticated user (using snake_case for Supabase)
+      const workoutData = {
+        ...req.body,
+        user_id: req.user.id
+      };
+      
+      const validatedData = insertWorkoutLogSchema.parse(workoutData);
       const log = await storage.createWorkoutLog(validatedData);
       res.status(201).json(log);
     } catch (error) {
