@@ -196,6 +196,10 @@ export class SupabaseStorage implements IStorage {
       ...data,
       firstName: data.first_name,
       lastName: data.last_name,
+      dateOfBirth: data.date_of_birth || null,
+      height: data.height || null,
+      weight: data.weight || null,
+      activityLevel: data.activity_level || 'moderado',
       isActive: data.is_active,
       createdAt: data.createdAt || data.created_at,
       updatedAt: data.updatedAt || data.updated_at
@@ -212,8 +216,7 @@ export class SupabaseStorage implements IStorage {
     if (updates.username) mappedUpdates.username = updates.username;
     if (updates.firstName) mappedUpdates.first_name = updates.firstName;
     if (updates.lastName) mappedUpdates.last_name = updates.lastName;
-    if (updates.dateOfBirth) mappedUpdates.dateOfBirth = updates.dateOfBirth;
-    if (updates.activityLevel) mappedUpdates.activityLevel = updates.activityLevel;
+    // Skip date_of_birth, height, weight, activity_level for now (missing columns)
     if (updates.isActive !== undefined) mappedUpdates.is_active = updates.isActive;
     
     const { data, error } = await supabase
@@ -233,6 +236,10 @@ export class SupabaseStorage implements IStorage {
       ...data,
       firstName: data.first_name,
       lastName: data.last_name,
+      dateOfBirth: data.date_of_birth || null,
+      height: data.height || null,
+      weight: data.weight || null,
+      activityLevel: data.activity_level || 'moderado',
       isActive: data.is_active,
       lastLoginAt: data.last_login_at,
       createdAt: data.createdAt || data.created_at,

@@ -261,9 +261,11 @@ export default function Profile() {
                                   className="h-8 w-8 bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm"
                                   onClick={() => {
                                     const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
-                                    const newDate = new Date(currentDate);
-                                    newDate.setMonth(newDate.getMonth() - 1);
-                                    field.onChange(formatDateForInput(newDate));
+                                    if (currentDate) {
+                                      const newDate = new Date(currentDate);
+                                      newDate.setMonth(newDate.getMonth() - 1);
+                                      field.onChange(formatDateForInput(newDate));
+                                    }
                                   }}
                                 >
                                   ‹
@@ -273,12 +275,14 @@ export default function Profile() {
                                   <div className="flex flex-col">
                                     <label className="text-xs text-slate-400 mb-1">Mês</label>
                                     <select
-                                      value={(field.value ? parseDate(field.value) : new Date(1990, 0)).getMonth()}
+                                      value={(field.value ? parseDate(field.value) : new Date(1990, 0))?.getMonth() || 0}
                                       onChange={(e) => {
                                         const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
-                                        const newDate = new Date(currentDate);
-                                        newDate.setMonth(parseInt(e.target.value));
-                                        field.onChange(formatDateForInput(newDate));
+                                        if (currentDate) {
+                                          const newDate = new Date(currentDate);
+                                          newDate.setMonth(parseInt(e.target.value));
+                                          field.onChange(formatDateForInput(newDate));
+                                        }
                                       }}
                                       className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[120px]"
                                     >
@@ -293,12 +297,14 @@ export default function Profile() {
                                   <div className="flex flex-col">
                                     <label className="text-xs text-slate-400 mb-1">Ano</label>
                                     <select
-                                      value={(field.value ? parseDate(field.value) : new Date(1990, 0)).getFullYear()}
+                                      value={(field.value ? parseDate(field.value) : new Date(1990, 0))?.getFullYear() || 1990}
                                       onChange={(e) => {
                                         const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
-                                        const newDate = new Date(currentDate);
-                                        newDate.setFullYear(parseInt(e.target.value));
-                                        field.onChange(formatDateForInput(newDate));
+                                        if (currentDate) {
+                                          const newDate = new Date(currentDate);
+                                          newDate.setFullYear(parseInt(e.target.value));
+                                          field.onChange(formatDateForInput(newDate));
+                                        }
                                       }}
                                       className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[90px]"
                                     >
@@ -316,9 +322,11 @@ export default function Profile() {
                                   className="h-8 w-8 bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm"
                                   onClick={() => {
                                     const currentDate = field.value ? parseDate(field.value) : new Date(1990, 0);
-                                    const newDate = new Date(currentDate);
-                                    newDate.setMonth(newDate.getMonth() + 1);
-                                    field.onChange(formatDateForInput(newDate));
+                                    if (currentDate) {
+                                      const newDate = new Date(currentDate);
+                                      newDate.setMonth(newDate.getMonth() + 1);
+                                      field.onChange(formatDateForInput(newDate));
+                                    }
                                   }}
                                 >
                                   ›
