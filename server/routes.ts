@@ -765,30 +765,32 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  // Create workout log set
-  app.post("/api/workout-log-sets", async (req, res) => {
+  // Update workout log set
+  app.put("/api/workout-log-sets/:id", async (req, res) => {
     try {
-      const { logExerciseId, setNumber, weight, reps } = req.body;
+      const { id } = req.params;
+      const { weight, reps, completed } = req.body;
       
       const supabaseStorage = storage as any;
       const { data, error } = await supabaseStorage.supabase
         .from('workoutLogSets')
-        .insert({
-          logExerciseId,
-          setNumber: setNumber || 1,
-          weight: weight || null,
-          reps: reps || null
-        })
+        .update({ weight, reps, completed })
+        .eq('id', id)
         .select()
         .single();
       
       if (error) throw error;
-      res.status(201).json(data);
+      res.json(data);
     } catch (error) {
-      console.error('Error creating workout log set:', error);
-      res.status(400).json({ message: "Erro ao criar série do treino" });
+      console.error('Error updating workout log set:', error);
+      res.status(500).json({ message: "Erro ao atualizar série do treino" });
     }
   });
+
+  // Only create server if needed (not for serverless)
+  if (!createServerInstance) {
+    return null;
+  }
 
   // Get all exercises with their recent weight progression - VERSÃO SIMPLIFICADA
   app.get('/api/exercises-weight-summary', async (req, res) => {
