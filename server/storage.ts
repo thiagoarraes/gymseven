@@ -49,6 +49,7 @@ export interface IStorage {
   
   // Exercises
   getAllExercises(): Promise<Exercise[]>;
+  getExercises(userId?: string): Promise<Exercise[]>;
   getExercise(id: string): Promise<Exercise | undefined>;
   createExercise(exercise: InsertExercise): Promise<Exercise>;
   updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined>;
@@ -57,6 +58,7 @@ export interface IStorage {
   
   // Workout Templates
   getAllWorkoutTemplates(): Promise<WorkoutTemplate[]>;
+  getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]>;
   getWorkoutTemplate(id: string): Promise<WorkoutTemplate | undefined>;
   createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate>;
   updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined>;
@@ -71,6 +73,7 @@ export interface IStorage {
   
   // Workout Logs
   getAllWorkoutLogs(): Promise<WorkoutLog[]>;
+  getWorkoutLogs(userId?: string): Promise<WorkoutLog[]>;
   getWorkoutLog(id: string): Promise<WorkoutLog | undefined>;
   createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog>;
   updateWorkoutLog(id: string, log: Partial<InsertWorkoutLog>): Promise<WorkoutLog | undefined>;

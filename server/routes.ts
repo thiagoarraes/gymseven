@@ -330,7 +330,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Exercise routes
-  app.get("/api/exercicios", async (req, res) => {
+  app.get("/api/exercicios", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const { muscleGroup } = req.query;
       let exercises;
@@ -338,7 +338,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if (muscleGroup && typeof muscleGroup === 'string') {
         exercises = await storage.getExercisesByMuscleGroup(muscleGroup);
       } else {
-        exercises = await storage.getAllExercises();
+        // Use user-specific exercises if authenticated, otherwise return all exercises
+        exercises = req.user ? 
+          await storage.getExercises(req.user.id) : 
+          await storage.getAllExercises();
       }
       
       res.json(exercises);
@@ -411,9 +414,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Workout Template routes
-  app.get("/api/workout-templates", async (req, res) => {
+  app.get("/api/workout-templates", optionalAuth, async (req: AuthRequest, res) => {
     try {
-      const templates = await storage.getAllWorkoutTemplates();
+      // Use user-specific templates if authenticated, otherwise return all templates
+      const templates = req.user ? 
+        await storage.getWorkoutTemplates(req.user.id) : 
+        await storage.getAllWorkoutTemplates();
       res.json(templates);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar modelos de treino" });
@@ -966,7 +972,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Workout Log routes
-  app.get("/api/workout-logs", async (req, res) => {
+  app.get("/api/workout-logs", optionalAuth, async (req: AuthRequest, res) => {
     try {
       const { recent } = req.query;
       let logs;
@@ -974,7 +980,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if (recent === 'true') {
         logs = await storage.getRecentWorkoutLogs(5);
       } else {
-        logs = await storage.getAllWorkoutLogs();
+        // Use user-specific logs if authenticated, otherwise return all logs
+        logs = req.user ? 
+          await storage.getWorkoutLogs(req.user.id) : 
+          await storage.getAllWorkoutLogs();
       }
       
       res.json(logs);

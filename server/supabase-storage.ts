@@ -419,6 +419,23 @@ export class SupabaseStorage implements IStorage {
     return data || [];
   }
 
+  async getExercises(userId?: string): Promise<Exercise[]> {
+    let query = supabase
+      .from('exercises')
+      .select('*')
+      .order('name');
+    
+    // Filter by user if userId is provided
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return data || [];
+  }
+
   async getExercise(id: string): Promise<Exercise | undefined> {
     const { data, error } = await supabase
       .from('exercises')
@@ -479,6 +496,23 @@ export class SupabaseStorage implements IStorage {
       .from('workoutTemplates')
       .select('*')
       .order('name');
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
+    let query = supabase
+      .from('workoutTemplates')
+      .select('*')
+      .order('name');
+    
+    // Filter by user if userId is provided
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    
+    const { data, error } = await query;
     
     if (error) throw error;
     return data || [];
@@ -679,6 +713,23 @@ export class SupabaseStorage implements IStorage {
       .from('workoutLogs')
       .select('*')
       .order('startTime', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
+    let query = supabase
+      .from('workoutLogs')
+      .select('*')
+      .order('startTime', { ascending: false });
+    
+    // Filter by user if userId is provided
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    
+    const { data, error } = await query;
     
     if (error) throw error;
     return data || [];
