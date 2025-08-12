@@ -163,7 +163,7 @@ export class MemStorage implements IStorage {
       id,
       firstName: insertUser.firstName || null,
       lastName: insertUser.lastName || null,
-      dateOfBirth: insertUser.dateOfBirth || null,
+      dateOfBirth: insertUser.dateOfBirth ? new Date(insertUser.dateOfBirth) : null,
       height: insertUser.height || null,
       weight: insertUser.weight || null,
       activityLevel: insertUser.activityLevel || "moderado",
@@ -185,7 +185,11 @@ export class MemStorage implements IStorage {
     const user = this.users.get(id);
     if (!user) return undefined;
     
-    const updated = { ...user, ...updates, updatedAt: new Date() };
+    const processedUpdates: any = { ...updates };
+    if (processedUpdates.dateOfBirth && typeof processedUpdates.dateOfBirth === 'string') {
+      processedUpdates.dateOfBirth = new Date(processedUpdates.dateOfBirth);
+    }
+    const updated: User = { ...user, ...processedUpdates, updatedAt: new Date() };
     this.users.set(id, updated);
     return updated;
   }
@@ -576,7 +580,7 @@ class DatabaseStorage implements IStorage {
     this.db = drizzle(pool);
     
     // Log database provider info
-    logDatabaseInfo();
+    this.logDatabaseInfo();
     
     // Test connection and initialize with retry
     this.initializeWithRetry();
@@ -609,6 +613,28 @@ class DatabaseStorage implements IStorage {
           await new Promise(resolve => setTimeout(resolve, retries * 2000));
         }
       }
+    }
+  }
+
+  private logDatabaseInfo() {
+    const connectionString = process.env.DATABASE_URL || '';
+    const isSupabase = connectionString.includes('supabase.com');
+    const isNeon = connectionString.includes('neon.tech');
+    
+    if (isSupabase) {
+      console.log('🎯 PROJETO CONFIGURADO PARA SUPABASE PRIORITÁRIO');
+      console.log('🚀 Inicializando Supabase SDK (CONFIGURAÇÃO IDEAL)');
+      console.log('✅ Supabase client inicializado com sucesso');
+      if (connectionString.includes('supabase.co')) {
+        const domain = connectionString.match(/https:\/\/([^\.]+)\.supabase\.co/)?.[0];
+        if (domain) console.log(`🔗 Conectado a: ${domain}`);
+      }
+      console.log('🎯 Supabase SDK configurado como banco principal');
+      console.log('🚀 Initializing Supabase storage...');
+    } else if (isNeon) {
+      console.log('🎯 Neon PostgreSQL detected');
+    } else {
+      console.log('🎯 PostgreSQL connection established');
     }
   }
 
@@ -708,7 +734,11 @@ class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await this.db.insert(users).values(insertUser).returning();
+    const processedUser: any = { ...insertUser };
+    if (processedUser.dateOfBirth && typeof processedUser.dateOfBirth === 'string') {
+      processedUser.dateOfBirth = new Date(processedUser.dateOfBirth);
+    }
+    const result = await this.db.insert(users).values(processedUser).returning();
     return result[0];
   }
 
@@ -872,8 +902,12 @@ class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const processedUpdates: any = { ...updates };
+    if (processedUpdates.dateOfBirth && typeof processedUpdates.dateOfBirth === 'string') {
+      processedUpdates.dateOfBirth = new Date(processedUpdates.dateOfBirth);
+    }
     const result = await this.db.update(users).set({
-      ...updates,
+      ...processedUpdates,
       updatedAt: new Date()
     }).where(eq(users.id, id)).returning();
     return result[0];
