@@ -18,7 +18,7 @@ import {
 } from "@shared/schema";
 import { registerUser, loginUser, changeUserPassword, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, createServerInstance = true): Promise<Server | null> {
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
     try {

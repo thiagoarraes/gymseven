@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build:netlify"
+  functions = "netlify/functions"
+  publish = "dist/public"
+
+[functions]
+  external_node_modules = ["express", "drizzle-orm", "pg", "@supabase/supabase-js"]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# Handle React Router (SPA routing)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  command = "npm run dev"
+  targetPort = 5000
+  autoLaunch = false
