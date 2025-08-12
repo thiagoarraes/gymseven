@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { loadEnv } from "./env";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -7,6 +8,32 @@ import { setupVite, serveStatic, log } from "./vite";
 loadEnv();
 
 const app = express();
+
+// Enhanced CORS configuration for Replit
+app.use(cors({
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allow Replit domains and localhost
+    const allowedOrigins = [
+      /\.replit\.dev$/,
+      /\.repl\.co$/,
+      /localhost/,
+      /127\.0\.0\.1/
+    ];
+    
+    const isAllowed = allowedOrigins.some(pattern => 
+      typeof pattern === 'string' ? origin === pattern : pattern.test(origin)
+    );
+    
+    callback(null, isAllowed);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

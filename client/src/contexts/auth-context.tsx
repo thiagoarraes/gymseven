@@ -34,7 +34,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     // Check for stored token on mount
-    const storedToken = localStorage.getItem('auth_token');
+    const storedToken = localStorage.getItem('auth-token');
     if (storedToken) {
       setToken(storedToken);
       fetchUser(storedToken);
@@ -56,12 +56,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(data.user);
       } else {
         // Token is invalid, remove it
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth-token');
         setToken(null);
       }
     } catch (error) {
       console.error('Error fetching user:', error);
-      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth-token');
       setToken(null);
     } finally {
       setLoading(false);
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const data = await response.json();
       setUser(data.user);
       setToken(data.token);
-      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth-token', data.token);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const data = await response.json();
       setUser(data.user);
       setToken(data.token);
-      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth-token', data.token);
     } catch (error) {
       console.error('Register error:', error);
       throw error;
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth-token');
   };
 
   const updateProfile = async (updates: Partial<User>) => {
