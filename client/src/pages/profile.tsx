@@ -17,6 +17,7 @@ import { updateUserSchema, type UpdateUser } from '@shared/schema';
 
 export default function Profile() {
   const [loading, setLoading] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 
@@ -233,7 +234,7 @@ export default function Profile() {
                           <Calendar className="mr-2 h-4 w-4" />
                           Data de Nascimento
                         </FormLabel>
-                        <Popover>
+                        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
@@ -250,30 +251,40 @@ export default function Profile() {
                             <CalendarComponent
                               mode="single"
                               selected={field.value ? parseDate(field.value) : undefined}
-                              onSelect={(date) => field.onChange(date ? formatDateForInput(date) : '')}
+                              onSelect={(date) => {
+                                field.onChange(date ? formatDateForInput(date) : '');
+                                setCalendarOpen(false);
+                              }}
                               disabled={(date) =>
                                 date > new Date() || date < new Date("1900-01-01")
                               }
-                              initialFocus
+                              defaultMonth={field.value ? parseDate(field.value) : new Date(1990, 0)}
+                              captionLayout="dropdown-buttons"
+                              fromYear={1900}
+                              toYear={new Date().getFullYear()}
                               locale={ptBR}
-                              className="bg-slate-800 text-white"
+                              className="bg-slate-800 text-white p-3"
                               classNames={{
                                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                                 month: "space-y-4",
-                                caption: "flex justify-center pt-1 relative items-center text-white",
+                                caption: "flex justify-center pt-1 relative items-center text-white mb-2",
                                 caption_label: "text-sm font-medium text-white",
+                                caption_dropdowns: "flex gap-2",
+                                dropdown: "bg-slate-700 border-slate-600 text-white text-sm rounded px-2 py-1",
+                                dropdown_month: "bg-slate-700 border-slate-600 text-white",
+                                dropdown_year: "bg-slate-700 border-slate-600 text-white",
                                 nav: "space-x-1 flex items-center",
-                                nav_button: "h-7 w-7 bg-transparent p-0 text-slate-400 hover:text-white",
+                                nav_button: "h-7 w-7 bg-transparent p-0 text-slate-400 hover:text-white border border-slate-600 rounded",
                                 nav_button_previous: "absolute left-1",
                                 nav_button_next: "absolute right-1",
                                 table: "w-full border-collapse space-y-1",
-                                head_row: "flex",
-                                head_cell: "text-slate-400 rounded-md w-9 font-normal text-[0.8rem]",
-                                row: "flex w-full mt-2",
+                                head_row: "flex mb-1",
+                                head_cell: "text-slate-400 rounded-md w-10 h-8 font-normal text-xs text-center flex items-center justify-center",
+                                row: "flex w-full",
                                 cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-slate-700 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                                day: "h-9 w-9 p-0 font-normal text-white hover:bg-slate-700 rounded-md",
+                                day: "h-10 w-10 p-0 font-normal text-white hover:bg-slate-700 rounded-md flex items-center justify-center text-sm",
                                 day_selected: "bg-blue-600 text-white hover:bg-blue-600 focus:bg-blue-600",
-                                day_today: "bg-slate-700 text-white",
+                                day_today: "bg-slate-700 text-white font-semibold",
                                 day_outside: "text-slate-600",
                                 day_disabled: "text-slate-600 opacity-50",
                                 day_range_middle: "aria-selected:bg-slate-700 aria-selected:text-white",
@@ -281,7 +292,7 @@ export default function Profile() {
                               }}
                               formatters={{
                                 formatCaption: (date) => format(date, 'MMMM yyyy', { locale: ptBR }),
-                                formatWeekdayName: (date) => format(date, 'EEE', { locale: ptBR }),
+                                formatWeekdayName: (date) => format(date, 'EEEEE', { locale: ptBR }),
                               }}
                             />
                           </PopoverContent>
