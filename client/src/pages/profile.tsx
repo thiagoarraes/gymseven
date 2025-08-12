@@ -3,12 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Camera, Save, Calendar, Mail, AtSign, Weight, Ruler, Activity } from 'lucide-react';
+import { User, Camera, Save, Calendar, Mail, AtSign, Weight, Ruler, Activity, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { updateUserSchema, type UpdateUser } from '@shared/schema';
@@ -23,6 +25,11 @@ export default function Profile() {
     if (!date) return '';
     const d = new Date(date);
     return d.toISOString().split('T')[0];
+  };
+
+  const parseDate = (dateStr: string): Date | undefined => {
+    if (!dateStr) return undefined;
+    return new Date(dateStr);
   };
 
   const formatDateForDisplay = (date: string | Date | undefined): string => {
@@ -216,7 +223,7 @@ export default function Profile() {
                     />
                   </div>
 
-                  {/* Data de Nascimento com formato brasileiro */}
+                  {/* Data de Nascimento com calendário brasileiro */}
                   <FormField
                     control={form.control}
                     name="dateOfBirth"
@@ -226,17 +233,59 @@ export default function Profile() {
                           <Calendar className="mr-2 h-4 w-4" />
                           Data de Nascimento
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value ? (typeof field.value === 'string' ? field.value : formatDateForInput(field.value)) : ''}
-                            type="date"
-                            className="bg-slate-800/50 border-slate-700 text-white [&::-webkit-calendar-picker-indicator]:brightness-200"
-                            disabled={loading}
-                            lang="pt-BR"
-                            placeholder="dd/mm/aaaa"
-                          />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start text-left font-normal bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700/50 hover:text-white"
+                                disabled={loading}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.value ? formatDateForDisplay(parseDate(field.value)) : "Selecione uma data"}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 bg-slate-800 border-slate-700" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value ? parseDate(field.value) : undefined}
+                              onSelect={(date) => field.onChange(date ? formatDateForInput(date) : '')}
+                              disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                              locale={ptBR}
+                              className="bg-slate-800 text-white"
+                              classNames={{
+                                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                month: "space-y-4",
+                                caption: "flex justify-center pt-1 relative items-center text-white",
+                                caption_label: "text-sm font-medium text-white",
+                                nav: "space-x-1 flex items-center",
+                                nav_button: "h-7 w-7 bg-transparent p-0 text-slate-400 hover:text-white",
+                                nav_button_previous: "absolute left-1",
+                                nav_button_next: "absolute right-1",
+                                table: "w-full border-collapse space-y-1",
+                                head_row: "flex",
+                                head_cell: "text-slate-400 rounded-md w-9 font-normal text-[0.8rem]",
+                                row: "flex w-full mt-2",
+                                cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-slate-700 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                                day: "h-9 w-9 p-0 font-normal text-white hover:bg-slate-700 rounded-md",
+                                day_selected: "bg-blue-600 text-white hover:bg-blue-600 focus:bg-blue-600",
+                                day_today: "bg-slate-700 text-white",
+                                day_outside: "text-slate-600",
+                                day_disabled: "text-slate-600 opacity-50",
+                                day_range_middle: "aria-selected:bg-slate-700 aria-selected:text-white",
+                                day_hidden: "invisible",
+                              }}
+                              formatters={{
+                                formatCaption: (date) => format(date, 'MMMM yyyy', { locale: ptBR }),
+                                formatWeekdayName: (date) => format(date, 'EEE', { locale: ptBR }),
+                              }}
+                            />
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                         {user?.dateOfBirth && (
                           <p className="text-xs text-slate-400 mt-1">
