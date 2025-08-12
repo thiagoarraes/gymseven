@@ -239,62 +239,80 @@ export default function Profile() {
                             <FormControl>
                               <Button
                                 variant="outline"
-                                className="w-full justify-start text-left font-normal bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700/50 hover:text-white"
+                                className="w-full justify-start text-left font-normal bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700/60 hover:text-white hover:border-slate-600 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10 group"
                                 disabled={loading}
                               >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? formatDateForDisplay(parseDate(field.value)) : "Selecione uma data"}
+                                <CalendarIcon className="mr-3 h-4 w-4 text-slate-400 group-hover:text-blue-400 transition-colors duration-200" />
+                                <span className={field.value ? "text-white" : "text-slate-400"}>
+                                  {field.value ? formatDateForDisplay(parseDate(field.value)) : "Selecione uma data"}
+                                </span>
+                                {field.value && (
+                                  <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                                )}
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-slate-800 border-slate-700" align="start">
-                            <CalendarComponent
-                              mode="single"
-                              selected={field.value ? parseDate(field.value) : undefined}
-                              onSelect={(date) => {
-                                field.onChange(date ? formatDateForInput(date) : '');
-                                setCalendarOpen(false);
-                              }}
-                              disabled={(date) =>
-                                date > new Date() || date < new Date("1900-01-01")
-                              }
-                              defaultMonth={field.value ? parseDate(field.value) : new Date(1990, 0)}
-                              captionLayout="dropdown-buttons"
-                              fromYear={1900}
-                              toYear={new Date().getFullYear()}
-                              locale={ptBR}
-                              className="bg-slate-800 text-white p-3"
-                              classNames={{
-                                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                                month: "space-y-4",
-                                caption: "flex justify-center pt-1 relative items-center text-white mb-2",
-                                caption_label: "text-sm font-medium text-white",
-                                caption_dropdowns: "flex gap-2",
-                                dropdown: "bg-slate-700 border-slate-600 text-white text-sm rounded px-2 py-1",
-                                dropdown_month: "bg-slate-700 border-slate-600 text-white",
-                                dropdown_year: "bg-slate-700 border-slate-600 text-white",
-                                nav: "space-x-1 flex items-center",
-                                nav_button: "h-7 w-7 bg-transparent p-0 text-slate-400 hover:text-white border border-slate-600 rounded",
-                                nav_button_previous: "absolute left-1",
-                                nav_button_next: "absolute right-1",
-                                table: "w-full border-collapse space-y-1",
-                                head_row: "flex mb-1",
-                                head_cell: "text-slate-400 rounded-md w-10 h-8 font-normal text-xs text-center flex items-center justify-center",
-                                row: "flex w-full",
-                                cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-slate-700 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                                day: "h-10 w-10 p-0 font-normal text-white hover:bg-slate-700 rounded-md flex items-center justify-center text-sm",
-                                day_selected: "bg-blue-600 text-white hover:bg-blue-600 focus:bg-blue-600",
-                                day_today: "bg-slate-700 text-white font-semibold",
-                                day_outside: "text-slate-600",
-                                day_disabled: "text-slate-600 opacity-50",
-                                day_range_middle: "aria-selected:bg-slate-700 aria-selected:text-white",
-                                day_hidden: "invisible",
-                              }}
-                              formatters={{
-                                formatCaption: (date) => format(date, 'MMMM yyyy', { locale: ptBR }),
-                                formatWeekdayName: (date) => format(date, 'EEEEE', { locale: ptBR }),
-                              }}
-                            />
+                          <PopoverContent className="w-auto p-0 bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border border-slate-600/50 shadow-2xl rounded-xl backdrop-blur-sm" align="start">
+                            <div className="p-4">
+                              <CalendarComponent
+                                mode="single"
+                                selected={field.value ? parseDate(field.value) : undefined}
+                                onSelect={(date) => {
+                                  field.onChange(date ? formatDateForInput(date) : '');
+                                  setCalendarOpen(false);
+                                }}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                defaultMonth={field.value ? parseDate(field.value) : new Date(1990, 0)}
+                                captionLayout="dropdown-buttons"
+                                fromYear={1900}
+                                toYear={new Date().getFullYear()}
+                                locale={ptBR}
+                                className="bg-transparent text-white"
+                                classNames={{
+                                  months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                  month: "space-y-4",
+                                  caption: "flex justify-center pb-2 relative items-center text-white mb-4 border-b border-slate-700/50",
+                                  caption_label: "text-lg font-semibold text-white hidden",
+                                  caption_dropdowns: "flex gap-3 items-center",
+                                  dropdown: "bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[100px]",
+                                  dropdown_month: "bg-slate-700/80 border border-slate-600/50 text-white",
+                                  dropdown_year: "bg-slate-700/80 border border-slate-600/50 text-white",
+                                  nav: "space-x-2 flex items-center",
+                                  nav_button: "h-8 w-8 bg-slate-700/50 p-0 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm",
+                                  nav_button_previous: "absolute left-1",
+                                  nav_button_next: "absolute right-1",
+                                  table: "w-full border-collapse mt-2",
+                                  head_row: "flex mb-3",
+                                  head_cell: "text-slate-400 rounded-lg w-11 h-9 font-medium text-xs text-center flex items-center justify-center uppercase tracking-wider",
+                                  row: "flex w-full gap-1 mb-1",
+                                  cell: "text-center text-sm relative focus-within:relative focus-within:z-20",
+                                  day: "h-11 w-11 p-0 font-medium text-white hover:bg-gradient-to-br hover:from-blue-500/20 hover:to-purple-500/20 rounded-lg flex items-center justify-center text-sm transition-all duration-200 hover:scale-105 hover:shadow-lg border border-transparent hover:border-blue-500/30",
+                                  day_selected: "bg-gradient-to-br from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 shadow-lg shadow-blue-500/25 border-blue-400/50 scale-105",
+                                  day_today: "bg-gradient-to-br from-slate-600/50 to-slate-700/50 text-white font-bold ring-2 ring-blue-400/30 ring-offset-1 ring-offset-slate-800",
+                                  day_outside: "text-slate-600 opacity-40",
+                                  day_disabled: "text-slate-600 opacity-30 hover:bg-transparent hover:scale-100",
+                                  day_range_middle: "aria-selected:bg-slate-700 aria-selected:text-white",
+                                  day_hidden: "invisible",
+                                }}
+                                formatters={{
+                                  formatCaption: (date) => format(date, 'MMMM yyyy', { locale: ptBR }),
+                                  formatWeekdayName: (date) => format(date, 'EEEEE', { locale: ptBR }).charAt(0).toUpperCase(),
+                                }}
+                              />
+                              
+                              {/* Footer with additional info */}
+                              <div className="mt-4 pt-3 border-t border-slate-700/50">
+                                <div className="flex items-center justify-between text-xs text-slate-400">
+                                  <span>Selecione sua data de nascimento</span>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <span>Hoje</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </PopoverContent>
                         </Popover>
                         <FormMessage />
