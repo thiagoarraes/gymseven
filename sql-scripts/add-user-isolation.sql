@@ -1,23 +1,23 @@
 -- Add userId columns to enable user data isolation
 -- This script adds the missing userId columns to exercises, workoutTemplates, and workoutLogs tables
 
--- Add userId column to exercises table
+-- Add userId column to exercises table (using UUID type to match users.id)
 ALTER TABLE exercises 
-ADD COLUMN user_id VARCHAR REFERENCES users(id) ON DELETE CASCADE;
+ADD COLUMN user_id UUID REFERENCES users(id) ON DELETE CASCADE;
 
 -- Add userId column to workout_templates table  
 ALTER TABLE "workoutTemplates"
-ADD COLUMN user_id VARCHAR REFERENCES users(id) ON DELETE CASCADE;
+ADD COLUMN user_id UUID REFERENCES users(id) ON DELETE CASCADE;
 
 -- Add userId column to workout_logs table
 ALTER TABLE "workoutLogs" 
-ADD COLUMN user_id VARCHAR REFERENCES users(id) ON DELETE CASCADE;
+ADD COLUMN user_id UUID REFERENCES users(id) ON DELETE CASCADE;
 
 -- Update existing data to assign to the first user (temporary solution)
 -- In production, you would need a proper data migration strategy
 DO $$
 DECLARE
-    first_user_id VARCHAR;
+    first_user_id UUID;
 BEGIN
     -- Get the first user ID
     SELECT id INTO first_user_id FROM users LIMIT 1;
