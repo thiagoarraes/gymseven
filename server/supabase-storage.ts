@@ -69,9 +69,31 @@ export class SupabaseStorage implements IStorage {
 
       console.log('🏗️ Creating sample data in Supabase...');
       
+      // Create system user first if not exists
+      const systemUserId = '00000000-0000-0000-0000-000000000000';
+      const { data: existingSystemUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', systemUserId)
+        .single();
+
+      if (!existingSystemUser) {
+        await supabase
+          .from('users')
+          .insert({
+            id: systemUserId,
+            username: 'system',
+            email: 'system@gymseven.com',
+            passwordHash: 'system',
+            firstName: 'System',
+            lastName: 'User'
+          });
+      }
+      
       const sampleExercises = [
         {
           name: "Supino Reto",
+          userId: systemUserId,
           muscleGroup: "Peito",
           description: "Exercício fundamental para o desenvolvimento do peitoral",
           imageUrl: null,
@@ -79,6 +101,7 @@ export class SupabaseStorage implements IStorage {
         },
         {
           name: "Agachamento Livre",
+          userId: systemUserId,
           muscleGroup: "Pernas", 
           description: "Exercício composto para pernas e glúteos",
           imageUrl: null,
@@ -86,6 +109,7 @@ export class SupabaseStorage implements IStorage {
         },
         {
           name: "Puxada Frontal",
+          userId: systemUserId,
           muscleGroup: "Costas",
           description: "Desenvolvimento do latíssimo do dorso",
           imageUrl: null,
@@ -93,6 +117,7 @@ export class SupabaseStorage implements IStorage {
         },
         {
           name: "Rosca Direta",
+          userId: systemUserId,
           muscleGroup: "Braços",
           description: "Desenvolvimento do bíceps",
           imageUrl: null,
@@ -100,6 +125,7 @@ export class SupabaseStorage implements IStorage {
         },
         {
           name: "Desenvolvimento Militar",
+          userId: systemUserId,
           muscleGroup: "Ombros",
           description: "Exercício para deltoides",
           imageUrl: null,

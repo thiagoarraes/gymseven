@@ -112,11 +112,37 @@ export class MemStorage implements IStorage {
   }
 
   private initializeSampleData() {
+    // Create system user for sample data
+    const systemUserId = '00000000-0000-0000-0000-000000000000';
+    const systemUser: User = {
+      id: systemUserId,
+      username: 'system',
+      email: 'system@gymseven.com',
+      passwordHash: 'system',
+      firstName: 'System',
+      lastName: 'User',
+      dateOfBirth: null,
+      height: null,
+      weight: null,
+      activityLevel: 'moderado',
+      fitnessGoals: [],
+      profileImageUrl: null,
+      experienceLevel: 'iniciante',
+      preferredWorkoutDuration: 60,
+      isActive: true,
+      emailVerified: false,
+      lastLoginAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.users.set(systemUserId, systemUser);
+
     // Sample exercises
     const exercises = [
       {
         id: randomUUID(),
         name: "Supino Reto",
+        userId: systemUserId,
         muscleGroup: "Peito",
         description: "Exercício fundamental para o desenvolvimento do peitoral",
         imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
@@ -126,6 +152,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         name: "Agachamento Livre",
+        userId: systemUserId,
         muscleGroup: "Pernas",
         description: "Exercício composto para pernas e glúteos",
         imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
@@ -135,6 +162,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         name: "Puxada Frontal",
+        userId: systemUserId,
         muscleGroup: "Costas",
         description: "Desenvolvimento do latíssimo do dorso",
         imageUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
@@ -249,6 +277,13 @@ export class MemStorage implements IStorage {
     return Array.from(this.exercises.values()).filter(ex => ex.muscleGroup === muscleGroup);
   }
 
+  async getExercises(userId?: string): Promise<Exercise[]> {
+    if (userId) {
+      return Array.from(this.exercises.values()).filter(ex => ex.userId === userId);
+    }
+    return Array.from(this.exercises.values());
+  }
+
   // Workout Template methods
   async getAllWorkoutTemplates(): Promise<WorkoutTemplate[]> {
     return Array.from(this.workoutTemplates.values());
@@ -334,6 +369,13 @@ export class MemStorage implements IStorage {
     return false;
   }
 
+  async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
+    if (userId) {
+      return Array.from(this.workoutTemplates.values()).filter(wt => wt.userId === userId);
+    }
+    return Array.from(this.workoutTemplates.values());
+  }
+
   // Workout Log methods
   async getAllWorkoutLogs(): Promise<WorkoutLog[]> {
     return Array.from(this.workoutLogs.values()).sort((a, b) => 
@@ -369,6 +411,16 @@ export class MemStorage implements IStorage {
 
   async deleteWorkoutLog(id: string): Promise<boolean> {
     return this.workoutLogs.delete(id);
+  }
+
+  async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
+    if (userId) {
+      return Array.from(this.workoutLogs.values())
+        .filter(wl => wl.userId === userId)
+        .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+    }
+    return Array.from(this.workoutLogs.values())
+      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
   }
 
   async getRecentWorkoutLogs(limit = 10): Promise<WorkoutLog[]> {
@@ -656,10 +708,26 @@ class DatabaseStorage implements IStorage {
 
       console.log('🏗️ Creating sample data...');
       
-      // Sample exercises
+      // Create system user first if not exists
+      const systemUserId = '00000000-0000-0000-0000-000000000000';
+      const existingSystemUser = await this.db.select().from(users).where(eq(users.id, systemUserId)).limit(1);
+      
+      if (existingSystemUser.length === 0) {
+        await this.db.insert(users).values({
+          id: systemUserId,
+          username: 'system',
+          email: 'system@gymseven.com',
+          passwordHash: 'system',
+          firstName: 'System',
+          lastName: 'User'
+        });
+      }
+
+      // Sample exercises with userId
       const sampleExercises = [
         {
           name: "Supino Reto",
+          userId: systemUserId,
           muscleGroup: "Peito",
           description: "Exercício fundamental para o desenvolvimento do peitoral",
           imageUrl: null,
@@ -667,6 +735,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Agachamento Livre",
+          userId: systemUserId,
           muscleGroup: "Pernas", 
           description: "Exercício composto para pernas e glúteos",
           imageUrl: null,
@@ -674,6 +743,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Puxada Frontal",
+          userId: systemUserId,
           muscleGroup: "Costas",
           description: "Desenvolvimento do latíssimo do dorso",
           imageUrl: null,
@@ -681,6 +751,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Rosca Direta",
+          userId: systemUserId,
           muscleGroup: "Braços",
           description: "Desenvolvimento do bíceps",
           imageUrl: null,
@@ -688,6 +759,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Desenvolvimento Militar",
+          userId: systemUserId,
           muscleGroup: "Ombros",
           description: "Exercício para deltoides",
           imageUrl: null,
@@ -695,6 +767,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Leg Press",
+          userId: systemUserId,
           muscleGroup: "Pernas",
           description: "Exercício para quadríceps e glúteos",
           imageUrl: null,
@@ -702,6 +775,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Prancha",
+          userId: systemUserId,
           muscleGroup: "Core",
           description: "Fortalecimento do core",
           imageUrl: null,
@@ -709,6 +783,7 @@ class DatabaseStorage implements IStorage {
         },
         {
           name: "Remada Curvada",
+          userId: systemUserId,
           muscleGroup: "Costas",
           description: "Desenvolvimento das costas",
           imageUrl: null,
@@ -772,6 +847,13 @@ class DatabaseStorage implements IStorage {
 
   async getExercisesByMuscleGroup(muscleGroup: string): Promise<Exercise[]> {
     return await this.db.select().from(exercises).where(eq(exercises.muscleGroup, muscleGroup));
+  }
+
+  async getExercises(userId?: string): Promise<Exercise[]> {
+    if (userId) {
+      return await this.db.select().from(exercises).where(eq(exercises.userId, userId));
+    }
+    return await this.db.select().from(exercises);
   }
 
   // Workout Template methods
@@ -840,6 +922,13 @@ class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
+    if (userId) {
+      return await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.userId, userId));
+    }
+    return await this.db.select().from(workoutTemplates);
+  }
+
   // Workout Log methods  
   async getAllWorkoutLogs(): Promise<WorkoutLog[]> {
     return await this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
@@ -863,6 +952,15 @@ class DatabaseStorage implements IStorage {
   async deleteWorkoutLog(id: string): Promise<boolean> {
     const result = await this.db.delete(workoutLogs).where(eq(workoutLogs.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
+    if (userId) {
+      return await this.db.select().from(workoutLogs)
+        .where(eq(workoutLogs.userId, userId))
+        .orderBy(desc(workoutLogs.startTime));
+    }
+    return await this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
   }
 
   async getRecentWorkoutLogs(limit: number = 5): Promise<WorkoutLog[]> {
