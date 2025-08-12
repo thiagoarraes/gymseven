@@ -216,7 +216,10 @@ export class SupabaseStorage implements IStorage {
     if (updates.username) mappedUpdates.username = updates.username;
     if (updates.firstName) mappedUpdates.first_name = updates.firstName;
     if (updates.lastName) mappedUpdates.last_name = updates.lastName;
-    // Skip date_of_birth, height, weight, activity_level for now (missing columns)
+    if (updates.dateOfBirth) mappedUpdates.date_of_birth = updates.dateOfBirth;
+    if (updates.height !== undefined) mappedUpdates.height = updates.height;
+    if (updates.weight !== undefined) mappedUpdates.weight = updates.weight;
+    if (updates.activityLevel) mappedUpdates.activity_level = updates.activityLevel;
     if (updates.isActive !== undefined) mappedUpdates.is_active = updates.isActive;
     
     const { data, error } = await supabase
