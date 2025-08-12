@@ -189,12 +189,12 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const updateUserSchema = insertUserSchema.partial().omit({ 
-  password: true,
-  height: true, 
-  weight: true 
+  password: true
 }).extend({
   email: z.string().email("Email inválido").optional(),
   username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres").optional(),
+  height: z.number().min(100, "Altura deve ser entre 100 e 250cm").max(250, "Altura deve ser entre 100 e 250cm").optional(),
+  weight: z.number().min(30, "Peso deve ser entre 30 e 300kg").max(300, "Peso deve ser entre 30 e 300kg").optional(),
 });
 
 export const loginSchema = z.object({
