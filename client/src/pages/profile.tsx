@@ -25,12 +25,18 @@ export default function Profile() {
   const formatDateForInput = (date: string | Date | undefined): string => {
     if (!date) return '';
     const d = new Date(date);
-    return d.toISOString().split('T')[0];
+    // Use local timezone to avoid date shifting
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const parseDate = (dateStr: string): Date | undefined => {
     if (!dateStr) return undefined;
-    return new Date(dateStr);
+    // Parse as local date to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
   };
 
   const formatDateForDisplay = (date: string | Date | undefined): string => {
@@ -65,7 +71,7 @@ export default function Profile() {
         ...data,
         height: data.height ? Number(data.height) : undefined,
         weight: data.weight ? Number(data.weight) : undefined,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+        dateOfBirth: data.dateOfBirth ? parseDate(data.dateOfBirth) : undefined,
       };
       
       await updateProfile(processedData);
