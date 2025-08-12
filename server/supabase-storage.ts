@@ -81,10 +81,9 @@ export class SupabaseStorage implements IStorage {
         await supabase
           .from('users')
           .insert({
-            id: systemUserId,
             username: 'system',
             email: 'system@gymseven.com',
-            passwordHash: 'system',
+            password: 'system',
             firstName: 'System',
             lastName: 'User'
           });

@@ -118,7 +118,7 @@ export class MemStorage implements IStorage {
       id: systemUserId,
       username: 'system',
       email: 'system@gymseven.com',
-      passwordHash: 'system',
+      password: 'system',
       firstName: 'System',
       lastName: 'User',
       dateOfBirth: null,
@@ -714,10 +714,9 @@ class DatabaseStorage implements IStorage {
       
       if (existingSystemUser.length === 0) {
         await this.db.insert(users).values({
-          id: systemUserId,
           username: 'system',
           email: 'system@gymseven.com',
-          passwordHash: 'system',
+          password: 'system',
           firstName: 'System',
           lastName: 'User'
         });
