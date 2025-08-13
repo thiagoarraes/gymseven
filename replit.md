@@ -13,6 +13,7 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 - Validação de arquivos (JPEG, PNG, WebP, max 5MB)
 - Sistema de arquivos estáticos configurado com cache otimizado
 - **Ação manual necessária:** Adicionar coluna `profile_image_url TEXT` na tabela `users` no Supabase
+- **SQL para executar:** `ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image_url TEXT;`
 
 ## Previous Changes (August 12, 2025)
 
