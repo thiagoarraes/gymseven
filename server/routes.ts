@@ -1,5 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import express from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { 
   insertExerciseSchema, 
@@ -17,6 +21,37 @@ import {
   updateUserPreferencesSchema
 } from "@shared/schema";
 import { registerUser, loginUser, changeUserPassword, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
+
+// Configure multer for avatar uploads
+const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const avatarStorage = multer.diskStorage({
+  destination: uploadsDir,
+  filename: (req, file, cb) => {
+    const userId = (req as any).user?.id;
+    const ext = path.extname(file.originalname);
+    const filename = `avatar-${userId}-${Date.now()}${ext}`;
+    cb(null, filename);
+  }
+});
+
+const uploadAvatar = multer({
+  storage: avatarStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB max
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de arquivo não suportado. Use JPEG, PNG ou WebP.'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express, createServerInstance = true): Promise<Server | null> {
   // Auth routes
@@ -128,6 +163,47 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
     }
   });
+
+  // Upload avatar endpoint
+  app.post('/api/auth/upload-avatar', authenticateToken, uploadAvatar.single('avatar'), async (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'Nenhum arquivo enviado' });
+      }
+
+      // Generate URL for the uploaded file
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      
+      // Update user's profile image URL
+      const updatedUser = await storage.updateUser(req.user!.id, {
+        profileImageUrl: avatarUrl
+      });
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+
+      // Delete old avatar file if exists
+      if (req.user!.profileImageUrl && req.user!.profileImageUrl.startsWith('/uploads/avatars/')) {
+        const oldFilePath = path.join(process.cwd(), req.user!.profileImageUrl);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json({ user: userWithoutPassword });
+    } catch (error: any) {
+      console.error('Upload avatar error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  // Serve static files for uploads
+  app.use('/uploads', (req, res, next) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year cache
+    next();
+  }, express.static(path.join(process.cwd(), 'uploads')));
 
   app.put("/api/auth/profile", authenticateToken, async (req: AuthRequest, res) => {
     try {
