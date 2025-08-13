@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
@@ -61,6 +62,11 @@ export default function Settings() {
       weekStartsOn: 1,
     },
   });
+
+  // Atualiza o valor do formulário quando o tema muda
+  React.useEffect(() => {
+    preferencesForm.setValue('theme', theme);
+  }, [theme, preferencesForm]);
 
   const passwordForm = useForm<ChangePassword>({
     resolver: zodResolver(changePasswordSchema),
@@ -149,7 +155,14 @@ export default function Settings() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-foreground">Tema</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={theme} value={field.value}>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setTheme(value as 'light' | 'dark');
+                          }} 
+                          defaultValue={theme} 
+                          value={theme}
+                        >
                           <FormControl>
                             <SelectTrigger className="bg-card border-border text-foreground">
                               <SelectValue placeholder="Selecione o tema" />
