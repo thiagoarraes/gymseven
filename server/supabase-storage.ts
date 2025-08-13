@@ -183,6 +183,11 @@ export class SupabaseStorage implements IStorage {
       ...data,
       firstName: data.first_name,
       lastName: data.last_name,
+      dateOfBirth: data.date_of_birth || null,
+      height: data.height || null,
+      weight: data.weight || null,
+      activityLevel: data.activity_level || 'moderado',
+      profileImageUrl: data.profile_image_url || null,
       isActive: data.is_active,
       lastLoginAt: data.last_login_at,
       createdAt: data.createdAt || data.created_at,
@@ -225,6 +230,7 @@ export class SupabaseStorage implements IStorage {
       height: data.height || null,
       weight: data.weight || null,
       activityLevel: data.activity_level || 'moderado',
+      profileImageUrl: data.profile_image_url || null,
       isActive: data.is_active,
       createdAt: data.createdAt || data.created_at,
       updatedAt: data.updatedAt || data.updated_at
@@ -245,6 +251,7 @@ export class SupabaseStorage implements IStorage {
     if (updates.height !== undefined) mappedUpdates.height = updates.height;
     if (updates.weight !== undefined) mappedUpdates.weight = updates.weight;
     if (updates.activityLevel) mappedUpdates.activity_level = updates.activityLevel;
+    if (updates.profileImageUrl !== undefined) mappedUpdates.profile_image_url = updates.profileImageUrl;
     if (updates.isActive !== undefined) mappedUpdates.is_active = updates.isActive;
     
     const { data, error } = await supabase
@@ -268,6 +275,7 @@ export class SupabaseStorage implements IStorage {
       height: data.height || null,
       weight: data.weight || null,
       activityLevel: data.activity_level || 'moderado',
+      profileImageUrl: data.profile_image_url || null,
       isActive: data.is_active,
       lastLoginAt: data.last_login_at,
       createdAt: data.createdAt || data.created_at,
