@@ -142,8 +142,8 @@ export default function ImageCropModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden bg-slate-900 border-slate-700">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[95vh] flex flex-col bg-slate-900 border-slate-700">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-white flex items-center">
             <CropIcon className="mr-2 h-5 w-5" />
             Ajustar Foto de Perfil
@@ -153,8 +153,8 @@ export default function ImageCropModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center space-y-4 py-4">
-          <div className="relative max-w-full max-h-96 overflow-auto">
+        <div className="flex-1 flex flex-col items-center space-y-4 py-4 overflow-auto">
+          <div className="relative w-full flex justify-center">
             <ReactCrop
               crop={crop}
               onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -166,25 +166,25 @@ export default function ImageCropModal({
             >
               <img
                 ref={imgRef}
-                alt="Crop me"
+                alt="Imagem para recortar"
                 src={imageSrc}
                 style={{ transform: 'scale(1) rotate(0deg)' }}
                 onLoad={onImageLoad}
-                className="max-w-full max-h-96 object-contain"
+                className="max-w-full max-h-[50vh] object-contain"
               />
             </ReactCrop>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-center space-x-4 w-full">
             <div className="flex items-center space-x-2">
-              <label className="text-sm text-slate-300">Formato:</label>
+              <label className="text-sm text-slate-300 font-medium">Formato:</label>
               <div className="flex space-x-2">
                 <Button
                   type="button"
                   variant={aspect === 1 ? "default" : "outline"}
                   size="sm"
                   onClick={() => setAspect(1)}
-                  className="text-xs px-3 py-1"
+                  className="text-xs px-4 py-2 border-slate-600 hover:bg-slate-700"
                 >
                   Quadrado
                 </Button>
@@ -193,7 +193,7 @@ export default function ImageCropModal({
                   variant={aspect === undefined ? "default" : "outline"}
                   size="sm"
                   onClick={() => setAspect(undefined)}
-                  className="text-xs px-3 py-1"
+                  className="text-xs px-4 py-2 border-slate-600 hover:bg-slate-700"
                 >
                   Livre
                 </Button>
@@ -202,13 +202,13 @@ export default function ImageCropModal({
           </div>
         </div>
 
-        <DialogFooter className="flex space-x-2">
+        <DialogFooter className="flex-shrink-0 flex justify-end space-x-3 pt-4 border-t border-slate-700">
           <Button
             type="button"
             variant="outline"
             onClick={handleClose}
             disabled={processing}
-            className="border-slate-600 text-slate-300 hover:bg-slate-800"
+            className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white px-6"
           >
             <X className="mr-2 h-4 w-4" />
             Cancelar
@@ -217,7 +217,7 @@ export default function ImageCropModal({
             type="button"
             onClick={handleCropComplete}
             disabled={!completedCrop || processing}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 px-6"
           >
             {processing ? (
               <div className="flex items-center space-x-2">
@@ -227,7 +227,7 @@ export default function ImageCropModal({
             ) : (
               <div className="flex items-center space-x-2">
                 <Check className="w-4 h-4" />
-                <span>Confirmar</span>
+                <span>Confirmar Crop</span>
               </div>
             )}
           </Button>

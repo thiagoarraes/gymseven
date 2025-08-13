@@ -4,6 +4,16 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 
 ## Recent Changes (August 13, 2025)
 
+**✅ Funcionalidade de Crop de Imagem para Avatar Implementada:**
+- Sistema completo de crop de imagem para upload de avatar
+- Componente `ImageCropModal` criado com `react-image-crop`
+- Modal responsivo com controles de aspecto (quadrado/livre)
+- Botões de confirmação e cancelamento claramente visíveis
+- Integração completa com sistema de upload existente
+- Validação mantida (JPEG, PNG, WebP, max 5MB)
+- Processamento otimizado da imagem recortada antes do upload
+- Interface melhorada para evitar distorção de imagens
+
 **✅ Migração Completa e Funcionalidade de Avatar Implementada:**
 - Migração do Replit Agent para Replit concluída com sucesso
 - Supabase SDK configurado e conectado corretamente
