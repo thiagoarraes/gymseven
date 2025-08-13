@@ -14,11 +14,15 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { updateUserSchema, type UpdateUser } from '@shared/schema';
+import ImageCropModal from '@/components/ImageCropModal';
 
 export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedFileName, setSelectedFileName] = useState<string>('');
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,7 +103,7 @@ export default function Profile() {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.username?.charAt(0).toUpperCase() || "U";
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -124,11 +128,25 @@ export default function Profile() {
       return;
     }
 
+    // Create image URL for crop modal
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedImage(imageUrl);
+    setSelectedFileName(file.name);
+    setCropModalOpen(true);
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedImageBlob: Blob, fileName: string) => {
     setUploadingAvatar(true);
+    setCropModalOpen(false);
     
     try {
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('avatar', croppedImageBlob, fileName);
 
       const response = await fetch('/api/auth/upload-avatar', {
         method: 'POST',
@@ -158,11 +176,21 @@ export default function Profile() {
       });
     } finally {
       setUploadingAvatar(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      // Clean up the created URL
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+        setSelectedImage('');
       }
     }
+  };
+
+  const handleCropCancel = () => {
+    // Clean up the created URL
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+      setSelectedImage('');
+    }
+    setCropModalOpen(false);
   };
 
   return (
@@ -196,7 +224,7 @@ export default function Profile() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/jpeg,image/jpg,image/png,image/webp"
-                onChange={handleAvatarUpload}
+                onChange={handleFileSelect}
                 className="hidden"
                 data-testid="input-avatar-file"
               />
@@ -601,6 +629,15 @@ export default function Profile() {
           </Card>
         </div>
       </div>
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={cropModalOpen}
+        onClose={handleCropCancel}
+        imageSrc={selectedImage}
+        onCropComplete={handleCropComplete}
+        fileName={selectedFileName}
+      />
     </div>
   );
 }
