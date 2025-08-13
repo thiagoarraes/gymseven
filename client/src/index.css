@@ -3,49 +3,51 @@
 @tailwind utilities;
 
 :root {
+  /* Light mode variables */
   --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --foreground: hsl(222, 84%, 4.9%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --popover-foreground: hsl(222, 84%, 4.9%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
+  --card-foreground: hsl(222, 84%, 4.9%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --input: hsl(214.3, 31.8%, 91.4%);
+  --primary: hsl(221.2, 83.2%, 53.3%);
+  --primary-foreground: hsl(210, 40%, 98%);
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(222.2, 84%, 4.9%);
+  --accent: hsl(210, 40%, 96%);
+  --accent-foreground: hsl(222.2, 84%, 4.9%);
   --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(221.2, 83.2%, 53.3%);
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: hsl(224, 71%, 4%);
-  --foreground: hsl(213, 31%, 91%);
-  --muted: hsl(223, 47%, 11%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --popover: hsl(224, 71%, 4%);
-  --popover-foreground: hsl(213, 31%, 91%);
-  --card: hsl(224, 71%, 4%);
-  --card-foreground: hsl(213, 31%, 91%);
-  --border: hsl(216, 34%, 17%);
-  --input: hsl(216, 34%, 17%);
-  --primary: hsl(210, 98%, 56%);
-  --primary-foreground: hsl(222, 84%, 5%);
-  --secondary: hsl(222, 47%, 11%);
-  --secondary-foreground: hsl(213, 31%, 91%);
-  --accent: hsl(216, 34%, 17%);
+  /* Dark mode variables */
+  --background: hsl(222.2, 84%, 4.9%);
+  --foreground: hsl(210, 40%, 98%);
+  --muted: hsl(217.2, 32.6%, 17.5%);
+  --muted-foreground: hsl(215, 20.2%, 65.1%);
+  --popover: hsl(222.2, 84%, 4.9%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --card: hsl(222.2, 84%, 4.9%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217.2, 32.6%, 17.5%);
+  --input: hsl(217.2, 32.6%, 17.5%);
+  --primary: hsl(217.2, 91.2%, 59.8%);
+  --primary-foreground: hsl(222.2, 84%, 4.9%);
+  --secondary: hsl(217.2, 32.6%, 17.5%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(217.2, 32.6%, 17.5%);
   --accent-foreground: hsl(210, 40%, 98%);
-  --destructive: hsl(359, 51%, 48%);
+  --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(216, 34%, 17%);
-  --radius: 1rem;
+  --ring: hsl(217.2, 32.6%, 17.5%);
+  --radius: 0.5rem;
 }
 
 @layer base {
@@ -58,18 +60,34 @@
   }
 
   html {
-    @apply dark;
+    /* Theme will be set by ThemeProvider */
   }
 }
 
 @layer utilities {
   .glassmorphism {
-    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
+  }
+  
+  /* Light mode glassmorphism */
+  :root .glassmorphism {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Dark mode glassmorphism */
+  .dark .glassmorphism {
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .gradient-bg {
+  /* Light mode gradient background */
+  :root .gradient-bg {
+    background: linear-gradient(135deg, hsl(210, 40%, 96%) 0%, hsl(214.3, 31.8%, 91.4%) 100%);
+  }
+  
+  /* Dark mode gradient background */
+  .dark .gradient-bg {
     background: linear-gradient(135deg, hsl(215, 28%, 17%) 0%, hsl(222, 84%, 4.9%) 100%);
   }
   

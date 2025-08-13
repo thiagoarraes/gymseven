@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
+import { useTheme } from '@/contexts/theme-context';
 import { changePasswordSchema, type ChangePassword } from '@shared/schema';
 import { z } from 'zod';
 
@@ -44,12 +45,13 @@ export default function Settings() {
   const [loading, setLoading] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const { user, token } = useAuth();
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const preferencesForm = useForm<Preferences>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      theme: 'dark',
+      theme: theme,
       units: 'metric',
       language: 'pt-BR',
       notifications: true,
@@ -72,7 +74,12 @@ export default function Settings() {
   const onSubmitPreferences = async (data: Preferences) => {
     setLoading(true);
     try {
-      // For now, just store in localStorage
+      // Update theme if changed
+      if (data.theme !== theme) {
+        setTheme(data.theme);
+      }
+      
+      // Store preferences in localStorage
       localStorage.setItem('userPreferences', JSON.stringify(data));
       
       toast({
@@ -113,22 +120,22 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-24 pb-24">
+    <div className="min-h-screen bg-background pt-24 pb-24">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-white flex items-center justify-center">
+            <h1 className="text-2xl font-bold text-foreground flex items-center justify-center">
               <SettingsIcon className="mr-2 h-6 w-6" />
               Configurações
             </h1>
-            <p className="text-slate-400">Personalize sua experiência no GymSeven</p>
+            <p className="text-muted-foreground">Personalize sua experiência no GymSeven</p>
           </div>
 
           {/* Appearance */}
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="glassmorphism">
             <CardHeader>
-              <CardTitle className="text-white flex items-center">
+              <CardTitle className="text-foreground flex items-center">
                 <Moon className="mr-2 h-5 w-5" />
                 Aparência
               </CardTitle>
@@ -141,21 +148,21 @@ export default function Settings() {
                     name="theme"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300">Tema</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel className="text-foreground">Tema</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={theme} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                            <SelectTrigger className="bg-card border-border text-foreground">
                               <SelectValue placeholder="Selecione o tema" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="dark" className="text-white">
+                          <SelectContent className="bg-card border-border">
+                            <SelectItem value="dark" className="text-foreground">
                               <div className="flex items-center">
                                 <Moon className="mr-2 h-4 w-4" />
                                 Escuro
                               </div>
                             </SelectItem>
-                            <SelectItem value="light" className="text-white">
+                            <SelectItem value="light" className="text-foreground">
                               <div className="flex items-center">
                                 <Sun className="mr-2 h-4 w-4" />
                                 Claro
@@ -173,16 +180,16 @@ export default function Settings() {
                     name="units"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300">Unidades</FormLabel>
+                        <FormLabel className="text-foreground">Unidades</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                            <SelectTrigger className="bg-card border-border text-foreground">
                               <SelectValue placeholder="Sistema de unidades" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="metric" className="text-white">Métrico (kg, cm)</SelectItem>
-                            <SelectItem value="imperial" className="text-white">Imperial (lb, ft)</SelectItem>
+                          <SelectContent className="bg-card border-border">
+                            <SelectItem value="metric" className="text-foreground">Métrico (kg, cm)</SelectItem>
+                            <SelectItem value="imperial" className="text-foreground">Imperial (lb, ft)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -195,9 +202,9 @@ export default function Settings() {
           </Card>
 
           {/* Notifications */}
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="glassmorphism">
             <CardHeader>
-              <CardTitle className="text-white flex items-center">
+              <CardTitle className="text-foreground flex items-center">
                 <Bell className="mr-2 h-5 w-5" />
                 Notificações
               </CardTitle>
@@ -209,12 +216,12 @@ export default function Settings() {
                     control={preferencesForm.control}
                     name="notifications"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-slate-700 p-3">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base text-white">
+                          <FormLabel className="text-base text-foreground">
                             Notificações Push
                           </FormLabel>
-                          <FormDescription className="text-slate-400">
+                          <FormDescription className="text-muted-foreground">
                             Receba lembretes sobre treinos e metas
                           </FormDescription>
                         </div>
@@ -232,13 +239,13 @@ export default function Settings() {
                     control={preferencesForm.control}
                     name="soundEffects"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-slate-700 p-3">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base text-white flex items-center">
+                          <FormLabel className="text-base text-foreground flex items-center">
                             {field.value ? <Volume2 className="mr-2 h-4 w-4" /> : <VolumeX className="mr-2 h-4 w-4" />}
                             Efeitos Sonoros
                           </FormLabel>
-                          <FormDescription className="text-slate-400">
+                          <FormDescription className="text-muted-foreground">
                             Sons de feedback durante o treino
                           </FormDescription>
                         </div>
@@ -257,9 +264,9 @@ export default function Settings() {
           </Card>
 
           {/* Workout Settings */}
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="glassmorphism">
             <CardHeader>
-              <CardTitle className="text-white flex items-center">
+              <CardTitle className="text-foreground flex items-center">
                 <Clock className="mr-2 h-5 w-5" />
                 Configurações de Treino
               </CardTitle>
@@ -271,12 +278,12 @@ export default function Settings() {
                     control={preferencesForm.control}
                     name="restTimerAutoStart"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-slate-700 p-3">
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base text-white">
+                          <FormLabel className="text-base text-foreground">
                             Timer Automático
                           </FormLabel>
-                          <FormDescription className="text-slate-400">
+                          <FormDescription className="text-muted-foreground">
                             Iniciar timer de descanso automaticamente
                           </FormDescription>
                         </div>
@@ -295,12 +302,12 @@ export default function Settings() {
                     name="defaultRestTime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300">Tempo de Descanso Padrão (segundos)</FormLabel>
+                        <FormLabel className="text-foreground">Tempo de Descanso Padrão (segundos)</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
-                            className="bg-slate-800/50 border-slate-700 text-white"
+                            className="bg-card border-border text-foreground"
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
                           />
                         </FormControl>
@@ -314,19 +321,19 @@ export default function Settings() {
                     name="weekStartsOn"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300 flex items-center">
+                        <FormLabel className="text-foreground flex items-center">
                           <Calendar className="mr-2 h-4 w-4" />
                           Semana Inicia Em
                         </FormLabel>
                         <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
                           <FormControl>
-                            <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                            <SelectTrigger className="bg-card border-border text-foreground">
                               <SelectValue placeholder="Primeiro dia da semana" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="0" className="text-white">Domingo</SelectItem>
-                            <SelectItem value="1" className="text-white">Segunda-feira</SelectItem>
+                          <SelectContent className="bg-card border-border">
+                            <SelectItem value="0" className="text-foreground">Domingo</SelectItem>
+                            <SelectItem value="1" className="text-foreground">Segunda-feira</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -358,9 +365,9 @@ export default function Settings() {
           </Card>
 
           {/* Security */}
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="glassmorphism">
             <CardHeader>
-              <CardTitle className="text-white flex items-center">
+              <CardTitle className="text-foreground flex items-center">
                 <Shield className="mr-2 h-5 w-5" />
                 Segurança
               </CardTitle>
@@ -369,14 +376,14 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-white font-medium">Alterar Senha</h3>
-                    <p className="text-slate-400 text-sm">Mantenha sua conta segura</p>
+                    <h3 className="text-foreground font-medium">Alterar Senha</h3>
+                    <p className="text-muted-foreground text-sm">Mantenha sua conta segura</p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowPasswordForm(!showPasswordForm)}
-                    className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                    className="border-border text-foreground hover:bg-accent"
                   >
                     <Key className="mr-2 h-4 w-4" />
                     {showPasswordForm ? 'Cancelar' : 'Alterar'}
@@ -384,7 +391,7 @@ export default function Settings() {
                 </div>
 
                 {showPasswordForm && (
-                  <Separator className="bg-slate-700" />
+                  <Separator className="bg-border" />
                 )}
 
                 {showPasswordForm && (
@@ -395,12 +402,12 @@ export default function Settings() {
                         name="currentPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-300">Senha Atual</FormLabel>
+                            <FormLabel className="text-foreground">Senha Atual</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 type="password"
-                                className="bg-slate-800/50 border-slate-700 text-white"
+                                className="bg-card border-border text-foreground"
                                 disabled={loading}
                               />
                             </FormControl>
@@ -414,12 +421,12 @@ export default function Settings() {
                         name="newPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-300">Nova Senha</FormLabel>
+                            <FormLabel className="text-foreground">Nova Senha</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 type="password"
-                                className="bg-slate-800/50 border-slate-700 text-white"
+                                className="bg-card border-border text-foreground"
                                 disabled={loading}
                               />
                             </FormControl>
@@ -433,12 +440,12 @@ export default function Settings() {
                         name="confirmPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-300">Confirmar Nova Senha</FormLabel>
+                            <FormLabel className="text-foreground">Confirmar Nova Senha</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 type="password"
-                                className="bg-slate-800/50 border-slate-700 text-white"
+                                className="bg-card border-border text-foreground"
                                 disabled={loading}
                               />
                             </FormControl>
