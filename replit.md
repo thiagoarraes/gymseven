@@ -4,6 +4,17 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 
 ## Recent Changes (August 13, 2025)
 
+**✅ Sistema Completo de Tema Claro/Escuro Implementado:**
+- Sistema de tema instantâneo com mudança imediata no dropdown de configurações
+- Variáveis CSS responsivas em `index.css` para light/dark mode
+- `ThemeContext` e `ThemeProvider` implementados com sincronização automática
+- Classes CSS atualizadas em todas as páginas para usar variáveis de tema
+- Header, bottom navigation, login, profile e outras páginas convertidas
+- Glassmorphism adaptado para ambos os temas com transparências corretas
+- Troca de tema sem necessidade de salvar - mudança instantânea ao selecionar
+- Sistema de persistência do tema selecionado no localStorage
+- Interface totalmente responsiva aos dois modos de visualização
+
 **✅ Funcionalidade de Crop de Imagem para Avatar Implementada:**
 - Sistema completo de crop de imagem para upload de avatar
 - Componente `ImageCropModal` criado com `react-image-crop`

@@ -194,7 +194,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-24 pb-24">
+    <div className="min-h-screen bg-background pt-24 pb-24">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="space-y-6">
           {/* Header */}
@@ -209,7 +209,7 @@ export default function Profile() {
               <Button
                 size="sm"
                 variant="outline"
-                className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0 bg-slate-800 border-slate-600 hover:bg-slate-700"
+                className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0 bg-card border-border hover:bg-accent"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingAvatar}
                 data-testid="button-upload-avatar"
@@ -230,23 +230,23 @@ export default function Profile() {
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-foreground">
                 {user?.firstName && user?.lastName 
                   ? `${user.firstName} ${user.lastName}` 
                   : user?.username}
               </h1>
-              <p className="text-slate-400">{user?.email}</p>
+              <p className="text-muted-foreground">{user?.email}</p>
             </div>
           </div>
 
           {/* Profile Form */}
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="glassmorphism">
             <CardHeader>
-              <CardTitle className="text-white flex items-center">
+              <CardTitle className="text-foreground flex items-center">
                 <User className="mr-2 h-5 w-5" />
                 Informações Pessoais
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-muted-foreground">
                 Atualize suas informações pessoais e preferências
               </CardDescription>
             </CardHeader>
@@ -260,7 +260,7 @@ export default function Profile() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300 flex items-center">
+                        <FormLabel className="text-foreground flex items-center">
                           <Mail className="mr-2 h-4 w-4" />
                           Email
                         </FormLabel>
@@ -269,7 +269,7 @@ export default function Profile() {
                             {...field}
                             value={field.value || ''}
                             type="email"
-                            className="bg-slate-800/50 border-slate-700 text-white"
+                            className="bg-card border-border text-foreground"
                             disabled={loading}
                           />
                         </FormControl>

@@ -32,7 +32,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-slate-800/50">
+    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/50">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <Logo />
@@ -49,31 +49,31 @@ export function Header() {
                   </Avatar>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 border-slate-700 backdrop-blur-sm">
+              <DropdownMenuContent align="end" className="w-56 bg-card/95 border-border backdrop-blur-sm">
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium text-white">
+                  <p className="text-sm font-medium text-foreground">
                     {user?.firstName && user?.lastName 
                       ? `${user.firstName} ${user.lastName}` 
                       : user?.username}
                   </p>
-                  <p className="text-xs text-slate-400">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
-                <DropdownMenuSeparator className="bg-slate-700" />
+                <DropdownMenuSeparator className="bg-border" />
                 <Link href="/profile">
-                  <DropdownMenuItem className="text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer">
+                  <DropdownMenuItem className="text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     <span>Perfil</span>
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/settings">
-                  <DropdownMenuItem className="text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer">
+                  <DropdownMenuItem className="text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Configurações</span>
                   </DropdownMenuItem>
                 </Link>
-                <DropdownMenuSeparator className="bg-slate-700" />
+                <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem 
-                  className="text-red-400 hover:bg-red-900/20 hover:text-red-300 cursor-pointer"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                   onClick={handleLogout}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

@@ -47,15 +47,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md glassmorphism">
         <CardHeader className="text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             <LogIn className="w-8 h-8 text-white" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-white">Entrar</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-2xl font-bold text-foreground">Entrar</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Acesse sua conta do GymSeven
             </CardDescription>
           </div>
@@ -69,15 +69,15 @@ export default function Login() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-300">Email</FormLabel>
+                    <FormLabel className="text-foreground">Email</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                         <Input
                           {...field}
                           type="email"
                           placeholder="seu@email.com"
-                          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                          className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground"
                           disabled={loading}
                         />
                       </div>
@@ -92,22 +92,22 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-300">Senha</FormLabel>
+                    <FormLabel className="text-foreground">Senha</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                         <Input
                           {...field}
                           type={showPassword ? 'text' : 'password'}
                           placeholder="Sua senha"
-                          className="pl-10 pr-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                          className="pl-10 pr-10 bg-card border-border text-foreground placeholder:text-muted-foreground"
                           disabled={loading}
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
+                          className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={loading}
                         >
@@ -141,10 +141,10 @@ export default function Login() {
           </Form>
 
           <div className="mt-6 text-center">
-            <p className="text-slate-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               Não tem uma conta?{' '}
               <Link href="/register">
-                <span className="text-blue-400 hover:text-blue-300 font-medium cursor-pointer transition-colors">
+                <span className="text-primary hover:text-primary/80 font-medium cursor-pointer transition-colors">
                   Criar conta
                 </span>
               </Link>

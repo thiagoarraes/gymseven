@@ -12,7 +12,7 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-slate-950/98 to-slate-950/95 backdrop-blur-2xl border-t border-slate-700/40 shadow-2xl shadow-black/50">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glassmorphism border-t border-border/40 shadow-2xl">
       <div className="safe-area-bottom">
         <div className="flex items-center justify-around px-2 py-3">
           {navItems.map((item) => {
@@ -25,23 +25,23 @@ export function BottomNavigation() {
                 onClick={() => navigate(item.path)}
                 className={`group relative flex flex-col items-center justify-center min-w-[64px] px-3 py-2 rounded-xl transition-all duration-200 ${
                   isActive 
-                    ? "bg-gradient-to-t from-blue-500/20 to-blue-500/10" 
-                    : "hover:bg-slate-800/30"
+                    ? "bg-gradient-to-t from-primary/20 to-primary/10" 
+                    : "hover:bg-accent/30"
                 }`}
               >
                 <div className={`relative p-1 rounded-lg transition-all duration-200 ${
-                  isActive ? "bg-blue-500/20" : ""
+                  isActive ? "bg-primary/20" : ""
                 }`}>
                   <Icon className={`w-5 h-5 transition-all duration-200 ${
                     isActive 
-                      ? "text-blue-400 scale-110" 
-                      : "text-slate-500 group-hover:text-slate-300"
+                      ? "text-primary scale-110" 
+                      : "text-muted-foreground group-hover:text-foreground"
                   }`} />
                 </div>
                 <span className={`text-[10px] font-medium mt-1 transition-all duration-200 ${
                   isActive 
-                    ? "text-blue-300" 
-                    : "text-slate-500 group-hover:text-slate-400"
+                    ? "text-primary" 
+                    : "text-muted-foreground group-hover:text-foreground"
                 }`}>
                   {item.label}
                 </span>
