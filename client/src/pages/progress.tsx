@@ -16,7 +16,8 @@ import {
   TrendingUp,
   Filter,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  Clock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -237,6 +238,238 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     requirement: { type: 'workout_count', target: 300, timeframe: 'all_time' },
     unlocked: false,
     progress: 11
+  },
+
+  // Conquistas Divertidas de Musculação
+  {
+    id: 'gym_bro',
+    name: 'Mano da Academia',
+    description: 'Complete 5 treinos de peito e bíceps em uma semana',
+    icon: Medal,
+    category: 'special',
+    tier: 'bronze',
+    points: 30,
+    requirement: { type: 'custom', target: 5 },
+    unlocked: true,
+    progress: 100,
+    unlockedAt: new Date('2025-08-13')
+  },
+  {
+    id: 'swole_patrol',
+    name: 'Patrulha dos Bombados',
+    description: 'Faça supino, agachamento e terra morto na mesma semana',
+    icon: Shield,
+    category: 'strength',
+    tier: 'prata',
+    points: 100,
+    requirement: { type: 'custom', target: 3 },
+    unlocked: false,
+    progress: 67
+  },
+  {
+    id: 'protein_hunter',
+    name: 'Caçador de Proteína',
+    description: 'Complete 20 treinos sem faltar nenhum',
+    icon: Target,
+    category: 'consistency',
+    tier: 'ouro',
+    points: 250,
+    requirement: { type: 'workout_count', target: 20, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 85
+  },
+  {
+    id: 'no_pain_no_gain',
+    name: 'Sem Dor, Sem Ganho',
+    description: 'Complete um treino que dure mais de 2 horas',
+    icon: Clock,
+    category: 'special',
+    tier: 'diamante',
+    points: 400,
+    requirement: { type: 'time_based', target: 120 },
+    unlocked: false,
+    progress: 45
+  },
+  {
+    id: 'mass_monster',
+    name: 'Monstro da Massa',
+    description: 'Ganhe 5kg de peso corporal em 3 meses',
+    icon: Crown,
+    category: 'milestone',
+    tier: 'epico',
+    points: 750,
+    requirement: { type: 'custom', target: 5 },
+    unlocked: false,
+    progress: 20
+  },
+  {
+    id: 'iron_addiction',
+    name: 'Viciado em Ferro',
+    description: 'Treine todos os dias por 2 semanas seguidas',
+    icon: Zap,
+    category: 'consistency',
+    tier: 'diamante',
+    points: 500,
+    requirement: { type: 'consecutive_days', target: 14 },
+    unlocked: false,
+    progress: 57
+  },
+  {
+    id: 'bicep_flex',
+    name: 'Flexão de Ego',
+    description: 'Tire 10 selfies no espelho da academia',
+    icon: Star,
+    category: 'special',
+    tier: 'bronze',
+    points: 15,
+    requirement: { type: 'custom', target: 10 },
+    unlocked: false,
+    progress: 30
+  },
+  {
+    id: 'pre_workout_zombie',
+    name: 'Zumbi do Pré-Treino',
+    description: 'Treine às 5h da manhã por 5 dias seguidos',
+    icon: Flame,
+    category: 'special',
+    tier: 'ouro',
+    points: 300,
+    requirement: { type: 'custom', target: 5 },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'leg_day_survivor',
+    name: 'Sobrevivente do Leg Day',
+    description: 'Complete 10 treinos de perna sem pular nenhum',
+    icon: Shield,
+    category: 'consistency',
+    tier: 'prata',
+    points: 150,
+    requirement: { type: 'custom', target: 10 },
+    unlocked: false,
+    progress: 40
+  },
+  {
+    id: 'pump_chaser',
+    name: 'Caçador de Pump',
+    description: 'Faça mais de 20 séries em um único treino',
+    icon: Zap,
+    category: 'strength',
+    tier: 'ouro',
+    points: 200,
+    requirement: { type: 'custom', target: 20 },
+    unlocked: false,
+    progress: 75
+  },
+  {
+    id: 'bench_warrior',
+    name: 'Guerreiro do Supino',
+    description: 'Supino com o próprio peso corporal',
+    icon: Medal,
+    category: 'strength',
+    tier: 'diamante',
+    points: 600,
+    requirement: { type: 'single_weight', target: 80 },
+    unlocked: false,
+    progress: 62
+  },
+  {
+    id: 'gym_shark',
+    name: 'Tubarão da Academia',
+    description: 'Seja o primeiro a chegar na academia 10 vezes',
+    icon: Crown,
+    category: 'special',
+    tier: 'prata',
+    points: 120,
+    requirement: { type: 'custom', target: 10 },
+    unlocked: false,
+    progress: 20
+  },
+  {
+    id: 'mirror_magnet',
+    name: 'Ímã de Espelho',
+    description: 'Passe mais de 30 minutos checando a forma nos espelhos',
+    icon: Star,
+    category: 'special',
+    tier: 'bronze',
+    points: 20,
+    requirement: { type: 'time_based', target: 30 },
+    unlocked: true,
+    progress: 100,
+    unlockedAt: new Date('2025-08-14')
+  },
+  {
+    id: 'gains_goblin',
+    name: 'Duende dos Ganhos',
+    description: 'Aumente a carga em pelo menos 3 exercícios na mesma semana',
+    icon: Target,
+    category: 'strength',
+    tier: 'ouro',
+    points: 250,
+    requirement: { type: 'custom', target: 3 },
+    unlocked: false,
+    progress: 33
+  },
+  {
+    id: 'sweat_waterfall',
+    name: 'Cachoeira de Suor',
+    description: 'Termine um treino completamente encharcado',
+    icon: Trophy,
+    category: 'special',
+    tier: 'prata',
+    points: 80,
+    requirement: { type: 'custom', target: 1 },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'rep_collector',
+    name: 'Colecionador de Reps',
+    description: 'Complete mais de 1000 repetições em um mês',
+    icon: Award,
+    category: 'milestone',
+    tier: 'epico',
+    points: 800,
+    requirement: { type: 'custom', target: 1000 },
+    unlocked: false,
+    progress: 42
+  },
+  {
+    id: 'beast_mode',
+    name: 'Modo Fera',
+    description: 'Treine por mais de 90 minutos sem parar',
+    icon: Flame,
+    category: 'special',
+    tier: 'diamante',
+    points: 450,
+    requirement: { type: 'time_based', target: 90 },
+    unlocked: false,
+    progress: 78
+  },
+  {
+    id: 'iron_temple_monk',
+    name: 'Monge do Templo de Ferro',
+    description: 'Treine na mesma academia por 6 meses seguidos',
+    icon: Shield,
+    category: 'consistency',
+    tier: 'lendario',
+    points: 1000,
+    requirement: { type: 'custom', target: 180 },
+    unlocked: false,
+    progress: 28
+  },
+  {
+    id: 'ultimate_bulk',
+    name: 'Bulk Supremo',
+    description: 'Ganhe mais de 10kg mantendo menos de 15% de gordura',
+    icon: Crown,
+    category: 'milestone',
+    tier: 'mitico',
+    points: 1500,
+    requirement: { type: 'custom', target: 10 },
+    unlocked: false,
+    progress: 5
   }
 ];
 
