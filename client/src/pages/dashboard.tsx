@@ -230,18 +230,18 @@ export default function Dashboard() {
           </div>
 
           {/* Last Workout & Streak Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
+          <div className="grid grid-cols-2 gap-4 relative z-10">
             {/* Last Workout Card */}
-            <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-5 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200">
+            <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-3 sm:p-5 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200">
               {recentWorkouts.length > 0 ? (
                 <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
-                      <Play className="w-5 h-5 text-blue-400" />
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
+                      <Play className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-white">Último Treino</h3>
-                      <p className="text-xs text-slate-400">Suas atividades recentes</p>
+                      <h3 className="text-sm sm:text-base font-bold text-white">Último Treino</h3>
+                      <p className="text-xs text-slate-400 hidden sm:block">Suas atividades recentes</p>
                     </div>
                   </div>
                   
@@ -260,11 +260,12 @@ export default function Dashboard() {
                       }
                     </div>
                     <Button 
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg px-4 py-2 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-sm"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg px-2 sm:px-4 py-2 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-xs sm:text-sm"
                       onClick={() => navigate("/treinos")}
                     >
-                      <Play className="w-4 h-4 mr-2" />
-                      Iniciar Novo Treino
+                      <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Iniciar Novo Treino</span>
+                      <span className="sm:hidden">Novo Treino</span>
                     </Button>
                   </div>
                 </div>
@@ -276,37 +277,38 @@ export default function Dashboard() {
                   <h3 className="text-base font-bold text-white mb-2">Primeiro Treino</h3>
                   <p className="text-slate-400 text-xs mb-3">Comece sua jornada fitness hoje!</p>
                   <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg px-4 py-2 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-sm"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg px-2 sm:px-4 py-2 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-xs sm:text-sm"
                     onClick={() => navigate("/treinos")}
                   >
-                    <Play className="w-4 h-4 mr-2" />
-                    Começar Primeiro Treino
+                    <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Começar Primeiro Treino</span>
+                    <span className="sm:hidden">Primeiro Treino</span>
                   </Button>
                 </div>
               )}
             </div>
 
             {/* Streak Card */}
-            <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-5 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-200">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-emerald-500/30">
-                  <Flame className="w-5 h-5 text-emerald-400" />
+            <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-3 sm:p-5 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-200">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-emerald-500/30">
+                  <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Sequência</h3>
-                  <p className="text-xs text-slate-400">Dias consecutivos</p>
+                  <h3 className="text-sm sm:text-base font-bold text-white">Sequência</h3>
+                  <p className="text-xs text-slate-400 hidden sm:block">Dias consecutivos</p>
                 </div>
               </div>
               
-              <div className="text-center py-3">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
-                  <div className="text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
+              <div className="text-center py-2 sm:py-3">
+                <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                  <div className="text-2xl sm:text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
                     {stats.currentStreak}
                   </div>
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
                 </div>
-                <div className="text-xs text-emerald-400 font-semibold tracking-wide mb-2">
+                <div className="text-xs text-emerald-400 font-semibold tracking-wide mb-1 sm:mb-2">
                   dias em sequência
                 </div>
                 {stats.currentStreak > 0 && (
