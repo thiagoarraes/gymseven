@@ -1,545 +1,554 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, TrendingUp, Dumbbell, ArrowUp, ArrowDown, Minus, Clock, Filter } from "lucide-react";
+import { 
+  Trophy, 
+  Medal, 
+  Star, 
+  Flame, 
+  Target, 
+  Calendar,
+  Zap,
+  Crown,
+  Shield,
+  Award,
+  Unlock,
+  Lock,
+  TrendingUp,
+  Filter,
+  Search,
+  CheckCircle2
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { exerciseProgressApi, exerciseApi, workoutLogApi } from "@/lib/api";
-import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, ReferenceLine, Tooltip } from "recharts";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { workoutLogApi } from "@/lib/api";
 
-// Weight Progression Chart Component with Area Chart
-function WeightProgressionChart({ exerciseId, exerciseName }: { exerciseId: string; exerciseName: string }) {
-  const { data: weightHistory = [], isLoading } = useQuery({
-    queryKey: ['/api/exercise-weight-history', exerciseId],
-    queryFn: () => exerciseProgressApi.getWeightHistory(exerciseId, 5),
-  });
+// Achievement types and data structure
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  category: 'workout' | 'strength' | 'consistency' | 'milestone' | 'special';
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  points: number;
+  requirement: {
+    type: 'workout_count' | 'consecutive_days' | 'total_weight' | 'single_weight' | 'time_based' | 'custom';
+    target: number;
+    timeframe?: 'daily' | 'weekly' | 'monthly' | 'all_time';
+  };
+  unlocked: boolean;
+  progress: number;
+  unlockedAt?: Date;
+}
 
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="loading-skeleton h-16 rounded"></div>
-        ))}
-      </div>
-    );
+// Sample achievements data - in a real app, this would come from an API
+const SAMPLE_ACHIEVEMENTS: Achievement[] = [
+  // Workout Achievements
+  {
+    id: 'first_workout',
+    name: 'Primeiro Passo',
+    description: 'Complete seu primeiro treino',
+    icon: Trophy,
+    category: 'milestone',
+    tier: 'bronze',
+    points: 10,
+    requirement: { type: 'workout_count', target: 1, timeframe: 'all_time' },
+    unlocked: true,
+    progress: 100,
+    unlockedAt: new Date('2025-08-10')
+  },
+  {
+    id: 'workout_10',
+    name: 'Veterano',
+    description: 'Complete 10 treinos',
+    icon: Medal,
+    category: 'workout',
+    tier: 'silver',
+    points: 50,
+    requirement: { type: 'workout_count', target: 10, timeframe: 'all_time' },
+    unlocked: true,
+    progress: 100,
+    unlockedAt: new Date('2025-08-12')
+  },
+  {
+    id: 'workout_50',
+    name: 'Dedicado',
+    description: 'Complete 50 treinos',
+    icon: Crown,
+    category: 'workout',
+    tier: 'gold',
+    points: 200,
+    requirement: { type: 'workout_count', target: 50, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 68
+  },
+  
+  // Consistency Achievements
+  {
+    id: 'streak_3',
+    name: 'Consistência',
+    description: 'Treine por 3 dias consecutivos',
+    icon: Flame,
+    category: 'consistency',
+    tier: 'bronze',
+    points: 25,
+    requirement: { type: 'consecutive_days', target: 3 },
+    unlocked: true,
+    progress: 100,
+    unlockedAt: new Date('2025-08-11')
+  },
+  {
+    id: 'streak_7',
+    name: 'Semana Perfeita',
+    description: 'Treine por 7 dias consecutivos',
+    icon: Calendar,
+    category: 'consistency',
+    tier: 'silver',
+    points: 75,
+    requirement: { type: 'consecutive_days', target: 7 },
+    unlocked: false,
+    progress: 43
+  },
+  {
+    id: 'streak_30',
+    name: 'Disciplina de Ferro',
+    description: 'Treine por 30 dias consecutivos',
+    icon: Shield,
+    category: 'consistency',
+    tier: 'platinum',
+    points: 500,
+    requirement: { type: 'consecutive_days', target: 30 },
+    unlocked: false,
+    progress: 14
+  },
+  
+  // Strength Achievements
+  {
+    id: 'total_weight_1000',
+    name: 'Força Bruta',
+    description: 'Levante um total de 1.000kg em uma sessão',
+    icon: Zap,
+    category: 'strength',
+    tier: 'gold',
+    points: 150,
+    requirement: { type: 'total_weight', target: 1000, timeframe: 'daily' },
+    unlocked: false,
+    progress: 82
+  },
+  {
+    id: 'benchpress_100',
+    name: 'Centurião',
+    description: 'Supino com 100kg ou mais',
+    icon: Target,
+    category: 'strength',
+    tier: 'gold',
+    points: 200,
+    requirement: { type: 'single_weight', target: 100 },
+    unlocked: false,
+    progress: 75
+  },
+  
+  // Special Achievements
+  {
+    id: 'early_bird',
+    name: 'Madrugador',
+    description: 'Complete um treino antes das 7h da manhã',
+    icon: Star,
+    category: 'special',
+    tier: 'silver',
+    points: 100,
+    requirement: { type: 'time_based', target: 7 },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'weekend_warrior',
+    name: 'Guerreiro de Fim de Semana',
+    description: 'Complete treinos em todos os finais de semana por um mês',
+    icon: Award,
+    category: 'special',
+    tier: 'platinum',
+    points: 300,
+    requirement: { type: 'custom', target: 8 },
+    unlocked: false,
+    progress: 25
   }
+];
 
-  if (!weightHistory || weightHistory.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-        <p className="text-slate-400">Nenhum dado de peso para {exerciseName}</p>
-        <p className="text-sm text-slate-500 mt-1">
-          Complete treinos com pesos para ver o progresso
-        </p>
-        <p className="text-xs text-slate-500 mt-2">
-          💡 Dica: Registre o peso usado em cada série durante o treino
-        </p>
-      </div>
-    );
-  }
+// Achievement Card Component
+function AchievementCard({ achievement }: { achievement: Achievement }) {
+  const IconComponent = achievement.icon;
+  
+  const tierColors = {
+    bronze: 'from-orange-400 to-orange-600',
+    silver: 'from-slate-400 to-slate-600', 
+    gold: 'from-yellow-400 to-yellow-600',
+    platinum: 'from-purple-400 to-purple-600'
+  };
 
-  // Prepare data for area chart (oldest to newest)
-  const chartData = [...weightHistory].reverse().map((entry: any, index: number) => ({
-    session: index + 1,
-    weight: entry.maxWeight,
-    date: new Date(entry.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
-    workoutName: entry.workoutName,
-    fullDate: entry.date
-  }));
-
-  const maxWeight = Math.max(...weightHistory.map((entry: any) => entry.maxWeight));
-  const minWeight = Math.min(...weightHistory.map((entry: any) => entry.maxWeight));
-
-  // Calculate trend
-  const latestWeight = weightHistory[0]?.maxWeight || 0;
-  const previousWeight = weightHistory[1]?.maxWeight || latestWeight;
-  const weightChange = latestWeight - previousWeight;
+  const tierBadgeColors = {
+    bronze: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+    silver: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+    gold: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    platinum: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Stats Header */}
-      <div className="grid grid-cols-3 gap-4 text-center">
-        <div>
-          <div className="text-2xl font-bold text-blue-400">{latestWeight}kg</div>
-          <div className="text-xs text-slate-400">Último Peso</div>
-        </div>
-        <div>
-          <div className="text-2xl font-bold text-emerald-400">{maxWeight}kg</div>
-          <div className="text-xs text-slate-400">Recorde</div>
-        </div>
-        <div className="flex items-center justify-center space-x-1">
-          {weightChange > 0 ? (
-            <ArrowUp className="w-4 h-4 text-emerald-400" />
-          ) : weightChange < 0 ? (
-            <ArrowDown className="w-4 h-4 text-red-400" />
-          ) : (
-            <Minus className="w-4 h-4 text-slate-400" />
-          )}
-          <div className={`text-lg font-bold ${
-            weightChange > 0 ? 'text-emerald-400' : 
-            weightChange < 0 ? 'text-red-400' : 'text-slate-400'
+    <Card 
+      className={`relative overflow-hidden transition-all duration-300 hover:scale-[1.02] ${
+        achievement.unlocked 
+          ? 'bg-card border-border shadow-lg hover:shadow-xl' 
+          : 'bg-card/50 border-border/50 opacity-75'
+      }`}
+      data-testid={`achievement-card-${achievement.id}`}
+    >
+      {/* Gradient overlay for unlocked achievements */}
+      {achievement.unlocked && (
+        <div className={`absolute inset-0 bg-gradient-to-br ${tierColors[achievement.tier]} opacity-5`} />
+      )}
+      
+      <CardContent className="p-6 relative">
+        <div className="flex items-start gap-4">
+          {/* Icon */}
+          <div className={`relative flex-shrink-0 ${
+            achievement.unlocked 
+              ? `bg-gradient-to-br ${tierColors[achievement.tier]} p-3 rounded-xl shadow-lg`
+              : 'bg-muted p-3 rounded-xl'
           }`}>
-            {weightChange > 0 ? '+' : ''}{weightChange}kg
-          </div>
-        </div>
-      </div>
-
-      {/* Modern Area Chart */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-semibold text-slate-300">Progresso de Carga Máxima - Últimos 5 Dias</h4>
-        
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-              <defs>
-                <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
-                </linearGradient>
-              </defs>
-              <XAxis 
-                dataKey="date" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
-                dy={10}
-              />
-              <YAxis 
-                domain={[Math.max(0, minWeight - 5), maxWeight + 5]}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
-                tickFormatter={(value) => `${value}kg`}
-              />
-              <ReferenceLine 
-                y={maxWeight} 
-                stroke="#10b981" 
-                strokeDasharray="3 3" 
-                strokeOpacity={0.7}
-                label={{ value: "Recorde", position: "insideTopRight", fontSize: 10, fill: "#10b981" }}
-              />
-              <Area
-                type="monotone"
-                dataKey="weight"
-                stroke="#3b82f6"
-                strokeWidth={3}
-                fill="url(#weightGradient)"
-                dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#1e293b" }}
-                activeDot={{ r: 6, fill: "#10b981", strokeWidth: 2, stroke: "#1e293b" }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-        
-        {/* Session details */}
-        <div className="grid grid-cols-2 gap-4 text-xs text-slate-400">
-          <div>
-            <span className="text-slate-300">Total de sessões:</span> {weightHistory.length}
-          </div>
-          <div>
-            <span className="text-slate-300">Variação:</span> {minWeight}kg - {maxWeight}kg
-          </div>
-        </div>
-
-        {/* Recent Sessions List */}
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          <h5 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detalhes das Sessões</h5>
-          {weightHistory.slice(0, 5).map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between bg-slate-800/30 rounded-lg p-3">
-              <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  entry.maxWeight === maxWeight ? 'bg-emerald-400' : 'bg-blue-400'
-                }`}></div>
-                <div>
-                  <div className="text-sm font-medium text-white">
-                    {new Date(entry.date).toLocaleDateString('pt-BR')}
-                  </div>
-                  <div className="text-xs text-slate-400">{entry.workoutName}</div>
-                </div>
+            {achievement.unlocked ? (
+              <IconComponent className="w-6 h-6 text-white" />
+            ) : (
+              <Lock className="w-6 h-6 text-muted-foreground" />
+            )}
+            
+            {achievement.unlocked && (
+              <div className="absolute -top-1 -right-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 bg-background rounded-full" />
               </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-white">{entry.maxWeight}kg</div>
-                <div className="text-xs text-slate-400">{entry.totalSets} séries</div>
-              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className={`font-semibold ${
+                achievement.unlocked ? 'text-foreground' : 'text-muted-foreground'
+              }`}>
+                {achievement.name}
+              </h3>
+              
+              <Badge 
+                variant="outline" 
+                className={`text-xs ${tierBadgeColors[achievement.tier]}`}
+              >
+                {achievement.tier}
+              </Badge>
+              
+              <Badge variant="secondary" className="text-xs">
+                +{achievement.points} pts
+              </Badge>
             </div>
-          ))}
+            
+            <p className={`text-sm mb-3 ${
+              achievement.unlocked ? 'text-muted-foreground' : 'text-muted-foreground/70'
+            }`}>
+              {achievement.description}
+            </p>
+
+            {/* Progress */}
+            {achievement.unlocked ? (
+              <div className="flex items-center gap-2 text-xs text-emerald-400">
+                <Unlock className="w-3 h-3" />
+                <span>
+                  Desbloqueada em{' '}
+                  {achievement.unlockedAt?.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'short'
+                  })}
+                </span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Progresso</span>
+                  <span className="text-muted-foreground">
+                    {achievement.progress}% ({Math.ceil(achievement.requirement.target * (1 - achievement.progress / 100))} restante)
+                  </span>
+                </div>
+                <Progress 
+                  value={achievement.progress} 
+                  className="h-2"
+                  data-testid={`progress-${achievement.id}`}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Stats Overview Component
+function StatsOverview({ achievements }: { achievements: Achievement[] }) {
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const totalPoints = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + a.points, 0);
+  const totalPossiblePoints = achievements.reduce((sum, a) => sum + a.points, 0);
+  
+  const tierCounts = {
+    bronze: achievements.filter(a => a.unlocked && a.tier === 'bronze').length,
+    silver: achievements.filter(a => a.unlocked && a.tier === 'silver').length,
+    gold: achievements.filter(a => a.unlocked && a.tier === 'gold').length,
+    platinum: achievements.filter(a => a.unlocked && a.tier === 'platinum').length,
+  };
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20">
+        <CardContent className="p-6 text-center">
+          <div className="text-3xl font-bold text-blue-400 mb-2">{unlockedCount}</div>
+          <div className="text-sm text-muted-foreground">Conquistas</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            {Math.round((unlockedCount / achievements.length) * 100)}% completo
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border-emerald-500/20">
+        <CardContent className="p-6 text-center">
+          <div className="text-3xl font-bold text-emerald-400 mb-2">{totalPoints}</div>
+          <div className="text-sm text-muted-foreground">Pontos</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            de {totalPossiblePoints} possíveis
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
+        <CardContent className="p-6 text-center">
+          <div className="text-3xl font-bold text-purple-400 mb-2">{tierCounts.platinum}</div>
+          <div className="text-sm text-muted-foreground">Platinum</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            Elite conquests
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border-yellow-500/20">
+        <CardContent className="p-6 text-center">
+          <div className="text-3xl font-bold text-yellow-400 mb-2">{tierCounts.gold}</div>
+          <div className="text-sm text-muted-foreground">Gold</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            Major achievements
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-export default function Progress() {
+export default function AchievementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedTier, setSelectedTier] = useState<string>("all");
 
-  // Fetch exercises that have progress data (used in completed workouts)
-  const { data: exercisesWithProgress = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/exercises-with-progress"],
-    queryFn: () => fetch("/api/exercises-with-progress").then(res => res.json()),
+  // Fetch workout logs to calculate real progress (for future implementation)
+  const { data: workoutLogs = [], isLoading } = useQuery({
+    queryKey: ["/api/workout-logs"],
+    queryFn: workoutLogApi.getAll,
   });
 
-  // Also fetch all exercises for fallback
-  const { data: allExercises = [] } = useQuery({
-    queryKey: ["/api/exercicios"],
-    queryFn: exerciseApi.getAll,
-  });
+  // Filter achievements based on search and filters
+  const filteredAchievements = useMemo(() => {
+    return SAMPLE_ACHIEVEMENTS.filter(achievement => {
+      const matchesSearch = achievement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           achievement.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = selectedCategory === "all" || achievement.category === selectedCategory;
+      const matchesTier = selectedTier === "all" || achievement.tier === selectedTier;
+      
+      return matchesSearch && matchesCategory && matchesTier;
+    });
+  }, [searchTerm, selectedCategory, selectedTier]);
 
-  // Auto-select first exercise for progress chart from exercises with progress
-  const firstExerciseId = useMemo(() => {
-    if (exercisesWithProgress.length > 0 && !selectedExerciseId) {
-      return exercisesWithProgress[0].id;
-    }
-    return selectedExerciseId;
-  }, [exercisesWithProgress, selectedExerciseId]);
+  const unlockedAchievements = filteredAchievements.filter(a => a.unlocked);
+  const lockedAchievements = filteredAchievements.filter(a => !a.unlocked);
 
-  // Fetch weight history for selected exercise
-  const { data: weightHistory = [], isLoading: chartLoading } = useQuery({
-    queryKey: ['/api/exercise-weight-history', firstExerciseId],
-    queryFn: () => exerciseProgressApi.getWeightHistory(firstExerciseId!, 10),
-    enabled: !!firstExerciseId,
-  });
-
-  // Find selected exercise name
-  const selectedExercise = exercisesWithProgress.find((e: any) => e.id === (selectedExerciseId || firstExerciseId)) || 
-                          allExercises.find((e: any) => e.id === (selectedExerciseId || firstExerciseId));
-  const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
-
-  // Process chart data
-  const chartData = useMemo(() => {
-    if (!weightHistory || weightHistory.length === 0) return [];
-    
-    // Data already comes from API in chronological order (oldest to newest)
-    return weightHistory.map((entry: any, index: number) => {
-        // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
-        const dateParts = entry.date.split('/');
-        let formattedDate = entry.date;
-        
-        // Try to create a proper date if the format is DD/MM/YYYY
-        if (dateParts.length === 3) {
-          const day = dateParts[0];
-          const month = dateParts[1];
-          const year = dateParts[2];
-          
-          // Create date object and format it
-          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-          if (!isNaN(dateObj.getTime())) {
-            formattedDate = `${day}/${month}`;
-          }
-        }
-        
-        return {
-          session: index + 1,
-          weight: entry.weight || entry.maxWeight || 0,
-          date: formattedDate,
-          fullDate: entry.date,
-          workoutName: entry.workoutName
-        };
-      });
-  }, [weightHistory]);
-
-  // Filter exercises for autocomplete - prioritize exercises with progress
-  const filteredExercises = useMemo(() => {
-    if (!searchTerm || searchTerm.length < 1) return exercisesWithProgress.slice(0, 8);
-    
-    const filtered = exercisesWithProgress.filter((exercise: any) =>
-      exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exercise.muscleGroup.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    return filtered.slice(0, 8);
-  }, [searchTerm, exercisesWithProgress]);
-
-  const handleExerciseSelect = (exercise: any) => {
-    setSelectedExerciseId(exercise.id);
-    setSearchTerm("");
-    setShowSuggestions(false);
-  };
-
-  return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
-          <TrendingUp className="w-8 h-8 text-blue-400" />
-          Progresso
-        </h1>
-        <p className="text-slate-400">
-          Acompanhe a evolução das suas cargas por exercício
-        </p>
-      </div>
-
-      {/* Search bar with autocomplete */}
-      <div className="relative max-w-md mx-auto">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-        <Input
-          type="text"
-          placeholder="Buscar exercício..."
-          value={searchTerm}
-          onChange={(e) => {
-            const value = e.target.value;
-            setSearchTerm(value);
-            setShowSuggestions(value.length >= 1);
-          }}
-          onFocus={() => {
-            if (searchTerm.length >= 1) setShowSuggestions(true);
-          }}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder-slate-400"
-        />
-        
-        {/* Autocomplete dropdown */}
-        {showSuggestions && searchTerm.length >= 1 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-            {filteredExercises.length === 0 ? (
-              <div className="px-4 py-3 text-slate-400 text-sm">
-                Nenhum exercício encontrado para "{searchTerm}"
-              </div>
-            ) : (
-              filteredExercises.map((exercise: any) => {
-                return (
-                  <button
-                    key={exercise.id}
-                    onClick={() => handleExerciseSelect(exercise)}
-                    className="w-full px-4 py-3 text-left hover:bg-slate-700 border-b border-slate-700 last:border-b-0 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-white font-medium">{exercise.name}</div>
-                        <div className="text-xs text-slate-400">{exercise.muscleGroup}</div>
-                      </div>
-                      {exercise.lastWeight && (
-                        <div className="text-xs text-slate-300">
-                          {exercise.lastWeight}kg
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                );
-              })
-            )}
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div className="loading-skeleton h-12 w-64 rounded-lg"></div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="loading-skeleton h-24 rounded-xl"></div>
+            ))}
           </div>
-        )}
-      </div>
-
-      {/* Quick access buttons for exercises with progress data */}
-      {exercisesWithProgress.length > 0 && (
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-semibold text-slate-300">Exercícios Recentes</h3>
-            <div className="text-xs text-slate-400">({exercisesWithProgress.length} últimos exercícios)</div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {exercisesWithProgress.map((exercise: any) => (
-              <Button
-                key={exercise.id}
-                variant={selectedExerciseId === exercise.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleExerciseSelect(exercise)}
-                className={`p-4 h-auto text-left justify-start ${
-                  selectedExerciseId === exercise.id 
-                    ? 'bg-blue-600 hover:bg-blue-700 border-blue-500' 
-                    : 'bg-slate-800/50 hover:bg-slate-700 border-slate-600 text-white'
-                }`}
-              >
-                <div className="w-full flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="font-medium text-sm truncate">{exercise.name}</div>
-                    <div className="text-xs opacity-75 truncate">{exercise.muscleGroup}</div>
-                  </div>
-                  {exercise.lastWeight > 0 && (
-                    <div className="text-right ml-2">
-                      <div className="text-sm font-bold text-emerald-400">{exercise.lastWeight}kg</div>
-                      <div className="text-xs text-slate-400">última</div>
-                    </div>
-                  )}
-                </div>
-              </Button>
+          <div className="space-y-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="loading-skeleton h-32 rounded-xl"></div>
             ))}
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Show message if no exercises with progress */}
-      {exercisesWithProgress.length === 0 && !exercisesLoading && allExercises.length > 0 && (
-        <Card className="glass-card rounded-2xl max-w-md mx-auto">
-          <CardContent className="text-center py-8">
-            <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-            <h3 className="text-lg font-semibold text-white mb-2">Nenhum progresso ainda</h3>
-            <p className="text-slate-400 text-sm mb-4">
-              Complete alguns treinos com peso para ver seu progresso aqui
-            </p>
-            <Button 
-              onClick={() => window.location.href = '/treinos'}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Clock className="w-4 h-4 mr-2" />
-              Iniciar Treino
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Progress chart - sempre mostra um exercício */}
-      <Card className="glass-card rounded-2xl">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-blue-400" />
-              Progresso de {selectedExerciseName}
-            </CardTitle>
-            <div className="relative">
-              <Select 
-                value={selectedExerciseId || firstExerciseId || ""} 
-                onValueChange={(value) => setSelectedExerciseId(value)}
-              >
-                <SelectTrigger className="w-56 bg-slate-800/50 border border-slate-700 text-slate-200 transition-all duration-200 hover:bg-slate-700/50">
-                  <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
-                </SelectTrigger>
-                <SelectContent 
-                  className="bg-slate-800 border-slate-700 max-h-60 overflow-auto backdrop-blur-md"
-                  sideOffset={4}
-                >
-                  {exercisesWithProgress.map((exercise: any, index: number) => (
-                    <SelectItem 
-                      key={`exercise-select-${exercise.id}-${index}`} 
-                      value={exercise.id}
-                      className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
-                    >
-                      {exercise.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full border border-purple-500/20">
+            <Trophy className="w-6 h-6 text-purple-400" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              Conquistas
+            </h1>
           </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {chartLoading ? (
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="loading-skeleton h-16 rounded"></div>
-              ))}
-            </div>
-          ) : chartData.length > 0 ? (
-            <div className="space-y-6">
-              {/* Stats Header */}
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-blue-400">{chartData[chartData.length - 1]?.weight || 0}kg</div>
-                  <div className="text-xs text-slate-400">Último Peso</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-emerald-400">{Math.max(...chartData.map((d: any) => d.weight))}kg</div>
-                  <div className="text-xs text-slate-400">Recorde</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-purple-400">{chartData.length}</div>
-                  <div className="text-xs text-slate-400">Sessões</div>
-                </div>
-              </div>
+          
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Desbloqueie conquistas completando treinos, mantendo consistência e alcançando novos recordes pessoais.
+          </p>
+        </div>
 
-              {/* Chart */}
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <defs>
-                      <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                        <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis 
-                      dataKey="date" 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: '#94A3B8' }}
-                    />
-                    <YAxis 
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: '#94A3B8' }}
-                      domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: '#1E293B',
-                        border: '1px solid #475569',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        color: '#F1F5F9'
-                      }}
-                      labelStyle={{ color: '#94A3B8' }}
-                      formatter={(value: any, name: any) => [
-                        <span style={{ color: '#3B82F6', fontWeight: 'bold' }}>{value}kg</span>
-                      ]}
-                      labelFormatter={(label: any) => label}
-                      separator=""
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="weight"
-                      stroke="#3B82F6"
-                      strokeWidth={3}
-                      fill="url(#weightGradient)"
-                      dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2, fill: '#fff' }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+        {/* Stats Overview */}
+        <StatsOverview achievements={SAMPLE_ACHIEVEMENTS} />
 
-              {/* Session details */}
-              <div className="space-y-2">
-                <h5 className="text-sm font-semibold text-slate-300">Histórico Recente</h5>
-                {chartData.slice(-5).reverse().map((entry: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between bg-slate-800/30 rounded-lg p-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                      <div>
-                        <div className="text-sm font-medium text-white">{entry.date}</div>
-                        <div className="text-xs text-slate-400">{entry.workoutName}</div>
-                      </div>
-                    </div>
-                    <div className="text-lg font-bold text-white">{entry.weight}kg</div>
-                  </div>
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar conquistas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+              data-testid="search-achievements"
+            />
+          </div>
+          
+          <div className="flex gap-2">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-40" data-testid="filter-category">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="workout">Treinos</SelectItem>
+                <SelectItem value="consistency">Consistência</SelectItem>
+                <SelectItem value="strength">Força</SelectItem>
+                <SelectItem value="milestone">Marcos</SelectItem>
+                <SelectItem value="special">Especiais</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={selectedTier} onValueChange={setSelectedTier}>
+              <SelectTrigger className="w-32" data-testid="filter-tier">
+                <SelectValue placeholder="Nível" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="bronze">Bronze</SelectItem>
+                <SelectItem value="silver">Silver</SelectItem>
+                <SelectItem value="gold">Gold</SelectItem>
+                <SelectItem value="platinum">Platinum</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Achievement Tabs */}
+        <Tabs defaultValue="unlocked" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:flex lg:gap-2">
+            <TabsTrigger value="unlocked" className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              Desbloqueadas ({unlockedAchievements.length})
+            </TabsTrigger>
+            <TabsTrigger value="locked" className="flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              Bloqueadas ({lockedAchievements.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="unlocked" className="space-y-4">
+            {unlockedAchievements.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Nenhuma conquista desbloqueada</h3>
+                  <p className="text-muted-foreground">
+                    Complete treinos para desbloquear suas primeiras conquistas!
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {unlockedAchievements.map((achievement) => (
+                  <AchievementCard key={achievement.id} achievement={achievement} />
                 ))}
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <TrendingUp className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-              <p className="text-slate-400">Nenhum dado de peso para {selectedExerciseName}</p>
-              <p className="text-sm text-slate-500 mt-1">
-                Complete treinos com pesos para ver o progresso
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      {/* Empty state when no exercise selected - NOT NEEDED ANYMORE */}
-      {false && (
-        <div></div>
-      )}
+            )}
+          </TabsContent>
 
-      {/* Loading states */}
-      {(exercisesLoading || chartLoading) && (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="glass-card rounded-2xl">
-              <CardContent className="p-6">
-                <div className="loading-skeleton h-6 rounded mb-4 w-3/4"></div>
-                <div className="loading-skeleton h-32 rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+          <TabsContent value="locked" className="space-y-4">
+            {lockedAchievements.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Crown className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Parabéns!</h3>
+                  <p className="text-muted-foreground">
+                    Você desbloqueou todas as conquistas disponíveis!
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {lockedAchievements.map((achievement) => (
+                  <AchievementCard key={achievement.id} achievement={achievement} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Quick Tips */}
+        <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-400">
+              <TrendingUp className="w-5 h-5" />
+              Dicas para Conquistar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex gap-3">
+                <Flame className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-orange-400 mb-1">Mantenha Consistência</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Treine regularmente para desbloquear conquistas de consistência
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <Target className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-green-400 mb-1">Aumente os Pesos</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Registre pesos progressivos para conquistas de força
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

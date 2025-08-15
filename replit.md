@@ -4,6 +4,22 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 
 ## Recent Changes (August 15, 2025)
 
+**✅ Página de Progresso Transformada em Sistema de Conquistas:**
+- Transformação completa da página /progresso em sistema de conquistas moderno
+- Interface UX/UI otimizada com cards de conquistas desbloqueadas/bloqueadas
+- Sistema de progresso visual com barras de progresso e indicadores percentuais
+- Categorização por tipos: treinos, força, consistência, marcos e especiais
+- Sistema de níveis: bronze, silver, gold e platinum com cores distintivas
+- Filtros e busca funcional para encontrar conquistas específicas
+- Visão geral com estatísticas de pontos e conquistas por nível
+- Design responsivo e mobile-first com hover effects e transições suaves
+- Tabs organizadas separando conquistas desbloqueadas das bloqueadas
+- Seção de dicas com orientações para desbloquear conquistas
+- Integração preparada para dados reais de treinos (workoutLogs API)
+- **Experiência gamificada completa para motivar usuários no fitness**
+
+## Previous Changes (August 15, 2025)
+
 **✅ Area Chart de Progresso Implementado na Sessão de Treino:**
 - Area chart profissional implementado no accordion de progresso da sessão
 - Pontos clicáveis com tooltip customizado e glassmorphism avançado

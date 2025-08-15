@@ -10,7 +10,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import Dashboard from "@/pages/dashboard";
 import Exercises from "@/pages/exercises";
 import Workouts from "@/pages/workouts";
-import Progress from "@/pages/progress";
+import AchievementsPage from "@/pages/progress";
 import WorkoutSession from "@/pages/workout-session";
 import WorkoutTemplateEditor from "@/pages/workout-template-editor";
 import WorkoutHistory from "@/pages/workout-history";
@@ -39,7 +39,7 @@ function AuthenticatedRouter() {
           <Route path="/exercicios" component={ExercisesRoute} />
           <Route path="/treinos" component={Workouts} />
           <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
-          <Route path="/progresso" component={Progress} />
+          <Route path="/progresso" component={AchievementsPage} />
           <Route path="/workout-session/:id" component={WorkoutSession} />
           <Route path="/workout-history" component={WorkoutHistory} />
           <Route path="/profile" component={Profile} />
