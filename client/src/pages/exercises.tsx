@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -41,6 +42,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const [editingExercise, setEditingExercise] = useState<any>(null);
   const [swipedExercise, setSwipedExercise] = useState<string | null>(null);
   const [draggedExercise, setDraggedExercise] = useState<string | null>(null);
+  const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -53,6 +55,13 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const { data: exercisesWithProgress = [] } = useQuery({
     queryKey: ["/api/exercises-with-progress"],
     queryFn: exerciseProgressApi.getExercisesWithProgress,
+  });
+
+  // Fetch weight history for expanded exercise
+  const { data: weightHistory = [] } = useQuery({
+    queryKey: ["/api/exercise-weight-history", expandedExercise],
+    queryFn: () => expandedExercise ? exerciseProgressApi.getWeightHistory(expandedExercise, 8) : [],
+    enabled: !!expandedExercise,
   });
 
   // Merge exercises with progress data
@@ -525,6 +534,64 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         </span>
                       </div>
                     </div>
+
+                    {/* Weight Progress Accordion */}
+                    <Collapsible open={expandedExercise === exercise.id} onOpenChange={(open) => setExpandedExercise(open ? exercise.id : null)}>
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full mt-3 p-2 hover:bg-slate-700/30 rounded-lg border border-slate-600/30 transition-colors"
+                        >
+                          <div className="flex items-center justify-center space-x-2 text-slate-300">
+                            <BarChart3 className="w-4 h-4" />
+                            <span className="text-sm font-medium">Progresso de Peso</span>
+                            {expandedExercise === exercise.id ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            )}
+                          </div>
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-3">
+                        <div className="bg-slate-900/30 rounded-xl p-3 border border-slate-600/30">
+                          {weightHistory.length > 0 ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-slate-400">Histórico de Peso</span>
+                                <span className="text-xs text-slate-500">{weightHistory.length} sessões</span>
+                              </div>
+                              <div className="space-y-1">
+                                {weightHistory.slice(0, 6).map((entry: any, index: number) => (
+                                  <div key={index} className="flex items-center justify-between py-1">
+                                    <span className="text-xs text-slate-500">{entry.date}</span>
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-sm font-semibold text-emerald-400">{entry.weight}kg</span>
+                                      {index === 0 && (
+                                        <span className="text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">
+                                          Mais recente
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              {weightHistory.length > 6 && (
+                                <div className="text-center mt-2 pt-2 border-t border-slate-700/50">
+                                  <span className="text-xs text-slate-500">+{weightHistory.length - 6} sessões anteriores</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4">
+                              <BarChart3 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+                              <p className="text-sm text-slate-500">Nenhum histórico de peso</p>
+                              <p className="text-xs text-slate-600">Complete treinos para ver o progresso</p>
+                            </div>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </CardContent>
               </Card>
