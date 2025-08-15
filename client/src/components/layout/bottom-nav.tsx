@@ -1,4 +1,4 @@
-import { Home, Dumbbell, List, TrendingUp } from "lucide-react";
+import { Home, Dumbbell, List, Trophy } from "lucide-react";
 import { useLocation } from "wouter";
 
 export function BottomNavigation() {
@@ -8,7 +8,7 @@ export function BottomNavigation() {
     { id: "dashboard", label: "Início", icon: Home, path: "/" },
     { id: "exercises", label: "Exercícios", icon: Dumbbell, path: "/exercicios" },
     { id: "workouts", label: "Treinos", icon: List, path: "/treinos" },
-    { id: "progress", label: "Conquistas", icon: TrendingUp, path: "/progresso" },
+    { id: "progress", label: "Conquistas", icon: Trophy, path: "/progresso" },
   ];
 
   return (
