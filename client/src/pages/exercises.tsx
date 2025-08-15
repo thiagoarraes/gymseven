@@ -492,11 +492,20 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                             (() => {
                               const lastDate = new Date(exercise.lastWorkout);
                               const today = new Date();
-                              const diffTime = today.getTime() - lastDate.getTime();
+                              
+                              // Reset time to start of day for accurate day comparison
+                              const lastDateOnly = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+                              const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                              
+                              const diffTime = todayOnly.getTime() - lastDateOnly.getTime();
                               const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                               
                               if (diffDays === 0) return "Hoje";
                               if (diffDays === 1) return "Ontem";
+                              if (diffDays < 0) {
+                                // Future date - shouldn't happen but handle gracefully
+                                return "Hoje";
+                              }
                               if (diffDays < 7) return `${diffDays}d atrás`;
                               if (diffDays < 30) return `${Math.floor(diffDays / 7)}sem atrás`;
                               return "1+ mês";
