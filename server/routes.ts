@@ -675,13 +675,16 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           }
         }
         
-        // Calculate latest weight for each exercise
+        // Calculate stats for each exercise
         const exercisesWithProgress = Array.from(exerciseMap.values())
           .map((exercise: any) => {
-            // Sort weights by date and get the latest
+            // Sort weights by date and get the latest and maximum
             const sortedWeights = exercise.weights.sort((a: any, b: any) => 
               new Date(b.date).getTime() - new Date(a.date).getTime()
             );
+            
+            const maxWeight = Math.max(...exercise.weights.map((w: any) => w.weight));
+            const totalSessions = [...new Set(exercise.weights.map((w: any) => w.date.split('T')[0]))].length;
             
             return {
               id: exercise.id,
@@ -692,12 +695,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
               videoUrl: exercise.videoUrl,
               createdAt: exercise.createdAt,
               lastWeight: sortedWeights[0].weight,
-              lastUsed: exercise.lastUsed
+              maxWeight: maxWeight,
+              lastUsed: exercise.lastUsed,
+              totalSessions: totalSessions
             };
           })
           .filter((exercise: any) => exercise.lastWeight > 0) // Only exercises with actual weight data
           .sort((a: any, b: any) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
-          .slice(0, 12); // Limit to the 12 most recent exercises
         
         res.json(exercisesWithProgress);
       } else {

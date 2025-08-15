@@ -61,7 +61,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     return {
       ...exercise,
       maxWeight: progressData?.maxWeight || 0,
-      lastWorkout: progressData?.lastWorkout || null,
+      lastWorkout: progressData?.lastUsed || null,
       totalSessions: progressData?.totalSessions || 0
     };
   });
