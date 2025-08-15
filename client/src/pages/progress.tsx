@@ -721,59 +721,93 @@ function LevelSystem({ achievements, username }: { achievements: Achievement[]; 
 }
 
 // Stats Overview Component
-function StatsOverview({ achievements }: { achievements: Achievement[] }) {
-  const unlockedCount = achievements.filter(a => a.unlocked).length;
-  const totalPoints = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + a.points, 0);
-  const totalPossiblePoints = achievements.reduce((sum, a) => sum + a.points, 0);
-  
-  const tierCounts = {
-    bronze: achievements.filter(a => a.unlocked && a.tier === 'bronze').length,
-    prata: achievements.filter(a => a.unlocked && a.tier === 'prata').length,
-    ouro: achievements.filter(a => a.unlocked && a.tier === 'ouro').length,
-    diamante: achievements.filter(a => a.unlocked && a.tier === 'diamante').length,
-    epico: achievements.filter(a => a.unlocked && a.tier === 'epico').length,
-    lendario: achievements.filter(a => a.unlocked && a.tier === 'lendario').length,
-    mitico: achievements.filter(a => a.unlocked && a.tier === 'mitico').length,
+function StatsOverview({ achievements, workoutLogs }: { achievements: Achievement[]; workoutLogs: any[] }) {
+  // Calculate workout statistics
+  const totalWorkouts = workoutLogs.length;
+  const thisMonth = new Date();
+  const currentMonthWorkouts = workoutLogs.filter(log => {
+    const logDate = new Date(log.startedAt);
+    return logDate.getMonth() === thisMonth.getMonth() && 
+           logDate.getFullYear() === thisMonth.getFullYear();
+  }).length;
+
+  // Calculate streak (consecutive days with workouts)
+  const calculateStreak = () => {
+    if (workoutLogs.length === 0) return 0;
+    
+    const sortedLogs = workoutLogs
+      .map(log => new Date(log.startedAt).toDateString())
+      .filter((date, index, arr) => arr.indexOf(date) === index) // Remove duplicates
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    
+    let streak = 0;
+    let currentDate = new Date();
+    
+    for (const logDate of sortedLogs) {
+      const dayDiff = Math.floor((currentDate.getTime() - new Date(logDate).getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (dayDiff === streak || (streak === 0 && dayDiff <= 1)) {
+        streak++;
+        currentDate = new Date(logDate);
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
   };
+
+  const currentStreak = calculateStreak();
+  
+  // Calculate average workout duration
+  const avgDuration = workoutLogs.length > 0 
+    ? Math.round(workoutLogs.reduce((sum, log) => {
+        if (log.endedAt) {
+          const duration = (new Date(log.endedAt).getTime() - new Date(log.startedAt).getTime()) / (1000 * 60);
+          return sum + duration;
+        }
+        return sum;
+      }, 0) / workoutLogs.filter(log => log.endedAt).length)
+    : 0;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20">
+      <Card className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 border-emerald-500/20">
         <CardContent className="p-6 text-center">
-          <div className="text-3xl font-bold text-blue-400 mb-2">{unlockedCount}</div>
-          <div className="text-sm text-muted-foreground">Conquistas</div>
+          <div className="text-3xl font-bold text-emerald-400 mb-2">{totalWorkouts}</div>
+          <div className="text-sm text-muted-foreground">Treinos</div>
           <div className="text-xs text-muted-foreground mt-1">
-            {Math.round((unlockedCount / achievements.length) * 100)}% completo
+            Completados
           </div>
         </CardContent>
       </Card>
       
-      <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border-emerald-500/20">
+      <Card className="bg-gradient-to-br from-orange-500/10 to-red-600/10 border-orange-500/20">
         <CardContent className="p-6 text-center">
-          <div className="text-3xl font-bold text-emerald-400 mb-2">{totalPoints}</div>
-          <div className="text-sm text-muted-foreground">Pontos</div>
+          <div className="text-3xl font-bold text-orange-400 mb-2">{currentStreak}</div>
+          <div className="text-sm text-muted-foreground">Sequência</div>
           <div className="text-xs text-muted-foreground mt-1">
-            de {totalPossiblePoints} possíveis
+            Dias seguidos
           </div>
         </CardContent>
       </Card>
       
-      <Card className="bg-gradient-to-br from-pink-500/10 to-purple-600/10 border-pink-500/20">
+      <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-600/10 border-blue-500/20">
         <CardContent className="p-6 text-center">
-          <div className="text-3xl font-bold text-pink-400 mb-2">{tierCounts.mitico}</div>
-          <div className="text-sm text-muted-foreground">Mítico</div>
+          <div className="text-3xl font-bold text-blue-400 mb-2">{currentMonthWorkouts}</div>
+          <div className="text-sm text-muted-foreground">Este Mês</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Conquistas lendárias
+            {new Date().toLocaleDateString('pt-BR', { month: 'long' })}
           </div>
         </CardContent>
       </Card>
       
-      <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border-yellow-500/20">
+      <Card className="bg-gradient-to-br from-purple-500/10 to-pink-600/10 border-purple-500/20">
         <CardContent className="p-6 text-center">
-          <div className="text-3xl font-bold text-yellow-400 mb-2">{tierCounts.ouro}</div>
-          <div className="text-sm text-muted-foreground">Ouro</div>
+          <div className="text-3xl font-bold text-purple-400 mb-2">{avgDuration}</div>
+          <div className="text-sm text-muted-foreground">Duração</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Grandes conquistas
+            Minutos médios
           </div>
         </CardContent>
       </Card>
@@ -850,7 +884,7 @@ export default function AchievementsPage() {
         <LevelSystem achievements={SAMPLE_ACHIEVEMENTS} username={user?.username || 'Usuário'} />
 
         {/* Stats Overview */}
-        <StatsOverview achievements={SAMPLE_ACHIEVEMENTS} />
+        <StatsOverview achievements={SAMPLE_ACHIEVEMENTS} workoutLogs={workoutLogs} />
 
         {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-center">

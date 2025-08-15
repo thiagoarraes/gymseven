@@ -4,6 +4,20 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 
 ## Recent Changes (August 15, 2025)
 
+**✅ Sistema de Nível Estilo Video Game e Estatísticas de Treino Aprimorados:**
+- Sistema completo de níveis com barra de progresso estilo RPG
+- Badge circular de nível com gradiente azul-roxo e tag "LVL" 
+- Títulos progressivos: Novato → Iniciante → Atleta → Veterano → Expert → Mestre → Lenda → Imortal
+- Sistema de XP baseado em pontos de conquistas com crescimento exponencial
+- Username com @ estilo gamer tag e percentual de progresso visual
+- Cards de estatísticas substituídos por métricas reais de treino:
+  - **Treinos Completados:** Total de workouts realizados
+  - **Sequência:** Dias consecutivos de treino calculados automaticamente
+  - **Este Mês:** Treinos do mês atual com nome do mês em português
+  - **Duração:** Tempo médio dos treinos em minutos
+- Integração com dados reais dos workout logs para estatísticas precisas
+- **Experiência gamificada completa com progressão matemática balanceada**
+
 **✅ Página de Progresso Transformada em Sistema de Conquistas:**
 - Transformação completa da página /progresso em sistema de conquistas moderno
 - Interface UX/UI otimizada com cards de conquistas desbloqueadas/bloqueadas
