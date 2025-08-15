@@ -54,14 +54,11 @@ export default function WorkoutSession() {
     enabled: !!workoutLog?.templateId,
   });
 
-  // Get current exercise
-  const currentExercise = templateExercises[currentExerciseIndex];
-  
-  // Query for exercise weight history
+  // Query for exercise weight history  
   const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
-    queryKey: ["/api/exercise-weight-history", currentExercise?.exerciseId],
-    queryFn: () => exerciseProgressApi.getWeightHistory(currentExercise!.exerciseId, 10),
-    enabled: !!currentExercise?.exerciseId,
+    queryKey: ["/api/exercise-weight-history", templateExercises[currentExerciseIndex]?.exerciseId],
+    queryFn: () => exerciseProgressApi.getWeightHistory(templateExercises[currentExerciseIndex]!.exerciseId, 10),
+    enabled: !!templateExercises[currentExerciseIndex]?.exerciseId,
   });
 
   // Create workout log exercises when template exercises are loaded
@@ -180,8 +177,8 @@ export default function WorkoutSession() {
   };
 
   const handleCompleteSet = async () => {
-    const currentExercise = templateExercises[currentExerciseIndex];
-    const logExerciseId = logExerciseIds[currentExercise?.exerciseId];
+    const exercise = templateExercises[currentExerciseIndex];
+    const logExerciseId = logExerciseIds[exercise?.exerciseId];
     
     // Save the set data if we have weight/reps
     if (logExerciseId && (currentWeight || currentReps)) {
@@ -198,12 +195,12 @@ export default function WorkoutSession() {
       }
     }
 
-    if (currentSetIndex < currentExercise?.sets - 1) {
+    if (currentSetIndex < exercise?.sets - 1) {
       // Move to next set and reset to template defaults
       setCurrentSetIndex(prev => prev + 1);
-      setRestTimer(currentExercise?.restDurationSeconds || 90);
-      setCurrentWeight(currentExercise?.weight?.toString() || "");
-      setCurrentReps(currentExercise?.reps?.toString() || "");
+      setRestTimer(exercise?.restDurationSeconds || 90);
+      setCurrentWeight(exercise?.weight?.toString() || "");
+      setCurrentReps(exercise?.reps?.toString() || "");
       toast({
         title: "Série concluída!",
         description: "Ótimo trabalho, continue assim.",
@@ -445,6 +442,67 @@ export default function WorkoutSession() {
                   >
                     Pular
                   </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Exercise Progress Chart */}
+            {currentExercise && weightHistory.length > 0 && (
+              <div className="mt-6 p-4 bg-slate-800/20 border border-slate-700/30 rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-white">Progresso de Peso</h4>
+                    <p className="text-xs text-slate-400">Últimas {weightHistory.length} sessões</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-semibold text-blue-400">
+                      {weightHistory[0]?.maxWeight || 0}kg
+                    </div>
+                    <div className="text-xs text-slate-500">Máximo atual</div>
+                  </div>
+                </div>
+
+                {/* Simple Chart */}
+                <div className="relative h-16 mb-3">
+                  <div className="absolute inset-0 flex items-end justify-between">
+                    {weightHistory.slice(0, 8).reverse().map((record: any, index: number) => {
+                      const maxWeight = Math.max(...weightHistory.map((r: any) => r.maxWeight || 0));
+                      const height = maxWeight > 0 ? ((record.maxWeight || 0) / maxWeight) * 100 : 0;
+                      
+                      return (
+                        <div 
+                          key={index}
+                          className="flex flex-col items-center group relative"
+                        >
+                          <div
+                            className="w-4 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-sm transition-all duration-200 group-hover:from-blue-500 group-hover:to-blue-300"
+                            style={{ height: `${Math.max(height, 5)}%` }}
+                          ></div>
+                          <div className="text-xs text-slate-500 mt-1 transform -rotate-45 origin-center">
+                            {new Date(record.workoutDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                          </div>
+                          
+                          {/* Tooltip */}
+                          <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {record.maxWeight}kg
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Progress Indicator */}
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">
+                    {weightHistory.length > 1 && weightHistory[1]?.maxWeight 
+                      ? `${weightHistory[0]?.maxWeight > weightHistory[1]?.maxWeight ? '+' : ''}${((weightHistory[0]?.maxWeight || 0) - (weightHistory[1]?.maxWeight || 0)).toFixed(1)}kg`
+                      : 'Primeira sessão'
+                    }
+                  </span>
+                  <span className="text-slate-500">
+                    vs última sessão
+                  </span>
                 </div>
               </div>
             )}
