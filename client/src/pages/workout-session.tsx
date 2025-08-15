@@ -506,28 +506,71 @@ export default function WorkoutSession() {
                             />
                             <Tooltip 
                               contentStyle={{
-                                backgroundColor: '#1E293B',
-                                border: '1px solid #475569',
-                                borderRadius: '12px',
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                border: '1px solid rgba(59, 130, 246, 0.3)',
+                                borderRadius: '16px',
                                 color: '#F1F5F9',
-                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-                                fontSize: '12px'
+                                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                                fontSize: '13px',
+                                padding: '12px 16px',
+                                backdropFilter: 'blur(12px)',
+                                WebkitBackdropFilter: 'blur(12px)'
                               }}
-                              formatter={(value: any, name: any, props: any) => [
-                                `${value}kg`,
-                                `Data: ${props.payload.fullDate}`
-                              ]}
-                              labelFormatter={() => ''}
-                              separator=""
+                              cursor={{ stroke: 'rgba(59, 130, 246, 0.5)', strokeWidth: 1 }}
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-4 shadow-2xl shadow-blue-500/20">
+                                      <div className="flex items-center space-x-3 mb-2">
+                                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                                        <div className="text-white font-semibold text-sm">Progressão</div>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <div className="flex items-center justify-between text-xs">
+                                          <span className="text-slate-400">Peso máximo:</span>
+                                          <span className="text-blue-400 font-bold text-lg">{data.weight}kg</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs">
+                                          <span className="text-slate-400">Data:</span>
+                                          <span className="text-slate-300">{data.fullDate}</span>
+                                        </div>
+                                        {data.workoutName && (
+                                          <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                            <div className="text-xs text-slate-500 truncate max-w-[180px]">
+                                              {data.workoutName}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
                             />
                             <Area
                               type="monotone"
                               dataKey="weight"
                               stroke="#3B82F6"
-                              strokeWidth={2}
+                              strokeWidth={2.5}
                               fill="url(#weightGradientSession)"
-                              dot={{ fill: '#3B82F6', strokeWidth: 2, r: 3 }}
-                              activeDot={{ r: 5, stroke: '#3B82F6', strokeWidth: 2, fill: '#fff' }}
+                              dot={{ 
+                                fill: '#3B82F6', 
+                                strokeWidth: 2, 
+                                r: 4,
+                                style: { filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))' }
+                              }}
+                              activeDot={{ 
+                                r: 7, 
+                                stroke: '#3B82F6', 
+                                strokeWidth: 3, 
+                                fill: '#fff',
+                                style: { 
+                                  filter: 'drop-shadow(0 4px 12px rgba(59, 130, 246, 0.6))',
+                                  cursor: 'pointer'
+                                }
+                              }}
                             />
                           </AreaChart>
                         </ResponsiveContainer>
