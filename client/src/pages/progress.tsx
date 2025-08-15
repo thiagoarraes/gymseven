@@ -756,6 +756,9 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <Card className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 border-emerald-500/20">
         <CardContent className="p-6 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <Trophy className="w-8 h-8 text-emerald-400" />
+          </div>
           <div className="text-3xl font-bold text-emerald-400 mb-2">{unlockedCount}</div>
           <div className="text-sm text-muted-foreground">Conquistas</div>
           <div className="text-xs text-muted-foreground mt-1">
@@ -766,6 +769,9 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
       
       <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-600/10 border-blue-500/20">
         <CardContent className="p-6 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <Zap className="w-8 h-8 text-blue-400" />
+          </div>
           <div className="text-3xl font-bold text-blue-400 mb-2">{totalPoints}</div>
           <div className="text-sm text-muted-foreground">XP Total</div>
           <div className="text-xs text-muted-foreground mt-1">
@@ -776,6 +782,9 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
       
       <Card className="bg-gradient-to-br from-purple-500/10 to-pink-600/10 border-purple-500/20">
         <CardContent className="p-6 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <Crown className="w-8 h-8 text-purple-400" />
+          </div>
           <div className="text-3xl font-bold text-purple-400 mb-2">{tierCounts.mitico + tierCounts.lendario + tierCounts.epico}</div>
           <div className="text-sm text-muted-foreground">Elite</div>
           <div className="text-xs text-muted-foreground mt-1">
@@ -786,6 +795,9 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
       
       <Card className="bg-gradient-to-br from-orange-500/10 to-yellow-600/10 border-orange-500/20">
         <CardContent className="p-6 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <Star className="w-8 h-8 text-orange-400" />
+          </div>
           <div className="text-2xl font-bold text-orange-400 mb-2">{highestTier}</div>
           <div className="text-sm text-muted-foreground">Maior Nível</div>
           <div className="text-xs text-muted-foreground mt-1">
