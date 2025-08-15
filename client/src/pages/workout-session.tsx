@@ -21,6 +21,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { workoutLogApi, workoutTemplateApi, exerciseProgressApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -474,34 +475,62 @@ export default function WorkoutSession() {
                   <AccordionContent className="px-4 pb-4">
                     {/* Chart Container */}
                     <div className="bg-slate-800/10 rounded-xl p-4 mt-3">
-                      {/* Simple Chart */}
-                      <div className="relative h-24 mb-4">
-                        <div className="absolute inset-0 flex items-end justify-between px-2">
-                          {weightHistory.slice(0, 8).reverse().map((record: any, index: number) => {
-                            const maxWeight = Math.max(...weightHistory.map((r: any) => r.maxWeight || 0));
-                            const height = maxWeight > 0 ? ((record.maxWeight || 0) / maxWeight) * 100 : 0;
-                            
-                            return (
-                              <div 
-                                key={index}
-                                className="flex flex-col items-center group relative"
-                              >
-                                <div
-                                  className="w-6 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-sm transition-all duration-200 group-hover:from-blue-500 group-hover:to-blue-300"
-                                  style={{ height: `${Math.max(height, 10)}%` }}
-                                ></div>
-                                <div className="text-xs text-slate-500 mt-2 transform -rotate-45 origin-center">
-                                  {record.date ? record.date.split('/').slice(0, 2).join('/') : 'N/A'}
-                                </div>
-                                
-                                {/* Tooltip */}
-                                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                  {record.maxWeight}kg
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                      {/* Area Chart */}
+                      <div className="h-40 mb-4">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={weightHistory.map((entry: any, index: number) => ({
+                            session: index + 1,
+                            weight: entry.maxWeight || entry.weight || 0,
+                            date: entry.date ? entry.date.split('/').slice(0, 2).join('/') : 'N/A',
+                            fullDate: entry.date,
+                            workoutName: entry.workoutName
+                          }))} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
+                            <defs>
+                              <linearGradient id="weightGradientSession" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                                <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                              </linearGradient>
+                            </defs>
+                            <XAxis 
+                              dataKey="date" 
+                              axisLine={false}
+                              tickLine={false}
+                              tick={{ fontSize: 10, fill: '#94A3B8' }}
+                            />
+                            <YAxis 
+                              axisLine={false}
+                              tickLine={false}
+                              tick={{ fontSize: 10, fill: '#94A3B8' }}
+                              domain={weightHistory.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
+                            />
+                            <Tooltip 
+                              contentStyle={{
+                                backgroundColor: '#1E293B',
+                                border: '1px solid #475569',
+                                borderRadius: '12px',
+                                color: '#F1F5F9',
+                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+                                fontSize: '12px'
+                              }}
+                              formatter={(value: any, name: any, props: any) => [
+                                `${value}kg`,
+                                `Data: ${props.payload.fullDate}`
+                              ]}
+                              labelFormatter={() => ''}
+                              separator=""
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="weight"
+                              stroke="#3B82F6"
+                              strokeWidth={2}
+                              fill="url(#weightGradientSession)"
+                              dot={{ fill: '#3B82F6', strokeWidth: 2, r: 3 }}
+                              activeDot={{ r: 5, stroke: '#3B82F6', strokeWidth: 2, fill: '#fff' }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
                       </div>
 
                       {/* Progress Stats */}
