@@ -769,12 +769,21 @@ export async function registerRoutes(app: Express, createServerInstance = true):
             
             if (maxWeight > 0) {
               const workoutDate = new Date(logExercise.workoutLog.startTime);
+              // Clean workout name to remove date patterns (DD/MM/YYYY or YYYY-MM-DD)
+              const cleanWorkoutName = logExercise.workoutLog.name
+                .replace(/\s*-\s*\d{2}\/\d{2}\/\d{4}.*$/, '') // Remove " - DD/MM/YYYY" and everything after
+                .replace(/\s*-\s*\d{4}-\d{2}-\d{2}.*$/, '') // Remove " - YYYY-MM-DD" and everything after
+                .replace(/\d{2}\/\d{2}\/\d{4}.*$/, '') // Remove "DD/MM/YYYY" and everything after
+                .replace(/\d{4}-\d{2}-\d{2}.*$/, '') // Remove "YYYY-MM-DD" and everything after
+                .replace(/\d{2}\/\d{2}\d{8,}.*$/, '') // Remove concatenated date patterns
+                .trim();
+
               const dataPoint = {
                 date: workoutDate.toLocaleDateString('pt-BR'),
                 workoutDate: workoutDate.toISOString(), // Add ISO date for proper parsing
                 maxWeight: maxWeight, // Change from 'weight' to 'maxWeight' for consistency
                 weight: maxWeight, // Keep for backwards compatibility
-                workoutName: logExercise.workoutLog.name,
+                workoutName: cleanWorkoutName,
                 totalSets: sets.length,
                 allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
               };
