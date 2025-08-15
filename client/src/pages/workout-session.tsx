@@ -491,7 +491,7 @@ export default function WorkoutSession() {
                                   style={{ height: `${Math.max(height, 10)}%` }}
                                 ></div>
                                 <div className="text-xs text-slate-500 mt-2 transform -rotate-45 origin-center">
-                                  {new Date(record.workoutDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                  {record.date ? record.date.split('/').slice(0, 2).join('/') : 'N/A'}
                                 </div>
                                 
                                 {/* Tooltip */}

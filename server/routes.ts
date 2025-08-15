@@ -768,9 +768,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
             const maxWeight = Math.max(...sets.map((set: any) => set.weight || 0));
             
             if (maxWeight > 0) {
+              const workoutDate = new Date(logExercise.workoutLog.startTime);
               const dataPoint = {
-                date: new Date(logExercise.workoutLog.startTime).toLocaleDateString('pt-BR'),
-                weight: maxWeight,
+                date: workoutDate.toLocaleDateString('pt-BR'),
+                workoutDate: workoutDate.toISOString(), // Add ISO date for proper parsing
+                maxWeight: maxWeight, // Change from 'weight' to 'maxWeight' for consistency
+                weight: maxWeight, // Keep for backwards compatibility
                 workoutName: logExercise.workoutLog.name,
                 totalSets: sets.length,
                 allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
