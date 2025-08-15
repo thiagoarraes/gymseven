@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, Dumbbell, Check } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { exerciseApi } from "@/lib/api";
+import { exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { MUSCLE_GROUPS } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,6 +47,23 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const { data: exercises = [], isLoading } = useQuery({
     queryKey: ["/api/exercicios"],
     queryFn: exerciseApi.getAll,
+  });
+
+  // Fetch exercise progress data for enhanced display
+  const { data: exercisesWithProgress = [] } = useQuery({
+    queryKey: ["/api/exercises-with-progress"],
+    queryFn: exerciseProgressApi.getExercisesWithProgress,
+  });
+
+  // Merge exercises with progress data
+  const enhancedExercises = exercises.map(exercise => {
+    const progressData = exercisesWithProgress.find((p: any) => p.id === exercise.id);
+    return {
+      ...exercise,
+      maxWeight: progressData?.maxWeight || 0,
+      lastWorkout: progressData?.lastWorkout || null,
+      totalSessions: progressData?.totalSessions || 0
+    };
   });
 
   const createMutation = useMutation({
@@ -113,6 +130,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     if (editingExercise) {
       updateMutation.mutate({ id: editingExercise.id, data: exerciseData });
     } else {
+      // Add userId to create data - will be added automatically by the backend
       createMutation.mutate(exerciseData);
     }
   };
@@ -151,7 +169,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     setDraggedExercise(exerciseId);
   };
 
-  const filteredExercises = exercises.filter((exercise) => {
+  const filteredExercises = enhancedExercises.filter((exercise) => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.muscleGroup === selectedMuscleGroup;
     return matchesSearch && matchesMuscleGroup;
@@ -311,18 +329,33 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
       {/* Exercise List */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="glass-card rounded-xl">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="loading-skeleton h-6 rounded mb-2 w-3/4"></div>
-                    <div className="loading-skeleton h-4 rounded w-1/2"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="glass-card rounded-2xl overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-4 pb-3">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <div className="loading-skeleton w-12 h-12 rounded-xl"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="loading-skeleton h-5 w-3/4 rounded"></div>
+                      <div className="loading-skeleton h-4 w-1/2 rounded-full"></div>
+                    </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <div className="loading-skeleton h-8 w-8 rounded-lg"></div>
-                    <div className="loading-skeleton h-8 w-8 rounded-lg"></div>
+                </div>
+                <div className="px-4 pb-4">
+                  <div className="bg-slate-800/30 rounded-xl p-3 space-y-3 border border-slate-700/30">
+                    <div className="flex items-center justify-between">
+                      <div className="loading-skeleton h-3 w-16 rounded"></div>
+                      <div className="loading-skeleton h-3 w-8 rounded"></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="loading-skeleton h-3 w-12 rounded"></div>
+                      <div className="loading-skeleton h-3 w-10 rounded"></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="loading-skeleton h-3 w-14 rounded"></div>
+                      <div className="loading-skeleton h-3 w-6 rounded"></div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -358,106 +391,135 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredExercises.map((exercise) => (
-            <div key={exercise.id} className="relative overflow-hidden">
-              {/* Background Action Buttons - WhatsApp Style */}
-              {!selectionMode && (
-                <div 
-                  className={`absolute right-0 top-0 flex transition-all duration-300 h-[4.75rem] ${
-                    (swipedExercise === exercise.id || draggedExercise === exercise.id) ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  style={{ zIndex: 1 }}
-                >
-                  {/* Edit Button Column */}
-                  <div
-                    className="flex items-center justify-center w-20 h-[4.75rem] bg-blue-500 rounded-l-xl cursor-pointer hover:bg-blue-600 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(exercise);
-                      setSwipedExercise(null);
-                    }}
-                  >
-                    <div className="flex flex-col items-center justify-center text-white">
-                      <Edit className="w-5 h-5 mb-1" />
-                      <span className="text-xs font-medium">Editar</span>
-                    </div>
-                  </div>
-                  
-                  {/* Delete Button Column */}
-                  <div
-                    className="flex items-center justify-center w-20 h-[4.75rem] bg-red-500 rounded-r-xl cursor-pointer hover:bg-red-600 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(exercise.id);
-                      setSwipedExercise(null);
-                    }}
-                  >
-                    <div className="flex flex-col items-center justify-center text-white">
-                      <Trash2 className="w-5 h-5 mb-1" />
-                      <span className="text-xs font-medium">Apagar</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Swipeable Card */}
-              <motion.div
-                drag={!selectionMode ? "x" : false}
-                dragConstraints={{ left: -160, right: 0, top: 0, bottom: 0 }}
-                dragElastic={{ left: 0.1, right: 0.1, top: 0, bottom: 0 }}
-                dragDirectionLock={true}
-                dragPropagation={false}
-                onDragStart={() => !selectionMode && handleDragStart(exercise.id)}
-                onDragEnd={(_, info) => !selectionMode && handleSwipeEnd(info, exercise.id)}
-                onDrag={(_, info) => {
-                  // Force y position to stay at 0 during drag
-                  if (info.point.y !== 0) {
-                    info.point.y = 0;
-                  }
-                }}
-                animate={{ 
-                  x: swipedExercise === exercise.id ? -160 : 0,
-                  y: 0
-                }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                style={{ zIndex: 2 }}
-                className="relative"
+            <motion.div
+              key={exercise.id}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="relative group"
+            >
+              <Card 
+                className={`glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 ${
+                  selectionMode && selectedExercises.includes(exercise.id) 
+                    ? "ring-2 ring-blue-500 bg-blue-500/10" 
+                    : "hover:border-blue-500/30"
+                }`}
+                onClick={() => selectionMode && onExerciseSelect?.(exercise.id)}
               >
-                <Card 
-                  className={`glass-card rounded-xl cursor-pointer transition-all duration-200 h-20 ${
-                    selectionMode && selectedExercises.includes(exercise.id) 
-                      ? "ring-2 ring-blue-500 bg-blue-500/10" 
-                      : ""
-                  }`}
-                  onClick={() => selectionMode && onExerciseSelect?.(exercise.id)}
-                >
-                  <CardContent className="p-4 h-20 flex items-center">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                          <Dumbbell className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-white text-lg">{exercise.name}</h4>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-slate-400">{exercise.muscleGroup}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        {selectionMode && selectedExercises.includes(exercise.id) && (
-                          <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                            <Check className="w-4 h-4 text-white" />
-                          </div>
+                <CardContent className="p-0">
+                  {/* Header Section */}
+                  <div className="p-4 pb-3 relative">
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="flex space-x-1">
+                        {!selectionMode && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="w-8 h-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/20"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(exercise);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="w-8 h-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(exercise.id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
+
+                    {/* Exercise Icon and Title */}
+                    <div className="flex items-start space-x-3 mb-3">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30">
+                        <Dumbbell className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-white text-lg leading-tight mb-1 truncate">
+                          {exercise.name}
+                        </h4>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-300 border border-indigo-500/20">
+                          {exercise.muscleGroup}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Selection Checkbox */}
+                    {selectionMode && selectedExercises.includes(exercise.id) && (
+                      <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stats Section */}
+                  <div className="px-4 pb-4">
+                    <div className="bg-slate-800/30 rounded-xl p-3 space-y-3 border border-slate-700/30">
+                      {/* Max Weight */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <TrendingUp className="w-4 h-4 text-emerald-400" />
+                          <span className="text-xs text-slate-400">Peso máx.</span>
+                        </div>
+                        <span className="text-sm font-bold text-emerald-400">
+                          {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
+                        </span>
+                      </div>
+
+                      {/* Last Workout */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-blue-400" />
+                          <span className="text-xs text-slate-400">Último</span>
+                        </div>
+                        <span className="text-sm font-medium text-blue-400">
+                          {exercise.lastWorkout ? (
+                            (() => {
+                              const lastDate = new Date(exercise.lastWorkout);
+                              const today = new Date();
+                              const diffTime = today.getTime() - lastDate.getTime();
+                              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                              
+                              if (diffDays === 0) return "Hoje";
+                              if (diffDays === 1) return "Ontem";
+                              if (diffDays < 7) return `${diffDays}d atrás`;
+                              if (diffDays < 30) return `${Math.floor(diffDays / 7)}sem atrás`;
+                              return "1+ mês";
+                            })()
+                          ) : "Nunca"}
+                        </span>
+                      </div>
+
+                      {/* Total Sessions */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-purple-400" />
+                          <span className="text-xs text-slate-400">Sessões</span>
+                        </div>
+                        <span className="text-sm font-medium text-purple-400">
+                          {exercise.totalSessions || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
