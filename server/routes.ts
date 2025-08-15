@@ -127,7 +127,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
       const updateData = updateUserSchema.parse(req.body);
       
-      const updatedUser = await storage.updateUser(req.user!.id, updateData);
+      // Convert null values to undefined for storage interface compatibility
+      const storageData = {
+        ...updateData,
+        height: updateData.height === null ? undefined : updateData.height,
+        weight: updateData.weight === null ? undefined : updateData.weight,
+      };
+      
+      const updatedUser = await storage.updateUser(req.user!.id, storageData);
       if (!updatedUser) {
         return res.status(404).json({ message: 'Usuário não encontrado' });
       }
@@ -205,28 +212,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     next();
   }, express.static(path.join(process.cwd(), 'uploads')));
 
-  app.put("/api/auth/profile", authenticateToken, async (req: AuthRequest, res) => {
-    try {
-      const validatedData = updateUserSchema.parse(req.body);
-      const updatedUser = await storage.updateUser(req.user!.id, validatedData);
-      
-      if (!updatedUser) {
-        return res.status(404).json({ message: "Usuário não encontrado" });
-      }
 
-      const { password, ...userWithoutPassword } = updatedUser;
-      res.json({ user: userWithoutPassword });
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        res.status(400).json({ 
-          message: "Dados inválidos",
-          errors: error.errors
-        });
-      } else {
-        res.status(500).json({ message: "Erro interno do servidor" });
-      }
-    }
-  });
 
   // Weight History routes
   app.get("/api/weight-history", authenticateToken, async (req: AuthRequest, res) => {

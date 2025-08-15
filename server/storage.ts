@@ -416,7 +416,7 @@ export class MemStorage implements IStorage {
   async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
     if (userId) {
       return Array.from(this.workoutLogs.values())
-        .filter(wl => wl.userId === userId)
+        .filter(wl => wl.user_id === userId)
         .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
     }
     return Array.from(this.workoutLogs.values())
@@ -956,7 +956,7 @@ class DatabaseStorage implements IStorage {
   async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
     if (userId) {
       return await this.db.select().from(workoutLogs)
-        .where(eq(workoutLogs.userId, userId))
+        .where(eq(workoutLogs.user_id, userId))
         .orderBy(desc(workoutLogs.startTime));
     }
     return await this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
