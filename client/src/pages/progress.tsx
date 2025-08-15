@@ -34,7 +34,7 @@ interface Achievement {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   category: 'workout' | 'strength' | 'consistency' | 'milestone' | 'special';
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  tier: 'bronze' | 'prata' | 'ouro' | 'diamante' | 'epico' | 'lendario' | 'mitico';
   points: number;
   requirement: {
     type: 'workout_count' | 'consecutive_days' | 'total_weight' | 'single_weight' | 'time_based' | 'custom';
@@ -46,9 +46,9 @@ interface Achievement {
   unlockedAt?: Date;
 }
 
-// Sample achievements data - in a real app, this would come from an API
+// Dados de conquistas de exemplo - em uma aplicação real, viria de uma API
 const SAMPLE_ACHIEVEMENTS: Achievement[] = [
-  // Workout Achievements
+  // Conquistas de Treino
   {
     id: 'first_workout',
     name: 'Primeiro Passo',
@@ -68,7 +68,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Complete 10 treinos',
     icon: Medal,
     category: 'workout',
-    tier: 'silver',
+    tier: 'prata',
     points: 50,
     requirement: { type: 'workout_count', target: 10, timeframe: 'all_time' },
     unlocked: true,
@@ -81,14 +81,26 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Complete 50 treinos',
     icon: Crown,
     category: 'workout',
-    tier: 'gold',
+    tier: 'ouro',
     points: 200,
     requirement: { type: 'workout_count', target: 50, timeframe: 'all_time' },
     unlocked: false,
     progress: 68
   },
+  {
+    id: 'workout_100',
+    name: 'Imortal',
+    description: 'Complete 100 treinos',
+    icon: Shield,
+    category: 'workout',
+    tier: 'diamante',
+    points: 500,
+    requirement: { type: 'workout_count', target: 100, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 34
+  },
   
-  // Consistency Achievements
+  // Conquistas de Consistência
   {
     id: 'streak_3',
     name: 'Consistência',
@@ -108,7 +120,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Treine por 7 dias consecutivos',
     icon: Calendar,
     category: 'consistency',
-    tier: 'silver',
+    tier: 'prata',
     points: 75,
     requirement: { type: 'consecutive_days', target: 7 },
     unlocked: false,
@@ -120,21 +132,33 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Treine por 30 dias consecutivos',
     icon: Shield,
     category: 'consistency',
-    tier: 'platinum',
-    points: 500,
+    tier: 'ouro',
+    points: 300,
     requirement: { type: 'consecutive_days', target: 30 },
     unlocked: false,
     progress: 14
   },
+  {
+    id: 'streak_100',
+    name: 'Lenda Viva',
+    description: 'Treine por 100 dias consecutivos',
+    icon: Crown,
+    category: 'consistency',
+    tier: 'epico',
+    points: 1000,
+    requirement: { type: 'consecutive_days', target: 100 },
+    unlocked: false,
+    progress: 4
+  },
   
-  // Strength Achievements
+  // Conquistas de Força
   {
     id: 'total_weight_1000',
     name: 'Força Bruta',
     description: 'Levante um total de 1.000kg em uma sessão',
     icon: Zap,
     category: 'strength',
-    tier: 'gold',
+    tier: 'ouro',
     points: 150,
     requirement: { type: 'total_weight', target: 1000, timeframe: 'daily' },
     unlocked: false,
@@ -146,21 +170,33 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Supino com 100kg ou mais',
     icon: Target,
     category: 'strength',
-    tier: 'gold',
-    points: 200,
+    tier: 'diamante',
+    points: 400,
     requirement: { type: 'single_weight', target: 100 },
     unlocked: false,
     progress: 75
   },
+  {
+    id: 'deadlift_200',
+    name: 'Destruidor',
+    description: 'Levantamento terra com 200kg ou mais',
+    icon: Zap,
+    category: 'strength',
+    tier: 'lendario',
+    points: 800,
+    requirement: { type: 'single_weight', target: 200 },
+    unlocked: false,
+    progress: 32
+  },
   
-  // Special Achievements
+  // Conquistas Especiais
   {
     id: 'early_bird',
     name: 'Madrugador',
     description: 'Complete um treino antes das 7h da manhã',
     icon: Star,
     category: 'special',
-    tier: 'silver',
+    tier: 'prata',
     points: 100,
     requirement: { type: 'time_based', target: 7 },
     unlocked: false,
@@ -172,11 +208,35 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Complete treinos em todos os finais de semana por um mês',
     icon: Award,
     category: 'special',
-    tier: 'platinum',
+    tier: 'ouro',
     points: 300,
     requirement: { type: 'custom', target: 8 },
     unlocked: false,
     progress: 25
+  },
+  {
+    id: 'perfect_month',
+    name: 'Mestre dos Treinos',
+    description: 'Complete pelo menos 20 treinos em um mês',
+    icon: Crown,
+    category: 'special',
+    tier: 'epico',
+    points: 600,
+    requirement: { type: 'custom', target: 20 },
+    unlocked: false,
+    progress: 15
+  },
+  {
+    id: 'year_champion',
+    name: 'Campeão Anual',
+    description: 'Complete pelo menos 300 treinos em um ano',
+    icon: Trophy,
+    category: 'special',
+    tier: 'mitico',
+    points: 2000,
+    requirement: { type: 'workout_count', target: 300, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 11
   }
 ];
 
@@ -186,16 +246,22 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
   
   const tierColors = {
     bronze: 'from-orange-400 to-orange-600',
-    silver: 'from-slate-400 to-slate-600', 
-    gold: 'from-yellow-400 to-yellow-600',
-    platinum: 'from-purple-400 to-purple-600'
+    prata: 'from-slate-400 to-slate-600', 
+    ouro: 'from-yellow-400 to-yellow-600',
+    diamante: 'from-cyan-400 to-cyan-600',
+    epico: 'from-purple-400 to-purple-600',
+    lendario: 'from-red-400 to-red-600',
+    mitico: 'from-pink-400 to-indigo-400'
   };
 
   const tierBadgeColors = {
     bronze: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-    silver: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-    gold: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    platinum: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+    prata: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+    ouro: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    diamante: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    epico: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    lendario: 'bg-red-500/20 text-red-300 border-red-500/30',
+    mitico: 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/30'
   };
 
   return (
@@ -302,9 +368,12 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
   
   const tierCounts = {
     bronze: achievements.filter(a => a.unlocked && a.tier === 'bronze').length,
-    silver: achievements.filter(a => a.unlocked && a.tier === 'silver').length,
-    gold: achievements.filter(a => a.unlocked && a.tier === 'gold').length,
-    platinum: achievements.filter(a => a.unlocked && a.tier === 'platinum').length,
+    prata: achievements.filter(a => a.unlocked && a.tier === 'prata').length,
+    ouro: achievements.filter(a => a.unlocked && a.tier === 'ouro').length,
+    diamante: achievements.filter(a => a.unlocked && a.tier === 'diamante').length,
+    epico: achievements.filter(a => a.unlocked && a.tier === 'epico').length,
+    lendario: achievements.filter(a => a.unlocked && a.tier === 'lendario').length,
+    mitico: achievements.filter(a => a.unlocked && a.tier === 'mitico').length,
   };
 
   return (
@@ -329,22 +398,22 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
         </CardContent>
       </Card>
       
-      <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
+      <Card className="bg-gradient-to-br from-pink-500/10 to-purple-600/10 border-pink-500/20">
         <CardContent className="p-6 text-center">
-          <div className="text-3xl font-bold text-purple-400 mb-2">{tierCounts.platinum}</div>
-          <div className="text-sm text-muted-foreground">Platinum</div>
+          <div className="text-3xl font-bold text-pink-400 mb-2">{tierCounts.mitico}</div>
+          <div className="text-sm text-muted-foreground">Mítico</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Elite conquests
+            Conquistas lendárias
           </div>
         </CardContent>
       </Card>
       
       <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border-yellow-500/20">
         <CardContent className="p-6 text-center">
-          <div className="text-3xl font-bold text-yellow-400 mb-2">{tierCounts.gold}</div>
-          <div className="text-sm text-muted-foreground">Gold</div>
+          <div className="text-3xl font-bold text-yellow-400 mb-2">{tierCounts.ouro}</div>
+          <div className="text-sm text-muted-foreground">Ouro</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Major achievements
+            Grandes conquistas
           </div>
         </CardContent>
       </Card>
@@ -454,9 +523,12 @@ export default function AchievementsPage() {
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="bronze">Bronze</SelectItem>
-                <SelectItem value="silver">Silver</SelectItem>
-                <SelectItem value="gold">Gold</SelectItem>
-                <SelectItem value="platinum">Platinum</SelectItem>
+                <SelectItem value="prata">Prata</SelectItem>
+                <SelectItem value="ouro">Ouro</SelectItem>
+                <SelectItem value="diamante">Diamante</SelectItem>
+                <SelectItem value="epico">Épico</SelectItem>
+                <SelectItem value="lendario">Lendário</SelectItem>
+                <SelectItem value="mitico">Mítico</SelectItem>
               </SelectContent>
             </Select>
           </div>
