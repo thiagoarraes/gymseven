@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3 } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -291,6 +291,55 @@ export default function Dashboard() {
                           "Em andamento"
                         }
                       </span>
+                    </div>
+                    
+                    {/* Muscle Groups */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-slate-400" />
+                        <span className="text-xs text-slate-400">Grupos</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 max-w-[130px] sm:max-w-[170px] justify-end">
+                        {(() => {
+                          const workoutName = recentWorkouts[0]?.name?.toLowerCase() || '';
+                          let muscleGroups: string[] = [];
+                          
+                          // More comprehensive muscle group detection
+                          if (workoutName.includes('push') || workoutName.includes('peito') || workoutName.includes('empurrar')) {
+                            muscleGroups = ['Peito', 'Ombro', 'Tríceps'];
+                          } else if (workoutName.includes('pull') || workoutName.includes('costa') || workoutName.includes('puxar') || workoutName.includes('costas')) {
+                            muscleGroups = ['Costa', 'Bíceps', 'Trapézio'];
+                          } else if (workoutName.includes('leg') || workoutName.includes('perna') || workoutName.includes('quadríceps') || workoutName.includes('glúteo')) {
+                            muscleGroups = ['Quadríceps', 'Glúteos', 'Panturrilha'];
+                          } else if (workoutName.includes('full') || workoutName.includes('completo') || workoutName.includes('corpo inteiro')) {
+                            muscleGroups = ['Corpo todo'];
+                          } else if (workoutName.includes('upper') || workoutName.includes('superior') || workoutName.includes('tronco')) {
+                            muscleGroups = ['Peito', 'Costa', 'Ombro'];
+                          } else if (workoutName.includes('lower') || workoutName.includes('inferior') || workoutName.includes('membros inferiores')) {
+                            muscleGroups = ['Pernas', 'Glúteos'];
+                          } else if (workoutName.includes('cardio') || workoutName.includes('aeróbico')) {
+                            muscleGroups = ['Cardio'];
+                          } else if (workoutName.includes('core') || workoutName.includes('abdômen') || workoutName.includes('abdominal')) {
+                            muscleGroups = ['Core', 'Abdômen'];
+                          } else if (workoutName.includes('ombro')) {
+                            muscleGroups = ['Ombro', 'Trapézio'];
+                          } else if (workoutName.includes('braço') || workoutName.includes('bíceps') || workoutName.includes('tríceps')) {
+                            muscleGroups = ['Bíceps', 'Tríceps'];
+                          } else {
+                            // Default for mixed or unspecified workouts
+                            muscleGroups = ['Variado'];
+                          }
+                          
+                          return muscleGroups.map((group, index) => (
+                            <span 
+                              key={index}
+                              className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-300 border border-indigo-500/20"
+                            >
+                              {group}
+                            </span>
+                          ));
+                        })()}
+                      </div>
                     </div>
                     
                     {/* Quick Stats */}
