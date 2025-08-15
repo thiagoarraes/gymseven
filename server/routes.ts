@@ -1235,15 +1235,39 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/workout-logs/:id", async (req, res) => {
+  app.put("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log(`Updating workout log ${req.params.id} with data:`, req.body);
+      
+      // Check if user is authenticated
+      if (!req.user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      
       const updates = insertWorkoutLogSchema.partial().parse(req.body);
+      
+      // First, check if the workout exists and belongs to the user
+      const existingLog = await storage.getWorkoutLog(req.params.id);
+      if (!existingLog) {
+        console.log(`Workout log ${req.params.id} not found`);
+        return res.status(404).json({ message: "Treino não encontrado" });
+      }
+      
+      // Check if the workout belongs to the current user
+      if (existingLog.user_id !== req.user.id) {
+        console.log(`Workout log ${req.params.id} does not belong to user ${req.user.id}`);
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
       const log = await storage.updateWorkoutLog(req.params.id, updates);
       if (!log) {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
+      
+      console.log(`Workout log ${req.params.id} updated successfully`);
       res.json(log);
     } catch (error) {
+      console.error("Workout log update error:", error);
       res.status(400).json({ message: "Dados inválidos para atualização do treino" });
     }
   });
