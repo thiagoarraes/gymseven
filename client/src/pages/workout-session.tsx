@@ -15,7 +15,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { workoutLogApi, workoutTemplateApi } from "@/lib/api";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { workoutLogApi, workoutTemplateApi, exerciseProgressApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
@@ -46,6 +52,16 @@ export default function WorkoutSession() {
     queryKey: ["/api/workout-templates", workoutLog?.templateId, "exercises"],
     queryFn: () => workoutTemplateApi.getExercises(workoutLog!.templateId!),
     enabled: !!workoutLog?.templateId,
+  });
+
+  // Get current exercise
+  const currentExercise = templateExercises[currentExerciseIndex];
+  
+  // Query for exercise weight history
+  const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
+    queryKey: ["/api/exercise-weight-history", currentExercise?.exerciseId],
+    queryFn: () => exerciseProgressApi.getWeightHistory(currentExercise!.exerciseId, 10),
+    enabled: !!currentExercise?.exerciseId,
   });
 
   // Create workout log exercises when template exercises are loaded
