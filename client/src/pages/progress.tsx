@@ -27,6 +27,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { workoutLogApi } from "@/lib/api";
+import { useAuth } from "@/contexts/auth-context";
 
 // Achievement types and data structure
 interface Achievement {
@@ -593,6 +594,132 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
   );
 }
 
+// Level System Component
+function LevelSystem({ achievements, username }: { achievements: Achievement[]; username: string }) {
+  const totalPoints = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + a.points, 0);
+  
+  // Calculate level based on points (exponential growth)
+  const calculateLevel = (points: number) => {
+    if (points < 100) return 1;
+    if (points < 300) return 2;
+    if (points < 600) return 3;
+    if (points < 1000) return 4;
+    if (points < 1500) return 5;
+    if (points < 2200) return 6;
+    if (points < 3000) return 7;
+    if (points < 4000) return 8;
+    if (points < 5200) return 9;
+    if (points < 6600) return 10;
+    if (points < 8200) return 11;
+    if (points < 10000) return 12;
+    return Math.floor(12 + (points - 10000) / 2000);
+  };
+
+  // Calculate points needed for next level
+  const getPointsForLevel = (level: number) => {
+    if (level <= 1) return 0;
+    if (level === 2) return 100;
+    if (level === 3) return 300;
+    if (level === 4) return 600;
+    if (level === 5) return 1000;
+    if (level === 6) return 1500;
+    if (level === 7) return 2200;
+    if (level === 8) return 3000;
+    if (level === 9) return 4000;
+    if (level === 10) return 5200;
+    if (level === 11) return 6600;
+    if (level === 12) return 8200;
+    if (level === 13) return 10000;
+    return 10000 + (level - 13) * 2000;
+  };
+
+  const currentLevel = calculateLevel(totalPoints);
+  const nextLevel = currentLevel + 1;
+  const currentLevelPoints = getPointsForLevel(currentLevel);
+  const nextLevelPoints = getPointsForLevel(nextLevel);
+  const progressPoints = totalPoints - currentLevelPoints;
+  const neededPoints = nextLevelPoints - currentLevelPoints;
+  const progressPercentage = Math.min((progressPoints / neededPoints) * 100, 100);
+
+  // Level titles based on level ranges
+  const getLevelTitle = (level: number) => {
+    if (level <= 2) return "Novato";
+    if (level <= 4) return "Iniciante";
+    if (level <= 6) return "Atleta";
+    if (level <= 8) return "Veterano";
+    if (level <= 10) return "Expert";
+    if (level <= 12) return "Mestre";
+    if (level <= 15) return "Lenda";
+    return "Imortal";
+  };
+
+  return (
+    <Card className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 border-blue-500/20 mb-6">
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4 mb-4">
+          {/* Level Badge */}
+          <div className="relative">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-blue-400/50 shadow-lg">
+              <span className="text-2xl font-bold text-white">{currentLevel}</span>
+            </div>
+            <div className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+              LVL
+            </div>
+          </div>
+
+          {/* User Info */}
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="text-xl font-bold text-foreground">@{username}</h2>
+              <Badge variant="outline" className="text-xs bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30">
+                {getLevelTitle(currentLevel)}
+              </Badge>
+            </div>
+            
+            <div className="space-y-2">
+              {/* Progress Bar */}
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Nível {currentLevel}</span>
+                <span>Nível {nextLevel}</span>
+              </div>
+              
+              <div className="relative">
+                <Progress 
+                  value={progressPercentage} 
+                  className="h-3 bg-slate-800/50"
+                  data-testid="level-progress"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full pointer-events-none" />
+              </div>
+              
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{totalPoints} XP</span>
+                <span>{nextLevelPoints - totalPoints} XP para próximo nível</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Level Stats */}
+        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border/40">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-400">{totalPoints}</div>
+            <div className="text-xs text-muted-foreground">XP Total</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-400">{currentLevel}</div>
+            <div className="text-xs text-muted-foreground">Nível Atual</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-emerald-400">{Math.round(progressPercentage)}%</div>
+            <div className="text-xs text-muted-foreground">Progresso</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Stats Overview Component
 function StatsOverview({ achievements }: { achievements: Achievement[] }) {
   const unlockedCount = achievements.filter(a => a.unlocked).length;
@@ -658,6 +785,7 @@ export default function AchievementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTier, setSelectedTier] = useState<string>("all");
+  const { user } = useAuth();
 
   // Fetch workout logs to calculate real progress (for future implementation)
   const { data: workoutLogs = [], isLoading } = useQuery({
@@ -717,6 +845,9 @@ export default function AchievementsPage() {
             Desbloqueie conquistas completando treinos, mantendo consistência e alcançando novos recordes pessoais.
           </p>
         </div>
+
+        {/* Level System */}
+        <LevelSystem achievements={SAMPLE_ACHIEVEMENTS} username={user?.username || 'Usuário'} />
 
         {/* Stats Overview */}
         <StatsOverview achievements={SAMPLE_ACHIEVEMENTS} />
