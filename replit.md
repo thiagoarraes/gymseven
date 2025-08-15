@@ -12,6 +12,7 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 - Gradiente azul/roxo consistente com o design da aplicação
 - Integração perfeita com dados reais dos treinos concluídos
 - Interface otimizada para mobile com toque responsivo nos pontos
+- **UX/UI melhorada aplicada também no dashboard principal com tooltips glassmorphism**
 
 ## Recent Changes (August 13, 2025)
 
