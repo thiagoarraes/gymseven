@@ -531,10 +531,6 @@ export default function WorkoutSession() {
                                           <span className="text-slate-400">Peso máximo:</span>
                                           <span className="text-blue-400 font-bold text-lg">{data.weight}kg</span>
                                         </div>
-                                        <div className="flex items-center justify-between text-xs">
-                                          <span className="text-slate-400">Data:</span>
-                                          <span className="text-slate-300">{data.fullDate}</span>
-                                        </div>
                                         {data.workoutName && (
                                           <div className="mt-2 pt-2 border-t border-slate-700/50">
                                             <div className="text-xs text-slate-500 truncate max-w-[180px]">
