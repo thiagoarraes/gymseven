@@ -8,8 +8,14 @@ export function Logo() {
         <Zap className="text-white w-7 h-7 drop-shadow-sm relative z-10" />
       </div>
       <div>
-        <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
-          Gym<span className="text-emerald-400">Seven</span>
+        <h1 className="text-2xl font-black tracking-tight relative">
+          <span className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+            GYM
+          </span>
+          <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent font-extrabold">
+            SEVEN
+          </span>
+          <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 rounded-full opacity-80"></div>
         </h1>
         <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">gerenciador de treino do @thiagoseven</p>
       </div>
