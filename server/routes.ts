@@ -399,8 +399,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       if (muscleGroup && typeof muscleGroup === 'string') {
         // Filter by muscle group for the authenticated user only
-        const userExercises = await storage.getExercises(req.user!.id);
-        exercises = userExercises.filter(ex => ex.muscleGroup === muscleGroup);
+        exercises = await storage.getExercisesByMuscleGroup(muscleGroup, req.user!.id);
       } else {
         // Get user-specific exercises only
         exercises = await storage.getExercises(req.user!.id);
@@ -428,7 +427,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       const validatedData = insertExerciseSchema.parse({
         ...req.body,
-        userId: req.user!.id // Ensure exercise belongs to authenticated user
+        user_id: req.user!.id // Ensure exercise belongs to authenticated user
       });
       const exercise = await storage.createExercise(validatedData);
       res.status(201).json(exercise);
@@ -514,7 +513,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       const validatedData = insertWorkoutTemplateSchema.parse({
         ...req.body,
-        userId: req.user!.id // Ensure template belongs to authenticated user
+        user_id: req.user!.id // Ensure template belongs to authenticated user
       });
       const template = await storage.createWorkoutTemplate(validatedData);
       res.status(201).json(template);
@@ -1357,6 +1356,28 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
+
+  // User Achievements routes - sistema de conquistas isolado por usuário
+  app.get("/api/achievements", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const achievements = await storage.getUserAchievements(req.user!.id);
+      res.json(achievements);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar conquistas do usuário" });
+    }
+  });
+
+  app.post("/api/achievements", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const achievement = await storage.createUserAchievement({
+        ...req.body,
+        userId: req.user!.id // Garantir isolamento por usuário
+      });
+      res.status(201).json(achievement);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar conquista do usuário" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

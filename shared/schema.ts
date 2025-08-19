@@ -62,6 +62,16 @@ export const userPreferences = pgTable("user_preferences", {
   trackingData: text("tracking_data").default("all"), // all, weight_only, none
 });
 
+// Tabela para conquistas do usuário (sistema gamificado isolado por usuário)
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: text("achievement_id").notNull(), // ID da conquista (exemplo: "first_workout", "strength_milestone_100kg")
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  progress: integer("progress").default(0), // Progresso atual para conquistas progressivas
+  isCompleted: boolean("is_completed").default(true),
+});
+
 export const exercises = pgTable("exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -254,6 +264,14 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).o
 
 export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ userId: true });
 
+// User Achievements schemas
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  unlockedAt: true,
+});
+
+export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ userId: true });
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -271,6 +289,10 @@ export type InsertUserGoal = z.infer<typeof insertUserGoalSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UpdateUserPreferences = z.infer<typeof updateUserPreferencesSchema>;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UpdateUserAchievement = z.infer<typeof updateUserAchievementSchema>;
 
 // Constants
 export const MUSCLE_GROUPS = [

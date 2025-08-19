@@ -261,7 +261,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data as Exercise[];
@@ -310,11 +310,14 @@ export class SupabaseStorage implements IStorage {
     return !error;
   }
 
-  async getExercisesByMuscleGroup(muscleGroup: string): Promise<Exercise[]> {
+  async getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]> {
+    if (!userId) return [];
+
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('muscleGroup', muscleGroup);
+      .eq('muscle_group', muscleGroup)
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data as Exercise[];
@@ -332,7 +335,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workout_templates')
       .select('*')
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data as WorkoutTemplate[];
@@ -496,7 +499,7 @@ export class SupabaseStorage implements IStorage {
       .from('workout_logs')
       .select('*')
       .eq('user_id', userId)
-      .order('startTime', { ascending: false });
+      .order('start_time', { ascending: false });
 
     if (error) throw error;
     return data as WorkoutLog[];
@@ -556,6 +559,49 @@ export class SupabaseStorage implements IStorage {
   async deleteWorkoutLogSet(id: string): Promise<boolean> {
     const { error } = await supabase
       .from('workout_log_sets')
+      .delete()
+      .eq('id', id);
+
+    return !error;
+  }
+
+  // User Achievements methods (conquistas isoladas por usuário)
+  async getUserAchievements(userId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async createUserAchievement(achievement: any): Promise<any> {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .insert(achievement)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async updateUserAchievement(id: string, updates: any): Promise<any | undefined> {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return undefined;
+    return data;
+  }
+
+  async deleteUserAchievement(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('user_achievements')
       .delete()
       .eq('id', id);
 

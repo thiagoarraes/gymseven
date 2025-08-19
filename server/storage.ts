@@ -7,7 +7,8 @@ import {
   type WorkoutLogSet, type InsertWorkoutLogSet,
   type WeightHistory, type InsertWeightHistory,
   type UserGoal, type InsertUserGoal,
-  type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences
+  type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences,
+  type UserAchievement, type InsertUserAchievement, type UpdateUserAchievement
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -16,7 +17,7 @@ import { eq, desc, and } from 'drizzle-orm';
 import { 
   users, exercises, workoutTemplates, workoutTemplateExercises, 
   workoutLogs, workoutLogExercises, workoutLogSets,
-  weightHistory, userGoals, userPreferences
+  weightHistory, userGoals, userPreferences, userAchievements
 } from '@shared/schema';
 
 
@@ -47,6 +48,12 @@ export interface IStorage {
   createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences>;
   updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined>;
   
+  // User Achievements (conquistas isoladas por usuário)
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  createUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement>;
+  updateUserAchievement(id: string, updates: UpdateUserAchievement): Promise<UserAchievement | undefined>;
+  deleteUserAchievement(id: string): Promise<boolean>;
+  
   // Exercises
   getAllExercises(): Promise<Exercise[]>;
   getExercises(userId?: string): Promise<Exercise[]>;
@@ -54,7 +61,7 @@ export interface IStorage {
   createExercise(exercise: InsertExercise): Promise<Exercise>;
   updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined>;
   deleteExercise(id: string): Promise<boolean>;
-  getExercisesByMuscleGroup(muscleGroup: string): Promise<Exercise[]>;
+  getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]>;
   
   // Workout Templates
   getAllWorkoutTemplates(): Promise<WorkoutTemplate[]>;
@@ -97,6 +104,7 @@ export class MemStorage implements IStorage {
   private weightHistory?: Map<string, WeightHistory>;
   private userGoals?: Map<string, UserGoal>;
   private userPreferences?: Map<string, UserPreferences>;
+  private userAchievements?: Map<string, UserAchievement>;
 
   constructor() {
     this.users = new Map();
@@ -580,6 +588,41 @@ export class MemStorage implements IStorage {
     this.userPreferences.set(existing.id, updated);
     return updated;
   }
+
+  // User Achievements methods
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    return Array.from(this.userAchievements?.values() || [])
+      .filter(achievement => achievement.userId === userId);
+  }
+
+  async createUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement> {
+    const id = randomUUID();
+    const userAchievement: UserAchievement = { 
+      ...achievement, 
+      id,
+      unlockedAt: new Date(),
+      isCompleted: achievement.isCompleted ?? true,
+      progress: achievement.progress ?? 0
+    };
+    if (!this.userAchievements) this.userAchievements = new Map();
+    this.userAchievements.set(id, userAchievement);
+    return userAchievement;
+  }
+
+  async updateUserAchievement(id: string, updates: UpdateUserAchievement): Promise<UserAchievement | undefined> {
+    if (!this.userAchievements) return undefined;
+    const existing = this.userAchievements.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...updates };
+    this.userAchievements.set(id, updated);
+    return updated;
+  }
+
+  async deleteUserAchievement(id: string): Promise<boolean> {
+    if (!this.userAchievements) return false;
+    return this.userAchievements.delete(id);
+  }
 }
 
 
@@ -987,6 +1030,26 @@ class DatabaseStorage implements IStorage {
   async updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined> {
     const result = await this.db.update(userPreferences).set(updates).where(eq(userPreferences.userId, userId)).returning();
     return result[0];
+  }
+
+  // User Achievements methods
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    return await this.db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+  }
+
+  async createUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement> {
+    const result = await this.db.insert(userAchievements).values(achievement).returning();
+    return result[0];
+  }
+
+  async updateUserAchievement(id: string, updates: UpdateUserAchievement): Promise<UserAchievement | undefined> {
+    const result = await this.db.update(userAchievements).set(updates).where(eq(userAchievements.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteUserAchievement(id: string): Promise<boolean> {
+    const result = await this.db.delete(userAchievements).where(eq(userAchievements.id, id)).returning();
+    return result.length > 0;
   }
 }
 
