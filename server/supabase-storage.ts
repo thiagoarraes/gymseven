@@ -20,6 +20,44 @@ export class SupabaseStorage implements IStorage {
     this.initializeSupabase();
   }
 
+  // Helper method to map database columns to TypeScript fields
+  private mapDbUserToUser(dbUser: any): User {
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      username: dbUser.username,
+      password: dbUser.password,
+      firstName: dbUser.first_name,
+      lastName: dbUser.last_name,
+      dateOfBirth: dbUser.date_of_birth,
+      height: dbUser.height,
+      weight: dbUser.weight,
+      activityLevel: dbUser.activity_level,
+      fitnessGoals: dbUser.fitness_goals,
+      profileImageUrl: dbUser.profile_image_url,
+      experienceLevel: dbUser.experience_level,
+      preferredWorkoutDuration: dbUser.preferred_workout_duration,
+      isActive: dbUser.is_active,
+      emailVerified: dbUser.email_verified,
+      lastLoginAt: dbUser.last_login_at,
+      createdAt: dbUser.created_at,
+      updatedAt: dbUser.updated_at
+    } as User;
+  }
+
+  private mapDbExerciseToExercise(dbExercise: any): Exercise {
+    return {
+      id: dbExercise.id,
+      userId: dbExercise.user_id,
+      name: dbExercise.name,
+      muscleGroup: dbExercise.muscle_group,
+      description: dbExercise.description,
+      imageUrl: dbExercise.image_url,
+      videoUrl: dbExercise.video_url,
+      createdAt: dbExercise.created_at
+    } as Exercise;
+  }
+
   private async initializeSupabase() {
     try {
       // Test connection first with a simple query
@@ -58,7 +96,7 @@ export class SupabaseStorage implements IStorage {
       .single();
 
     if (error) return undefined;
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -69,7 +107,7 @@ export class SupabaseStorage implements IStorage {
       .single();
 
     if (error) return undefined;
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -80,30 +118,111 @@ export class SupabaseStorage implements IStorage {
       .single();
 
     if (error) return undefined;
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async createUser(user: InsertUser): Promise<User> {
+    // Map camelCase to snake_case for database columns
+    const dbUser = {
+      ...user,
+      first_name: user.firstName,
+      last_name: user.lastName,
+      date_of_birth: user.dateOfBirth,
+      activity_level: user.activityLevel,
+      fitness_goals: user.fitnessGoals,
+      profile_image_url: user.profileImageUrl,
+      experience_level: user.experienceLevel,
+      preferred_workout_duration: user.preferredWorkoutDuration,
+      is_active: user.isActive,
+      email_verified: user.emailVerified,
+      last_login_at: user.lastLoginAt,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    // Remove camelCase properties to avoid conflicts
+    delete (dbUser as any).firstName;
+    delete (dbUser as any).lastName;
+    delete (dbUser as any).dateOfBirth;
+    delete (dbUser as any).activityLevel;
+    delete (dbUser as any).fitnessGoals;
+    delete (dbUser as any).profileImageUrl;
+    delete (dbUser as any).experienceLevel;
+    delete (dbUser as any).preferredWorkoutDuration;
+    delete (dbUser as any).isActive;
+    delete (dbUser as any).emailVerified;
+    delete (dbUser as any).lastLoginAt;
+
     const { data, error } = await supabase
       .from('users')
-      .insert(user)
+      .insert(dbUser)
       .select()
       .single();
 
     if (error) throw error;
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    // Map camelCase to snake_case for database columns
+    const dbUpdates: any = { ...updates };
+    
+    if (updates.firstName !== undefined) {
+      dbUpdates.first_name = updates.firstName;
+      delete dbUpdates.firstName;
+    }
+    if (updates.lastName !== undefined) {
+      dbUpdates.last_name = updates.lastName;
+      delete dbUpdates.lastName;
+    }
+    if (updates.dateOfBirth !== undefined) {
+      dbUpdates.date_of_birth = updates.dateOfBirth;
+      delete dbUpdates.dateOfBirth;
+    }
+    if (updates.activityLevel !== undefined) {
+      dbUpdates.activity_level = updates.activityLevel;
+      delete dbUpdates.activityLevel;
+    }
+    if (updates.fitnessGoals !== undefined) {
+      dbUpdates.fitness_goals = updates.fitnessGoals;
+      delete dbUpdates.fitnessGoals;
+    }
+    if (updates.profileImageUrl !== undefined) {
+      dbUpdates.profile_image_url = updates.profileImageUrl;
+      delete dbUpdates.profileImageUrl;
+    }
+    if (updates.experienceLevel !== undefined) {
+      dbUpdates.experience_level = updates.experienceLevel;
+      delete dbUpdates.experienceLevel;
+    }
+    if (updates.preferredWorkoutDuration !== undefined) {
+      dbUpdates.preferred_workout_duration = updates.preferredWorkoutDuration;
+      delete dbUpdates.preferredWorkoutDuration;
+    }
+    if (updates.isActive !== undefined) {
+      dbUpdates.is_active = updates.isActive;
+      delete dbUpdates.isActive;
+    }
+    if (updates.emailVerified !== undefined) {
+      dbUpdates.email_verified = updates.emailVerified;
+      delete dbUpdates.emailVerified;
+    }
+    if (updates.lastLoginAt !== undefined) {
+      dbUpdates.last_login_at = updates.lastLoginAt;
+      delete dbUpdates.lastLoginAt;
+    }
+
+    dbUpdates.updated_at = new Date().toISOString();
+
     const { data, error } = await supabase
       .from('users')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();
 
     if (error) return undefined;
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async deleteUser(id: string): Promise<boolean> {
@@ -118,7 +237,7 @@ export class SupabaseStorage implements IStorage {
   async updateLastLogin(id: string): Promise<void> {
     await supabase
       .from('users')
-      .update({ lastLoginAt: new Date().toISOString() })
+      .update({ last_login_at: new Date().toISOString() })
       .eq('id', id);
   }
 
@@ -264,7 +383,7 @@ export class SupabaseStorage implements IStorage {
       .eq('user_id', userId);
 
     if (error) throw error;
-    return data as Exercise[];
+    return data.map(item => this.mapDbExerciseToExercise(item));
   }
 
   async getExercise(id: string): Promise<Exercise | undefined> {
@@ -275,18 +394,32 @@ export class SupabaseStorage implements IStorage {
       .single();
 
     if (error) return undefined;
-    return data as Exercise;
+    return this.mapDbExerciseToExercise(data);
   }
 
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
+    const dbExercise = {
+      ...exercise,
+      user_id: exercise.userId,
+      muscle_group: exercise.muscleGroup,
+      image_url: exercise.imageUrl,
+      video_url: exercise.videoUrl,
+      created_at: new Date().toISOString()
+    };
+    
+    delete (dbExercise as any).userId;
+    delete (dbExercise as any).muscleGroup;
+    delete (dbExercise as any).imageUrl;
+    delete (dbExercise as any).videoUrl;
+
     const { data, error } = await supabase
       .from('exercises')
-      .insert(exercise)
+      .insert(dbExercise)
       .select()
       .single();
 
     if (error) throw error;
-    return data as Exercise;
+    return this.mapDbExerciseToExercise(data);
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined> {
