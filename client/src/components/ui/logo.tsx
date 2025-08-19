@@ -1,10 +1,11 @@
-import { Dumbbell } from "lucide-react";
+import { Zap } from "lucide-react";
 
 export function Logo() {
   return (
     <div className="flex items-center space-x-4">
-      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 border border-blue-400/20">
-        <Dumbbell className="text-white text-xl w-6 h-6 rotate-45" />
+      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/25 border border-emerald-400/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+        <Zap className="text-white w-7 h-7 drop-shadow-sm relative z-10" />
       </div>
       <div>
         <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
