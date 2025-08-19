@@ -637,11 +637,11 @@ class DatabaseStorage implements IStorage {
     // Log database provider info
     this.logDatabaseInfo();
     
-    // Test connection and initialize with retry
-    this.initializeWithRetry();
+    // Test connection only - no sample data initialization
+    this.testConnectionWithRetry();
   }
 
-  private async initializeWithRetry(maxRetries = 3) {
+  private async testConnectionWithRetry(maxRetries = 3) {
     let retries = 0;
     
     while (retries < maxRetries) {
@@ -649,15 +649,12 @@ class DatabaseStorage implements IStorage {
         // Test basic connection
         await this.testConnection();
         console.log('✅ Database connection verified');
-        
-        // Initialize sample data
-        await this.initializeSampleData();
-        console.log('✅ Database initialization complete');
+        console.log('✅ Database ready for user data');
         break;
         
       } catch (error: any) {
         retries++;
-        console.error(`❌ Database initialization attempt ${retries}/${maxRetries} failed:`, error.message || error);
+        console.error(`❌ Database connection attempt ${retries}/${maxRetries} failed:`, error.message || error);
         
         if (retries >= maxRetries) {
           console.error('🔥 All database connection attempts failed. Please check your DATABASE_URL.');
@@ -697,107 +694,7 @@ class DatabaseStorage implements IStorage {
     await this.db.execute('SELECT 1 as test');
   }
 
-  private async initializeSampleData() {
-    try {
-      // Check if we already have exercises
-      const existingExercises = await this.db.select().from(exercises).limit(1);
-      if (existingExercises.length > 0) {
-        console.log('📚 Sample data already exists');
-        return;
-      }
-
-      console.log('🏗️ Creating sample data...');
-      
-      // Create system user first if not exists
-      const systemUserId = '00000000-0000-0000-0000-000000000000';
-      const existingSystemUser = await this.db.select().from(users).where(eq(users.id, systemUserId)).limit(1);
-      
-      if (existingSystemUser.length === 0) {
-        await this.db.insert(users).values({
-          username: 'system',
-          email: 'system@gymseven.com',
-          password: 'system',
-          firstName: 'System',
-          lastName: 'User'
-        });
-      }
-
-      // Sample exercises with userId
-      const sampleExercises = [
-        {
-          name: "Supino Reto",
-          userId: systemUserId,
-          muscleGroup: "Peito",
-          description: "Exercício fundamental para o desenvolvimento do peitoral",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Agachamento Livre",
-          userId: systemUserId,
-          muscleGroup: "Pernas", 
-          description: "Exercício composto para pernas e glúteos",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Puxada Frontal",
-          userId: systemUserId,
-          muscleGroup: "Costas",
-          description: "Desenvolvimento do latíssimo do dorso",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Rosca Direta",
-          userId: systemUserId,
-          muscleGroup: "Braços",
-          description: "Desenvolvimento do bíceps",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Desenvolvimento Militar",
-          userId: systemUserId,
-          muscleGroup: "Ombros",
-          description: "Exercício para deltoides",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Leg Press",
-          userId: systemUserId,
-          muscleGroup: "Pernas",
-          description: "Exercício para quadríceps e glúteos",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Prancha",
-          userId: systemUserId,
-          muscleGroup: "Core",
-          description: "Fortalecimento do core",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Remada Curvada",
-          userId: systemUserId,
-          muscleGroup: "Costas",
-          description: "Desenvolvimento das costas",
-          imageUrl: null,
-          videoUrl: null,
-        }
-      ];
-
-      await this.db.insert(exercises).values(sampleExercises);
-      console.log('✅ Sample exercises created successfully');
-      
-    } catch (error) {
-      console.error('❌ Error creating sample data:', error);
-      throw error;
-    }
-  }
+  // Sample data initialization removed - users create their own content
 
   // User methods
   async getUser(id: string): Promise<User | undefined> {
@@ -819,9 +716,10 @@ class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  // Exercise methods
+  // Exercise methods - user-specific data only
   async getAllExercises(): Promise<Exercise[]> {
-    return await this.db.select().from(exercises);
+    // Return empty array - exercises should be filtered by user
+    return [];
   }
 
   async getExercise(id: string): Promise<Exercise | undefined> {
@@ -925,12 +823,14 @@ class DatabaseStorage implements IStorage {
     if (userId) {
       return await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.userId, userId));
     }
-    return await this.db.select().from(workoutTemplates);
+    // Return empty array when no user specified - no global templates
+    return [];
   }
 
   // Workout Log methods  
   async getAllWorkoutLogs(): Promise<WorkoutLog[]> {
-    return await this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
+    // Return empty array - logs should be filtered by user
+    return [];
   }
 
   async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
@@ -959,7 +859,8 @@ class DatabaseStorage implements IStorage {
         .where(eq(workoutLogs.user_id, userId))
         .orderBy(desc(workoutLogs.startTime));
     }
-    return await this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
+    // Return empty array when no user specified
+    return [];
   }
 
   async getRecentWorkoutLogs(limit: number = 5): Promise<WorkoutLog[]> {

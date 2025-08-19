@@ -391,19 +391,19 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  // Exercise routes
-  app.get("/api/exercicios", optionalAuth, async (req: AuthRequest, res) => {
+  // Exercise routes - require authentication
+  app.get("/api/exercicios", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { muscleGroup } = req.query;
       let exercises;
       
       if (muscleGroup && typeof muscleGroup === 'string') {
-        exercises = await storage.getExercisesByMuscleGroup(muscleGroup);
+        // Filter by muscle group for the authenticated user only
+        const userExercises = await storage.getExercises(req.user!.id);
+        exercises = userExercises.filter(ex => ex.muscleGroup === muscleGroup);
       } else {
-        // Use user-specific exercises if authenticated, otherwise return all exercises
-        exercises = req.user ? 
-          await storage.getExercises(req.user.id) : 
-          await storage.getAllExercises();
+        // Get user-specific exercises only
+        exercises = await storage.getExercises(req.user!.id);
       }
       
       res.json(exercises);
@@ -412,7 +412,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/exercicios/:id", async (req, res) => {
+  app.get("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const exercise = await storage.getExercise(req.params.id);
       if (!exercise) {
@@ -424,9 +424,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/exercicios", async (req, res) => {
+  app.post("/api/exercicios", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const validatedData = insertExerciseSchema.parse(req.body);
+      const validatedData = insertExerciseSchema.parse({
+        ...req.body,
+        userId: req.user!.id // Ensure exercise belongs to authenticated user
+      });
       const exercise = await storage.createExercise(validatedData);
       res.status(201).json(exercise);
     } catch (error: any) {
@@ -450,7 +453,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/exercicios/:id", async (req, res) => {
+  app.put("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertExerciseSchema.partial().parse(req.body);
       const exercise = await storage.updateExercise(req.params.id, updates);
@@ -463,7 +466,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/exercicios/:id", async (req, res) => {
+  app.delete("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const deleted = await storage.deleteExercise(req.params.id);
       if (!deleted) {
@@ -475,20 +478,18 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  // Workout Template routes
-  app.get("/api/workout-templates", optionalAuth, async (req: AuthRequest, res) => {
+  // Workout Template routes - require authentication
+  app.get("/api/workout-templates", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // Use user-specific templates if authenticated, otherwise return all templates
-      const templates = req.user ? 
-        await storage.getWorkoutTemplates(req.user.id) : 
-        await storage.getAllWorkoutTemplates();
+      // Get user-specific templates only
+      const templates = await storage.getWorkoutTemplates(req.user!.id);
       res.json(templates);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar modelos de treino" });
     }
   });
 
-  app.get("/api/workout-templates/:id", async (req, res) => {
+  app.get("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const template = await storage.getWorkoutTemplate(req.params.id);
       if (!template) {
@@ -500,7 +501,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-templates/:id/exercises", async (req, res) => {
+  app.get("/api/workout-templates/:id/exercises", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const exercises = await storage.getWorkoutTemplateExercises(req.params.id);
       res.json(exercises);
@@ -509,9 +510,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/workout-templates", async (req, res) => {
+  app.post("/api/workout-templates", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const validatedData = insertWorkoutTemplateSchema.parse(req.body);
+      const validatedData = insertWorkoutTemplateSchema.parse({
+        ...req.body,
+        userId: req.user!.id // Ensure template belongs to authenticated user
+      });
       const template = await storage.createWorkoutTemplate(validatedData);
       res.status(201).json(template);
     } catch (error) {
@@ -519,7 +523,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/workout-templates/:id", async (req, res) => {
+  app.put("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertWorkoutTemplateSchema.partial().parse(req.body);
       const template = await storage.updateWorkoutTemplate(req.params.id, updates);
@@ -532,7 +536,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/workout-templates/:id", async (req, res) => {
+  app.delete("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const deleted = await storage.deleteWorkoutTemplate(req.params.id);
       if (!deleted) {
@@ -544,7 +548,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/workout-templates/:id/exercises", async (req, res) => {
+  app.post("/api/workout-templates/:id/exercises", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const templateId = req.params.id;
       
@@ -593,7 +597,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/workout-template-exercises/:id", async (req, res) => {
+  app.put("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertWorkoutTemplateExerciseSchema.partial().parse(req.body);
       const templateExercise = await storage.updateWorkoutTemplateExercise(req.params.id, updates);
@@ -606,7 +610,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/workout-template-exercises/:id", async (req, res) => {
+  app.delete("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const deleted = await storage.deleteWorkoutTemplateExercise(req.params.id);
       if (!deleted) {
@@ -619,24 +623,25 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get exercises that have been used in completed workouts with weight data
-  app.get('/api/exercises-with-progress', async (req, res) => {
+  app.get('/api/exercises-with-progress', authenticateToken, async (req: AuthRequest, res) => {
     try {
       // Check if we have Supabase storage
       if ('supabase' in storage) {
         const supabaseStorage = storage as any;
         
-        // Get exercises with actual weight data in completed workouts
+        // Get exercises with actual weight data in completed workouts for authenticated user
         const { data: exercisesWithWeights, error } = await supabaseStorage.supabase
           .from('workoutLogSets')
           .select(`
             weight,
             workoutLogExercise:workoutLogExercises!inner(
               exerciseId,
-              exercise:exercises(*),
-              workoutLog:workoutLogs!inner(startTime, endTime, name)
+              exercise:exercises!inner(*),
+              workoutLog:workoutLogs!inner(startTime, endTime, name, user_id)
             )
           `)
           .gt('weight', 0)
+          .eq('workoutLogExercises.workoutLogs.user_id', req.user!.id)
           .not('workoutLogExercises.workoutLogs.endTime', 'is', null); // Only completed workouts
         
         if (error) {
@@ -720,7 +725,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get exercise weight progression data for progress charts
-  app.get('/api/exercise-weight-history/:exerciseId', async (req, res) => {
+  app.get('/api/exercise-weight-history/:exerciseId', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { exerciseId } = req.params;
       const { limit = 10 } = req.query;
@@ -729,14 +734,15 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if ('supabase' in storage) {
         const supabaseStorage = storage as any;
         
-        // Get workout log exercises for this specific exercise
+        // Get workout log exercises for this specific exercise for authenticated user
         const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
           .from('workoutLogExercises')
           .select(`
             *,
-            workoutLog:workoutLogs(*)
+            workoutLog:workoutLogs!inner(*, user_id)
           `)
           .eq('exerciseId', exerciseId)
+          .eq('workoutLogs.user_id', req.user!.id)
           .order('order');
 
         if (logExercisesError) {
@@ -813,7 +819,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Create workout log exercise
-  app.post("/api/workout-log-exercises", async (req, res) => {
+  app.post("/api/workout-log-exercises", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { logId, exerciseId, order } = req.body;
       
@@ -853,7 +859,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Create workout log set
-  app.post("/api/workout-log-sets", async (req, res) => {
+  app.post("/api/workout-log-sets", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertWorkoutLogSetSchema.parse(req.body);
       const result = await storage.createWorkoutLogSet(validatedData);
@@ -872,7 +878,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Update workout log set
-  app.put("/api/workout-log-sets/:id", async (req, res) => {
+  app.put("/api/workout-log-sets/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
       const { weight, reps, completed } = req.body;
@@ -898,8 +904,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     return null;
   }
 
-  // Get all exercises with their recent weight progression - VERSÃO SIMPLIFICADA
-  app.get('/api/exercises-weight-summary', async (req, res) => {
+  // Get all exercises with their recent weight progression - user-specific
+  app.get('/api/exercises-weight-summary', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const supabaseStorage = storage as any;
       
@@ -999,13 +1005,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get daily volume data for progress charts (must be before parameterized routes)
-  app.get('/api/workout-logs-daily-volume', async (req, res) => {
+  app.get('/api/workout-logs-daily-volume', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // Use supabase directly like in other endpoints
+      // Use supabase directly like in other endpoints - filter by authenticated user
       const supabaseStorage = storage as any;
       const { data: logs, error } = await supabaseStorage.supabase
         .from('workoutLogs')
         .select('*')
+        .eq('user_id', req.user!.id)
         .not('endTime', 'is', null) // Only completed workouts
         .order('startTime');
 
@@ -1049,19 +1056,19 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  // Workout Log routes
-  app.get("/api/workout-logs", optionalAuth, async (req: AuthRequest, res) => {
+  // Workout Log routes - require authentication
+  app.get("/api/workout-logs", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { recent } = req.query;
       let logs;
       
       if (recent === 'true') {
-        logs = await storage.getRecentWorkoutLogs(5);
+        // Get recent logs for authenticated user only
+        const allLogs = await storage.getWorkoutLogs(req.user!.id);
+        logs = allLogs.slice(0, 5);
       } else {
-        // Use user-specific logs if authenticated, otherwise return all logs
-        logs = req.user ? 
-          await storage.getWorkoutLogs(req.user.id) : 
-          await storage.getAllWorkoutLogs();
+        // Get user-specific logs only
+        logs = await storage.getWorkoutLogs(req.user!.id);
       }
       
       res.json(logs);
@@ -1070,7 +1077,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-logs/:id", async (req, res) => {
+  app.get("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const log = await storage.getWorkoutLog(req.params.id);
       if (!log) {
@@ -1082,7 +1089,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-logs/:id/summary", async (req, res) => {
+  app.get("/api/workout-logs/:id/summary", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const log = await storage.getWorkoutLog(req.params.id);
       if (!log) {
@@ -1281,8 +1288,18 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/workout-logs/:id", async (req, res) => {
+  app.delete("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      // First check if workout belongs to authenticated user
+      const existingLog = await storage.getWorkoutLog(req.params.id);
+      if (!existingLog) {
+        return res.status(404).json({ message: "Treino não encontrado" });
+      }
+      
+      if (existingLog.user_id !== req.user!.id) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
       const deleted = await storage.deleteWorkoutLog(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Treino não encontrado" });

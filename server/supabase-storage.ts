@@ -40,10 +40,7 @@ export class SupabaseStorage implements IStorage {
       }
       
       console.log('✅ Supabase connection verified');
-      
-      // Initialize sample data if needed
-      await this.initializeSampleData();
-      console.log('✅ Supabase initialization complete');
+      console.log('✅ Supabase ready for user data');
       
     } catch (error) {
       console.error('❌ Supabase initialization failed:', error);
@@ -52,110 +49,16 @@ export class SupabaseStorage implements IStorage {
     }
   }
 
-  private async initializeSampleData() {
-    try {
-      // Check if we already have exercises
-      const { data: existingExercises, error } = await supabase
-        .from('exercises')
-        .select('id')
-        .limit(1);
-
-      if (error) throw error;
-      
-      if (existingExercises && existingExercises.length > 0) {
-        console.log('📚 Sample data already exists in Supabase');
-        return;
-      }
-
-      console.log('🏗️ Creating sample data in Supabase...');
-      
-      // Create system user first if not exists
-      const systemUserId = '00000000-0000-0000-0000-000000000000';
-      const { data: existingSystemUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', systemUserId)
-        .single();
-
-      if (!existingSystemUser) {
-        await supabase
-          .from('users')
-          .insert({
-            username: 'system',
-            email: 'system@gymseven.com',
-            password: 'system',
-            firstName: 'System',
-            lastName: 'User'
-          });
-      }
-      
-      const sampleExercises = [
-        {
-          name: "Supino Reto",
-          userId: systemUserId,
-          muscleGroup: "Peito",
-          description: "Exercício fundamental para o desenvolvimento do peitoral",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Agachamento Livre",
-          userId: systemUserId,
-          muscleGroup: "Pernas", 
-          description: "Exercício composto para pernas e glúteos",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Puxada Frontal",
-          userId: systemUserId,
-          muscleGroup: "Costas",
-          description: "Desenvolvimento do latíssimo do dorso",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Rosca Direta",
-          userId: systemUserId,
-          muscleGroup: "Braços",
-          description: "Desenvolvimento do bíceps",
-          imageUrl: null,
-          videoUrl: null,
-        },
-        {
-          name: "Desenvolvimento Militar",
-          userId: systemUserId,
-          muscleGroup: "Ombros",
-          description: "Exercício para deltoides",
-          imageUrl: null,
-          videoUrl: null,
-        }
-      ];
-
-      const { error: insertError } = await supabase
-        .from('exercises')
-        .insert(sampleExercises);
-
-      if (insertError) throw insertError;
-      
-      console.log('✅ Sample exercises created successfully in Supabase');
-      
-    } catch (error) {
-      console.error('❌ Error creating sample data in Supabase:', error);
-      throw error;
-    }
-  }
-
-  // User methods
+  // Auth & Users
   async getUser(id: string): Promise<User | undefined> {
     const { data, error } = await supabase
       .from('users')
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as User;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -164,9 +67,9 @@ export class SupabaseStorage implements IStorage {
       .select('*')
       .eq('username', username)
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as User;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -175,114 +78,32 @@ export class SupabaseStorage implements IStorage {
       .select('*')
       .eq('email', email)
       .single();
-    
+
     if (error) return undefined;
-    
-    // Map snake_case to camelCase
-    const user = {
-      ...data,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      dateOfBirth: data.date_of_birth || null,
-      height: data.height || null,
-      weight: data.weight || null,
-      activityLevel: data.activity_level || 'moderado',
-      profileImageUrl: data.profile_image_url || null,
-      isActive: data.is_active,
-      lastLoginAt: data.last_login_at,
-      createdAt: data.createdAt || data.created_at,
-      updatedAt: data.updatedAt || data.updated_at
-    };
-    
-    return user;
+    return data as User;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    // Map camelCase to snake_case for Supabase compatibility
-    const mappedUser = {
-      email: insertUser.email,
-      username: insertUser.username,
-      password: insertUser.password,
-      first_name: insertUser.firstName,
-      last_name: insertUser.lastName,
-      is_active: insertUser.isActive ?? true
-    };
-
-    console.log('Creating user with mapped data:', { ...mappedUser, password: '[HIDDEN]' });
-    
+  async createUser(user: InsertUser): Promise<User> {
     const { data, error } = await supabase
       .from('users')
-      .insert(mappedUser)
+      .insert(user)
       .select()
       .single();
-    
-    if (error) {
-      console.error('Supabase user creation error:', error);
-      throw error;
-    }
-    
-    // Map back to camelCase for response
-    const user = {
-      ...data,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      dateOfBirth: data.date_of_birth || null,
-      height: data.height || null,
-      weight: data.weight || null,
-      activityLevel: data.activity_level || 'moderado',
-      profileImageUrl: data.profile_image_url || null,
-      isActive: data.is_active,
-      createdAt: data.createdAt || data.created_at,
-      updatedAt: data.updatedAt || data.updated_at
-    };
-    
-    return user;
+
+    if (error) throw error;
+    return data as User;
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    // Map camelCase to snake_case for Supabase compatibility
-    const mappedUpdates: any = {};
-    
-    if (updates.email) mappedUpdates.email = updates.email;
-    if (updates.username) mappedUpdates.username = updates.username;
-    if (updates.firstName) mappedUpdates.first_name = updates.firstName;
-    if (updates.lastName) mappedUpdates.last_name = updates.lastName;
-    if (updates.dateOfBirth) mappedUpdates.date_of_birth = updates.dateOfBirth;
-    if (updates.height !== undefined) mappedUpdates.height = updates.height;
-    if (updates.weight !== undefined) mappedUpdates.weight = updates.weight;
-    if (updates.activityLevel) mappedUpdates.activity_level = updates.activityLevel;
-    if (updates.profileImageUrl !== undefined) mappedUpdates.profile_image_url = updates.profileImageUrl;
-    if (updates.isActive !== undefined) mappedUpdates.is_active = updates.isActive;
-    
     const { data, error } = await supabase
       .from('users')
-      .update(mappedUpdates)
+      .update(updates)
       .eq('id', id)
       .select()
       .single();
-    
-    if (error) {
-      console.error('Supabase user update error:', error);
-      return undefined;
-    }
-    
-    // Map back to camelCase for response
-    const user = {
-      ...data,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      dateOfBirth: data.date_of_birth || null,
-      height: data.height || null,
-      weight: data.weight || null,
-      activityLevel: data.activity_level || 'moderado',
-      profileImageUrl: data.profile_image_url || null,
-      isActive: data.is_active,
-      lastLoginAt: data.last_login_at,
-      createdAt: data.createdAt || data.created_at,
-      updatedAt: data.updatedAt || data.updated_at
-    };
-    
-    return user;
+
+    if (error) return undefined;
+    return data as User;
   }
 
   async deleteUser(id: string): Promise<boolean> {
@@ -290,28 +111,32 @@ export class SupabaseStorage implements IStorage {
       .from('users')
       .delete()
       .eq('id', id);
-    
+
     return !error;
   }
 
   async updateLastLogin(id: string): Promise<void> {
     await supabase
       .from('users')
-      .update({ lastLoginAt: new Date() })
+      .update({ lastLoginAt: new Date().toISOString() })
       .eq('id', id);
   }
 
-  // Weight History methods
-  async getWeightHistory(userId: string, limit = 50): Promise<WeightHistory[]> {
-    const { data, error } = await supabase
+  // Weight History
+  async getWeightHistory(userId: string, limit?: number): Promise<WeightHistory[]> {
+    let query = supabase
       .from('weight_history')
       .select('*')
       .eq('userId', userId)
-      .order('date', { ascending: false })
-      .limit(limit);
-    
+      .order('date', { ascending: false });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
-    return data || [];
+    return data as WeightHistory[];
   }
 
   async addWeightEntry(entry: InsertWeightHistory): Promise<WeightHistory> {
@@ -320,9 +145,9 @@ export class SupabaseStorage implements IStorage {
       .insert(entry)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as WeightHistory;
   }
 
   async updateWeightEntry(id: string, updates: Partial<InsertWeightHistory>): Promise<WeightHistory | undefined> {
@@ -332,9 +157,9 @@ export class SupabaseStorage implements IStorage {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as WeightHistory;
   }
 
   async deleteWeightEntry(id: string): Promise<boolean> {
@@ -342,20 +167,19 @@ export class SupabaseStorage implements IStorage {
       .from('weight_history')
       .delete()
       .eq('id', id);
-    
+
     return !error;
   }
 
-  // User Goals methods
+  // User Goals
   async getUserGoals(userId: string): Promise<UserGoal[]> {
     const { data, error } = await supabase
       .from('user_goals')
       .select('*')
-      .eq('userId', userId)
-      .order('createdAt', { ascending: false });
-    
+      .eq('userId', userId);
+
     if (error) throw error;
-    return data || [];
+    return data as UserGoal[];
   }
 
   async createUserGoal(goal: InsertUserGoal): Promise<UserGoal> {
@@ -364,9 +188,9 @@ export class SupabaseStorage implements IStorage {
       .insert(goal)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as UserGoal;
   }
 
   async updateUserGoal(id: string, updates: Partial<InsertUserGoal>): Promise<UserGoal | undefined> {
@@ -376,9 +200,9 @@ export class SupabaseStorage implements IStorage {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as UserGoal;
   }
 
   async deleteUserGoal(id: string): Promise<boolean> {
@@ -386,20 +210,20 @@ export class SupabaseStorage implements IStorage {
       .from('user_goals')
       .delete()
       .eq('id', id);
-    
+
     return !error;
   }
 
-  // User Preferences methods
+  // User Preferences
   async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
     const { data, error } = await supabase
       .from('user_preferences')
       .select('*')
       .eq('userId', userId)
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as UserPreferences;
   }
 
   async createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences> {
@@ -408,25 +232,9 @@ export class SupabaseStorage implements IStorage {
       .insert(prefs)
       .select()
       .single();
-    
-    if (error) {
-      console.log('User preferences table not available:', error.message);
-      // Return a default preferences object if table doesn't exist
-      return {
-        id: 'temp-id',
-        userId: prefs.userId,
-        theme: 'dark',
-        units: 'metric',
-        language: 'pt-BR',
-        notifications: true,
-        soundEffects: true,
-        restTimerAutoStart: true,
-        defaultRestTime: 90,
-        weekStartsOn: 1,
-        trackingData: 'all'
-      } as UserPreferences;
-    }
-    return data;
+
+    if (error) throw error;
+    return data as UserPreferences;
   }
 
   async updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined> {
@@ -436,37 +244,27 @@ export class SupabaseStorage implements IStorage {
       .eq('userId', userId)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as UserPreferences;
   }
 
-  // Exercise methods
+  // Exercises - user-specific only
   async getAllExercises(): Promise<Exercise[]> {
-    const { data, error } = await supabase
-      .from('exercises')
-      .select('*')
-      .order('name');
-    
-    if (error) throw error;
-    return data || [];
+    // Return empty array - exercises should be filtered by user
+    return [];
   }
 
   async getExercises(userId?: string): Promise<Exercise[]> {
-    let query = supabase
+    if (!userId) return [];
+
+    const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .order('name');
-    
-    // Filter by user if userId is provided
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-    
-    const { data, error } = await query;
-    
+      .eq('userId', userId);
+
     if (error) throw error;
-    return data || [];
+    return data as Exercise[];
   }
 
   async getExercise(id: string): Promise<Exercise | undefined> {
@@ -475,9 +273,9 @@ export class SupabaseStorage implements IStorage {
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as Exercise;
   }
 
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
@@ -486,9 +284,9 @@ export class SupabaseStorage implements IStorage {
       .insert(exercise)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as Exercise;
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined> {
@@ -498,9 +296,9 @@ export class SupabaseStorage implements IStorage {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as Exercise;
   }
 
   async deleteExercise(id: string): Promise<boolean> {
@@ -508,7 +306,7 @@ export class SupabaseStorage implements IStorage {
       .from('exercises')
       .delete()
       .eq('id', id);
-    
+
     return !error;
   }
 
@@ -516,357 +314,251 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('muscleGroup', muscleGroup)
-      .order('name');
-    
+      .eq('muscleGroup', muscleGroup);
+
     if (error) throw error;
-    return data || [];
+    return data as Exercise[];
   }
 
-  // Workout Template methods
+  // Workout Templates - user-specific only
   async getAllWorkoutTemplates(): Promise<WorkoutTemplate[]> {
-    const { data, error } = await supabase
-      .from('workoutTemplates')
-      .select('*')
-      .order('name');
-    
-    if (error) throw error;
-    return data || [];
+    // Return empty array - templates should be filtered by user
+    return [];
   }
 
   async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
-    let query = supabase
-      .from('workoutTemplates')
+    if (!userId) return [];
+
+    const { data, error } = await supabase
+      .from('workout_templates')
       .select('*')
-      .order('name');
-    
-    // Filter by user if userId is provided
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-    
-    const { data, error } = await query;
-    
+      .eq('userId', userId);
+
     if (error) throw error;
-    return data || [];
+    return data as WorkoutTemplate[];
   }
 
   async getWorkoutTemplate(id: string): Promise<WorkoutTemplate | undefined> {
     const { data, error } = await supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as WorkoutTemplate;
   }
 
   async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
     const { data, error } = await supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .insert(template)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as WorkoutTemplate;
   }
 
   async updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined> {
     const { data, error } = await supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .update(template)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as WorkoutTemplate;
   }
 
   async deleteWorkoutTemplate(id: string): Promise<boolean> {
-    console.log(`🗑️ Attempting to delete workout template: ${id}`);
-    
-    try {
-      // First check if the template exists
-      const { data: existingTemplate, error: checkError } = await supabase
-        .from('workoutTemplates')
-        .select('id')
-        .eq('id', id)
-        .single();
-      
-      if (checkError || !existingTemplate) {
-        console.log(`❌ Template ${id} not found for deletion`);
-        return false;
-      }
-      
-      console.log(`✅ Template ${id} found, checking dependencies...`);
-      
-      // Check if there are workout logs referencing this template
-      const { data: dependentLogs, error: logCheckError } = await supabase
-        .from('workoutLogs')
-        .select('id')
-        .eq('templateId', id);
-      
-      if (logCheckError) {
-        console.error(`❌ Error checking dependent logs:`, logCheckError);
-        return false;
-      }
-      
-      // If there are dependent workout logs, delete them first
-      if (dependentLogs && dependentLogs.length > 0) {
-        console.log(`🔗 Found ${dependentLogs.length} dependent workout logs, deleting them first...`);
-        
-        for (const log of dependentLogs) {
-          const logDeleted = await this.deleteWorkoutLog(log.id);
-          if (!logDeleted) {
-            console.error(`❌ Failed to delete dependent workout log ${log.id}`);
-            return false;
-          }
-        }
-        
-        console.log(`✅ All dependent workout logs deleted`);
-      }
-      
-      // Delete template exercises first (they should cascade, but let's be explicit)
-      const { error: exerciseDeleteError } = await supabase
-        .from('workoutTemplateExercises')
-        .delete()
-        .eq('templateId', id);
-      
-      if (exerciseDeleteError) {
-        console.error(`❌ Error deleting template exercises:`, exerciseDeleteError);
-        // Continue anyway, as this might cascade
-      } else {
-        console.log(`✅ Template exercises deleted`);
-      }
-      
-      // Now delete the template itself
-      const { error } = await supabase
-        .from('workoutTemplates')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error(`❌ Error deleting template ${id}:`, error);
-        return false;
-      }
-      
-      console.log(`✅ Template ${id} deleted successfully`);
-      return true;
-      
-    } catch (error) {
-      console.error(`❌ Unexpected error during template deletion:`, error);
-      return false;
-    }
+    const { error } = await supabase
+      .from('workout_templates')
+      .delete()
+      .eq('id', id);
+
+    return !error;
   }
 
-  // Workout Template Exercise methods
+  // Workout Template Exercises
   async getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
     const { data, error } = await supabase
-      .from('workoutTemplateExercises')
+      .from('workout_template_exercises')
       .select(`
         *,
-        exercise:exercises(*)
+        exercises (*)
       `)
-      .eq('templateId', templateId)
-      .order('order');
-    
+      .eq('templateId', templateId);
+
     if (error) throw error;
-    
-    // Map restDuration to restDurationSeconds for consistency
-    const mapped = (data || []).map(item => ({
+    return data.map(item => ({
       ...item,
-      restDurationSeconds: item.restDuration || item.restDurationSeconds || 90
-    }));
-    
-    return mapped;
+      exercise: item.exercises
+    })) as (WorkoutTemplateExercise & { exercise: Exercise })[];
   }
 
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
     const { data, error } = await supabase
-      .from('workoutTemplateExercises')
+      .from('workout_template_exercises')
       .insert(exercise)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as WorkoutTemplateExercise;
   }
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
-    // Map restDurationSeconds to restDuration for Supabase compatibility
-    const mappedUpdates: any = { ...updates };
-    if ('restDurationSeconds' in mappedUpdates) {
-      mappedUpdates.restDuration = mappedUpdates.restDurationSeconds;
-      delete mappedUpdates.restDurationSeconds;
-    }
-    
     const { data, error } = await supabase
-      .from('workoutTemplateExercises')
-      .update(mappedUpdates)
+      .from('workout_template_exercises')
+      .update(updates)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    
-    // Map back to restDurationSeconds for consistency
-    const result = {
-      ...data,
-      restDurationSeconds: data.restDuration || data.restDurationSeconds || 90
-    };
-    
-    return result;
+    return data as WorkoutTemplateExercise;
   }
 
   async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from('workoutTemplateExercises')
+      .from('workout_template_exercises')
       .delete()
       .eq('id', id);
-    
+
     return !error;
   }
 
   async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {
     const { error } = await supabase
-      .from('workoutTemplateExercises')
+      .from('workout_template_exercises')
       .delete()
       .eq('templateId', templateId)
       .eq('exerciseId', exerciseId);
-    
+
     return !error;
   }
 
-  // Workout Log methods
+  // Workout Logs - user-specific only
   async getAllWorkoutLogs(): Promise<WorkoutLog[]> {
-    const { data, error } = await supabase
-      .from('workoutLogs')
-      .select('*')
-      .order('startTime', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  }
-
-  async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
-    let query = supabase
-      .from('workoutLogs')
-      .select('*')
-      .order('startTime', { ascending: false });
-    
-    // Filter by user if userId is provided
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) throw error;
-    return data || [];
+    // Return empty array - logs should be filtered by user
+    return [];
   }
 
   async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
     const { data, error } = await supabase
-      .from('workoutLogs')
-      .select(`
-        *,
-        exercises:workoutLogExercises(
-          *,
-          sets:workoutLogSets(*)
-        )
-      `)
+      .from('workout_logs')
+      .select('*')
       .eq('id', id)
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as WorkoutLog;
   }
 
   async createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog> {
     const { data, error } = await supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .insert(log)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as WorkoutLog;
   }
 
   async updateWorkoutLog(id: string, log: Partial<InsertWorkoutLog>): Promise<WorkoutLog | undefined> {
     const { data, error } = await supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .update(log)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as WorkoutLog;
   }
 
   async deleteWorkoutLog(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .delete()
       .eq('id', id);
-    
+
     return !error;
   }
 
-  async getRecentWorkoutLogs(limit = 10): Promise<WorkoutLog[]> {
+  async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
+    if (!userId) return [];
+
     const { data, error } = await supabase
-      .from('workoutLogs')
+      .from('workout_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .order('startTime', { ascending: false });
+
+    if (error) throw error;
+    return data as WorkoutLog[];
+  }
+
+  async getRecentWorkoutLogs(limit: number = 5): Promise<WorkoutLog[]> {
+    // This method should also be user-specific in practice
+    const { data, error } = await supabase
+      .from('workout_logs')
       .select('*')
       .order('startTime', { ascending: false })
       .limit(limit);
-    
-    if (error) {
-      console.error('Error getting recent workout logs:', error);
-      throw error;
-    }
-    return data || [];
+
+    if (error) throw error;
+    return data as WorkoutLog[];
   }
 
   // Workout Log Set methods
   async getWorkoutLogSets(logId: string): Promise<WorkoutLogSet[]> {
-    // Check table structure first - likely using log_exercise_id instead of logId
     const { data, error } = await supabase
       .from('workout_log_sets')
-      .select('*')
-      .eq('log_exercise_id', logId) // This might need to be adjusted based on actual schema
-      .order('set_number');
-    
-    if (error) {
-      console.error('Error fetching workout log sets:', error);
-      return [];
-    }
-    return data || [];
+      .select(`
+        *,
+        workout_log_exercises!inner (
+          logId
+        )
+      `)
+      .eq('workout_log_exercises.logId', logId);
+
+    if (error) throw error;
+    return data as WorkoutLogSet[];
   }
 
   async createWorkoutLogSet(set: InsertWorkoutLogSet): Promise<WorkoutLogSet> {
     const { data, error } = await supabase
-      .from('workoutLogSets')
+      .from('workout_log_sets')
       .insert(set)
       .select()
       .single();
-    
+
     if (error) throw error;
-    return data;
+    return data as WorkoutLogSet;
   }
 
   async updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined> {
     const { data, error } = await supabase
-      .from('workoutLogSets')
+      .from('workout_log_sets')
       .update(set)
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) return undefined;
-    return data;
+    return data as WorkoutLogSet;
+  }
+
+  async deleteWorkoutLogSet(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('workout_log_sets')
+      .delete()
+      .eq('id', id);
+
+    return !error;
   }
 }
