@@ -48,34 +48,34 @@ export class SupabaseStorage implements IStorage {
   private mapDbExerciseToExercise(dbExercise: any): Exercise {
     return {
       id: dbExercise.id,
-      userId: dbExercise.userId,
+      userId: dbExercise.user_id,
       name: dbExercise.name,
-      muscleGroup: dbExercise.muscleGroup,
+      muscleGroup: dbExercise.muscle_group,
       description: dbExercise.description,
-      imageUrl: dbExercise.imageUrl,
-      videoUrl: dbExercise.videoUrl,
-      createdAt: dbExercise.createdAt
+      imageUrl: dbExercise.image_url,
+      videoUrl: dbExercise.video_url,
+      createdAt: dbExercise.created_at
     } as Exercise;
   }
 
   private mapDbWorkoutLogToWorkoutLog(dbLog: any): WorkoutLog {
     return {
       id: dbLog.id,
-      user_id: dbLog.userId,
-      templateId: dbLog.templateId,
+      user_id: dbLog.user_id,
+      templateId: dbLog.template_id,
       name: dbLog.name,
-      startTime: dbLog.startTime,
-      endTime: dbLog.endTime
+      startTime: dbLog.start_time,
+      endTime: dbLog.end_time
     } as WorkoutLog;
   }
 
   private mapDbWorkoutTemplateToWorkoutTemplate(dbTemplate: any): WorkoutTemplate {
     return {
       id: dbTemplate.id,
-      userId: dbTemplate.userId,
+      userId: dbTemplate.user_id,
       name: dbTemplate.name,
       description: dbTemplate.description,
-      createdAt: dbTemplate.createdAt
+      createdAt: dbTemplate.created_at
     } as WorkoutTemplate;
   }
 
@@ -259,7 +259,7 @@ export class SupabaseStorage implements IStorage {
     let query = supabase
       .from('weight_history')
       .select('*')
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .order('date', { ascending: false });
 
     if (limit) {
@@ -308,7 +308,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('user_goals')
       .select('*')
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data as UserGoal[];
@@ -351,7 +351,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('user_preferences')
       .select('*')
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .single();
 
     if (error) return undefined;
@@ -373,7 +373,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('user_preferences')
       .update(updates)
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -393,7 +393,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data.map(item => this.mapDbExerciseToExercise(item));
@@ -463,7 +463,7 @@ export class SupabaseStorage implements IStorage {
       .from('exercises')
       .select('*')
       .eq('muscle_group', muscleGroup)
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data as Exercise[];
@@ -481,7 +481,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workoutTemplates')
       .select('*')
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error fetching workout templates:', error);
@@ -647,8 +647,8 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workoutLogs')
       .select('*')
-      .eq('userId', userId)
-      .order('startTime', { ascending: false });
+      .eq('user_id', userId)
+      .order('start_time', { ascending: false });
 
     if (error) {
       console.error('Error fetching workout logs:', error);
@@ -722,7 +722,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('userAchievements')
       .select('*')
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) throw error;
     return data || [];

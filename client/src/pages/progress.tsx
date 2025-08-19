@@ -85,7 +85,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 200,
     requirement: { type: 'workout_count', target: 50, timeframe: 'all_time' },
     unlocked: false,
-    progress: 68
+    progress: 0
   },
   {
     id: 'workout_100',
@@ -97,7 +97,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 500,
     requirement: { type: 'workout_count', target: 100, timeframe: 'all_time' },
     unlocked: false,
-    progress: 34
+    progress: 0
   },
   
   // Conquistas de Consistência
@@ -123,7 +123,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 75,
     requirement: { type: 'consecutive_days', target: 7 },
     unlocked: false,
-    progress: 43
+    progress: 0
   },
   {
     id: 'streak_30',
@@ -135,7 +135,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 300,
     requirement: { type: 'consecutive_days', target: 30 },
     unlocked: false,
-    progress: 14
+    progress: 0
   },
   {
     id: 'streak_100',
@@ -147,7 +147,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 1000,
     requirement: { type: 'consecutive_days', target: 100 },
     unlocked: false,
-    progress: 4
+    progress: 0
   },
   
   // Conquistas de Força
@@ -161,7 +161,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 150,
     requirement: { type: 'total_weight', target: 1000, timeframe: 'daily' },
     unlocked: false,
-    progress: 82
+    progress: 0
   },
   {
     id: 'benchpress_100',
@@ -173,7 +173,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 400,
     requirement: { type: 'single_weight', target: 100 },
     unlocked: false,
-    progress: 75
+    progress: 0
   },
   {
     id: 'deadlift_200',
@@ -185,7 +185,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 800,
     requirement: { type: 'single_weight', target: 200 },
     unlocked: false,
-    progress: 32
+    progress: 0
   },
   
   // Conquistas Especiais
@@ -211,7 +211,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 300,
     requirement: { type: 'custom', target: 8 },
     unlocked: false,
-    progress: 25
+    progress: 0
   },
   {
     id: 'perfect_month',
@@ -223,7 +223,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 600,
     requirement: { type: 'custom', target: 20 },
     unlocked: false,
-    progress: 15
+    progress: 0
   },
   {
     id: 'year_champion',
@@ -235,7 +235,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 2000,
     requirement: { type: 'workout_count', target: 300, timeframe: 'all_time' },
     unlocked: false,
-    progress: 11
+    progress: 0
   },
 
   // Conquistas Divertidas de Musculação
@@ -261,7 +261,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 100,
     requirement: { type: 'custom', target: 3 },
     unlocked: false,
-    progress: 67
+    progress: 0
   },
   {
     id: 'protein_hunter',
@@ -273,7 +273,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 250,
     requirement: { type: 'workout_count', target: 20, timeframe: 'all_time' },
     unlocked: false,
-    progress: 85
+    progress: 0
   },
   {
     id: 'no_pain_no_gain',
@@ -285,7 +285,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 400,
     requirement: { type: 'time_based', target: 120 },
     unlocked: false,
-    progress: 45
+    progress: 0
   },
   {
     id: 'mass_monster',
@@ -297,7 +297,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 750,
     requirement: { type: 'custom', target: 5 },
     unlocked: false,
-    progress: 20
+    progress: 0
   },
   {
     id: 'iron_addiction',
@@ -309,7 +309,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 500,
     requirement: { type: 'consecutive_days', target: 14 },
     unlocked: false,
-    progress: 57
+    progress: 0
   },
   {
     id: 'bicep_flex',
@@ -321,7 +321,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 15,
     requirement: { type: 'custom', target: 10 },
     unlocked: false,
-    progress: 30
+    progress: 0
   },
   {
     id: 'pre_workout_zombie',
@@ -345,7 +345,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 150,
     requirement: { type: 'custom', target: 10 },
     unlocked: false,
-    progress: 40
+    progress: 0
   },
   {
     id: 'pump_chaser',
@@ -357,7 +357,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 200,
     requirement: { type: 'custom', target: 20 },
     unlocked: false,
-    progress: 75
+    progress: 0
   },
   {
     id: 'bench_warrior',
@@ -369,7 +369,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 600,
     requirement: { type: 'single_weight', target: 80 },
     unlocked: false,
-    progress: 62
+    progress: 0
   },
   {
     id: 'gym_shark',
@@ -381,7 +381,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 120,
     requirement: { type: 'custom', target: 10 },
     unlocked: false,
-    progress: 20
+    progress: 0
   },
   {
     id: 'mirror_magnet',
@@ -405,7 +405,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 250,
     requirement: { type: 'custom', target: 3 },
     unlocked: false,
-    progress: 33
+    progress: 0
   },
   {
     id: 'sweat_waterfall',
@@ -429,7 +429,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 800,
     requirement: { type: 'custom', target: 1000 },
     unlocked: false,
-    progress: 42
+    progress: 0
   },
   {
     id: 'beast_mode',
@@ -441,7 +441,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 450,
     requirement: { type: 'time_based', target: 90 },
     unlocked: false,
-    progress: 78
+    progress: 0
   },
   {
     id: 'iron_temple_monk',
@@ -453,7 +453,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 1000,
     requirement: { type: 'custom', target: 180 },
     unlocked: false,
-    progress: 28
+    progress: 0
   },
   {
     id: 'ultimate_bulk',
@@ -465,7 +465,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     points: 1500,
     requirement: { type: 'custom', target: 10 },
     unlocked: false,
-    progress: 5
+    progress: 0
   }
 ];
 
