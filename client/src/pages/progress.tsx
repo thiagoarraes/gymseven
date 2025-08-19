@@ -495,113 +495,95 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
 
   return (
     <Card 
-      className={`group relative overflow-hidden backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] ${
+      className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
         achievement.unlocked 
-          ? 'bg-gradient-to-br from-card via-card to-card/95 border-border shadow-lg hover:shadow-2xl hover:border-border/70' 
-          : 'bg-gradient-to-br from-card/40 via-card/50 to-card/40 border-border/30 hover:border-border/50'
+          ? 'bg-card border-border/40 shadow-md' 
+          : 'bg-card/60 border-border/30'
       }`}
       data-testid={`achievement-card-${achievement.id}`}
     >
-      {/* Gradient overlay for tier effect */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${tierColors[achievement.tier]} ${
-        achievement.unlocked ? 'opacity-8' : 'opacity-3'
-      } group-hover:opacity-12 transition-opacity duration-300`} />
-      
-      <CardContent className="p-6 relative z-10">
-        {/* Header with Icon and Status */}
-        <div className="flex items-start justify-between mb-4">
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          {/* Icon */}
           <div className={`relative flex-shrink-0 ${
             achievement.unlocked 
-              ? `bg-gradient-to-br ${tierColors[achievement.tier]} p-4 rounded-2xl shadow-lg ring-2 ring-white/20`
-              : 'bg-muted/80 p-4 rounded-2xl border border-border/50'
+              ? 'bg-slate-100 dark:bg-slate-800 p-3 rounded-xl'
+              : 'bg-muted p-3 rounded-xl'
           }`}>
             {achievement.unlocked ? (
-              <IconComponent className="w-7 h-7 text-white drop-shadow-sm" />
+              <IconComponent className="w-6 h-6 text-slate-700 dark:text-slate-300" />
             ) : (
-              <Lock className="w-7 h-7 text-muted-foreground/70" />
+              <Lock className="w-6 h-6 text-muted-foreground" />
             )}
             
             {achievement.unlocked && (
-              <div className="absolute -top-2 -right-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 bg-background rounded-full drop-shadow-sm" />
+              <div className="absolute -top-1 -right-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 bg-background rounded-full" />
               </div>
             )}
           </div>
 
-          {/* Tier and Points Badges */}
-          <div className="flex flex-col gap-2">
-            <Badge 
-              variant="outline" 
-              className={`text-xs font-medium ${tierBadgeColors[achievement.tier]} backdrop-blur-sm`}
-            >
-              {achievement.tier}
-            </Badge>
-            
-            <Badge variant="secondary" className="text-xs whitespace-nowrap font-bold bg-background/60 backdrop-blur-sm">
-              +{achievement.points}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Achievement Name - DESTACADO */}
-        <div className="mb-3">
-          <h3 className={`text-xl font-bold leading-tight ${
-            achievement.unlocked 
-              ? 'text-foreground drop-shadow-sm' 
-              : 'text-muted-foreground'
-          }`}>
-            {achievement.name}
-          </h3>
-        </div>
-        
-        {/* Description */}
-        <p className={`text-sm leading-relaxed mb-4 ${
-          achievement.unlocked ? 'text-muted-foreground/90' : 'text-muted-foreground/60'
-        }`}>
-          {achievement.description}
-        </p>
-
-        {/* Progress Section */}
-        {achievement.unlocked ? (
-          <div className="flex items-center gap-2 text-sm text-emerald-400 font-medium bg-emerald-500/10 rounded-lg px-3 py-2 border border-emerald-500/20">
-            <Unlock className="w-4 h-4" />
-            <span>
-              Desbloqueada em{' '}
-              {achievement.unlockedAt?.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: 'short'
-              })}
-            </span>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground font-medium">Progresso</span>
-              <span className={`font-bold ${
-                achievement.progress > 0 ? 'text-blue-400' : 'text-muted-foreground'
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Header - Nome e badges */}
+            <div className="flex items-start justify-between mb-3">
+              <h3 className={`text-lg font-bold leading-tight ${
+                achievement.unlocked ? 'text-foreground' : 'text-muted-foreground'
               }`}>
-                {achievement.progress}%
-              </span>
+                {achievement.name}
+              </h3>
+              
+              <div className="flex items-center gap-2 ml-3">
+                <Badge variant="outline" className="text-xs">
+                  {achievement.tier}
+                </Badge>
+                <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                  +{achievement.points}
+                </Badge>
+              </div>
             </div>
             
-            <div className="relative">
-              <Progress 
-                value={achievement.progress} 
-                className="h-3 bg-muted/50"
-                data-testid={`progress-${achievement.id}`}
-              />
-              {achievement.progress > 0 && (
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full pointer-events-none" />
-              )}
-            </div>
-            
-            {achievement.progress > 0 && (
-              <div className="text-xs text-muted-foreground text-center">
-                {Math.ceil(achievement.requirement.target * (1 - achievement.progress / 100))} restante para completar
+            {/* Description */}
+            <p className={`text-sm leading-relaxed mb-4 ${
+              achievement.unlocked ? 'text-muted-foreground' : 'text-muted-foreground/80'
+            }`}>
+              {achievement.description}
+            </p>
+
+            {/* Progress */}
+            {achievement.unlocked ? (
+              <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+                <Unlock className="w-3 h-3" />
+                <span>
+                  Desbloqueada em{' '}
+                  {achievement.unlockedAt?.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'short'
+                  })}
+                </span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Progresso</span>
+                  <span className="text-muted-foreground font-medium">
+                    {achievement.progress}%
+                  </span>
+                </div>
+                <Progress 
+                  value={achievement.progress} 
+                  className="h-2"
+                  data-testid={`progress-${achievement.id}`}
+                />
+                {achievement.progress > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    {Math.ceil(achievement.requirement.target * (1 - achievement.progress / 100))} restante
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
