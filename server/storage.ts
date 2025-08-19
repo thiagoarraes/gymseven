@@ -1053,47 +1053,45 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-// **SUPABASE PRIORITY CONFIGURATION** - Supabase é obrigatório
+// **REPLIT DATABASE CONFIGURATION** - Flexible database support
 async function initializeStorage(): Promise<IStorage> {
-  console.log('🎯 PROJETO CONFIGURADO PARA SUPABASE PRIORITÁRIO');
+  console.log('🎯 Inicializando sistema de armazenamento');
   
   try {
-    // TENTATIVA 1: Supabase SDK com credenciais específicas (IDEAL)
+    // OPTION 1: Supabase SDK with specific credentials (if provided)
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Inicializando Supabase SDK (CONFIGURAÇÃO IDEAL)');
+      console.log('🚀 Using Supabase SDK configuration');
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
     }
     
-    // TENTATIVA 2: Tentar extrair Supabase do DATABASE_URL
+    // OPTION 2: Supabase detected via DATABASE_URL
     if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase.co')) {
-      console.log('🔄 Detectado Supabase via DATABASE_URL, tentando SDK...');
+      console.log('🔄 Supabase detected via DATABASE_URL, attempting SDK...');
       try {
         const { SupabaseStorage } = await import('./supabase-storage');
         return new SupabaseStorage();
       } catch (supabaseError) {
-        console.log('⚠️ Supabase SDK falhou, usando conexão direta PostgreSQL');
+        console.log('⚠️ Supabase SDK failed, using direct PostgreSQL connection');
         return new DatabaseStorage();
       }
     }
     
-    // TENTATIVA 3: PostgreSQL direto (se for Supabase)
+    // OPTION 3: Direct PostgreSQL connection (Replit database)
     if (process.env.DATABASE_URL) {
-      console.log('📊 Usando conexão direta PostgreSQL');
-      console.log('💡 Para funcionalidades completas, configure credenciais Supabase SDK');
+      console.log('📊 Using direct PostgreSQL connection');
+      console.log('✅ Connected to Replit database');
       return new DatabaseStorage();
     }
     
-    // AVISO: Sem banco configurado
-    console.log('🔴 ATENÇÃO: SUPABASE NÃO CONFIGURADO!');
-    console.log('📝 Este projeto requer Supabase como banco principal');
-    console.log('🔧 Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY');
-    console.log('⚠️ Usando storage temporário - dados serão perdidos!');
+    // FALLBACK: No database configured - use memory storage
+    console.log('⚠️ No database configured, using temporary storage');
+    console.log('💡 Data will be lost when the application restarts');
     return new MemStorage();
     
   } catch (error) {
-    console.error('❌ Falha na inicialização do storage:', error);
-    console.log('🆘 Usando storage de emergência (dados temporários)');
+    console.error('❌ Storage initialization failed:', error);
+    console.log('🆘 Using emergency memory storage (temporary data)');
     return new MemStorage();
   }
 }

@@ -30,24 +30,9 @@ function extractSupabaseCredentials(): { url: string | null, key: string | null 
 
 const { url: supabaseUrl, key: supabaseKey } = extractSupabaseCredentials();
 
-// Se não tiver credenciais específicas, verifica se pode extrair do DATABASE_URL
-if (!supabaseUrl && process.env.DATABASE_URL) {
-  console.log('⚠️ Supabase é prioritário mas credenciais não encontradas');
-  console.log('💡 Para usar Supabase SDK, configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY');
-  console.log('📋 Ou forneça DATABASE_URL do Supabase');
-  throw new Error('Supabase configuration missing - please provide credentials');
-}
-
+// Only initialize Supabase if credentials are available
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error(`
-  🔴 SUPABASE É OBRIGATÓRIO NESTE PROJETO
-  
-  Configure as credenciais do Supabase:
-  1. SUPABASE_URL: https://seu-projeto.supabase.co
-  2. SUPABASE_SERVICE_ROLE_KEY: sua chave de serviço
-  
-  OU forneça DATABASE_URL com string de conexão do Supabase
-  `);
+  throw new Error('Supabase credentials not found - this module requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
 }
 
 // Create Supabase client
