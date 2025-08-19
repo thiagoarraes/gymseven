@@ -544,7 +544,7 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
                 {achievement.tier}
               </Badge>
               
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs whitespace-nowrap">
                 +{achievement.points} pts
               </Badge>
             </div>
