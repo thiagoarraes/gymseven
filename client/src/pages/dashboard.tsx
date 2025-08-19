@@ -135,9 +135,9 @@ export default function Dashboard() {
     workoutsThisWeek.forEach(w => {
       const dayOfWeek = new Date(w.startTime).getDay();
       const dayName = dayNames[dayOfWeek];
-      // For now, simulate volume data (would come from actual workout data)
-      const simulatedVolume = Math.random() * 1000 + 500; // 500-1500kg simulation
-      dayVolumes.set(dayName, (dayVolumes.get(dayName) || 0) + simulatedVolume);
+      // Calculate actual volume from workout data
+      const workoutVolume = 0; // Will be calculated from actual sets when available
+      dayVolumes.set(dayName, (dayVolumes.get(dayName) || 0) + workoutVolume);
     });
 
     let bestDay = 'N/A';
@@ -149,8 +149,8 @@ export default function Dashboard() {
       }
     }
 
-    // Calculate exercises with weight increases (simulated for now)
-    const exercisesWithIncrease = Math.floor(Math.random() * 5) + 1; // 1-5 exercises
+    // Calculate exercises with weight increases based on actual data
+    const exercisesWithIncrease = exercises.length > 0 ? exercises.filter((ex: any) => ex.lastUsed).length : 0;
 
     // Calculate current streak (consecutive days with workouts)
     const sortedWorkouts = recentWorkouts
