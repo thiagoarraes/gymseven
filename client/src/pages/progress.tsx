@@ -36,7 +36,7 @@ interface Achievement {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   category: 'workout' | 'strength' | 'consistency' | 'milestone' | 'special';
-  tier: 'bronze' | 'prata' | 'ouro' | 'diamante' | 'epico' | 'lendario' | 'mitico';
+  tier: 'bronze' | 'prata' | 'ouro' | 'diamante' | 'épico' | 'lendário' | 'mítico';
   points: number;
   requirement: {
     type: 'workout_count' | 'consecutive_days' | 'total_weight' | 'single_weight' | 'time_based' | 'custom';
@@ -143,7 +143,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Treine por 100 dias consecutivos',
     icon: Crown,
     category: 'consistency',
-    tier: 'epico',
+    tier: 'épico',
     points: 1000,
     requirement: { type: 'consecutive_days', target: 100 },
     unlocked: false,
@@ -181,7 +181,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Levantamento terra com 200kg ou mais',
     icon: Zap,
     category: 'strength',
-    tier: 'lendario',
+    tier: 'lendário',
     points: 800,
     requirement: { type: 'single_weight', target: 200 },
     unlocked: false,
@@ -219,7 +219,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Complete pelo menos 20 treinos em um mês',
     icon: Crown,
     category: 'special',
-    tier: 'epico',
+    tier: 'épico',
     points: 600,
     requirement: { type: 'custom', target: 20 },
     unlocked: false,
@@ -231,7 +231,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Complete pelo menos 300 treinos em um ano',
     icon: Trophy,
     category: 'special',
-    tier: 'mitico',
+    tier: 'mítico',
     points: 2000,
     requirement: { type: 'workout_count', target: 300, timeframe: 'all_time' },
     unlocked: false,
@@ -293,7 +293,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Ganhe 5kg de peso corporal em 3 meses',
     icon: Crown,
     category: 'milestone',
-    tier: 'epico',
+    tier: 'épico',
     points: 750,
     requirement: { type: 'custom', target: 5 },
     unlocked: false,
@@ -425,7 +425,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Complete mais de 1000 repetições em um mês',
     icon: Award,
     category: 'milestone',
-    tier: 'epico',
+    tier: 'épico',
     points: 800,
     requirement: { type: 'custom', target: 1000 },
     unlocked: false,
@@ -449,7 +449,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Treine na mesma academia por 6 meses seguidos',
     icon: Shield,
     category: 'consistency',
-    tier: 'lendario',
+    tier: 'lendário',
     points: 1000,
     requirement: { type: 'custom', target: 180 },
     unlocked: false,
@@ -461,7 +461,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     description: 'Ganhe mais de 10kg mantendo menos de 15% de gordura',
     icon: Crown,
     category: 'milestone',
-    tier: 'mitico',
+    tier: 'mítico',
     points: 1500,
     requirement: { type: 'custom', target: 10 },
     unlocked: false,
@@ -478,9 +478,9 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
     prata: 'from-slate-400 to-slate-600', 
     ouro: 'from-yellow-400 to-yellow-600',
     diamante: 'from-cyan-400 to-cyan-600',
-    epico: 'from-purple-400 to-purple-600',
-    lendario: 'from-red-400 to-red-600',
-    mitico: 'from-pink-400 to-indigo-400'
+    épico: 'from-purple-400 to-purple-600',
+    lendário: 'from-red-400 to-red-600',
+    mítico: 'from-pink-400 to-indigo-400'
   };
 
   const tierBadgeColors = {
@@ -488,9 +488,9 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
     prata: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     ouro: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
     diamante: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    epico: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    lendario: 'bg-red-500/20 text-red-300 border-red-500/30',
-    mitico: 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/30'
+    épico: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    lendário: 'bg-red-500/20 text-red-300 border-red-500/30',
+    mítico: 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/30'
   };
 
   return (
@@ -732,16 +732,16 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
     prata: achievements.filter(a => a.unlocked && a.tier === 'prata').length,
     ouro: achievements.filter(a => a.unlocked && a.tier === 'ouro').length,
     diamante: achievements.filter(a => a.unlocked && a.tier === 'diamante').length,
-    epico: achievements.filter(a => a.unlocked && a.tier === 'epico').length,
-    lendario: achievements.filter(a => a.unlocked && a.tier === 'lendario').length,
-    mitico: achievements.filter(a => a.unlocked && a.tier === 'mitico').length,
+    épico: achievements.filter(a => a.unlocked && a.tier === 'épico').length,
+    lendário: achievements.filter(a => a.unlocked && a.tier === 'lendário').length,
+    mítico: achievements.filter(a => a.unlocked && a.tier === 'mítico').length,
   };
 
   // Count highest tier achieved
   const getHighestTier = () => {
-    if (tierCounts.mitico > 0) return "Mítico";
-    if (tierCounts.lendario > 0) return "Lendário";
-    if (tierCounts.epico > 0) return "Épico";
+    if (tierCounts.mítico > 0) return "Mítico";
+    if (tierCounts.lendário > 0) return "Lendário";
+    if (tierCounts.épico > 0) return "Épico";
     if (tierCounts.diamante > 0) return "Diamante";
     if (tierCounts.ouro > 0) return "Ouro";
     if (tierCounts.prata > 0) return "Prata";
@@ -784,7 +784,7 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
           <div className="flex items-center justify-center mb-3">
             <Crown className="w-8 h-8 text-purple-400" />
           </div>
-          <div className="text-3xl font-bold text-purple-400 mb-2">{tierCounts.mitico + tierCounts.lendario + tierCounts.epico}</div>
+          <div className="text-3xl font-bold text-purple-400 mb-2">{tierCounts.mítico + tierCounts.lendário + tierCounts.épico}</div>
           <div className="text-sm text-muted-foreground">Elite</div>
           <div className="text-xs text-muted-foreground mt-1">
             Épico+ desbloqueadas
@@ -917,9 +917,9 @@ export default function AchievementsPage() {
                 <SelectItem value="prata">Prata</SelectItem>
                 <SelectItem value="ouro">Ouro</SelectItem>
                 <SelectItem value="diamante">Diamante</SelectItem>
-                <SelectItem value="epico">Épico</SelectItem>
-                <SelectItem value="lendario">Lendário</SelectItem>
-                <SelectItem value="mitico">Mítico</SelectItem>
+                <SelectItem value="épico">Épico</SelectItem>
+                <SelectItem value="lendário">Lendário</SelectItem>
+                <SelectItem value="mítico">Mítico</SelectItem>
               </SelectContent>
             </Select>
           </div>
