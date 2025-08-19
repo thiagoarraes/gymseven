@@ -525,22 +525,26 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            {/* Header - Nome e badges */}
-            <div className="flex items-start justify-between mb-3">
+            {/* Nome da conquista - linha própria */}
+            <div className="mb-2">
               <h3 className={`text-lg font-bold leading-tight ${
                 achievement.unlocked ? 'text-foreground' : 'text-muted-foreground'
               }`}>
                 {achievement.name}
               </h3>
-              
-              <div className="flex items-center gap-2 ml-3">
-                <Badge variant="outline" className="text-xs">
-                  {achievement.tier}
-                </Badge>
-                <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                  +{achievement.points}
-                </Badge>
-              </div>
+            </div>
+            
+            {/* Badges - linha separada */}
+            <div className="flex items-center gap-2 mb-3">
+              <Badge 
+                variant="outline" 
+                className={`text-xs ${tierBadgeColors[achievement.tier]}`}
+              >
+                {achievement.tier}
+              </Badge>
+              <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                +{achievement.points}
+              </Badge>
             </div>
             
             {/* Description */}
