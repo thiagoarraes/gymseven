@@ -122,45 +122,37 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    // Map camelCase to snake_case for database columns
-    const dbUser = {
-      ...user,
-      first_name: user.firstName,
-      last_name: user.lastName,
-      date_of_birth: user.dateOfBirth,
-      activity_level: user.activityLevel,
-      fitness_goals: user.fitnessGoals,
-      profile_image_url: user.profileImageUrl,
-      experience_level: user.experienceLevel,
-      preferred_workout_duration: user.preferredWorkoutDuration,
-      is_active: user.isActive,
-      email_verified: user.emailVerified,
-      last_login_at: user.lastLoginAt,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    // Remove camelCase properties to avoid conflicts
-    delete (dbUser as any).firstName;
-    delete (dbUser as any).lastName;
-    delete (dbUser as any).dateOfBirth;
-    delete (dbUser as any).activityLevel;
-    delete (dbUser as any).fitnessGoals;
-    delete (dbUser as any).profileImageUrl;
-    delete (dbUser as any).experienceLevel;
-    delete (dbUser as any).preferredWorkoutDuration;
-    delete (dbUser as any).isActive;
-    delete (dbUser as any).emailVerified;
-    delete (dbUser as any).lastLoginAt;
+    try {
+      // Start with minimal required fields
+      const dbUser: any = {
+        email: user.email,
+        username: user.username,
+        password: user.password
+      };
+      
+      // Add optional fields that are provided
+      if (user.firstName) dbUser.first_name = user.firstName;
+      if (user.lastName) dbUser.last_name = user.lastName;
 
-    const { data, error } = await supabase
-      .from('users')
-      .insert(dbUser)
-      .select()
-      .single();
+      console.log('Attempting to create user with data:', JSON.stringify(dbUser, null, 2));
 
-    if (error) throw error;
-    return this.mapDbUserToUser(data);
+      const { data, error } = await supabase
+        .from('users')
+        .insert(dbUser)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase insert error details:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      console.log('User created successfully:', data);
+      return this.mapDbUserToUser(data);
+    } catch (err: any) {
+      console.error('Create user error:', err);
+      throw err;
+    }
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
@@ -212,7 +204,7 @@ export class SupabaseStorage implements IStorage {
       delete dbUpdates.lastLoginAt;
     }
 
-    dbUpdates.updated_at = new Date().toISOString();
+    // Let Supabase handle timestamps automatically
 
     const { data, error } = await supabase
       .from('users')
