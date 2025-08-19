@@ -58,6 +58,27 @@ export class SupabaseStorage implements IStorage {
     } as Exercise;
   }
 
+  private mapDbWorkoutLogToWorkoutLog(dbLog: any): WorkoutLog {
+    return {
+      id: dbLog.id,
+      user_id: dbLog.user_id,
+      templateId: dbLog.template_id,
+      name: dbLog.name,
+      startTime: dbLog.start_time,
+      endTime: dbLog.end_time
+    } as WorkoutLog;
+  }
+
+  private mapDbWorkoutTemplateToWorkoutTemplate(dbTemplate: any): WorkoutTemplate {
+    return {
+      id: dbTemplate.id,
+      userId: dbTemplate.user_id,
+      name: dbTemplate.name,
+      description: dbTemplate.description,
+      createdAt: dbTemplate.created_at
+    } as WorkoutTemplate;
+  }
+
   private async initializeSupabase() {
     try {
       // Test connection first with a simple query
@@ -462,8 +483,11 @@ export class SupabaseStorage implements IStorage {
       .select('*')
       .eq('user_id', userId);
 
-    if (error) throw error;
-    return data as WorkoutTemplate[];
+    if (error) {
+      console.error('Error fetching workout templates:', error);
+      return []; // Return empty array instead of throwing
+    }
+    return data.map(item => this.mapDbWorkoutTemplateToWorkoutTemplate(item));
   }
 
   async getWorkoutTemplate(id: string): Promise<WorkoutTemplate | undefined> {
@@ -626,8 +650,11 @@ export class SupabaseStorage implements IStorage {
       .eq('user_id', userId)
       .order('start_time', { ascending: false });
 
-    if (error) throw error;
-    return data as WorkoutLog[];
+    if (error) {
+      console.error('Error fetching workout logs:', error);
+      return []; // Return empty array instead of throwing
+    }
+    return data.map(item => this.mapDbWorkoutLogToWorkoutLog(item));
   }
 
   async getRecentWorkoutLogs(limit: number = 5): Promise<WorkoutLog[]> {

@@ -60,9 +60,8 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     points: 10,
     requirement: { type: 'workout_count', target: 1, timeframe: 'all_time' },
-    unlocked: true,
-    progress: 100,
-    unlockedAt: new Date('2025-08-10')
+    unlocked: false,
+    progress: 0
   },
   {
     id: 'workout_10',
@@ -73,9 +72,8 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'prata',
     points: 50,
     requirement: { type: 'workout_count', target: 10, timeframe: 'all_time' },
-    unlocked: true,
-    progress: 100,
-    unlockedAt: new Date('2025-08-12')
+    unlocked: false,
+    progress: 0
   },
   {
     id: 'workout_50',
@@ -112,9 +110,8 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     points: 25,
     requirement: { type: 'consecutive_days', target: 3 },
-    unlocked: true,
-    progress: 100,
-    unlockedAt: new Date('2025-08-11')
+    unlocked: false,
+    progress: 0
   },
   {
     id: 'streak_7',
@@ -251,9 +248,8 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     points: 30,
     requirement: { type: 'custom', target: 5 },
-    unlocked: true,
-    progress: 100,
-    unlockedAt: new Date('2025-08-13')
+    unlocked: false,
+    progress: 0
   },
   {
     id: 'swole_patrol',
@@ -396,9 +392,8 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     points: 20,
     requirement: { type: 'time_based', target: 30 },
-    unlocked: true,
-    progress: 100,
-    unlockedAt: new Date('2025-08-14')
+    unlocked: false,
+    progress: 0
   },
   {
     id: 'gains_goblin',
