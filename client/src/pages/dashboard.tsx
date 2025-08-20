@@ -746,7 +746,7 @@ export default function Dashboard() {
             )}
             
             {/* Progress Chart */}
-            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+            <div className="bg-blue-50/80 dark:bg-slate-900/50 rounded-xl p-4 border border-blue-200/40 dark:border-slate-700/30">
               <div className="h-64 relative overflow-hidden">
                 {chartLoading ? (
                   <div className="absolute inset-0 flex items-center justify-center">
