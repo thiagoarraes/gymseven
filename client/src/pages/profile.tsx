@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Camera, Save, Calendar, Mail, AtSign, Weight, Ruler, Activity, CalendarIcon, Upload } from 'lucide-react';
+import { User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -526,93 +526,6 @@ export default function Profile() {
                     )}
                   />
 
-                  {/* Altura e Peso com formato brasileiro */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="height"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 flex items-center">
-                            <Ruler className="mr-2 h-4 w-4" />
-                            Altura (cm)
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value?.toString() || ''}
-                              type="number"
-                              step="0.1"
-                              min="100"
-                              max="250"
-                              placeholder="175"
-                              className="bg-slate-800/50 border-slate-700 text-white"
-                              disabled={loading}
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="weight"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 flex items-center">
-                            <Weight className="mr-2 h-4 w-4" />
-                            Peso (kg)
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value?.toString() || ''}
-                              type="number"
-                              step="0.1"
-                              min="30"
-                              max="300"
-                              placeholder="70.5"
-                              className="bg-slate-800/50 border-slate-700 text-white"
-                              disabled={loading}
-                              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Nível de Atividade com opções brasileiras */}
-                  <FormField
-                    control={form.control}
-                    name="activityLevel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 flex items-center">
-                          <Activity className="mr-2 h-4 w-4" />
-                          Nível de Atividade Física
-                        </FormLabel>
-                        <FormControl>
-                          <select 
-                            {...field}
-                            value={field.value || ''}
-                            className="w-full bg-slate-800/50 border border-slate-700 text-white rounded-md px-3 py-2 text-sm"
-                            disabled={loading}
-                          >
-                            <option value="sedentário">Sedentário (sem exercícios)</option>
-                            <option value="leve">Leve (1-3 dias/semana)</option>
-                            <option value="moderado">Moderado (3-5 dias/semana)</option>
-                            <option value="intenso">Intenso (6-7 dias/semana)</option>
-                            <option value="atleta">Atleta (2x por dia ou mais)</option>
-                          </select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <Button
                     type="submit"
