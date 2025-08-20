@@ -95,14 +95,34 @@
     background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(217, 91%, 60%) 100%);
   }
   
-  .glass-card {
+  /* Light mode glass card */
+  :root .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Dark mode glass card */
+  .dark .glass-card {
     background: rgba(7, 12, 28, 0.75);
     backdrop-filter: blur(20px) saturate(150%);
     border: 1px solid rgba(59, 130, 246, 0.15);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   
-  .neo-card {
+  /* Light mode neo card */
+  :root .neo-card {
+    background: linear-gradient(145deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.8));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 
+      0 10px 40px rgba(0, 0, 0, 0.08), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Dark mode neo card */
+  .dark .neo-card {
     background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
     border: 1px solid rgba(59, 130, 246, 0.2);
     box-shadow: 
@@ -120,7 +140,15 @@
     box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
   }
   
-  .loading-skeleton {
+  /* Light mode loading skeleton */
+  :root .loading-skeleton {
+    background: linear-gradient(90deg, hsl(210, 40%, 96%) 25%, hsl(214.3, 31.8%, 91.4%) 50%, hsl(210, 40%, 96%) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+  
+  /* Dark mode loading skeleton */
+  .dark .loading-skeleton {
     background: linear-gradient(90deg, hsl(215, 28%, 17%) 25%, hsl(217, 32.6%, 17.5%) 50%, hsl(215, 28%, 17%) 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
