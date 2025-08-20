@@ -197,10 +197,10 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       {/* Header & Search */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">
+          <h1 className="text-2xl font-bold text-foreground mb-1">
             {selectionMode ? "Selecionar Exercícios" : "Exercícios"}
           </h1>
-          <p className="text-slate-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             {selectionMode ? "Escolha os exercícios para seu treino" : "Gerencie seus exercícios"}
           </p>
         </div>
@@ -291,15 +291,15 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       </div>
 
       {/* Search & Filters */}
-      <Card className="glass-card rounded-2xl">
+      <Card className="bg-blue-50/60 dark:bg-slate-800/40 rounded-2xl border border-blue-200/30 dark:border-slate-600/30">
         <CardContent className="p-4 space-y-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="Buscar exercícios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder-slate-400"
+              className="pl-10 bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50"
             />
           </div>
           
@@ -311,7 +311,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               className={`whitespace-nowrap ${
                 selectedMuscleGroup === "Todos" 
                   ? "gradient-accent text-white" 
-                  : "glass-card border-slate-700 text-slate-300"
+                  : "bg-white/70 dark:bg-slate-700/50 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-600/50"
               }`}
               onClick={() => setSelectedMuscleGroup("Todos")}
             >
@@ -325,7 +325,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                 className={`whitespace-nowrap ${
                   selectedMuscleGroup === group
                     ? "gradient-accent text-white"
-                    : "glass-card border-slate-700 text-slate-300"
+                    : "bg-white/70 dark:bg-slate-700/50 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-600/50"
                 }`}
                 onClick={() => setSelectedMuscleGroup(group)}
               >
@@ -340,7 +340,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
-            <Card key={i} className="glass-card rounded-2xl overflow-hidden">
+            <Card key={i} className="bg-blue-50/60 dark:bg-slate-800/40 rounded-2xl overflow-hidden border border-blue-200/30 dark:border-slate-600/30">
               <CardContent className="p-0">
                 <div className="p-4 pb-3">
                   <div className="flex items-start space-x-3 mb-3">
@@ -352,7 +352,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   </div>
                 </div>
                 <div className="px-4 pb-4">
-                  <div className="bg-slate-800/30 rounded-xl p-3 space-y-3 border border-slate-700/30">
+                  <div className="bg-blue-100/50 dark:bg-slate-800/30 rounded-xl p-3 space-y-3 border border-blue-200/40 dark:border-slate-700/30">
                     <div className="flex items-center justify-between">
                       <div className="loading-skeleton h-3 w-16 rounded"></div>
                       <div className="loading-skeleton h-3 w-8 rounded"></div>
@@ -373,16 +373,16 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
         </div>
       ) : filteredExercises.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
-            <Dumbbell className="w-8 h-8 text-slate-400" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100/60 dark:bg-slate-800/50 flex items-center justify-center border border-blue-200/50 dark:border-slate-600/50">
+            <Dumbbell className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             {searchTerm || selectedMuscleGroup !== "Todos" 
               ? "Nenhum exercício encontrado" 
               : "Nenhum exercício cadastrado"
             }
           </h3>
-          <p className="text-slate-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             {searchTerm || selectedMuscleGroup !== "Todos"
               ? "Tente ajustar os filtros de busca"
               : "Adicione exercícios para começar a treinar"
@@ -412,10 +412,10 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               className="relative group"
             >
               <Card 
-                className={`glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 ${
+                className={`bg-blue-50/60 dark:bg-slate-800/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 border ${
                   selectionMode && selectedExercises.includes(exercise.id) 
-                    ? "ring-2 ring-blue-500 bg-blue-500/10" 
-                    : "hover:border-blue-500/30"
+                    ? "ring-2 ring-blue-500 bg-blue-100/70 dark:bg-blue-500/10 border-blue-300/50 dark:border-blue-500/30" 
+                    : "border-blue-200/30 dark:border-slate-600/30 hover:border-blue-300/50 dark:hover:border-blue-500/30"
                 }`}
                 onClick={() => selectionMode && onExerciseSelect?.(exercise.id)}
               >
@@ -459,7 +459,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         <Dumbbell className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-white text-lg leading-tight mb-1 truncate">
+                        <h4 className="font-bold text-foreground text-lg leading-tight mb-1 truncate">
                           {exercise.name}
                         </h4>
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-300 border border-indigo-500/20">
@@ -478,12 +478,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
                   {/* Stats Section */}
                   <div className="px-4 pb-4">
-                    <div className="bg-slate-800/30 rounded-xl p-3 space-y-3 border border-slate-700/30">
+                    <div className="bg-blue-100/50 dark:bg-slate-800/30 rounded-xl p-3 space-y-3 border border-blue-200/40 dark:border-slate-700/30">
                       {/* Max Weight */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <TrendingUp className="w-4 h-4 text-emerald-400" />
-                          <span className="text-xs text-slate-400">Peso máx.</span>
+                          <span className="text-xs text-muted-foreground">Peso máx.</span>
                         </div>
                         <span className="text-sm font-bold text-emerald-400">
                           {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
@@ -494,7 +494,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4 text-blue-400" />
-                          <span className="text-xs text-slate-400">Último</span>
+                          <span className="text-xs text-muted-foreground">Último</span>
                         </div>
                         <span className="text-sm font-medium text-blue-400">
                           {exercise.lastWorkout ? (
@@ -527,7 +527,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs text-slate-400">Sessões</span>
+                          <span className="text-xs text-muted-foreground">Sessões</span>
                         </div>
                         <span className="text-sm font-medium text-purple-400">
                           {exercise.totalSessions || 0}
@@ -540,9 +540,9 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="w-full mt-3 p-2 hover:bg-slate-700/30 rounded-lg border border-slate-600/30 transition-colors"
+                          className="w-full mt-3 p-2 hover:bg-blue-100/60 dark:hover:bg-slate-700/30 rounded-lg border border-blue-200/40 dark:border-slate-600/30 transition-colors"
                         >
-                          <div className="flex items-center justify-center space-x-2 text-slate-300">
+                          <div className="flex items-center justify-center space-x-2 text-foreground">
                             <BarChart3 className="w-4 h-4" />
                             <span className="text-sm font-medium">Progresso de Peso</span>
                             {expandedExercise === exercise.id ? (
@@ -554,17 +554,17 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-3">
-                        <div className="bg-slate-900/30 rounded-xl p-3 border border-slate-600/30">
+                        <div className="bg-blue-100/40 dark:bg-slate-900/30 rounded-xl p-3 border border-blue-200/40 dark:border-slate-600/30">
                           {weightHistory.length > 0 ? (
                             <div className="space-y-2">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-slate-400">Histórico de Peso</span>
-                                <span className="text-xs text-slate-500">{weightHistory.length} sessões</span>
+                                <span className="text-xs font-medium text-muted-foreground">Histórico de Peso</span>
+                                <span className="text-xs text-muted-foreground/80">{weightHistory.length} sessões</span>
                               </div>
                               <div className="space-y-1">
                                 {weightHistory.slice(0, 6).map((entry: any, index: number) => (
                                   <div key={index} className="flex items-center justify-between py-1">
-                                    <span className="text-xs text-slate-500">{entry.date}</span>
+                                    <span className="text-xs text-muted-foreground/80">{entry.date}</span>
                                     <div className="flex items-center space-x-2">
                                       <span className="text-sm font-semibold text-emerald-400">{entry.weight}kg</span>
                                       {index === 0 && (
@@ -584,9 +584,9 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                             </div>
                           ) : (
                             <div className="text-center py-4">
-                              <BarChart3 className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-                              <p className="text-sm text-slate-500">Nenhum histórico de peso</p>
-                              <p className="text-xs text-slate-600">Complete treinos para ver o progresso</p>
+                              <BarChart3 className="w-6 h-6 text-muted-foreground/60 mx-auto mb-2" />
+                              <p className="text-sm text-muted-foreground">Nenhum histórico de peso</p>
+                              <p className="text-xs text-muted-foreground/80">Complete treinos para ver o progresso</p>
                             </div>
                           )}
                         </div>
