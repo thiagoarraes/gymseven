@@ -31,7 +31,6 @@ import { z } from 'zod';
 // Simple preferences schema
 const preferencesSchema = z.object({
   theme: z.enum(['light', 'dark']).default('dark'),
-  units: z.enum(['metric', 'imperial']).default('metric'),
   language: z.string().default('pt-BR'),
   notifications: z.boolean().default(true),
   soundEffects: z.boolean().default(true),
@@ -53,7 +52,6 @@ export default function Settings() {
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
       theme: theme,
-      units: 'metric',
       language: 'pt-BR',
       notifications: true,
       soundEffects: true,
@@ -188,27 +186,6 @@ export default function Settings() {
                     )}
                   />
 
-                  <FormField
-                    control={preferencesForm.control}
-                    name="units"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground">Unidades</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-card border-border text-foreground">
-                              <SelectValue placeholder="Sistema de unidades" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-card border-border">
-                            <SelectItem value="metric" className="text-foreground">Métrico (kg, cm)</SelectItem>
-                            <SelectItem value="imperial" className="text-foreground">Imperial (lb, ft)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </form>
               </Form>
             </CardContent>
