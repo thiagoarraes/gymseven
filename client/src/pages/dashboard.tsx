@@ -529,7 +529,7 @@ export default function Dashboard() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all duration-200 rounded-lg px-3 py-1.5 border border-transparent hover:border-blue-500/30"
+              className="text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-100/80 dark:hover:bg-blue-500/20 transition-all duration-200 rounded-lg px-3 py-1.5 border border-blue-200/40 dark:border-blue-500/30 hover:border-blue-300/60 dark:hover:border-blue-400/50"
               onClick={() => navigate("/workout-history")}
             >
               Ver todos
