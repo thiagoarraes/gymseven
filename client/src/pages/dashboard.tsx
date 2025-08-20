@@ -221,10 +221,10 @@ export default function Dashboard() {
           
           {/* Header Section */}
           <div className="relative z-10 text-center mb-6">
-            <h2 className="text-2xl sm:text-3xl font-black text-white bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text mb-2">
+            <h2 className="text-2xl sm:text-3xl font-black text-foreground bg-gradient-to-r from-foreground via-primary/80 to-foreground bg-clip-text mb-2">
               Olá, {user?.username || 'Usuário'}!🔥
             </h2>
-            <p className="text-slate-300 text-base sm:text-lg font-medium">
+            <p className="text-muted-foreground text-base sm:text-lg font-medium">
               Pronto para progredir carga hoje?
             </p>
           </div>
@@ -241,8 +241,8 @@ export default function Dashboard() {
                       <Play className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-sm sm:text-base font-bold text-white">Último Treino</h3>
-                      <p className="text-xs text-slate-400 hidden sm:block">Suas atividades recentes</p>
+                      <h3 className="text-sm sm:text-base font-bold text-foreground">Último Treino</h3>
+                      <p className="text-xs text-muted-foreground hidden sm:block">Suas atividades recentes</p>
                     </div>
                     <div className="text-right">
                       <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
@@ -270,22 +270,22 @@ export default function Dashboard() {
                   {/* Workout Info */}
                   <div className="bg-slate-800/30 rounded-xl p-3 space-y-2 border border-slate-700/30">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-400">Treino</span>
-                      <span className="text-sm font-medium text-white truncate max-w-[120px] sm:max-w-[150px]">
+                      <span className="text-xs text-muted-foreground">Treino</span>
+                      <span className="text-sm font-medium text-foreground truncate max-w-[120px] sm:max-w-[150px]">
                         {recentWorkouts[0]?.name || "Treino personalizado"}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-400">Data</span>
-                      <span className="text-sm font-medium text-slate-300">
+                      <span className="text-xs text-muted-foreground">Data</span>
+                      <span className="text-sm font-medium text-foreground">
                         {formatDate(recentWorkouts[0]?.startTime)}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-400">Duração</span>
-                      <span className="text-sm font-medium text-blue-400">
+                      <span className="text-xs text-muted-foreground">Duração</span>
+                      <span className="text-sm font-medium text-primary">
                         {recentWorkouts[0]?.endTime ? 
                           calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
                           "Em andamento"
@@ -296,8 +296,8 @@ export default function Dashboard() {
                     {/* Muscle Groups */}
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-slate-400" />
-                        <span className="text-xs text-slate-400">Grupos</span>
+                        <Zap className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Grupos</span>
                       </div>
                       <div className="flex flex-wrap gap-1 max-w-[130px] sm:max-w-[170px] justify-end">
                         {(() => {
@@ -357,7 +357,7 @@ export default function Dashboard() {
                               return '5';
                             })()}
                           </div>
-                          <div className="text-xs text-slate-400">Exercícios</div>
+                          <div className="text-xs text-muted-foreground">Exercícios</div>
                         </div>
                         <div>
                           <div className="text-lg font-bold text-purple-400">
@@ -370,7 +370,7 @@ export default function Dashboard() {
                               return Math.round(hours * 1200 + Math.random() * 400);
                             })()}kg
                           </div>
-                          <div className="text-xs text-slate-400">Volume</div>
+                          <div className="text-xs text-muted-foreground">Volume</div>
                         </div>
                       </div>
                     </div>
@@ -392,8 +392,8 @@ export default function Dashboard() {
                     <Play className="w-6 h-6 text-slate-400" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">Primeiro Treino</h3>
-                    <p className="text-slate-400 text-xs mb-3">Comece sua jornada fitness hoje!</p>
+                    <h3 className="text-base font-bold text-foreground mb-1">Primeiro Treino</h3>
+                    <p className="text-muted-foreground text-xs mb-3">Comece sua jornada fitness hoje!</p>
                   </div>
                   <Button 
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-3 sm:px-4 py-2.5 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-xs sm:text-sm"
@@ -414,8 +414,8 @@ export default function Dashboard() {
                   <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-white">Sequência</h3>
-                  <p className="text-xs text-slate-400 hidden sm:block">Dias consecutivos</p>
+                  <h3 className="text-sm sm:text-base font-bold text-foreground">Sequência</h3>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Dias consecutivos</p>
                 </div>
               </div>
               
@@ -439,8 +439,8 @@ export default function Dashboard() {
               
               <div className="mt-3 pt-3 border-t border-slate-700/50">
                 <div className="text-center">
-                  <div className="text-xs text-slate-400 mb-1">Próximo objetivo</div>
-                  <div className="text-xs font-medium text-slate-300">
+                  <div className="text-xs text-muted-foreground mb-1">Próximo objetivo</div>
+                  <div className="text-xs font-medium text-foreground">
                     {stats.currentStreak < 7 ? `${7 - stats.currentStreak} dias para 1 semana` :
                      stats.currentStreak < 30 ? `${30 - stats.currentStreak} dias para 1 mês` :
                      'Mantenha o ritmo!'}
@@ -465,8 +465,8 @@ export default function Dashboard() {
                 Esta semana
               </span>
             </div>
-            <div className="text-3xl font-black text-white mb-1">{stats.weeklyWorkouts}</div>
-            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Treinos esta semana</div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.weeklyWorkouts}</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Treinos esta semana</div>
           </CardContent>
         </Card>
 
@@ -482,8 +482,8 @@ export default function Dashboard() {
                 Melhor dia
               </span>
             </div>
-            <div className="text-3xl font-black text-white mb-1">{stats.bestVolumeDay}</div>
-            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Maior volume</div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.bestVolumeDay}</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Maior volume</div>
           </CardContent>
         </Card>
 
@@ -499,8 +499,8 @@ export default function Dashboard() {
                 Média geral
               </span>
             </div>
-            <div className="text-3xl font-black text-white mb-1">{stats.avgDuration}</div>
-            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Tempo médio</div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.avgDuration}</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Tempo médio</div>
           </CardContent>
         </Card>
         
@@ -516,8 +516,8 @@ export default function Dashboard() {
                 Progresso
               </span>
             </div>
-            <div className="text-3xl font-black text-white mb-1">{stats.exercisesWithIncrease}</div>
-            <div className="text-sm text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Pesos aumentados</div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.exercisesWithIncrease}</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Pesos aumentados</div>
           </CardContent>
         </Card>
       </div>
@@ -525,7 +525,7 @@ export default function Dashboard() {
       <Card className="glass-card rounded-2xl hover-lift">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Treinos Recentes</h3>
+            <h3 className="text-lg font-semibold text-foreground">Treinos Recentes</h3>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -548,9 +548,9 @@ export default function Dashboard() {
           ) : recentWorkouts.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
-                <List className="w-8 h-8 text-slate-400" />
+                <List className="w-8 h-8 text-muted-foreground" />
               </div>
-              <p className="text-slate-400 mb-4">Nenhum treino registrado ainda</p>
+              <p className="text-muted-foreground mb-4">Nenhum treino registrado ainda</p>
               <Button 
                 className="gradient-accent"
                 onClick={() => navigate("/treinos")}
@@ -571,8 +571,8 @@ export default function Dashboard() {
                       <Play className="text-white text-sm w-4 h-4" />
                     </div>
                     <div>
-                      <div className="font-medium text-white">{workout.name}</div>
-                      <div className="text-sm text-slate-400">{formatDate(workout.startTime)}</div>
+                      <div className="font-medium text-foreground">{workout.name}</div>
+                      <div className="text-sm text-muted-foreground">{formatDate(workout.startTime)}</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
