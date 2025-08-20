@@ -195,7 +195,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
 }).extend({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-  username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
+  username: z.string()
+    .min(3, "Nome de usuário deve ter pelo menos 3 caracteres")
+    .max(20, "Nome de usuário deve ter no máximo 20 caracteres")
+    .regex(/^[a-zA-Z0-9_]+$/, "Nome de usuário deve conter apenas letras, números e underscore. Sem acentos, espaços ou caracteres especiais"),
   height: z.number().min(100).max(250).optional(),
   weight: z.number().min(30).max(300).optional(),
   dateOfBirth: z.string().optional(),
@@ -205,7 +208,11 @@ export const updateUserSchema = insertUserSchema.partial().omit({
   password: true
 }).extend({
   email: z.string().email("Email inválido").optional(),
-  username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres").optional(),
+  username: z.string()
+    .min(3, "Nome de usuário deve ter pelo menos 3 caracteres")
+    .max(20, "Nome de usuário deve ter no máximo 20 caracteres")
+    .regex(/^[a-zA-Z0-9_]+$/, "Nome de usuário deve conter apenas letras, números e underscore. Sem acentos, espaços ou caracteres especiais")
+    .optional(),
   height: z.union([
     z.number().min(100, "Altura deve ser entre 100 e 250cm").max(250, "Altura deve ser entre 100 e 250cm"),
     z.null()
@@ -224,7 +231,10 @@ export const loginSchema = z.object({
 
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
-  username: z.string().min(3, "Nome de usuário deve ter pelo menos 3 caracteres"),
+  username: z.string()
+    .min(3, "Nome de usuário deve ter pelo menos 3 caracteres")
+    .max(20, "Nome de usuário deve ter no máximo 20 caracteres")
+    .regex(/^[a-zA-Z0-9_]+$/, "Nome de usuário deve conter apenas letras, números e underscore. Sem acentos, espaços ou caracteres especiais"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
   firstName: z.string().optional(),
   lastName: z.string().optional(),

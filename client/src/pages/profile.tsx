@@ -287,12 +287,20 @@ export default function Profile() {
                           <AtSign className="mr-2 h-4 w-4" />
                           Nome de usuário
                         </FormLabel>
+                        <p className="text-xs text-slate-400 mb-2">Apenas letras, números e underscore. Sem acentos ou espaços.</p>
                         <FormControl>
                           <Input
                             {...field}
                             value={field.value || ''}
                             className="bg-slate-800/50 border-slate-700 text-white"
                             disabled={loading}
+                            onChange={(e) => {
+                              // Remove caracteres inválidos em tempo real
+                              const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                              field.onChange(value);
+                            }}
+                            maxLength={20}
+                            placeholder="seunome123"
                           />
                         </FormControl>
                         <FormMessage />

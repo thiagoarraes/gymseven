@@ -136,6 +136,7 @@ export default function Register() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-slate-300">Nome de usuário</FormLabel>
+                    <p className="text-xs text-slate-400 mb-2">Apenas letras, números e underscore. Sem acentos ou espaços.</p>
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -144,6 +145,12 @@ export default function Register() {
                           placeholder="seunome123"
                           className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
                           disabled={loading}
+                          onChange={(e) => {
+                            // Remove caracteres inválidos em tempo real
+                            const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                            field.onChange(value);
+                          }}
+                          maxLength={20}
                         />
                       </div>
                     </FormControl>
