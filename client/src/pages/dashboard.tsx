@@ -268,7 +268,7 @@ export default function Dashboard() {
                   </div>
                   
                   {/* Workout Info */}
-                  <div className="bg-slate-800/30 rounded-xl p-3 space-y-2 border border-slate-700/30">
+                  <div className="bg-muted/30 rounded-xl p-3 space-y-2 border border-border/30">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">Treino</span>
                       <span className="text-sm font-medium text-foreground truncate max-w-[120px] sm:max-w-[150px]">
@@ -343,7 +343,7 @@ export default function Dashboard() {
                     </div>
                     
                     {/* Quick Stats */}
-                    <div className="pt-2 border-t border-slate-700/50">
+                    <div className="pt-2 border-t border-border/50">
                       <div className="grid grid-cols-2 gap-2 text-center">
                         <div>
                           <div className="text-lg font-bold text-emerald-400">
@@ -388,8 +388,8 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center space-y-3">
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center">
-                    <Play className="w-6 h-6 text-slate-400" />
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center border border-border">
+                    <Play className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-foreground mb-1">Primeiro Treino</h3>
@@ -437,7 +437,7 @@ export default function Dashboard() {
                 )}
               </div>
               
-              <div className="mt-3 pt-3 border-t border-slate-700/50">
+              <div className="mt-3 pt-3 border-t border-border/50">
                 <div className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">Próximo objetivo</div>
                   <div className="text-xs font-medium text-foreground">
@@ -539,7 +539,7 @@ export default function Dashboard() {
           {workoutsLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-3 bg-slate-800/30 rounded-xl">
+                <div key={i} className="p-3 bg-muted/30 rounded-xl border border-border/30">
                   <div className="loading-skeleton h-4 rounded mb-2"></div>
                   <div className="loading-skeleton h-3 rounded w-1/2"></div>
                 </div>
@@ -547,7 +547,7 @@ export default function Dashboard() {
             </div>
           ) : recentWorkouts.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center border border-border">
                 <List className="w-8 h-8 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground mb-4">Nenhum treino registrado ainda</p>
@@ -563,7 +563,7 @@ export default function Dashboard() {
               {recentWorkouts.slice(0, 3).map((workout) => (
                 <div 
                   key={workout.id} 
-                  className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl border border-slate-700/50 hover-lift cursor-pointer"
+                  className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border border-border/50 hover-lift cursor-pointer"
                   onClick={() => handleWorkoutClick(workout.id)}
                 >
                   <div className="flex items-center space-x-3">
@@ -580,11 +580,11 @@ export default function Dashboard() {
                       <div className="text-sm font-medium text-emerald-400">
                         {workout.endTime ? calculateDuration(workout.startTime, workout.endTime) : "Em andamento"}
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-muted-foreground">
                         {workout.endTime ? "Concluído" : "Incompleto"}
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
               ))}
@@ -603,8 +603,8 @@ export default function Dashboard() {
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Progresso de Treino</h3>
-                  <p className="text-sm text-slate-400">Acompanhe sua evolução</p>
+                  <h3 className="text-xl font-bold text-foreground">Progresso de Treino</h3>
+                  <p className="text-sm text-muted-foreground">Acompanhe sua evolução</p>
                 </div>
               </div>
               
@@ -613,18 +613,18 @@ export default function Dashboard() {
                   value={selectedExerciseId || firstExerciseId || ""} 
                   onValueChange={(value) => setSelectedExerciseId(value)}
                 >
-                  <SelectTrigger className="w-56 bg-slate-800/50 border border-slate-700 text-slate-200 transition-all duration-200 hover:bg-slate-700/50">
+                  <SelectTrigger className="w-56 bg-muted/50 border border-border text-foreground transition-all duration-200 hover:bg-muted/70">
                     <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
                   </SelectTrigger>
                   <SelectContent 
-                    className="bg-slate-800 border-slate-700 max-h-60 overflow-auto backdrop-blur-md"
+                    className="bg-background border border-border max-h-60 overflow-auto backdrop-blur-md"
                     sideOffset={4}
                   >
                     {exercises.map((exercise: any, index: number) => (
                       <SelectItem 
                         key={`exercise-select-${exercise.id}-${index}`} 
                         value={exercise.id}
-                        className="text-slate-200 focus:bg-slate-700 focus:text-white cursor-pointer transition-colors"
+                        className="text-foreground focus:bg-muted focus:text-foreground cursor-pointer transition-colors"
                       >
                         {exercise.name}
                       </SelectItem>
@@ -644,13 +644,13 @@ export default function Dashboard() {
                     </div>
                     <span className="text-sm font-medium text-blue-400 whitespace-nowrap">Peso Máximo</span>
                   </div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold text-foreground">
                     {chartData.length > 0 && chartData.some((d: any) => d.weight > 0) 
                       ? Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight))
                       : 0
                     }kg
                   </div>
-                  <div className="text-xs text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis">Maior peso atingido</div>
+                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Maior peso atingido</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 border border-emerald-500/20">
@@ -660,8 +660,8 @@ export default function Dashboard() {
                     </div>
                     <span className="text-sm font-medium text-emerald-400 whitespace-nowrap">Total Sessões</span>
                   </div>
-                  <div className="text-2xl font-bold text-white">{chartData.length}</div>
-                  <div className="text-xs text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis">Treinos registrados</div>
+                  <div className="text-2xl font-bold text-foreground">{chartData.length}</div>
+                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Treinos registrados</div>
                 </div>
 
                 <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 border border-purple-500/20">
@@ -671,7 +671,7 @@ export default function Dashboard() {
                     </div>
                     <span className="text-sm font-medium text-purple-400 whitespace-nowrap">Último Treino</span>
                   </div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold text-foreground">
                     {chartData.length > 0 
                       ? (() => {
                           try {
@@ -740,7 +740,7 @@ export default function Dashboard() {
                       : "Nunca"
                     }
                   </div>
-                  <div className="text-xs text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis">Última execução</div>
+                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Última execução</div>
                 </div>
               </div>
             )}
