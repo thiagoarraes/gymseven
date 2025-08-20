@@ -232,7 +232,7 @@ export default function Dashboard() {
           {/* Last Workout & Streak Cards */}
           <div className="grid grid-cols-2 gap-4 relative z-10">
             {/* Last Workout Card */}
-            <div className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 rounded-2xl p-3 sm:p-5 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200">
+            <div className="bg-gradient-to-r from-blue-50/80 to-purple-50/60 dark:from-slate-800/40 dark:to-slate-700/20 rounded-2xl p-3 sm:p-5 border border-blue-200/30 dark:border-slate-600/30 hover:border-blue-300/50 dark:hover:border-slate-500/50 transition-all duration-200">
               {recentWorkouts.length > 0 ? (
                 <div className="space-y-3 sm:space-y-4">
                   {/* Header */}
@@ -268,7 +268,7 @@ export default function Dashboard() {
                   </div>
                   
                   {/* Workout Info */}
-                  <div className="bg-muted/30 rounded-xl p-3 space-y-2 border border-border/30">
+                  <div className="bg-blue-50/60 dark:bg-muted/30 rounded-xl p-3 space-y-2 border border-blue-200/30 dark:border-border/30">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">Treino</span>
                       <span className="text-sm font-medium text-foreground truncate max-w-[120px] sm:max-w-[150px]">
@@ -388,7 +388,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center space-y-3">
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center border border-border">
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-blue-100/80 to-purple-100/60 dark:from-muted/50 dark:to-muted/80 flex items-center justify-center border border-blue-200/50 dark:border-border">
                     <Play className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <div>
@@ -539,7 +539,7 @@ export default function Dashboard() {
           {workoutsLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-3 bg-muted/30 rounded-xl border border-border/30">
+                <div key={i} className="p-3 bg-blue-50/60 dark:bg-muted/30 rounded-xl border border-blue-200/30 dark:border-border/30">
                   <div className="loading-skeleton h-4 rounded mb-2"></div>
                   <div className="loading-skeleton h-3 rounded w-1/2"></div>
                 </div>
@@ -547,7 +547,7 @@ export default function Dashboard() {
             </div>
           ) : recentWorkouts.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center border border-border">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100/60 dark:bg-muted/50 flex items-center justify-center border border-blue-200/50 dark:border-border">
                 <List className="w-8 h-8 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground mb-4">Nenhum treino registrado ainda</p>
@@ -563,7 +563,7 @@ export default function Dashboard() {
               {recentWorkouts.slice(0, 3).map((workout) => (
                 <div 
                   key={workout.id} 
-                  className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border border-border/50 hover-lift cursor-pointer"
+                  className="flex items-center justify-between p-3 bg-blue-50/60 dark:bg-muted/30 rounded-xl border border-blue-200/30 dark:border-border/50 hover-lift cursor-pointer hover:bg-blue-100/70 dark:hover:bg-muted/40 transition-colors"
                   onClick={() => handleWorkoutClick(workout.id)}
                 >
                   <div className="flex items-center space-x-3">
