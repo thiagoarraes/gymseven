@@ -127,69 +127,40 @@ export default function Settings() {
     <div className="min-h-screen bg-background pt-24 pb-24">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-2">
+          {/* Header com seletor de tema */}
+          <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold text-foreground flex items-center justify-center">
               <SettingsIcon className="mr-2 h-6 w-6" />
               Configurações
             </h1>
             <p className="text-muted-foreground">Personalize sua experiência no GymSeven</p>
+            
+            {/* Seletor de Tema Compacto */}
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-sm text-muted-foreground">Tema:</span>
+              <div className="flex bg-muted rounded-lg p-1">
+                <Button
+                  variant={theme === 'dark' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setTheme('dark')}
+                  className="flex items-center space-x-2 px-3 py-1.5 text-xs"
+                >
+                  <Moon className="w-3 h-3" />
+                  <span>Escuro</span>
+                </Button>
+                <Button
+                  variant={theme === 'light' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setTheme('light')}
+                  className="flex items-center space-x-2 px-3 py-1.5 text-xs"
+                >
+                  <Sun className="w-3 h-3" />
+                  <span>Claro</span>
+                </Button>
+              </div>
+            </div>
           </div>
 
-          {/* Appearance */}
-          <Card className="glassmorphism">
-            <CardHeader>
-              <CardTitle className="text-foreground flex items-center">
-                <Moon className="mr-2 h-5 w-5" />
-                Aparência
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...preferencesForm}>
-                <form onSubmit={preferencesForm.handleSubmit(onSubmitPreferences)} className="space-y-4">
-                  <FormField
-                    control={preferencesForm.control}
-                    name="theme"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground">Tema</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setTheme(value as 'light' | 'dark');
-                          }} 
-                          defaultValue={theme} 
-                          value={theme}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-card border-border text-foreground">
-                              <SelectValue placeholder="Selecione o tema" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-card border-border">
-                            <SelectItem value="dark" className="text-foreground">
-                              <div className="flex items-center">
-                                <Moon className="mr-2 h-4 w-4" />
-                                Escuro
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="light" className="text-foreground">
-                              <div className="flex items-center">
-                                <Sun className="mr-2 h-4 w-4" />
-                                Claro
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
 
           {/* Notifications */}
           <Card className="glassmorphism">
