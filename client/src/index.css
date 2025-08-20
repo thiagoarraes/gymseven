@@ -3,22 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Light mode variables */
-  --background: hsl(0, 0%, 100%);
+  /* Light mode variables - Better contrast and readability */
+  --background: hsl(0, 0%, 98%);
   --foreground: hsl(222, 84%, 4.9%);
-  --muted: hsl(210, 40%, 96%);
-  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --muted: hsl(210, 40%, 94%);
+  --muted-foreground: hsl(215.3, 25%, 26.7%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(222, 84%, 4.9%);
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(222, 84%, 4.9%);
-  --border: hsl(214.3, 31.8%, 91.4%);
-  --input: hsl(214.3, 31.8%, 91.4%);
+  --border: hsl(214.3, 31.8%, 88%);
+  --input: hsl(214.3, 31.8%, 88%);
   --primary: hsl(221.2, 83.2%, 53.3%);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(210, 40%, 96%);
+  --secondary: hsl(210, 40%, 92%);
   --secondary-foreground: hsl(222.2, 84%, 4.9%);
-  --accent: hsl(210, 40%, 96%);
+  --accent: hsl(210, 40%, 92%);
   --accent-foreground: hsl(222.2, 84%, 4.9%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(210, 40%, 98%);
@@ -65,14 +65,32 @@
 }
 
 @layer utilities {
+  /* Text readability improvements for light mode */
+  .text-readable {
+    color: hsl(215.3, 25%, 26.7%);
+  }
+  
+  .dark .text-readable {
+    color: hsl(210, 40%, 98%);
+  }
+  
+  .text-readable-muted {
+    color: hsl(215.3, 25%, 35%);
+  }
+  
+  .dark .text-readable-muted {
+    color: hsl(215, 20.2%, 65.1%);
+  }
+  
   .glassmorphism {
     backdrop-filter: blur(10px);
   }
   
   /* Light mode glassmorphism */
   :root .glassmorphism {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
   
   /* Dark mode glassmorphism */
@@ -83,7 +101,7 @@
   
   /* Light mode gradient background */
   :root .gradient-bg {
-    background: linear-gradient(135deg, hsl(210, 40%, 96%) 0%, hsl(214.3, 31.8%, 91.4%) 100%);
+    background: linear-gradient(135deg, hsl(210, 40%, 98%) 0%, hsl(214.3, 31.8%, 94%) 100%);
   }
   
   /* Dark mode gradient background */
@@ -142,7 +160,7 @@
   
   /* Light mode loading skeleton */
   :root .loading-skeleton {
-    background: linear-gradient(90deg, hsl(210, 40%, 96%) 25%, hsl(214.3, 31.8%, 91.4%) 50%, hsl(210, 40%, 96%) 75%);
+    background: linear-gradient(90deg, hsl(210, 40%, 94%) 25%, hsl(214.3, 31.8%, 90%) 50%, hsl(210, 40%, 94%) 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
   }
