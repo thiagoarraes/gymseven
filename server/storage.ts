@@ -1058,9 +1058,10 @@ async function initializeStorage(): Promise<IStorage> {
   console.log('🎯 Inicializando sistema de armazenamento');
   
   try {
-    // OPTION 1: Supabase SDK with specific credentials (if provided)
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // OPTION 1: Supabase SDK with credentials (prioritize ANON_KEY or SERVICE_ROLE_KEY)
+    if (process.env.SUPABASE_URL && (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) {
       console.log('🚀 Using Supabase SDK configuration');
+      console.log('✅ Supabase credentials detected');
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
     }
