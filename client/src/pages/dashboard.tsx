@@ -770,21 +770,21 @@ export default function Dashboard() {
                           dataKey="date" 
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 12, fill: '#94A3B8' }}
+                          tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
                         />
                         <YAxis 
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 12, fill: '#94A3B8' }}
+                          tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
                           domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
                         />
                         <Tooltip 
                           contentStyle={{
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            backgroundColor: 'rgba(248, 250, 252, 0.95)',
                             border: '1px solid rgba(59, 130, 246, 0.3)',
                             borderRadius: '16px',
-                            color: '#F1F5F9',
-                            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                            color: '#1E293B',
+                            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(59, 130, 246, 0.1)',
                             fontSize: '13px',
                             padding: '12px 16px',
                             backdropFilter: 'blur(12px)',
@@ -795,19 +795,19 @@ export default function Dashboard() {
                             if (active && payload && payload.length) {
                               const data = payload[0].payload;
                               return (
-                                <div className="bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-4 shadow-2xl shadow-blue-500/20">
+                                <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-4 shadow-2xl shadow-blue-500/20">
                                   <div className="flex items-center space-x-3 mb-2">
                                     <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                                    <div className="text-white font-semibold text-sm">Progressão</div>
+                                    <div className="text-slate-800 dark:text-white font-semibold text-sm">Progressão</div>
                                   </div>
                                   <div className="space-y-1">
                                     <div className="flex items-center justify-between text-xs">
-                                      <span className="text-slate-400">Peso máximo:</span>
-                                      <span className="text-blue-400 font-bold text-lg">{data.weight}kg</span>
+                                      <span className="text-slate-600 dark:text-slate-400">Peso máximo:</span>
+                                      <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">{data.weight}kg</span>
                                     </div>
                                     {data.workoutName && (
-                                      <div className="mt-2 pt-2 border-t border-slate-700/50">
-                                        <div className="text-xs text-slate-500 truncate max-w-[180px]">
+                                      <div className="mt-2 pt-2 border-t border-slate-300/50 dark:border-slate-700/50">
+                                        <div className="text-xs text-slate-500 dark:text-slate-500 truncate max-w-[180px]">
                                           {data.workoutName}
                                         </div>
                                       </div>
@@ -847,15 +847,15 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-slate-400">
-                      <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/5 flex items-center justify-center border border-blue-500/20">
-                        <TrendingUp className="w-10 h-10 text-blue-400" />
+                    <div className="text-center text-muted-foreground">
+                      <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100/60 to-purple-100/40 dark:from-blue-500/10 dark:to-purple-500/5 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/20">
+                        <TrendingUp className="w-10 h-10 text-blue-500 dark:text-blue-400" />
                       </div>
-                      <p className="text-lg font-medium text-slate-300 mb-2">Nenhum progresso registrado</p>
-                      <p className="text-sm text-slate-500 mb-4">
+                      <p className="text-lg font-medium text-foreground mb-2">Nenhum progresso registrado</p>
+                      <p className="text-sm text-muted-foreground mb-4">
                         Complete treinos com peso para visualizar sua evolução
                       </p>
-                      <div className="inline-flex items-center space-x-2 text-xs text-blue-300 bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20">
+                      <div className="inline-flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-300 bg-blue-100/60 dark:bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-200/50 dark:border-blue-500/20">
                         <Play className="w-3 h-3" />
                         <span>Inicie um treino para começar</span>
                       </div>
