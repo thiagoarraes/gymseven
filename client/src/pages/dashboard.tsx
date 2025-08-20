@@ -232,7 +232,7 @@ export default function Dashboard() {
           {/* Last Workout & Streak Cards */}
           <div className="grid grid-cols-2 gap-4 relative z-10">
             {/* Last Workout Card */}
-            <div className="bg-gradient-to-r from-blue-50/80 to-purple-50/60 dark:from-slate-800/40 dark:to-slate-700/20 rounded-2xl p-3 sm:p-5 border border-blue-200/30 dark:border-slate-600/30 hover:border-blue-300/50 dark:hover:border-slate-500/50 transition-all duration-200">
+            <div className="bg-blue-100/70 hover:bg-blue-200/80 dark:bg-slate-800/40 dark:hover:bg-slate-700/60 rounded-2xl p-3 sm:p-5 border border-blue-200/40 dark:border-slate-600/30 hover:border-blue-300/60 dark:hover:border-slate-500/50 transition-all duration-200 cursor-pointer">
               {recentWorkouts.length > 0 ? (
                 <div className="space-y-3 sm:space-y-4">
                   {/* Header */}
