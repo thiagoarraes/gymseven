@@ -16,7 +16,7 @@ export function Logo() {
             SEVEN
           </span>
         </h1>
-        <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">gerenciador de treino do @thiagoseven</p>
+        <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">Treine. Registre. Evolua.</p>
       </div>
     </div>
   );
