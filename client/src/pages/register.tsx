@@ -112,15 +112,15 @@ export default function Register() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-300">Email</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                         <Input
                           {...field}
                           type="email"
                           placeholder="seu@email.com"
-                          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                          className="pl-10"
                           disabled={loading}
                         />
                       </div>
@@ -135,15 +135,15 @@ export default function Register() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-300">Nome de usuário</FormLabel>
-                    <p className="text-xs text-slate-400 mb-2">Apenas letras, números e underscore. Sem acentos ou espaços.</p>
+                    <FormLabel>Nome de usuário</FormLabel>
+                    <p className="text-xs text-muted-foreground mb-2">Apenas letras, números e underscore. Sem acentos ou espaços.</p>
                     <FormControl>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                         <Input
                           {...field}
                           placeholder="seunome123"
-                          className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                          className="pl-10"
                           disabled={loading}
                           onChange={(e) => {
                             // Remove caracteres inválidos em tempo real
@@ -164,22 +164,22 @@ export default function Register() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-300">Senha</FormLabel>
+                    <FormLabel>Senha</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                         <Input
                           {...field}
                           type={showPassword ? 'text' : 'password'}
                           placeholder="Mínimo 6 caracteres"
-                          className="pl-10 pr-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                          className="pl-10 pr-10"
                           disabled={loading}
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
+                          className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={loading}
                         >

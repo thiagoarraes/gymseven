@@ -153,7 +153,7 @@ export default function Login() {
 
           <div className="mt-4 flex items-center justify-center">
             <Link href="/register">
-              <Button variant="outline" className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Button variant="outline" className="w-full">
                 <UserPlus className="w-4 h-4 mr-2" />
                 Criar nova conta
               </Button>

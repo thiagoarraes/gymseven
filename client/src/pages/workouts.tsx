@@ -13,6 +13,7 @@ import { z } from "zod";
 import { workoutTemplateApi, workoutLogApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
 
 const workoutFormSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -27,6 +28,7 @@ export default function Workouts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
+  const { user } = useAuth();
 
   const { data: workoutTemplates = [], isLoading } = useQuery({
     queryKey: ["/api/workout-templates"],
@@ -114,6 +116,7 @@ export default function Workouts() {
         name: template?.name || "Treino",
         startTime: new Date(),
         completed: false,
+        user_id: user?.id || "",
       };
       console.log('Creating workout with data:', workoutData);
       return workoutLogApi.create(workoutData);
@@ -143,7 +146,7 @@ export default function Workouts() {
     if (editingWorkout) {
       updateMutation.mutate({ id: editingWorkout.id, data });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate({ ...data, userId: user?.id || "" });
     }
   };
 
@@ -173,7 +176,7 @@ export default function Workouts() {
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Meus Treinos</h2>
+        <h2 className="text-2xl font-bold text-foreground">Meus Treinos</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button 
@@ -190,9 +193,9 @@ export default function Workouts() {
               Novo Treino
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-slate-700">
+          <DialogContent className="glass-card">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-foreground">
                 {editingWorkout ? "Editar Treino" : "Novo Treino"}
               </DialogTitle>
             </DialogHeader>
@@ -203,11 +206,10 @@ export default function Workouts() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">Nome</FormLabel>
+                      <FormLabel>Nome</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Ex: Push A, Pull B, Legs"
-                          className="bg-slate-800 border-slate-700 text-white"
                           {...field}
                         />
                       </FormControl>
@@ -220,11 +222,10 @@ export default function Workouts() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">Descrição</FormLabel>
+                      <FormLabel>Descrição</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Peito, Ombros e Tríceps..."
-                          className="bg-slate-800 border-slate-700 text-white"
                           {...field}
                         />
                       </FormControl>
@@ -236,7 +237,7 @@ export default function Workouts() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1 border-slate-700 text-slate-300"
+                    className="flex-1"
                     onClick={() => setIsDialogOpen(false)}
                   >
                     Cancelar
