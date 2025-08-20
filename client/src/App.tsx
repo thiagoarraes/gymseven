@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/header";
 import { BottomNavigation } from "@/components/layout/bottom-nav";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
+import { WorkoutProvider } from "@/contexts/workout-context";
 import Dashboard from "@/pages/dashboard";
 import Exercises from "@/pages/exercises";
 import Workouts from "@/pages/workouts";
@@ -16,6 +17,7 @@ import WorkoutTemplateEditor from "@/pages/workout-template-editor";
 import WorkoutHistory from "@/pages/workout-history";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
+import TimerTest from "@/pages/timer-test";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import NotFound from "@/pages/not-found";
@@ -31,26 +33,29 @@ function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
 
 function AuthenticatedRouter() {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="pt-20 pb-20">
-        <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/exercicios" component={ExercisesRoute} />
-          <Route path="/treinos" component={Workouts} />
-          <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
-          <Route path="/progresso" component={AchievementsPage} />
-          <Route path="/workout-session/:id" component={WorkoutSession} />
-          <Route path="/workout-history" component={WorkoutHistory} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/settings" component={Settings} />
-          <Route path="/login" component={Dashboard} />
-          <Route path="/register" component={Dashboard} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-      <BottomNavigation />
-    </div>
+    <WorkoutProvider>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-20 pb-20">
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/exercicios" component={ExercisesRoute} />
+            <Route path="/treinos" component={Workouts} />
+            <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
+            <Route path="/progresso" component={AchievementsPage} />
+            <Route path="/workout-session/:id" component={WorkoutSession} />
+            <Route path="/workout-history" component={WorkoutHistory} />
+            <Route path="/profile" component={Profile} />
+            <Route path="/settings" component={Settings} />
+            <Route path="/timer-test" component={TimerTest} />
+            <Route path="/login" component={Dashboard} />
+            <Route path="/register" component={Dashboard} />
+            <Route component={NotFound} />
+          </Switch>
+        </main>
+        <BottomNavigation />
+      </div>
+    </WorkoutProvider>
   );
 }
 

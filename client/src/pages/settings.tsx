@@ -25,6 +25,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { useTheme } from '@/contexts/theme-context';
+import { useNotifications } from '@/hooks/use-notifications';
 import { changePasswordSchema, type ChangePassword } from '@shared/schema';
 import { z } from 'zod';
 
@@ -47,6 +48,7 @@ export default function Settings() {
   const { user, token } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { permission, isSupported, requestPermission, sendNotification } = useNotifications();
 
   const preferencesForm = useForm<Preferences>({
     resolver: zodResolver(preferencesSchema),
@@ -165,9 +167,27 @@ export default function Settings() {
           {/* Notifications */}
           <Card className="glassmorphism">
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center">
-                <Bell className="mr-2 h-5 w-5" />
-                Notificações
+              <CardTitle className="text-foreground flex items-center justify-between">
+                <div className="flex items-center">
+                  <Bell className="mr-2 h-5 w-5" />
+                  Notificações
+                </div>
+                {isSupported && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      sendNotification({
+                        title: '🧪 Teste de notificação',
+                        body: 'Se você viu isso, as notificações estão funcionando!',
+                        tag: 'test-notification'
+                      });
+                    }}
+                    disabled={permission !== 'granted'}
+                  >
+                    Testar
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -179,17 +199,58 @@ export default function Settings() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base text-foreground">
+                          <FormLabel className="text-base text-foreground flex items-center">
+                            <Bell className="mr-2 h-4 w-4" />
                             Notificações Push
+                            {!isSupported && (
+                              <span className="ml-2 text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                                Não suportado
+                              </span>
+                            )}
+                            {isSupported && permission === 'denied' && (
+                              <span className="ml-2 text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                                Bloqueado
+                              </span>
+                            )}
+                            {isSupported && permission === 'granted' && field.value && (
+                              <span className="ml-2 text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">
+                                Ativo
+                              </span>
+                            )}
                           </FormLabel>
                           <FormDescription className="text-muted-foreground">
-                            Receba lembretes sobre treinos e metas
+                            {!isSupported 
+                              ? 'Seu navegador não suporta notificações push'
+                              : permission === 'denied'
+                              ? 'Ative as notificações nas configurações do navegador'
+                              : 'Receba lembretes sobre treinos e descanso'
+                            }
                           </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                            checked={field.value && permission === 'granted'}
+                            disabled={!isSupported}
+                            onCheckedChange={async (checked) => {
+                              if (checked && permission !== 'granted') {
+                                const granted = await requestPermission();
+                                if (granted) {
+                                  field.onChange(true);
+                                  // Testar notificação
+                                  setTimeout(() => {
+                                    sendNotification({
+                                      title: '🎉 Notificações ativadas!',
+                                      body: 'Você receberá alertas sobre seus treinos.',
+                                      tag: 'welcome-notification'
+                                    });
+                                  }, 1000);
+                                } else {
+                                  field.onChange(false);
+                                }
+                              } else {
+                                field.onChange(checked);
+                              }
+                            }}
                           />
                         </FormControl>
                       </FormItem>
