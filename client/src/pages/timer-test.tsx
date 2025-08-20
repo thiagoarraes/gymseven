@@ -5,10 +5,12 @@ import { Bell, Zap, Trophy, Timer } from 'lucide-react';
 import { RestTimer } from '@/components/rest-timer';
 import { useWorkout } from '@/contexts/workout-context';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useSoundEffects } from '@/hooks/use-sound-effects';
 
 export default function TimerTest() {
   const { startWorkout, endWorkout, isWorkoutActive, currentWorkout, notifyPersonalRecord } = useWorkout();
   const { sendNotification, permission, isSupported } = useNotifications();
+  const soundEffects = useSoundEffects();
 
   const testNotifications = [
     {
@@ -27,13 +29,14 @@ export default function TimerTest() {
       action: () => endWorkout()
     },
     {
-      title: '⏰ Lembrete',
-      body: 'Que tal treinar hoje? Seus músculos estão prontos!',
-      action: () => sendNotification({
-        title: '⏰ Lembrete',
-        body: 'Que tal treinar hoje? Seus músculos estão prontos!',
-        tag: 'workout-reminder'
-      })
+      title: '⏰ Descanso finalizado!',
+      body: 'Teste do som de fim de descanso',
+      action: () => soundEffects.playRestComplete()
+    },
+    {
+      title: '🎵 Teste de som',
+      body: 'Melodia de teste dos efeitos sonoros',
+      action: () => soundEffects.testSound()
     }
   ];
 
@@ -63,11 +66,19 @@ export default function TimerTest() {
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span>Suporte do navegador:</span>
+                <span>Notificações:</span>
                 <span className={`px-2 py-1 rounded text-xs ${
                   isSupported ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
                 }`}>
                   {isSupported ? '✅ Suportado' : '❌ Não suportado'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Efeitos sonoros:</span>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  soundEffects.isSupported ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                }`}>
+                  {soundEffects.isSupported ? '✅ Suportado' : '❌ Não suportado'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -138,10 +149,12 @@ export default function TimerTest() {
               ))}
             </div>
             
-            {(!isSupported || permission !== 'granted') && (
+            {(!isSupported || permission !== 'granted' || !soundEffects.isSupported) && (
               <p className="text-sm text-muted-foreground mt-4 text-center">
                 {!isSupported 
                   ? 'Seu navegador não suporta notificações push.'
+                  : !soundEffects.isSupported
+                  ? 'Efeitos sonoros não suportados neste navegador.'
                   : 'Ative as notificações nas configurações para testar.'
                 }
               </p>

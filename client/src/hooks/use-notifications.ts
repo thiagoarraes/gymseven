@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useToast } from './use-toast';
+import { useSoundEffects } from './use-sound-effects';
 
 export interface NotificationOptions {
   title: string;
@@ -15,6 +16,7 @@ export function useNotifications() {
   const [isSupported, setIsSupported] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const { toast } = useToast();
+  const soundEffects = useSoundEffects();
 
   useEffect(() => {
     // Verificar suporte a notificações
@@ -128,6 +130,7 @@ export function useNotifications() {
 
   // Notificações específicas do GymSeven
   const notifyRestComplete = () => {
+    soundEffects.playRestComplete();
     sendNotification({
       title: '⏰ Descanso finalizado!',
       body: 'Hora de continuar seu treino. Vamos lá!',
@@ -137,6 +140,7 @@ export function useNotifications() {
   };
 
   const notifyWorkoutStart = (workoutName: string) => {
+    soundEffects.playWorkoutStart();
     sendNotification({
       title: '💪 Treino iniciado!',
       body: `Bom treino de ${workoutName}. Foque e dê o seu melhor!`,
@@ -145,6 +149,7 @@ export function useNotifications() {
   };
 
   const notifyWorkoutComplete = (workoutName: string, duration: string) => {
+    soundEffects.playWorkoutComplete();
     sendNotification({
       title: '🎉 Treino concluído!',
       body: `Parabéns! Você finalizou ${workoutName} em ${duration}.`,
@@ -154,6 +159,7 @@ export function useNotifications() {
   };
 
   const notifyPersonalRecord = (exercise: string) => {
+    soundEffects.playPersonalRecord();
     sendNotification({
       title: '🔥 Novo recorde pessoal!',
       body: `Você quebrou seu recorde em ${exercise}. Incrível!`,
@@ -171,5 +177,6 @@ export function useNotifications() {
     notifyWorkoutStart,
     notifyWorkoutComplete,
     notifyPersonalRecord,
+    soundEffects,
   };
 }

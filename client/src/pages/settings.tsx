@@ -48,7 +48,7 @@ export default function Settings() {
   const { user, token } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const { permission, isSupported, requestPermission, sendNotification } = useNotifications();
+  const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
 
   const preferencesForm = useForm<Preferences>({
     resolver: zodResolver(preferencesSchema),
@@ -266,16 +266,42 @@ export default function Settings() {
                           <FormLabel className="text-base text-foreground flex items-center">
                             {field.value ? <Volume2 className="mr-2 h-4 w-4" /> : <VolumeX className="mr-2 h-4 w-4" />}
                             Efeitos Sonoros
+                            {!soundEffects.isSupported && (
+                              <span className="ml-2 text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                                Não suportado
+                              </span>
+                            )}
+                            {soundEffects.isSupported && field.value && (
+                              <span className="ml-2 text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">
+                                Ativo
+                              </span>
+                            )}
                           </FormLabel>
                           <FormDescription className="text-muted-foreground">
-                            Sons de feedback durante o treino
+                            {soundEffects.isSupported 
+                              ? 'Sons de feedback durante treinos e descanso'
+                              : 'Seu navegador não suporta áudio'
+                            }
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={field.value && soundEffects.isSupported}
+                              disabled={!soundEffects.isSupported}
+                              onCheckedChange={field.onChange}
+                            />
+                            {field.value && soundEffects.isSupported && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => soundEffects.testSound()}
+                                className="text-xs px-2 py-1 h-6"
+                              >
+                                Testar
+                              </Button>
+                            )}
+                          </div>
                         </FormControl>
                       </FormItem>
                     )}

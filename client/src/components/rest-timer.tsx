@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Play, Pause, RotateCcw } from 'lucide-react';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useSoundEffects } from '@/hooks/use-sound-effects';
 
 interface RestTimerProps {
   defaultTime?: number; // em segundos
@@ -14,6 +15,7 @@ export function RestTimer({ defaultTime = 90, onComplete }: RestTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const { notifyRestComplete } = useNotifications();
+  const soundEffects = useSoundEffects();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -49,6 +51,10 @@ export function RestTimer({ defaultTime = 90, onComplete }: RestTimerProps) {
   const startTimer = () => {
     setIsRunning(true);
     setIsCompleted(false);
+    // Som sutil de início
+    if (soundEffects.isEnabled) {
+      soundEffects.playButtonClick();
+    }
   };
 
   const pauseTimer = () => {
