@@ -456,7 +456,7 @@ export default function Dashboard() {
         {/* Card 1: Treinos desta semana */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex-shrink-0">
                 <Calendar className="text-blue-400 w-5 h-5" />
@@ -473,7 +473,7 @@ export default function Dashboard() {
         {/* Card 2: Melhor dia da semana */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
                 <Flame className="text-purple-400 w-5 h-5" />
@@ -490,7 +490,7 @@ export default function Dashboard() {
         {/* Card 3: Tempo médio */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-green-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-green-500/10 rounded-xl border border-green-500/20 flex-shrink-0">
                 <Clock className="text-green-400 w-5 h-5" />
@@ -507,7 +507,7 @@ export default function Dashboard() {
         {/* Card 4: Exercícios com peso aumentado */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-yellow-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-yellow-500/10 rounded-xl border border-yellow-500/20 flex-shrink-0">
                 <TrendingUp className="text-yellow-400 w-5 h-5" />
