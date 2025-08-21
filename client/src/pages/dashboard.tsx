@@ -547,8 +547,8 @@ export default function Dashboard() {
             </div>
           ) : recentWorkouts.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100/60 dark:bg-muted/50 flex items-center justify-center border border-blue-200/50 dark:border-border">
-                <List className="w-8 h-8 text-muted-foreground" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50/60 dark:bg-muted/30 flex items-center justify-center border border-blue-200/30 dark:border-border/30">
+                <List className="w-8 h-8 text-blue-500 dark:text-blue-400" />
               </div>
               <p className="text-muted-foreground mb-4">Nenhum treino registrado ainda</p>
               <Button 
