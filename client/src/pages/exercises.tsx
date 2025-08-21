@@ -532,10 +532,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         <div className="mt-2">
                           {(() => {
                             const groupInfo = getMuscleGroupInfo(exercise.muscleGroup);
-                            const IconComponent = groupInfo.icon;
                             return (
-                              <div className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
-                                <IconComponent className="w-3.5 h-3.5" />
+                              <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
                                 <span className="text-xs font-semibold tracking-wide">
                                   {exercise.muscleGroup}
                                 </span>
