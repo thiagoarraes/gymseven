@@ -121,28 +121,6 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     },
   });
 
-  const deleteAllMutation = useMutation({
-    mutationFn: async () => {
-      // Delete all exercises one by one
-      for (const exercise of exercises) {
-        await exerciseApi.delete(exercise.id);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
-      toast({
-        title: "Todos os exercícios excluídos!",
-        description: "Todos os exercícios foram removidos com sucesso.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir todos os exercícios.",
-        variant: "destructive",
-      });
-    },
-  });
 
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
@@ -184,11 +162,6 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     }
   };
 
-  const handleDeleteAll = () => {
-    if (confirm("Tem certeza que deseja excluir TODOS os exercícios? Esta ação não pode ser desfeita.")) {
-      deleteAllMutation.mutate();
-    }
-  };
 
   const handleSwipeEnd = (info: any, exerciseId: string) => {
     const { offset, velocity } = info;
@@ -235,103 +208,90 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
             {selectionMode ? "Escolha os exercícios para seu treino" : "Gerencie seus exercícios"}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {!selectionMode && exercises.length > 0 && (
-            <Button
-              variant="outline"
-              className="text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950"
-              onClick={handleDeleteAll}
-              disabled={deleteAllMutation.isPending}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              className="gradient-accent hover:scale-105 transition-transform"
+              onClick={resetForm}
             >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {deleteAllMutation.isPending ? "Excluindo..." : "Limpar Todos"}
+              <Plus className="w-4 h-4 mr-2" />
+              Novo
             </Button>
-          )}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                className="gradient-accent hover:scale-105 transition-transform"
-                onClick={resetForm}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Novo
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700 backdrop-blur-md">
-              <DialogHeader>
-                <DialogTitle className="text-foreground">
-                  {editingExercise ? "Editar Exercício" : "Novo Exercício"}
-                </DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground">Nome</FormLabel>
+          </DialogTrigger>
+          <DialogContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700 backdrop-blur-md">
+            <DialogHeader>
+              <DialogTitle className="text-foreground">
+                {editingExercise ? "Editar Exercício" : "Novo Exercício"}
+              </DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground">Nome</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Supino Reto"
+                          className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-muted-foreground"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="muscleGroup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground">Grupo Muscular</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <Input
-                            placeholder="Ex: Supino Reto"
-                            className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-muted-foreground"
-                            {...field}
-                          />
+                          <SelectTrigger className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
+                            <SelectValue placeholder="Selecione o grupo muscular" className="text-muted-foreground" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="muscleGroup"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-foreground">Grupo Muscular</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
-                              <SelectValue placeholder="Selecione o grupo muscular" className="text-muted-foreground" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
-                            {MUSCLE_GROUPS.map((group) => (
-                              <SelectItem 
-                                key={group} 
-                                value={group}
-                                className="text-foreground hover:bg-blue-100/60 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-100/60 dark:focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-300"
-                              >
-                                {group}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex space-x-3 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-700/50"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-1 gradient-accent"
-                      disabled={createMutation.isPending || updateMutation.isPending}
-                    >
-                      {editingExercise ? "Atualizar" : "Criar"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                        <SelectContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
+                          {MUSCLE_GROUPS.map((group) => (
+                            <SelectItem 
+                              key={group} 
+                              value={group}
+                              className="text-foreground hover:bg-blue-100/60 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-100/60 dark:focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-300"
+                            >
+                              {group}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-700/50"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 gradient-accent"
+                    disabled={createMutation.isPending || updateMutation.isPending}
+                  >
+                    {editingExercise ? "Atualizar" : "Criar"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search & Filters */}
