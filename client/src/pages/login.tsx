@@ -192,16 +192,11 @@ export default function Login() {
                 </form>
               </Form>
 
-              {/* Divider with improved spacing */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-600/30"></div>
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm px-6 py-2 text-slate-300 font-medium text-sm rounded-full border border-slate-600/30">
-                    Novo por aqui?
-                  </span>
-                </div>
+              {/* Simple section divider */}
+              <div className="my-8 text-center">
+                <p className="text-slate-400 text-sm font-medium">
+                  Não tem uma conta ainda?
+                </p>
               </div>
 
               {/* Register Button with improved design */}
