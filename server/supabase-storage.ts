@@ -50,11 +50,11 @@ export class SupabaseStorage implements IStorage {
       id: dbExercise.id,
       userId: dbExercise.user_id,
       name: dbExercise.name,
-      muscleGroup: dbExercise.muscle_group,
+      muscleGroup: dbExercise.muscleGroup || dbExercise.muscle_group,
       description: dbExercise.description,
-      imageUrl: dbExercise.image_url,
-      videoUrl: dbExercise.video_url,
-      createdAt: dbExercise.created_at
+      imageUrl: dbExercise.imageUrl || dbExercise.image_url || null,
+      videoUrl: dbExercise.videoUrl || dbExercise.video_url || null,
+      createdAt: dbExercise.created_at || dbExercise.createdAt
     } as Exercise;
   }
 
@@ -411,13 +411,14 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
-    // Map properties correctly for Supabase (snake_case for database fields)
+    // Map properties correctly for Supabase - only insert fields that exist
     const dbExercise = {
       name: exercise.name,
-      muscle_group: exercise.muscleGroup,
+      muscleGroup: exercise.muscleGroup,
       description: exercise.description,
-      image_url: exercise.imageUrl,
-      video_url: exercise.videoUrl,
+      // Don't try to insert imageUrl and videoUrl fields for now since they don't exist in current schema
+      // image_url: exercise.imageUrl,
+      // video_url: exercise.videoUrl,
       user_id: exercise.userId
     };
 
@@ -435,13 +436,14 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
-    // Map properties correctly for Supabase (snake_case for database fields)
+    // Map properties correctly for Supabase - only update fields that exist
     const dbUpdate: any = {};
     if (exercise.name !== undefined) dbUpdate.name = exercise.name;
-    if (exercise.muscleGroup !== undefined) dbUpdate.muscle_group = exercise.muscleGroup;
+    if (exercise.muscleGroup !== undefined) dbUpdate.muscleGroup = exercise.muscleGroup;
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
-    if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl;
-    if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl;
+    // Don't try to update imageUrl and videoUrl fields for now since they don't exist in current schema
+    // if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl;
+    // if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl;
     if (exercise.userId !== undefined) dbUpdate.user_id = exercise.userId;
 
     let query = supabase
@@ -480,7 +482,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('muscle_group', muscleGroup)
+      .eq('muscleGroup', muscleGroup)
       .eq('user_id', userId);
 
     if (error) throw error;
