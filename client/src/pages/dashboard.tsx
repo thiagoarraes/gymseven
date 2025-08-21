@@ -410,8 +410,8 @@ export default function Dashboard() {
             {/* Streak Card */}
             <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-3 sm:p-5 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-200">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-emerald-500/30">
-                  <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 dark:from-emerald-500/30 dark:to-blue-500/30 flex items-center justify-center border border-emerald-500/30 dark:border-emerald-400/40">
+                  <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 dark:text-emerald-300" />
                 </div>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-foreground">Sequência</h3>
