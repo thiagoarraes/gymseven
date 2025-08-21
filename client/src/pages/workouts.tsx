@@ -276,13 +276,13 @@ export default function Workouts() {
         </div>
       ) : workoutTemplates.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
-            <Dumbbell className="w-8 h-8 text-slate-400" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100/60 dark:bg-slate-800/50 flex items-center justify-center border border-blue-200/50 dark:border-border">
+            <Dumbbell className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             Nenhum treino cadastrado
           </h3>
-          <p className="text-slate-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             Crie seu primeiro modelo de treino para começar
           </p>
           <Button 
@@ -307,14 +307,14 @@ export default function Workouts() {
               <CardContent className="p-6 pb-4 flex flex-col h-full">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">{template.name}</h3>
-                    <p className="text-sm text-slate-400">{template.description || "Sem descrição"}</p>
+                    <h3 className="text-lg font-semibold text-foreground mb-1">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground">{template.description || "Sem descrição"}</p>
                   </div>
                   <div className="flex space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="p-2 bg-slate-800/50 rounded-lg hover:bg-slate-700 transition-colors"
+                      className="p-2 bg-muted/50 dark:bg-slate-800/50 rounded-lg hover:bg-muted dark:hover:bg-slate-700 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         // TODO: Implement duplicate functionality
@@ -324,29 +324,29 @@ export default function Workouts() {
                         });
                       }}
                     >
-                      <Copy className="text-slate-400 w-4 h-4" />
+                      <Copy className="text-muted-foreground dark:text-slate-400 w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="p-2 bg-slate-800/50 rounded-lg hover:bg-slate-700 transition-colors"
+                      className="p-2 bg-muted/50 dark:bg-slate-800/50 rounded-lg hover:bg-muted dark:hover:bg-slate-700 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/workout-template/${template.id}`);
                       }}
                     >
-                      <Edit3 className="text-slate-400 w-4 h-4" />
+                      <Edit3 className="text-muted-foreground dark:text-slate-400 w-4 h-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="p-2 bg-slate-800/50 rounded-lg hover:bg-red-500/20 hover:border-red-500/20 transition-colors"
+                      className="p-2 bg-muted/50 dark:bg-slate-800/50 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 hover:border-red-200 dark:hover:border-red-500/20 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDelete(template.id);
                       }}
                     >
-                      <Trash2 className="text-red-400 hover:text-red-300 w-4 h-4" />
+                      <Trash2 className="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -354,14 +354,14 @@ export default function Workouts() {
                 {/* Exercise List */}
                 <div className="space-y-3 flex-1">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-slate-300">
-                      <Dumbbell className="text-blue-400 mr-2 w-4 h-4" />
+                    <div className="flex items-center text-sm text-foreground">
+                      <Dumbbell className="text-blue-500 dark:text-blue-400 mr-2 w-4 h-4" />
                       <span>{template.exercises?.length || 0} exercícios</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg px-2 py-1 transition-all duration-200"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg px-2 py-1 transition-all duration-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/workout-template/${template.id}`);
@@ -374,26 +374,26 @@ export default function Workouts() {
                   <div className="space-y-2">
                     {template.exercises && template.exercises.length > 0 ? (
                       template.exercises.slice(0, 3).map((exercise: any, index: number) => (
-                        <div key={exercise.id} className="flex items-center text-xs text-slate-400">
+                        <div key={exercise.id} className="flex items-center text-xs text-muted-foreground">
                           <span className="w-4 text-center">{index + 1}</span>
                           <span className="flex-1 ml-2">{exercise.exercise?.name || exercise.name || 'Exercício'}</span>
-                          <span className="text-blue-400 text-xs">{exercise.sets}×{exercise.reps}</span>
+                          <span className="text-blue-500 dark:text-blue-400 text-xs">{exercise.sets}×{exercise.reps}</span>
                         </div>
                       ))
                     ) : (
                       <div 
-                        className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 text-center cursor-pointer hover:bg-slate-800/50 transition-colors"
+                        className="bg-muted/30 dark:bg-slate-800/30 border border-border dark:border-slate-700 rounded-lg p-3 text-center cursor-pointer hover:bg-muted/50 dark:hover:bg-slate-800/50 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/workout-template/${template.id}`);
                         }}
                       >
-                        <span className="text-slate-400 text-sm">+ Adicionar exercícios</span>
+                        <span className="text-muted-foreground text-sm">+ Adicionar exercícios</span>
                       </div>
                     )}
                     
                     {template.exercises && template.exercises.length > 3 && (
-                      <div className="text-xs text-slate-500 text-center pt-1">
+                      <div className="text-xs text-muted-foreground/70 text-center pt-1">
                         +{template.exercises.length - 3} mais exercícios
                       </div>
                     )}
