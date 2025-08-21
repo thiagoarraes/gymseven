@@ -257,8 +257,8 @@ export default function Register() {
               </Form>
 
               {/* Simple section divider with more spacing */}
-              <div className="mt-16 mb-10 text-center">
-                <p className="text-slate-400 text-sm font-medium">
+              <div className="mt-16 mb-12 text-center">
+                <p className="text-slate-400 text-sm font-medium mb-2">
                   Já possui uma conta?
                 </p>
               </div>
