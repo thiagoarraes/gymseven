@@ -309,9 +309,11 @@ export const MUSCLE_GROUPS = [
   "Peito",
   "Costas", 
   "Ombros",
-  "Braços",
+  "Bíceps",
+  "Tríceps",
   "Pernas",
-  "Abdômen"
+  "Abdômen",
+  "Cardio"
 ] as const;
 
 export const ACTIVITY_LEVELS = [
