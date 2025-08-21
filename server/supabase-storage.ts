@@ -411,13 +411,13 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
-    // Map properties correctly for Supabase (camelCase, except user_id)
+    // Map properties correctly for Supabase (snake_case for database fields)
     const dbExercise = {
       name: exercise.name,
-      muscleGroup: exercise.muscleGroup,
+      muscle_group: exercise.muscleGroup,
       description: exercise.description,
-      imageUrl: exercise.imageUrl,
-      videoUrl: exercise.videoUrl,
+      image_url: exercise.imageUrl,
+      video_url: exercise.videoUrl,
       user_id: exercise.userId
     };
 
@@ -435,13 +435,13 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
-    // Map properties correctly for Supabase (camelCase, except user_id)
+    // Map properties correctly for Supabase (snake_case for database fields)
     const dbUpdate: any = {};
     if (exercise.name !== undefined) dbUpdate.name = exercise.name;
-    if (exercise.muscleGroup !== undefined) dbUpdate.muscleGroup = exercise.muscleGroup;
+    if (exercise.muscleGroup !== undefined) dbUpdate.muscle_group = exercise.muscleGroup;
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
-    if (exercise.imageUrl !== undefined) dbUpdate.imageUrl = exercise.imageUrl;
-    if (exercise.videoUrl !== undefined) dbUpdate.videoUrl = exercise.videoUrl;
+    if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl;
+    if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl;
     if (exercise.userId !== undefined) dbUpdate.user_id = exercise.userId;
 
     let query = supabase
@@ -480,7 +480,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('muscleGroup', muscleGroup)
+      .eq('muscle_group', muscleGroup)
       .eq('user_id', userId);
 
     if (error) throw error;
