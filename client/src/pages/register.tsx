@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation } from 'wouter';
@@ -14,9 +14,14 @@ import { registerSchema, type RegisterUser } from '@shared/schema';
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const { register } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const form = useForm<RegisterUser>({
     resolver: zodResolver(registerSchema),
@@ -96,16 +101,26 @@ export default function Register() {
 
       {/* Right side - Register Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md">
+        <div className={`w-full max-w-md transition-all duration-1000 ease-out ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center shadow-xl">
-              <Dumbbell className="w-8 h-8 text-white" />
+          <div className={`lg:hidden text-center mb-8 transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`} style={{transitionDelay: '200ms'}}>
+            <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center shadow-xl transition-all duration-700 ease-out hover:scale-110 hover:rotate-3 ${
+              isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 rotate-12'
+            }`} style={{transitionDelay: '100ms'}}>
+              <Dumbbell className="w-8 h-8 text-white transition-transform duration-300 hover:rotate-12" />
             </div>
-            <h1 className="text-2xl font-bold text-white">GymSeven</h1>
+            <h1 className={`text-2xl font-bold text-white transition-all duration-1000 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`} style={{transitionDelay: '300ms'}}>GymSeven</h1>
           </div>
 
-          <Card className="glass-card border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-xl shadow-2xl">
+          <Card className={`glass-card border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-xl shadow-2xl transition-all duration-1000 ease-out hover:shadow-3xl hover:bg-slate-800/50 ${
+            isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+          }`} style={{transitionDelay: '400ms'}}>
             <CardHeader className="text-center space-y-4 pb-6">
               <div>
                 <CardTitle className="text-3xl font-bold text-white tracking-tight">Criar Conta</CardTitle>
@@ -118,7 +133,9 @@ export default function Register() {
             <CardContent className="space-y-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className={`grid grid-cols-2 gap-4 transition-all duration-700 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`} style={{transitionDelay: '600ms'}}>
                     <FormField
                       control={form.control}
                       name="firstName"
@@ -129,7 +146,7 @@ export default function Register() {
                             <Input
                               {...field}
                               placeholder="João"
-                              className="h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl"
+                              className="h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl transition-all duration-300 hover:bg-slate-800/70 focus:scale-[1.02]"
                               disabled={loading}
                             />
                           </FormControl>
@@ -148,7 +165,7 @@ export default function Register() {
                             <Input
                               {...field}
                               placeholder="Silva"
-                              className="h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl"
+                              className="h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl transition-all duration-300 hover:bg-slate-800/70 focus:scale-[1.02]"
                               disabled={loading}
                             />
                           </FormControl>
@@ -158,28 +175,32 @@ export default function Register() {
                     />
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-200 font-medium">Email</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                            <Input
-                              {...field}
-                              type="email"
-                              placeholder="seu@email.com"
-                              className="pl-12 h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl"
-                              disabled={loading}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className={`transition-all duration-700 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`} style={{transitionDelay: '700ms'}}>
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-200 font-medium">Email</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 transition-colors duration-300 group-focus-within:text-emerald-400" />
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="seu@email.com"
+                                className="pl-12 h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl transition-all duration-300 hover:bg-slate-800/70 focus:scale-[1.02]"
+                                disabled={loading}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -203,44 +224,51 @@ export default function Register() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-200 font-medium">Senha</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                            <Input
-                              {...field}
-                              type={showPassword ? 'text' : 'password'}
-                              placeholder="Sua senha"
-                              className="pl-12 pr-12 h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl"
-                              disabled={loading}
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-10 w-10 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg"
-                              onClick={() => setShowPassword(!showPassword)}
-                              disabled={loading}
-                            >
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </Button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className={`transition-all duration-700 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`} style={{transitionDelay: '800ms'}}>
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-200 font-medium">Senha</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 transition-colors duration-300 group-focus-within:text-emerald-400" />
+                              <Input
+                                {...field}
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="Sua senha"
+                                className="pl-12 pr-12 h-12 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-400 focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-xl transition-all duration-300 hover:bg-slate-800/70 focus:scale-[1.02]"
+                                disabled={loading}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-10 w-10 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-300 hover:scale-110"
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={loading}
+                              >
+                                {showPassword ? <EyeOff className="w-4 h-4 transition-transform duration-300" /> : <Eye className="w-4 h-4 transition-transform duration-300" />}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
-                    disabled={loading}
-                  >
+                  <div className={`transition-all duration-700 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`} style={{transitionDelay: '900ms'}}>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                      disabled={loading}
+                    >
                     {loading ? (
                       <div className="flex items-center space-x-3">
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -252,7 +280,8 @@ export default function Register() {
                         <span>Criar Conta</span>
                       </div>
                     )}
-                  </Button>
+                    </Button>
+                  </div>
                 </form>
               </Form>
 
