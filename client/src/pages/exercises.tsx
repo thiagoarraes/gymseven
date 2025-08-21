@@ -481,14 +481,14 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   {/* Stats Section */}
                   <div className="px-4 pb-4">
                     <div className="bg-blue-100/50 dark:bg-slate-800/30 rounded-xl p-3 space-y-3 border border-blue-200/40 dark:border-slate-700/30">
-                      {/* Muscle Group */}
+                      {/* Max Weight */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Target className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                          <span className="text-xs text-muted-foreground">Grupo muscular</span>
+                          <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                          <span className="text-xs text-muted-foreground">Peso máx.</span>
                         </div>
-                        <span className="text-sm font-medium text-blue-500 dark:text-blue-400 capitalize">
-                          {exercise.muscleGroup || "Não definido"}
+                        <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
+                          {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
                         </span>
                       </div>
 
