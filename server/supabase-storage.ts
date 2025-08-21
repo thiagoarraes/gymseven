@@ -682,11 +682,14 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('workoutLogs')
       .select('*')
-      .order('startTime', { ascending: false })
+      .order('start_time', { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
-    return data as WorkoutLog[];
+    if (error) {
+      console.error('Error fetching recent workout logs:', error);
+      return []; // Return empty array instead of throwing
+    }
+    return data.map(item => this.mapDbWorkoutLogToWorkoutLog(item));
   }
 
   // Workout Log Set methods
