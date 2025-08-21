@@ -121,6 +121,29 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     },
   });
 
+  const deleteAllMutation = useMutation({
+    mutationFn: async () => {
+      // Delete all exercises one by one
+      for (const exercise of exercises) {
+        await exerciseApi.delete(exercise.id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
+      toast({
+        title: "Todos os exercícios excluídos!",
+        description: "Todos os exercícios foram removidos com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir todos os exercícios.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseFormSchema),
     defaultValues: {
@@ -158,6 +181,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const handleDelete = (id: string) => {
     if (confirm("Tem certeza que deseja excluir este exercício?")) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const handleDeleteAll = () => {
+    if (confirm("Tem certeza que deseja excluir TODOS os exercícios? Esta ação não pode ser desfeita.")) {
+      deleteAllMutation.mutate();
     }
   };
 
@@ -206,90 +235,103 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
             {selectionMode ? "Escolha os exercícios para seu treino" : "Gerencie seus exercícios"}
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              className="gradient-accent hover:scale-105 transition-transform"
-              onClick={resetForm}
+        <div className="flex items-center gap-3">
+          {!selectionMode && exercises.length > 0 && (
+            <Button
+              variant="outline"
+              className="text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950"
+              onClick={handleDeleteAll}
+              disabled={deleteAllMutation.isPending}
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Novo
+              <Trash2 className="w-4 h-4 mr-2" />
+              {deleteAllMutation.isPending ? "Excluindo..." : "Limpar Todos"}
             </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700 backdrop-blur-md">
-            <DialogHeader>
-              <DialogTitle className="text-foreground">
-                {editingExercise ? "Editar Exercício" : "Novo Exercício"}
-              </DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-foreground">Nome</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Supino Reto"
-                          className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-muted-foreground"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="muscleGroup"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-foreground">Grupo Muscular</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                className="gradient-accent hover:scale-105 transition-transform"
+                onClick={resetForm}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700 backdrop-blur-md">
+              <DialogHeader>
+                <DialogTitle className="text-foreground">
+                  {editingExercise ? "Editar Exercício" : "Novo Exercício"}
+                </DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-foreground">Nome</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
-                            <SelectValue placeholder="Selecione o grupo muscular" className="text-muted-foreground" />
-                          </SelectTrigger>
+                          <Input
+                            placeholder="Ex: Supino Reto"
+                            className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-muted-foreground"
+                            {...field}
+                          />
                         </FormControl>
-                        <SelectContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
-                          {MUSCLE_GROUPS.map((group) => (
-                            <SelectItem 
-                              key={group} 
-                              value={group}
-                              className="text-foreground hover:bg-blue-100/60 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-100/60 dark:focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-300"
-                            >
-                              {group}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex space-x-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-700/50"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 gradient-accent"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                  >
-                    {editingExercise ? "Atualizar" : "Criar"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="muscleGroup"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-foreground">Grupo Muscular</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
+                              <SelectValue placeholder="Selecione o grupo muscular" className="text-muted-foreground" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
+                            {MUSCLE_GROUPS.map((group) => (
+                              <SelectItem 
+                                key={group} 
+                                value={group}
+                                className="text-foreground hover:bg-blue-100/60 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-100/60 dark:focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-300"
+                              >
+                                {group}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex space-x-3 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-700/50"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="flex-1 gradient-accent"
+                      disabled={createMutation.isPending || updateMutation.isPending}
+                    >
+                      {editingExercise ? "Atualizar" : "Criar"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search & Filters */}
@@ -519,34 +561,41 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                               }
                               if (diffDays < 7) return `${diffDays}d atrás`;
                               if (diffDays < 30) return `${Math.floor(diffDays / 7)}sem atrás`;
-                              return "1+ mês";
+                              return `${Math.floor(diffDays / 30)}mês atrás`;
                             })()
-                          ) : "Nunca"}
+                          ) : (
+                            "Nunca"
+                          )}
                         </span>
                       </div>
 
                       {/* Total Sessions */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                          <Target className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                           <span className="text-xs text-muted-foreground">Sessões</span>
                         </div>
-                        <span className="text-sm font-medium text-purple-500 dark:text-purple-400">
+                        <span className="text-sm font-bold text-amber-500 dark:text-amber-400">
                           {exercise.totalSessions || 0}
                         </span>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Weight Progress Accordion */}
-                    <Collapsible open={expandedExercise === exercise.id} onOpenChange={(open) => setExpandedExercise(open ? exercise.id : null)}>
+                  {/* Expandable Weight History */}
+                  <div className="px-4 pb-4">
+                    <Collapsible
+                      open={expandedExercise === exercise.id}
+                      onOpenChange={(isOpen) => setExpandedExercise(isOpen ? exercise.id : null)}
+                    >
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="w-full mt-3 p-2 hover:bg-blue-100/60 dark:hover:bg-slate-700/30 rounded-lg border border-blue-200/40 dark:border-slate-600/30 transition-colors"
+                          className="w-full h-auto p-2 text-xs text-muted-foreground hover:text-foreground hover:bg-blue-100/50 dark:hover:bg-slate-700/30 rounded-lg transition-colors"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="flex items-center justify-center space-x-2 text-foreground">
-                            <BarChart3 className="w-4 h-4" />
-                            <span className="text-sm font-medium">Progresso de Peso</span>
+                          <div className="flex items-center justify-between w-full">
+                            <span>Histórico de Peso</span>
                             {expandedExercise === exercise.id ? (
                               <ChevronUp className="w-4 h-4" />
                             ) : (
@@ -555,38 +604,41 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                           </div>
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-3">
-                        <div className="bg-blue-100/40 dark:bg-slate-900/30 rounded-xl p-3 border border-blue-200/40 dark:border-slate-600/30">
+                      <CollapsibleContent className="mt-2">
+                        <div className="bg-white/40 dark:bg-slate-900/30 rounded-lg p-3 border border-blue-200/30 dark:border-slate-700/30">
                           {weightHistoryLoading ? (
-                            <div className="text-center py-4">
-                              <div className="loading-skeleton h-4 rounded mb-2 mx-auto w-32"></div>
-                              <div className="space-y-2">
-                                {[...Array(3)].map((_, i) => (
-                                  <div key={i} className="flex items-center justify-between py-1">
-                                    <div className="loading-skeleton h-3 rounded w-16"></div>
-                                    <div className="loading-skeleton h-3 rounded w-12"></div>
-                                  </div>
-                                ))}
-                              </div>
+                            <div className="space-y-2">
+                              {[...Array(3)].map((_, i) => (
+                                <div key={i} className="flex justify-between items-center">
+                                  <div className="loading-skeleton h-3 w-16 rounded"></div>
+                                  <div className="loading-skeleton h-3 w-12 rounded"></div>
+                                </div>
+                              ))}
                             </div>
                           ) : weightHistory.length > 0 ? (
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-muted-foreground">Histórico de Peso</span>
-                                <span className="text-xs text-muted-foreground/80">{weightHistory.length} sessões</span>
+                              <div className="text-xs font-medium text-muted-foreground mb-2 pb-1 border-b border-border/30 dark:border-slate-700/50">
+                                Últimas 6 sessões
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-1.5 max-h-32 overflow-y-auto">
                                 {weightHistory.slice(0, 6).map((entry: any, index: number) => (
-                                  <div key={index} className="flex items-center justify-between py-1">
-                                    <span className="text-xs text-muted-foreground/80">{entry.date}</span>
+                                  <div key={index} className="flex items-center justify-between p-1.5 rounded bg-blue-50/50 dark:bg-slate-800/40 border border-blue-100/50 dark:border-slate-700/30">
                                     <div className="flex items-center space-x-2">
-                                      <span className="text-sm font-semibold text-emerald-500 dark:text-emerald-400">{entry.weight}kg</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {new Date(entry.date).toLocaleDateString('pt-BR', { 
+                                          day: '2-digit', 
+                                          month: '2-digit' 
+                                        })}
+                                      </span>
                                       {index === 0 && (
                                         <span className="text-xs bg-emerald-500/20 dark:bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/30">
                                           Mais recente
                                         </span>
                                       )}
                                     </div>
+                                    <span className="text-xs font-bold text-foreground">
+                                      {entry.weight}kg
+                                    </span>
                                   </div>
                                 ))}
                               </div>
