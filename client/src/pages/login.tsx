@@ -182,18 +182,17 @@ export default function Login() {
                         <span>Entrando...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center space-x-3">
                         <LogIn className="w-5 h-5" />
                         <span>Entrar na Conta</span>
-                        <ArrowRight className="w-4 h-4" />
                       </div>
                     )}
                   </Button>
                 </form>
               </Form>
 
-              {/* Simple section divider */}
-              <div className="my-8 text-center">
+              {/* Simple section divider with more spacing */}
+              <div className="mt-10 mb-6 text-center">
                 <p className="text-slate-400 text-sm font-medium">
                   Não tem uma conta ainda?
                 </p>
@@ -208,7 +207,6 @@ export default function Login() {
                   <div className="flex items-center justify-center space-x-3 w-full">
                     <UserPlus className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
                     <span className="font-medium">Criar Nova Conta</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:text-blue-400 transition-all duration-300" />
                   </div>
                 </Button>
               </Link>

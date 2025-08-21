@@ -247,18 +247,17 @@ export default function Register() {
                         <span>Criando conta...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center space-x-3">
                         <UserPlus className="w-5 h-5" />
                         <span>Criar Conta</span>
-                        <ArrowRight className="w-4 h-4" />
                       </div>
                     )}
                   </Button>
                 </form>
               </Form>
 
-              {/* Simple section divider */}
-              <div className="my-8 text-center">
+              {/* Simple section divider with more spacing */}
+              <div className="mt-10 mb-6 text-center">
                 <p className="text-slate-400 text-sm font-medium">
                   Já possui uma conta?
                 </p>
@@ -273,7 +272,6 @@ export default function Register() {
                   <div className="flex items-center justify-center space-x-3 w-full">
                     <LogIn className="w-5 h-5 group-hover:text-emerald-400 transition-colors" />
                     <span className="font-medium">Fazer Login</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:text-emerald-400 transition-all duration-300" />
                   </div>
                 </Button>
               </Link>
