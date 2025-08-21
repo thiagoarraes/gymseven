@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3, Target } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3, Target, Heart, ArrowUp, Zap, Layers, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -29,6 +29,67 @@ interface Exercise {
   name: string;
   muscleGroup: string;
 }
+
+// Função para obter ícone e cores do grupo muscular
+const getMuscleGroupInfo = (muscleGroup: string) => {
+  const groups: Record<string, { icon: any; bgColor: string; textColor: string; borderColor: string }> = {
+    "Peito": { 
+      icon: Heart, 
+      bgColor: "bg-rose-100/80 dark:bg-rose-500/20", 
+      textColor: "text-rose-700 dark:text-rose-400", 
+      borderColor: "border-rose-300/50 dark:border-rose-500/30" 
+    },
+    "Costas": { 
+      icon: ArrowUp, 
+      bgColor: "bg-blue-100/80 dark:bg-blue-500/20", 
+      textColor: "text-blue-700 dark:text-blue-400", 
+      borderColor: "border-blue-300/50 dark:border-blue-500/30" 
+    },
+    "Ombros": { 
+      icon: Layers, 
+      bgColor: "bg-amber-100/80 dark:bg-amber-500/20", 
+      textColor: "text-amber-700 dark:text-amber-400", 
+      borderColor: "border-amber-300/50 dark:border-amber-500/30" 
+    },
+    "Bíceps": { 
+      icon: Zap, 
+      bgColor: "bg-purple-100/80 dark:bg-purple-500/20", 
+      textColor: "text-purple-700 dark:text-purple-400", 
+      borderColor: "border-purple-300/50 dark:border-purple-500/30" 
+    },
+    "Tríceps": { 
+      icon: TrendingUp, 
+      bgColor: "bg-indigo-100/80 dark:bg-indigo-500/20", 
+      textColor: "text-indigo-700 dark:text-indigo-400", 
+      borderColor: "border-indigo-300/50 dark:border-indigo-500/30" 
+    },
+    "Pernas": { 
+      icon: Target, 
+      bgColor: "bg-emerald-100/80 dark:bg-emerald-500/20", 
+      textColor: "text-emerald-700 dark:text-emerald-400", 
+      borderColor: "border-emerald-300/50 dark:border-emerald-500/30" 
+    },
+    "Abdômen": { 
+      icon: Calendar, 
+      bgColor: "bg-orange-100/80 dark:bg-orange-500/20", 
+      textColor: "text-orange-700 dark:text-orange-400", 
+      borderColor: "border-orange-300/50 dark:border-orange-500/30" 
+    },
+    "Cardio": { 
+      icon: Activity, 
+      bgColor: "bg-red-100/80 dark:bg-red-500/20", 
+      textColor: "text-red-700 dark:text-red-400", 
+      borderColor: "border-red-300/50 dark:border-red-500/30" 
+    }
+  };
+
+  return groups[muscleGroup] || { 
+    icon: Dumbbell, 
+    bgColor: "bg-gray-100/80 dark:bg-gray-500/20", 
+    textColor: "text-gray-700 dark:text-gray-400", 
+    borderColor: "border-gray-300/50 dark:border-gray-500/30" 
+  };
+};
 
 interface ExercisesProps {
   selectionMode?: boolean;
@@ -467,9 +528,21 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         <h4 className="font-bold text-foreground text-lg leading-tight truncate">
                           {exercise.name}
                         </h4>
-                        <p className="text-sm text-muted-foreground mt-1 font-medium">
-                          {exercise.muscleGroup}
-                        </p>
+                        {/* Improved Muscle Group Badge */}
+                        <div className="mt-2">
+                          {(() => {
+                            const groupInfo = getMuscleGroupInfo(exercise.muscleGroup);
+                            const IconComponent = groupInfo.icon;
+                            return (
+                              <div className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
+                                <IconComponent className="w-3.5 h-3.5" />
+                                <span className="text-xs font-semibold tracking-wide">
+                                  {exercise.muscleGroup}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
 
