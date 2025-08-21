@@ -388,8 +388,8 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center space-y-3">
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50/60 dark:bg-muted/30 flex items-center justify-center border border-blue-200/30 dark:border-border/30">
-                    <Play className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50/60 dark:bg-blue-500/10 flex items-center justify-center border border-blue-200/30 dark:border-blue-500/20">
+                    <Play className="w-6 h-6 text-blue-500 dark:text-blue-500" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-foreground mb-1">Primeiro Treino</h3>
