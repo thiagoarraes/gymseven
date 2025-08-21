@@ -15,6 +15,7 @@ import { z } from "zod";
 import { exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { MUSCLE_GROUPS } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 
 const exerciseFormSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -44,6 +45,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const [draggedExercise, setDraggedExercise] = useState<string | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: exercises = [], isLoading } = useQuery({
@@ -58,7 +60,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   });
 
   // Fetch weight history for expanded exercise
-  const { data: weightHistory = [] } = useQuery({
+  const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
     queryKey: ["/api/exercise-weight-history", expandedExercise],
     queryFn: () => expandedExercise ? exerciseProgressApi.getWeightHistory(expandedExercise, 8) : [],
     enabled: !!expandedExercise,
@@ -131,6 +133,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     // Add optional fields with null values to match backend schema
     const exerciseData = {
       ...data,
+      userId: user?.id || "",
       description: null,
       imageUrl: null,
       videoUrl: null,
@@ -139,7 +142,6 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     if (editingExercise) {
       updateMutation.mutate({ id: editingExercise.id, data: exerciseData });
     } else {
-      // Add userId to create data - will be added automatically by the backend
       createMutation.mutate(exerciseData);
     }
   };
@@ -555,7 +557,19 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-3">
                         <div className="bg-blue-100/40 dark:bg-slate-900/30 rounded-xl p-3 border border-blue-200/40 dark:border-slate-600/30">
-                          {weightHistory.length > 0 ? (
+                          {weightHistoryLoading ? (
+                            <div className="text-center py-4">
+                              <div className="loading-skeleton h-4 rounded mb-2 mx-auto w-32"></div>
+                              <div className="space-y-2">
+                                {[...Array(3)].map((_, i) => (
+                                  <div key={i} className="flex items-center justify-between py-1">
+                                    <div className="loading-skeleton h-3 rounded w-16"></div>
+                                    <div className="loading-skeleton h-3 rounded w-12"></div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : weightHistory.length > 0 ? (
                             <div className="space-y-2">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-medium text-muted-foreground">Histórico de Peso</span>
@@ -577,8 +591,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                                 ))}
                               </div>
                               {weightHistory.length > 6 && (
-                                <div className="text-center mt-2 pt-2 border-t border-slate-700/50">
-                                  <span className="text-xs text-slate-500">+{weightHistory.length - 6} sessões anteriores</span>
+                                <div className="text-center mt-2 pt-2 border-t border-border/50 dark:border-slate-700/50">
+                                  <span className="text-xs text-muted-foreground/70">+{weightHistory.length - 6} sessões anteriores</span>
                                 </div>
                               )}
                             </div>
