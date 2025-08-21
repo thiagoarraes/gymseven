@@ -192,25 +192,29 @@ export default function Login() {
                 </form>
               </Form>
 
-              {/* Divider */}
-              <div className="relative my-8">
+              {/* Divider with improved spacing */}
+              <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-600/50"></div>
+                  <div className="w-full border-t border-slate-600/30"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="bg-slate-800/50 px-4 text-slate-400 font-medium">Novo por aqui?</span>
+                <div className="relative flex justify-center">
+                  <span className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm px-6 py-2 text-slate-300 font-medium text-sm rounded-full border border-slate-600/30">
+                    Novo por aqui?
+                  </span>
                 </div>
               </div>
 
-              {/* Register Button */}
+              {/* Register Button with improved design */}
               <Link href="/register">
                 <Button 
                   variant="outline" 
-                  className="w-full h-12 border-slate-600/50 bg-slate-800/30 text-white hover:bg-slate-700/50 hover:border-blue-400/50 rounded-xl transition-all duration-300 group"
+                  className="w-full h-12 border-slate-600/40 bg-gradient-to-r from-slate-800/30 to-slate-700/30 text-slate-200 hover:bg-gradient-to-r hover:from-slate-700/50 hover:to-slate-600/50 hover:border-blue-400/50 hover:text-white rounded-xl transition-all duration-300 group backdrop-blur-sm"
                 >
-                  <UserPlus className="w-5 h-5 mr-3 group-hover:text-blue-400 transition-colors" />
-                  <span>Criar Nova Conta</span>
-                  <ArrowRight className="w-4 h-4 ml-3 group-hover:translate-x-1 transition-transform" />
+                  <div className="flex items-center justify-center space-x-3 w-full">
+                    <UserPlus className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
+                    <span className="font-medium">Criar Nova Conta</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:text-blue-400 transition-all duration-300" />
+                  </div>
                 </Button>
               </Link>
 
