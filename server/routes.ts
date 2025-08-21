@@ -798,13 +798,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           }
         }
         
-        // Sort by date (oldest first) for chronological chart display
+        // Sort by date (newest first) so the most recent entry is always index 0
         weightHistory.sort((a, b) => {
           const dateA = a.date.split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
           const dateB = b.date.split('/').reverse().join('-');
-          return new Date(dateA).getTime() - new Date(dateB).getTime();
+          return new Date(dateB).getTime() - new Date(dateA).getTime(); // Reversed order for newest first
         });
-        const limitedHistory = weightHistory.slice(-parseInt(limit as string)); // Take the most recent N entries
+        const limitedHistory = weightHistory.slice(0, parseInt(limit as string)); // Take the most recent N entries from the start
         
         res.json(limitedHistory);
       } else {
