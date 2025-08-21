@@ -461,12 +461,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         <Dumbbell className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-foreground text-lg leading-tight mb-1 truncate">
+                        <h4 className="font-bold text-foreground text-lg leading-tight truncate">
                           {exercise.name}
                         </h4>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-300 border border-indigo-500/20">
+                        <p className="text-sm text-muted-foreground mt-1 font-medium">
                           {exercise.muscleGroup}
-                        </span>
+                        </p>
                       </div>
                     </div>
 
