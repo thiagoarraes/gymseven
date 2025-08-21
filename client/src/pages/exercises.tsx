@@ -623,67 +623,92 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="w-full h-auto p-2 text-xs text-muted-foreground hover:text-foreground hover:bg-blue-100/50 dark:hover:bg-slate-700/30 rounded-lg transition-colors"
+                          className="w-full h-auto p-3 bg-gradient-to-r from-blue-50/60 to-purple-50/60 dark:from-slate-800/40 dark:to-slate-700/40 hover:from-blue-100/80 hover:to-purple-100/80 dark:hover:from-slate-700/60 dark:hover:to-slate-600/60 rounded-xl border border-blue-200/40 dark:border-slate-600/40 transition-all duration-300 shadow-sm hover:shadow-md group"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-between w-full">
-                            <span>Histórico de Peso</span>
+                            <div className="flex items-center space-x-2">
+                              <BarChart3 className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
+                              <span className="text-sm font-medium text-foreground">Histórico de Peso</span>
+                            </div>
                             {expandedExercise === exercise.id ? (
-                              <ChevronUp className="w-4 h-4" />
+                              <ChevronUp className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
                             ) : (
-                              <ChevronDown className="w-4 h-4" />
+                              <ChevronDown className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
                             )}
                           </div>
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-2">
-                        <div className="bg-white/40 dark:bg-slate-900/30 rounded-lg p-3 border border-blue-200/30 dark:border-slate-700/30">
+                      <CollapsibleContent className="mt-3 overflow-hidden transition-all duration-300 data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                        <div className="bg-gradient-to-br from-white/60 to-blue-50/40 dark:from-slate-900/60 dark:to-slate-800/40 rounded-xl p-4 border border-blue-200/50 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
                           {weightHistoryLoading ? (
-                            <div className="space-y-2">
+                            <div className="space-y-3">
+                              <div className="flex items-center space-x-2 mb-3">
+                                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                <span className="text-xs font-medium text-muted-foreground">Carregando histórico...</span>
+                              </div>
                               {[...Array(3)].map((_, i) => (
-                                <div key={i} className="flex justify-between items-center">
-                                  <div className="loading-skeleton h-3 w-16 rounded"></div>
-                                  <div className="loading-skeleton h-3 w-12 rounded"></div>
+                                <div key={i} className="flex justify-between items-center p-2 rounded-lg bg-blue-50/50 dark:bg-slate-800/50">
+                                  <div className="loading-skeleton h-4 w-20 rounded-md"></div>
+                                  <div className="loading-skeleton h-4 w-16 rounded-md"></div>
                                 </div>
                               ))}
                             </div>
                           ) : weightHistory.length > 0 ? (
-                            <div className="space-y-2">
-                              <div className="text-xs font-medium text-muted-foreground mb-2 pb-1 border-b border-border/30 dark:border-slate-700/50">
-                                Últimas 6 sessões
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between mb-3 pb-2 border-b border-blue-200/40 dark:border-slate-700/40">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Últimas 6 sessões</span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">{weightHistory.length} total</span>
                               </div>
-                              <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                              <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
                                 {weightHistory.slice(0, 6).map((entry: any, index: number) => (
-                                  <div key={index} className="flex items-center justify-between p-1.5 rounded bg-blue-50/50 dark:bg-slate-800/40 border border-blue-100/50 dark:border-slate-700/30">
-                                    <div className="flex items-center space-x-2">
-                                      <span className="text-xs text-muted-foreground">
-                                        {new Date(entry.date).toLocaleDateString('pt-BR', { 
-                                          day: '2-digit', 
-                                          month: '2-digit' 
-                                        })}
-                                      </span>
+                                  <motion.div 
+                                    key={index} 
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-blue-50/70 to-white/50 dark:from-slate-800/70 dark:to-slate-700/50 border border-blue-100/60 dark:border-slate-700/60 hover:shadow-sm transition-all duration-200 group"
+                                  >
+                                    <div className="flex items-center space-x-3">
+                                      <div className="flex items-center space-x-2">
+                                        <div className={`w-2 h-2 rounded-full ${index === 0 ? 'bg-emerald-500' : 'bg-blue-400'}`}></div>
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                          {new Date(entry.date).toLocaleDateString('pt-BR', { 
+                                            day: '2-digit', 
+                                            month: '2-digit',
+                                            year: '2-digit'
+                                          })}
+                                        </span>
+                                      </div>
                                       {index === 0 && (
-                                        <span className="text-xs bg-emerald-500/20 dark:bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/30">
+                                        <span className="text-xs bg-emerald-500/20 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/30 font-medium">
                                           Mais recente
                                         </span>
                                       )}
                                     </div>
-                                    <span className="text-xs font-bold text-foreground">
+                                    <span className="text-sm font-bold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                       {entry.weight}kg
                                     </span>
-                                  </div>
+                                  </motion.div>
                                 ))}
                               </div>
                               {weightHistory.length > 6 && (
-                                <div className="text-center mt-2 pt-2 border-t border-border/50 dark:border-slate-700/50">
-                                  <span className="text-xs text-muted-foreground/70">+{weightHistory.length - 6} sessões anteriores</span>
+                                <div className="text-center mt-3 pt-3 border-t border-blue-200/40 dark:border-slate-700/40">
+                                  <span className="text-xs text-muted-foreground/80 bg-blue-50/50 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-blue-200/40 dark:border-slate-700/40">
+                                    +{weightHistory.length - 6} sessões anteriores
+                                  </span>
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <div className="text-center py-4">
-                              <BarChart3 className="w-6 h-6 text-muted-foreground/60 mx-auto mb-2" />
-                              <p className="text-sm text-muted-foreground">Nenhum histórico de peso</p>
+                            <div className="text-center py-6">
+                              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
+                                <BarChart3 className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                              </div>
+                              <p className="text-sm font-medium text-muted-foreground mb-1">Nenhum histórico de peso</p>
                               <p className="text-xs text-muted-foreground/80">Complete treinos para ver o progresso</p>
                             </div>
                           )}
