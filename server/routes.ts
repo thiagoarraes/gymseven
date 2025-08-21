@@ -523,7 +523,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       const validatedData = insertWorkoutTemplateSchema.parse({
         ...req.body,
-        userId: req.user!.id // Use camelCase field name
+        user_id: req.user!.id // Use snake_case field name to match database schema
       });
       const template = await storage.createWorkoutTemplate(validatedData);
       res.status(201).json(template);

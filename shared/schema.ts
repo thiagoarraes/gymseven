@@ -65,7 +65,7 @@ export const userPreferences = pgTable("user_preferences", {
 // Tabela para conquistas do usuário (sistema gamificado isolado por usuário)
 export const userAchievements = pgTable("user_achievements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   achievementId: text("achievement_id").notNull(), // ID da conquista (exemplo: "first_workout", "strength_milestone_100kg")
   unlockedAt: timestamp("unlocked_at").defaultNow(),
   progress: integer("progress").default(0), // Progresso atual para conquistas progressivas
@@ -74,7 +74,7 @@ export const userAchievements = pgTable("user_achievements", {
 
 export const exercises = pgTable("exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   muscleGroup: text("muscle_group").notNull(),
   description: text("description"),
@@ -85,7 +85,7 @@ export const exercises = pgTable("exercises", {
 
 export const workoutTemplates = pgTable("workout_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -274,7 +274,7 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).o
   id: true,
 });
 
-export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ userId: true });
+export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ user_id: true });
 
 // User Achievements schemas
 export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
@@ -282,7 +282,7 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
   unlockedAt: true,
 });
 
-export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ userId: true });
+export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ user_id: true });
 
 // Types
 export type User = typeof users.$inferSelect;
