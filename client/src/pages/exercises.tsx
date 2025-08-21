@@ -216,9 +216,9 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               Novo
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-slate-700">
+          <DialogContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700 backdrop-blur-md">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-foreground">
                 {editingExercise ? "Editar Exercício" : "Novo Exercício"}
               </DialogTitle>
             </DialogHeader>
@@ -229,11 +229,11 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">Nome</FormLabel>
+                      <FormLabel className="text-foreground">Nome</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Ex: Supino Reto"
-                          className="glass-card border-slate-700/50 text-white h-11 rounded-xl hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-slate-400"
+                          className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 placeholder-muted-foreground"
                           {...field}
                         />
                       </FormControl>
@@ -246,19 +246,19 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   name="muscleGroup"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-200">Grupo Muscular</FormLabel>
+                      <FormLabel className="text-foreground">Grupo Muscular</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="glass-card border-slate-700/50 text-white h-11 rounded-xl hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
-                            <SelectValue placeholder="Selecione o grupo muscular" className="text-slate-300" />
+                          <SelectTrigger className="bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700/50 text-foreground h-11 rounded-xl hover:border-blue-400/60 dark:hover:border-blue-500/30 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50">
+                            <SelectValue placeholder="Selecione o grupo muscular" className="text-muted-foreground" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="glass-card border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
+                        <SelectContent className="bg-white/95 dark:bg-slate-900/95 border-blue-200/50 dark:border-slate-700/50 rounded-xl shadow-xl backdrop-blur-md">
                           {MUSCLE_GROUPS.map((group) => (
                             <SelectItem 
                               key={group} 
                               value={group}
-                              className="text-slate-200 hover:bg-blue-500/10 hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-500/10 focus:text-blue-300"
+                              className="text-foreground hover:bg-blue-100/60 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-300 rounded-lg cursor-pointer transition-colors focus:bg-blue-100/60 dark:focus:bg-blue-500/10 focus:text-blue-600 dark:focus:text-blue-300"
                             >
                               {group}
                             </SelectItem>
@@ -273,7 +273,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1 border-slate-700 text-slate-300"
+                    className="flex-1 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-700/50"
                     onClick={() => setIsDialogOpen(false)}
                   >
                     Cancelar
