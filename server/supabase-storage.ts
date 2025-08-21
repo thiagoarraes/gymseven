@@ -435,15 +435,25 @@ export class SupabaseStorage implements IStorage {
     return this.mapDbExerciseToExercise(data);
   }
 
-  async updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined> {
-    const { data, error } = await supabase
+  async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
+    let query = supabase
       .from('exercises')
       .update(exercise)
-      .eq('id', id)
+      .eq('id', id);
+
+    // Add user isolation if userId is provided
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query
       .select()
       .single();
 
-    if (error) return undefined;
+    if (error) {
+      console.error('Error updating exercise:', error);
+      return undefined;
+    }
     return data as Exercise;
   }
 

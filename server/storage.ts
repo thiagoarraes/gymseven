@@ -59,7 +59,7 @@ export interface IStorage {
   getExercises(userId?: string): Promise<Exercise[]>;
   getExercise(id: string): Promise<Exercise | undefined>;
   createExercise(exercise: InsertExercise): Promise<Exercise>;
-  updateExercise(id: string, exercise: Partial<InsertExercise>): Promise<Exercise | undefined>;
+  updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined>;
   deleteExercise(id: string): Promise<boolean>;
   getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]>;
   
@@ -268,9 +268,12 @@ export class MemStorage implements IStorage {
     return exercise;
   }
 
-  async updateExercise(id: string, updates: Partial<InsertExercise>): Promise<Exercise | undefined> {
+  async updateExercise(id: string, updates: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
     const exercise = this.exercises.get(id);
     if (!exercise) return undefined;
+    
+    // Check user ownership if userId is provided
+    if (userId && exercise.userId !== userId) return undefined;
     
     const updated = { ...exercise, ...updates };
     this.exercises.set(id, updated);

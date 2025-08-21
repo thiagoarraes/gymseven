@@ -455,12 +455,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertExerciseSchema.partial().parse(req.body);
-      const exercise = await storage.updateExercise(req.params.id, updates);
+      const exercise = await storage.updateExercise(req.params.id, updates, req.user!.id);
       if (!exercise) {
-        return res.status(404).json({ message: "Exercício não encontrado" });
+        return res.status(404).json({ message: "Exercício não encontrado ou você não tem permissão para editá-lo" });
       }
       res.json(exercise);
     } catch (error) {
+      console.error('Error updating exercise:', error);
       res.status(400).json({ message: "Dados inválidos para atualização do exercício" });
     }
   });
