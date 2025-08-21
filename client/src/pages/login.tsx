@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation } from 'wouter';
-import { Eye, EyeOff, Mail, Lock, LogIn, UserPlus, Dumbbell, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, LogIn, UserPlus, Dumbbell, ArrowRight, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,13 +15,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [loginError, setLoginError] = useState<string>('');
   const { login } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   const form = useForm<LoginUser>({
     resolver: zodResolver(loginSchema),
@@ -31,8 +28,23 @@ export default function Login() {
     },
   });
 
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  // Clear error when user starts typing
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (loginError) {
+        setLoginError('');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, loginError]);
+
   const onSubmit = async (data: LoginUser) => {
     setLoading(true);
+    setLoginError(''); // Clear any previous errors
     try {
       await login(data.email, data.password);
       toast({
@@ -41,11 +53,9 @@ export default function Login() {
       });
       setLocation('/');
     } catch (error: any) {
-      toast({
-        title: "Erro no login",
-        description: error.message || "Verifique suas credenciais",
-        variant: "destructive",
-      });
+      // Set custom error instead of toast
+      const errorMessage = error.message || "Email ou senha incorretos";
+      setLoginError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -193,6 +203,36 @@ export default function Login() {
                       )}
                     />
                   </div>
+
+                  {/* Error Alert */}
+                  {loginError && (
+                    <div className={`bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/30 rounded-xl p-4 mb-4 backdrop-blur-sm transition-all duration-500 ease-out ${
+                      loginError ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'
+                    }`}>
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-red-300 mb-1">
+                            Falha no Login
+                          </h3>
+                          <p className="text-sm text-red-200/80 leading-relaxed">
+                            {loginError}
+                          </p>
+                          <p className="text-xs text-red-200/60 mt-2">
+                            Verifique se o email e senha estão corretos e tente novamente.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setLoginError('')}
+                          className="flex-shrink-0 p-1 hover:bg-red-500/20 rounded-lg transition-colors duration-200"
+                        >
+                          <X className="w-4 h-4 text-red-400 hover:text-red-300" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className={`transition-all duration-700 ease-out ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'

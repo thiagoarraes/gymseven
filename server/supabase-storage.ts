@@ -48,7 +48,7 @@ export class SupabaseStorage implements IStorage {
   private mapDbExerciseToExercise(dbExercise: any): Exercise {
     return {
       id: dbExercise.id,
-      userId: dbExercise.user_id,
+      user_id: dbExercise.user_id,
       name: dbExercise.name,
       muscleGroup: dbExercise.muscleGroup || dbExercise.muscle_group,
       description: dbExercise.description,
@@ -72,7 +72,7 @@ export class SupabaseStorage implements IStorage {
   private mapDbWorkoutTemplateToWorkoutTemplate(dbTemplate: any): WorkoutTemplate {
     return {
       id: dbTemplate.id,
-      userId: dbTemplate.user_id,
+      user_id: dbTemplate.user_id,
       name: dbTemplate.name,
       description: dbTemplate.description,
       createdAt: dbTemplate.created_at
@@ -419,7 +419,7 @@ export class SupabaseStorage implements IStorage {
       // Don't try to insert imageUrl and videoUrl fields for now since they don't exist in current schema
       // image_url: exercise.imageUrl,
       // video_url: exercise.videoUrl,
-      user_id: exercise.userId
+      user_id: exercise.user_id
     };
 
     const { data, error } = await supabase
@@ -444,7 +444,7 @@ export class SupabaseStorage implements IStorage {
     // Don't try to update imageUrl and videoUrl fields for now since they don't exist in current schema
     // if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl;
     // if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl;
-    if (exercise.userId !== undefined) dbUpdate.user_id = exercise.userId;
+    if (exercise.user_id !== undefined) dbUpdate.user_id = exercise.user_id;
 
     let query = supabase
       .from('exercises')
