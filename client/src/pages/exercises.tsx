@@ -484,10 +484,10 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       {/* Max Weight */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <TrendingUp className="w-4 h-4 text-emerald-400" />
+                          <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                           <span className="text-xs text-muted-foreground">Peso máx.</span>
                         </div>
-                        <span className="text-sm font-bold text-emerald-400">
+                        <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
                           {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
                         </span>
                       </div>
@@ -495,10 +495,10 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       {/* Last Workout */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-blue-400" />
+                          <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                           <span className="text-xs text-muted-foreground">Último</span>
                         </div>
-                        <span className="text-sm font-medium text-blue-400">
+                        <span className="text-sm font-medium text-blue-500 dark:text-blue-400">
                           {exercise.lastWorkout ? (
                             (() => {
                               const lastDate = new Date(exercise.lastWorkout);
@@ -528,10 +528,10 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       {/* Total Sessions */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-purple-400" />
+                          <Calendar className="w-4 h-4 text-purple-500 dark:text-purple-400" />
                           <span className="text-xs text-muted-foreground">Sessões</span>
                         </div>
-                        <span className="text-sm font-medium text-purple-400">
+                        <span className="text-sm font-medium text-purple-500 dark:text-purple-400">
                           {exercise.totalSessions || 0}
                         </span>
                       </div>
@@ -580,9 +580,9 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                                   <div key={index} className="flex items-center justify-between py-1">
                                     <span className="text-xs text-muted-foreground/80">{entry.date}</span>
                                     <div className="flex items-center space-x-2">
-                                      <span className="text-sm font-semibold text-emerald-400">{entry.weight}kg</span>
+                                      <span className="text-sm font-semibold text-emerald-500 dark:text-emerald-400">{entry.weight}kg</span>
                                       {index === 0 && (
-                                        <span className="text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30">
+                                        <span className="text-xs bg-emerald-500/20 dark:bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30 dark:border-emerald-500/30">
                                           Mais recente
                                         </span>
                                       )}
