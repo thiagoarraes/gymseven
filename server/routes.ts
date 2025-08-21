@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       const validatedData = insertExerciseSchema.parse({
         ...req.body,
-        user_id: req.user!.id // Ensure exercise belongs to authenticated user
+        userId: req.user!.id // Ensure exercise belongs to authenticated user
       });
       const exercise = await storage.createExercise(validatedData);
       res.status(201).json(exercise);
@@ -439,11 +439,15 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           received: err.received
         }));
         
+        console.error('Validation errors creating exercise:', validationErrors);
+        console.error('Request body:', req.body);
+        
         res.status(400).json({ 
           message: "Dados inválidos para criação do exercício",
           errors: validationErrors
         });
       } else {
+        console.error('Error creating exercise:', error);
         res.status(500).json({ 
           message: "Erro interno do servidor",
           error: error.message

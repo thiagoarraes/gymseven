@@ -133,7 +133,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const onSubmit = (data: ExerciseFormValues) => {
     // Add optional fields with null values to match backend schema
     const exerciseData = {
-      ...data,
+      name: data.name,
+      muscleGroup: data.muscleGroup,
       userId: user?.id || "",
       description: null,
       imageUrl: null,
