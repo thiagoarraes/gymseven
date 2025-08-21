@@ -411,19 +411,15 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
+    // Map properties correctly for Supabase (camelCase, except user_id)
     const dbExercise = {
-      ...exercise,
-      user_id: exercise.userId,
-      muscle_group: exercise.muscleGroup,
-      image_url: exercise.imageUrl,
-      video_url: exercise.videoUrl,
-      created_at: new Date().toISOString()
+      name: exercise.name,
+      muscleGroup: exercise.muscleGroup,
+      description: exercise.description,
+      imageUrl: exercise.imageUrl,
+      videoUrl: exercise.videoUrl,
+      user_id: exercise.userId
     };
-    
-    delete (dbExercise as any).userId;
-    delete (dbExercise as any).muscleGroup;
-    delete (dbExercise as any).imageUrl;
-    delete (dbExercise as any).videoUrl;
 
     const { data, error } = await supabase
       .from('exercises')
@@ -431,18 +427,21 @@ export class SupabaseStorage implements IStorage {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating exercise:', error);
+      throw error;
+    }
     return this.mapDbExerciseToExercise(data);
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
-    // Map camelCase to snake_case for Supabase
+    // Map properties correctly for Supabase (camelCase, except user_id)
     const dbUpdate: any = {};
     if (exercise.name !== undefined) dbUpdate.name = exercise.name;
-    if (exercise.muscleGroup !== undefined) dbUpdate.muscle_group = exercise.muscleGroup;
+    if (exercise.muscleGroup !== undefined) dbUpdate.muscleGroup = exercise.muscleGroup;
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
-    if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl;
-    if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl;
+    if (exercise.imageUrl !== undefined) dbUpdate.imageUrl = exercise.imageUrl;
+    if (exercise.videoUrl !== undefined) dbUpdate.videoUrl = exercise.videoUrl;
     if (exercise.userId !== undefined) dbUpdate.user_id = exercise.userId;
 
     let query = supabase
@@ -481,11 +480,11 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .select('*')
-      .eq('muscle_group', muscleGroup)
+      .eq('muscleGroup', muscleGroup)
       .eq('user_id', userId);
 
     if (error) throw error;
-    return data as Exercise[];
+    return data.map(item => this.mapDbExerciseToExercise(item));
   }
 
   // Workout Templates - user-specific only
