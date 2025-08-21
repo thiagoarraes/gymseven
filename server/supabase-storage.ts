@@ -436,9 +436,18 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
+    // Map camelCase to snake_case for Supabase
+    const dbUpdate: any = {};
+    if (exercise.name !== undefined) dbUpdate.name = exercise.name;
+    if (exercise.muscleGroup !== undefined) dbUpdate.muscle_group = exercise.muscleGroup;
+    if (exercise.description !== undefined) dbUpdate.description = exercise.description;
+    if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl;
+    if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl;
+    if (exercise.userId !== undefined) dbUpdate.user_id = exercise.userId;
+
     let query = supabase
       .from('exercises')
-      .update(exercise)
+      .update(dbUpdate)
       .eq('id', id);
 
     // Add user isolation if userId is provided
@@ -454,7 +463,7 @@ export class SupabaseStorage implements IStorage {
       console.error('Error updating exercise:', error);
       return undefined;
     }
-    return data as Exercise;
+    return this.mapDbExerciseToExercise(data);
   }
 
   async deleteExercise(id: string): Promise<boolean> {
