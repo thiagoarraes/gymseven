@@ -516,14 +516,32 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.post("/api/workout-templates", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log("Workout template creation request:", {
+        body: req.body,
+        userId: req.user!.id
+      });
+      
       const validatedData = insertWorkoutTemplateSchema.parse({
         ...req.body,
-        user_id: req.user!.id // Ensure template belongs to authenticated user
+        userId: req.user!.id // Use camelCase field name
       });
       const template = await storage.createWorkoutTemplate(validatedData);
       res.status(201).json(template);
-    } catch (error) {
-      res.status(400).json({ message: "Dados inválidos para criação do modelo de treino" });
+    } catch (error: any) {
+      console.error("Workout template creation error:", {
+        error: error.message,
+        zodErrors: error.errors,
+        requestBody: req.body
+      });
+      
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos para criação do modelo de treino",
+          errors: error.errors
+        });
+      } else {
+        res.status(400).json({ message: "Dados inválidos para criação do modelo de treino" });
+      }
     }
   });
 
