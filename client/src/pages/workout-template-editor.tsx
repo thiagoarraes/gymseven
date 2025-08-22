@@ -403,7 +403,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                       draggedItem === exercise.id ? 'ring-2 ring-blue-500/50 shadow-2xl' : 'hover:border-slate-600/50'
                     }`}>
                       <CardContent className="mobile-card-padding">
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {/* Mobile-First Exercise Header */}
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start space-x-3 flex-1 min-w-0">
@@ -478,7 +478,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
                           {/* Drag Indicator for Mobile */}
                           <div 
-                            className="sm:hidden flex items-center justify-center py-2 cursor-grab active:cursor-grabbing"
+                            className="sm:hidden flex items-center justify-center py-1 cursor-grab active:cursor-grabbing"
                           >
                             <div className="flex space-x-1">
                               {[...Array(6)].map((_, i) => (
@@ -489,7 +489,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                           </div>
 
                           {/* Parameters Grid */}
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-2 gap-3 mt-1">
                             {exercise.exercise?.muscleGroup === 'Cardio' || exercise.muscleGroup === 'Cardio' ? (
                               <>
                                 {/* Duration for Cardio */}
