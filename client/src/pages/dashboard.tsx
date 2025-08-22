@@ -213,7 +213,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="fade-in header-offset">
+    <div className="fade-in header-offset space-y-6">
       {/* Welcome Section */}
       <Card className="neo-card rounded-3xl hover-lift overflow-hidden">
         <CardContent className="mobile-card-padding relative touch-feedback">
@@ -451,6 +451,7 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Card 1: Treinos desta semana */}
@@ -521,6 +522,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+      
       {/* Recent Workouts */}
       <Card className="glass-card rounded-2xl hover-lift">
         <CardContent className="p-6">
@@ -592,6 +594,7 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+      
       {/* Enhanced Progress Section */}
       <div className="space-y-4">
         {/* Progress Header Card */}
