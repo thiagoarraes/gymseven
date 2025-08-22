@@ -382,7 +382,7 @@ export class MemStorage implements IStorage {
 
   async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
     if (userId) {
-      return Array.from(this.workoutTemplates.values()).filter(wt => wt.userId === userId);
+      return Array.from(this.workoutTemplates.values()).filter(wt => wt.user_id === userId);
     }
     return Array.from(this.workoutTemplates.values());
   }
@@ -595,7 +595,7 @@ export class MemStorage implements IStorage {
   // User Achievements methods
   async getUserAchievements(userId: string): Promise<UserAchievement[]> {
     return Array.from(this.userAchievements?.values() || [])
-      .filter(achievement => achievement.userId === userId);
+      .filter(achievement => achievement.user_id === userId);
   }
 
   async createUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement> {
