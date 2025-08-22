@@ -428,28 +428,28 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             </div>
 
                             {/* Mobile-Optimized Action Menu */}
-                            <div className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
-                              {/* Reorder Controls - Mobile First */}
-                              <div className="flex flex-col sm:hidden gap-1">
+                            <div className="flex flex-row items-center gap-1 flex-shrink-0">
+                              {/* Reorder Controls - Horizontal Layout */}
+                              <div className="flex sm:hidden gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="w-8 h-8 p-0 hover:bg-blue-500/20 rounded-lg transition-colors touch-feedback mobile-focus"
+                                  className="w-7 h-7 p-0 hover:bg-blue-500/20 rounded-md transition-colors touch-feedback mobile-focus"
                                   onClick={() => moveExercise(exercise.id, 'up')}
                                   disabled={index === 0}
                                   data-testid={`move-up-${exercise.id}`}
                                 >
-                                  <ChevronUp className="w-4 h-4 text-blue-400" />
+                                  <ChevronUp className="w-3 h-3 text-blue-400" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="w-8 h-8 p-0 hover:bg-blue-500/20 rounded-lg transition-colors touch-feedback mobile-focus"
+                                  className="w-7 h-7 p-0 hover:bg-blue-500/20 rounded-md transition-colors touch-feedback mobile-focus"
                                   onClick={() => moveExercise(exercise.id, 'down')}
                                   disabled={index === reorderedExercises.length - 1}
                                   data-testid={`move-down-${exercise.id}`}
                                 >
-                                  <ChevronDown className="w-4 h-4 text-blue-400" />
+                                  <ChevronDown className="w-3 h-3 text-blue-400" />
                                 </Button>
                               </div>
                               
@@ -457,39 +457,27 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="hidden sm:flex w-10 h-10 p-0 hover:bg-slate-700/50 rounded-lg cursor-grab active:cursor-grabbing touch-feedback mobile-focus"
+                                className="hidden sm:flex w-8 h-8 p-0 hover:bg-slate-700/50 rounded-md cursor-grab active:cursor-grabbing touch-feedback mobile-focus"
                                 data-testid={`drag-handle-${exercise.id}`}
                               >
-                                <Menu className="w-5 h-5 text-slate-400" />
+                                <Menu className="w-4 h-4 text-slate-400" />
                               </Button>
                               
                               {/* Remove Button */}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="w-10 h-10 p-0 hover:bg-red-500/20 rounded-lg transition-colors touch-feedback mobile-focus"
+                                className="w-8 h-8 p-0 hover:bg-red-500/20 rounded-md transition-colors touch-feedback mobile-focus"
                                 onClick={() => handleRemoveExercise(exercise.id)}
                                 data-testid={`remove-exercise-${exercise.id}`}
                               >
-                                <Trash2 className="text-red-400 w-4 h-4" />
+                                <Trash2 className="text-red-400 w-3.5 h-3.5" />
                               </Button>
                             </div>
                           </div>
 
-                          {/* Drag Indicator for Mobile */}
-                          <div 
-                            className="sm:hidden flex items-center justify-center py-1 cursor-grab active:cursor-grabbing"
-                          >
-                            <div className="flex space-x-1">
-                              {[...Array(6)].map((_, i) => (
-                                <div key={i} className="w-1 h-1 bg-slate-500/60 rounded-full"></div>
-                              ))}
-                            </div>
-                            <span className="mobile-caption text-slate-400 ml-2">Arrastar para reordenar</span>
-                          </div>
-
                           {/* Parameters Grid */}
-                          <div className="grid grid-cols-2 gap-3 mt-1">
+                          <div className="grid grid-cols-2 gap-3">
                             {exercise.exercise?.muscleGroup === 'Cardio' || exercise.muscleGroup === 'Cardio' ? (
                               <>
                                 {/* Duration for Cardio */}
