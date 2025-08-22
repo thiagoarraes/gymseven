@@ -174,7 +174,7 @@ export default function Workouts() {
   };
 
   return (
-    <div className="mobile-spacing">
+    <div className="mobile-spacing pb-32">
       <div className="flex items-center justify-between">
         <h2 className="mobile-heading text-foreground">Meus Treinos</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
