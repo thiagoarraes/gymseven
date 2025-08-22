@@ -196,7 +196,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     const exerciseData = {
       name: data.name,
       muscleGroup: data.muscleGroup,
-      userId: user?.id || "",
+      user_id: user?.id || "",
       description: null,
       imageUrl: null,
       videoUrl: null,
@@ -360,12 +360,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       <Card className="bg-blue-50/60 dark:bg-slate-800/40 rounded-2xl border border-blue-200/30 dark:border-slate-600/30">
         <CardContent className="mobile-card-padding space-y-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 z-10" />
             <Input
               placeholder="Buscar exercícios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-14 mobile-button bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50 mobile-focus"
+              className="pl-12 pr-4 h-12 mobile-button bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50 mobile-focus"
               data-testid="input-search-exercises"
             />
           </div>
