@@ -213,7 +213,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="mobile-spacing fade-in">
+    <div className="fade-in">
       {/* Welcome Section */}
       <Card className="neo-card rounded-3xl hover-lift overflow-hidden">
         <CardContent className="mobile-card-padding relative touch-feedback">

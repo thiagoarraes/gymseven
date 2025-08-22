@@ -36,7 +36,7 @@ function AuthenticatedRouter() {
     <WorkoutProvider>
       <div className="min-h-screen bg-background mobile-optimized">
         <Header />
-        <main className="pt-20 pb-20 mobile-scroll-container scroll-container">
+        <main className="pt-8 pb-8 mobile-scroll-container scroll-container">
           <div className="mobile-container mobile-spacing">
             <Switch>
               <Route path="/" component={Dashboard} />
