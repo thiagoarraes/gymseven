@@ -711,7 +711,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                     <Minus className="w-4 h-4" />
                                   </Button>
                                   <div className="text-center">
-                                    <div className="text-xl font-bold text-orange-400">
+                                    <div className="text-2xl font-bold text-orange-400">
                                       {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
                                     </div>
                                     <div className="text-xs text-slate-400">minutos</div>
