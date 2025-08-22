@@ -50,7 +50,7 @@ export function Header() {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-60 sm:w-56 bg-card/95 border-border backdrop-blur-sm mr-2 mobile-glass" sideOffset={8}>
-                <div className="px-3 py-2">
+                <div className="px-3 pb-2 pt-1">
                   <p className="mobile-body font-semibold text-foreground truncate">
                     {user?.firstName && user?.lastName 
                       ? `${user.firstName} ${user.lastName}` 
