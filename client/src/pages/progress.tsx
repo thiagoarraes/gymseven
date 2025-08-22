@@ -493,12 +493,22 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
     mítico: 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/30'
   };
 
+  const tierCardStyles = {
+    bronze: 'bg-gradient-to-br from-orange-500/5 to-orange-600/10 border-orange-500/20',
+    prata: 'bg-gradient-to-br from-slate-500/5 to-slate-600/10 border-slate-500/20',
+    ouro: 'bg-gradient-to-br from-yellow-500/5 to-yellow-600/10 border-yellow-500/20',
+    diamante: 'bg-gradient-to-br from-cyan-500/5 to-cyan-600/10 border-cyan-500/20',
+    épico: 'bg-gradient-to-br from-purple-500/5 to-purple-600/10 border-purple-500/20',
+    lendário: 'bg-gradient-to-br from-red-500/5 to-red-600/10 border-red-500/20',
+    mítico: 'bg-gradient-to-br from-pink-500/5 via-purple-500/8 to-indigo-500/10 border-gradient-to-r from-pink-500/20 to-purple-500/20'
+  };
+
   return (
     <Card 
       className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
         achievement.unlocked 
-          ? 'bg-card border-border/40 shadow-md' 
-          : 'bg-card/60 border-border/30'
+          ? `${tierCardStyles[achievement.tier]} shadow-md` 
+          : `${tierCardStyles[achievement.tier]} opacity-60`
       }`}
       data-testid={`achievement-card-${achievement.id}`}
     >
