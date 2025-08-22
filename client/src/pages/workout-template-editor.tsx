@@ -381,14 +381,10 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
               onReorder={handleReorder}
               className="space-y-4"
             >
-              {reorderedExercises.map((exercise: any, index: number) => {
-                const dragControls = useDragControls();
-                
-                return (
+              {reorderedExercises.map((exercise: any, index: number) => (
                   <Reorder.Item
                     key={exercise.id}
                     value={exercise}
-                    dragControls={dragControls}
                     className="relative"
                     onDragStart={() => setDraggedItem(exercise.id)}
                     onDragEnd={() => setDraggedItem(null)}
@@ -462,7 +458,6 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                 variant="ghost"
                                 size="sm"
                                 className="hidden sm:flex w-10 h-10 p-0 hover:bg-slate-700/50 rounded-lg cursor-grab active:cursor-grabbing touch-feedback mobile-focus"
-                                onPointerDown={(e) => dragControls.start(e)}
                                 data-testid={`drag-handle-${exercise.id}`}
                               >
                                 <Menu className="w-5 h-5 text-slate-400" />
@@ -484,7 +479,6 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                           {/* Drag Indicator for Mobile */}
                           <div 
                             className="sm:hidden flex items-center justify-center py-2 cursor-grab active:cursor-grabbing"
-                            onPointerDown={(e) => dragControls.start(e)}
                           >
                             <div className="flex space-x-1">
                               {[...Array(6)].map((_, i) => (
@@ -755,8 +749,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                       </CardContent>
                     </Card>
                   </Reorder.Item>
-                );
-              })}
+              ))}
             </Reorder.Group>
             
             {/* Add More Exercises Button */}

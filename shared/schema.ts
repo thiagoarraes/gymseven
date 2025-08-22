@@ -274,7 +274,7 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).o
   id: true,
 });
 
-export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ user_id: true });
+export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ userId: true });
 
 // User Achievements schemas
 export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
