@@ -561,26 +561,25 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                     <div className="bg-blue-100/50 dark:bg-slate-800/30 rounded-xl p-3 space-y-3 border border-blue-200/40 dark:border-slate-700/30">
                       {exercise.muscleGroup === "Cardio" ? (
                         <>
-                          {/* Total Time for Cardio */}
+                          {/* Duration for Cardio */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <Timer className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                              <span className="text-xs text-muted-foreground">Tempo total</span>
+                              <span className="text-xs text-muted-foreground">Duração</span>
                             </div>
                             <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
-                              {/* Mock data for now - will be real data later */}
                               0min
                             </span>
                           </div>
                           
-                          {/* Calories Burned */}
+                          {/* Distance for Cardio */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                              <Flame className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-                              <span className="text-xs text-muted-foreground">Calorias</span>
+                              <MapPin className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                              <span className="text-xs text-muted-foreground">Distância</span>
                             </div>
-                            <span className="text-sm font-bold text-orange-500 dark:text-orange-400">
-                              0kcal
+                            <span className="text-sm font-bold text-blue-500 dark:text-blue-400">
+                              0km
                             </span>
                           </div>
                         </>
