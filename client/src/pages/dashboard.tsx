@@ -596,82 +596,84 @@ export default function Dashboard() {
       <div className="space-y-4">
         {/* Progress Header Card */}
         <Card className="glass-card rounded-2xl hover-lift">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">Progresso de Treino</h3>
-                  <p className="text-sm text-muted-foreground">Acompanhe sua evolução</p>
-                </div>
-              </div>
-              
-              <div className="relative">
-                <Select 
-                  value={selectedExerciseId || firstExerciseId || ""} 
-                  onValueChange={(value) => setSelectedExerciseId(value)}
-                >
-                  <SelectTrigger className="w-full sm:w-56 bg-muted/50 border border-border text-foreground transition-all duration-200 hover:bg-muted/70">
-                    <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
-                  </SelectTrigger>
-                  <SelectContent 
-                    className="bg-background border border-border max-h-60 overflow-auto backdrop-blur-md"
-                    sideOffset={4}
-                  >
-                    {exercises.map((exercise: any, index: number) => (
-                      <SelectItem 
-                        key={`exercise-select-${exercise.id}-${index}`} 
-                        value={exercise.id}
-                        className="text-foreground focus:bg-muted focus:text-foreground cursor-pointer transition-colors"
-                      >
-                        {exercise.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Progress Stats */}
-            {chartData.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-3 sm:p-4 border border-blue-500/20">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
-                    </div>
-                    <span className="text-xs sm:text-sm font-medium text-blue-400">Peso Máximo</span>
+          <CardContent className="p-4 sm:p-6">
+            <div className="space-y-6">
+              {/* Header Section with more breathing room */}
+              <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
-                  <div className="text-xl sm:text-2xl font-bold text-foreground">
+                  <div className="space-y-1">
+                    <h3 className="mobile-subheading text-foreground">Progresso de Treino</h3>
+                    <p className="mobile-caption text-muted-foreground">Acompanhe sua evolução</p>
+                  </div>
+                </div>
+              
+                <div className="w-full sm:w-auto">
+                  <Select 
+                    value={selectedExerciseId || firstExerciseId || ""} 
+                    onValueChange={(value) => setSelectedExerciseId(value)}
+                  >
+                    <SelectTrigger className="w-full sm:w-56 mobile-button bg-muted/50 border border-border text-foreground transition-all duration-200 hover:bg-muted/70 mobile-focus">
+                      <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
+                    </SelectTrigger>
+                    <SelectContent 
+                      className="bg-background border border-border max-h-60 overflow-auto backdrop-blur-md"
+                      sideOffset={4}
+                    >
+                      {exercises.map((exercise: any, index: number) => (
+                        <SelectItem 
+                          key={`exercise-select-${exercise.id}-${index}`} 
+                          value={exercise.id}
+                          className="text-foreground focus:bg-muted focus:text-foreground cursor-pointer transition-colors"
+                        >
+                          {exercise.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Progress Stats */}
+              {chartData.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-4 sm:p-5 border border-blue-500/20 touch-feedback">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                      </div>
+                      <span className="mobile-body font-medium text-blue-400">Peso Máximo</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                     {chartData.length > 0 && chartData.some((d: any) => d.weight > 0) 
                       ? Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight))
                       : 0
                     }kg
                   </div>
-                  <div className="text-xs text-muted-foreground overflow-hidden text-ellipsis">Maior peso atingido</div>
-                </div>
-
-                <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-3 sm:p-4 border border-emerald-500/20">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <Target className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
-                    </div>
-                    <span className="text-xs sm:text-sm font-medium text-emerald-400">Total Sessões</span>
+                    <div className="mobile-caption text-muted-foreground">Maior peso atingido</div>
                   </div>
-                  <div className="text-xl sm:text-2xl font-bold text-foreground">{chartData.length}</div>
-                  <div className="text-xs text-muted-foreground overflow-hidden text-ellipsis">Treinos registrados</div>
-                </div>
 
-                <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-3 sm:p-4 border border-purple-500/20">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
+                  <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 sm:p-5 border border-emerald-500/20 touch-feedback">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                        <Target className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
+                      </div>
+                      <span className="mobile-body font-medium text-emerald-400">Total Sessões</span>
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-purple-400">Último Treino</span>
+                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{chartData.length}</div>
+                    <div className="mobile-caption text-muted-foreground">Treinos registrados</div>
                   </div>
-                  <div className="text-xl sm:text-2xl font-bold text-foreground">
+
+                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 sm:p-5 border border-purple-500/20 touch-feedback">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                      </div>
+                      <span className="mobile-body font-medium text-purple-400">Último Treino</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                     {chartData.length > 0 
                       ? (() => {
                           try {
@@ -740,14 +742,14 @@ export default function Dashboard() {
                       : "Nunca"
                     }
                   </div>
-                  <div className="text-xs text-muted-foreground overflow-hidden text-ellipsis">Última execução</div>
+                    <div className="mobile-caption text-muted-foreground">Última execução</div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             
-            {/* Progress Chart */}
-            <div className="bg-blue-50/80 dark:bg-slate-900/50 rounded-xl p-3 sm:p-4 border border-blue-200/40 dark:border-slate-700/30">
-              <div className="h-48 sm:h-64 relative overflow-hidden">
+              {/* Progress Chart */}
+              <div className="bg-blue-50/80 dark:bg-slate-900/50 rounded-xl p-4 sm:p-6 border border-blue-200/40 dark:border-slate-700/30">
+                <div className="h-56 sm:h-72 relative overflow-hidden">
                 {chartLoading ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center text-slate-400">
@@ -862,6 +864,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             </div>
           </CardContent>
