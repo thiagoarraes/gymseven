@@ -365,7 +365,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
               placeholder="Buscar exercícios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 mobile-button bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50 mobile-focus"
+              className="pl-12 mobile-button bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50 mobile-focus"
               data-testid="input-search-exercises"
             />
           </div>
