@@ -433,4 +433,8 @@
   .mobile-safe-bottom {
     padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
+
+  .header-offset {
+    padding-top: max(80px, calc(80px + env(safe-area-inset-top)));
+  }
 }

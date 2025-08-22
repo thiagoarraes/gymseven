@@ -213,7 +213,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="fade-in">
+    <div className="fade-in header-offset">
       {/* Welcome Section */}
       <Card className="neo-card rounded-3xl hover-lift overflow-hidden">
         <CardContent className="mobile-card-padding relative touch-feedback">
