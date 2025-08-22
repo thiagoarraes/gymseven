@@ -174,13 +174,14 @@ export default function Workouts() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="mobile-spacing">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Meus Treinos</h2>
+        <h2 className="mobile-heading text-foreground">Meus Treinos</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button 
-              className="gradient-accent px-4 py-2 rounded-xl font-semibold text-white hover:scale-105 transition-transform"
+              className="gradient-accent mobile-button rounded-xl font-semibold text-white hover:scale-105 transition-transform touch-feedback mobile-focus" 
+              data-testid="button-new-workout"
               onClick={() => {
                 setEditingWorkout(null);
                 form.reset({

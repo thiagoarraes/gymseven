@@ -12,9 +12,9 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glassmorphism border-t border-border/40 shadow-2xl">
-      <div className="safe-area-bottom">
-        <div className="flex items-center justify-around px-2 py-3">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glassmorphism border-t border-border/40 shadow-2xl mobile-safe-bottom">
+      <div className="safe-area-bottom mobile-optimized">
+        <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -22,23 +22,25 @@ export function BottomNavigation() {
             return (
               <button
                 key={item.id}
+                data-testid={`nav-${item.id}`}
                 onClick={() => navigate(item.path)}
-                className={`group relative flex flex-col items-center justify-center min-w-[64px] px-3 py-2 rounded-xl transition-all duration-200 ${
+                className={`nav-item-mobile touch-feedback mobile-focus ${
                   isActive 
-                    ? "bg-gradient-to-t from-primary/20 to-primary/10" 
-                    : "hover:bg-accent/30"
+                    ? "bg-gradient-to-t from-primary/25 to-primary/10" 
+                    : "hover:bg-accent/30 active:bg-accent/50"
                 }`}
               >
-                <div className={`relative p-1 rounded-lg transition-all duration-200 ${
-                  isActive ? "bg-primary/20" : ""
+                <div className={`relative p-2 rounded-lg transition-all duration-200 ${
+                  isActive ? "bg-primary/20 shadow-sm" : ""
                 }`}>
                   <Icon className={`w-5 h-5 transition-all duration-200 ${
                     isActive 
-                      ? "text-primary scale-110" 
+                      ? "text-primary scale-110 filter drop-shadow-sm" 
                       : "text-muted-foreground group-hover:text-foreground"
                   }`} />
+                  {isActive && <div className="nav-indicator"></div>}
                 </div>
-                <span className={`text-[10px] font-medium mt-1 transition-all duration-200 ${
+                <span className={`mobile-caption font-semibold mt-1 transition-all duration-200 leading-tight ${
                   isActive 
                     ? "text-primary" 
                     : "text-muted-foreground group-hover:text-foreground"

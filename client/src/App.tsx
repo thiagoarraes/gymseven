@@ -34,24 +34,26 @@ function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
 function AuthenticatedRouter() {
   return (
     <WorkoutProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background mobile-optimized">
         <Header />
-        <main className="pt-20 pb-20">
-          <Switch>
-            <Route path="/" component={Dashboard} />
-            <Route path="/exercicios" component={ExercisesRoute} />
-            <Route path="/treinos" component={Workouts} />
-            <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
-            <Route path="/progresso" component={AchievementsPage} />
-            <Route path="/workout-session/:id" component={WorkoutSession} />
-            <Route path="/workout-history" component={WorkoutHistory} />
-            <Route path="/profile" component={Profile} />
-            <Route path="/settings" component={Settings} />
-            <Route path="/timer-test" component={TimerTest} />
-            <Route path="/login" component={Dashboard} />
-            <Route path="/register" component={Dashboard} />
-            <Route component={NotFound} />
-          </Switch>
+        <main className="pt-20 pb-20 mobile-scroll-container scroll-container">
+          <div className="mobile-container mobile-spacing">
+            <Switch>
+              <Route path="/" component={Dashboard} />
+              <Route path="/exercicios" component={ExercisesRoute} />
+              <Route path="/treinos" component={Workouts} />
+              <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
+              <Route path="/progresso" component={AchievementsPage} />
+              <Route path="/workout-session/:id" component={WorkoutSession} />
+              <Route path="/workout-history" component={WorkoutHistory} />
+              <Route path="/profile" component={Profile} />
+              <Route path="/settings" component={Settings} />
+              <Route path="/timer-test" component={TimerTest} />
+              <Route path="/login" component={Dashboard} />
+              <Route path="/register" component={Dashboard} />
+              <Route component={NotFound} />
+            </Switch>
+          </div>
         </main>
         <BottomNavigation />
       </div>
@@ -77,10 +79,10 @@ function Router() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
+      <div className="min-h-screen bg-background flex items-center justify-center mobile-container">
+        <div className="flex flex-col items-center mobile-spacing">
           <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-muted-foreground">Carregando...</p>
+          <p className="mobile-body text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );

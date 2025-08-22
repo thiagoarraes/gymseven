@@ -213,10 +213,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6 fade-in">
+    <div className="mobile-spacing fade-in">
       {/* Welcome Section */}
       <Card className="neo-card rounded-3xl hover-lift overflow-hidden">
-        <CardContent className="p-6 sm:p-8 relative">
+        <CardContent className="mobile-card-padding relative touch-feedback">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
           
           {/* Header Section */}
@@ -230,9 +230,9 @@ export default function Dashboard() {
           </div>
 
           {/* Last Workout & Streak Cards */}
-          <div className="grid grid-cols-2 gap-4 relative z-10">
+          <div className="mobile-flex relative z-10">
             {/* Last Workout Card */}
-            <div className="bg-blue-100/70 hover:bg-blue-200/80 dark:bg-slate-800/40 dark:hover:bg-slate-700/60 rounded-2xl p-3 sm:p-5 border border-blue-200/40 dark:border-slate-600/30 hover:border-blue-300/60 dark:hover:border-slate-500/50 transition-all duration-200 cursor-pointer">
+            <div className="bg-blue-100/70 hover:bg-blue-200/80 dark:bg-slate-800/40 dark:hover:bg-slate-700/60 rounded-2xl mobile-card-padding border border-blue-200/40 dark:border-slate-600/30 hover:border-blue-300/60 dark:hover:border-slate-500/50 transition-all duration-200 cursor-pointer touch-feedback mobile-focus">
               {recentWorkouts.length > 0 ? (
                 <div className="space-y-3 sm:space-y-4">
                   {/* Header */}

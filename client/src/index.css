@@ -65,6 +65,43 @@
 }
 
 @layer utilities {
+  /* Mobile-first optimizations */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .mobile-spacing {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  .mobile-card-padding {
+    @apply p-4 sm:p-6;
+  }
+  
+  .mobile-button {
+    @apply min-h-[44px] px-4 py-3 text-sm font-medium;
+  }
+  
+  .mobile-icon-button {
+    @apply min-h-[44px] min-w-[44px] p-2;
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
   /* Text readability improvements for light mode */
   .text-readable {
     color: hsl(215.3, 25%, 26.7%);
@@ -156,6 +193,26 @@
   .hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+  }
+  
+  /* Touch feedback for mobile */
+  .touch-feedback {
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .touch-feedback:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  
+  /* Enhanced mobile interactions */
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center relative;
+  }
+  
+  .mobile-scroll-container {
+    @apply overflow-y-auto max-h-[calc(100vh-140px)] overscroll-contain;
   }
   
   /* Light mode loading skeleton */
@@ -258,5 +315,98 @@
     animation-delay: 0.5s; 
     --random-x: -200px; 
     --random-y: -140px;
+  }
+  
+  /* Mobile navigation enhancements */
+  .nav-indicator {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    background: linear-gradient(90deg, #3B82F6, #6366F1);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-item-mobile {
+    @apply relative flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-200 min-h-[60px] mobile-touch-target;
+  }
+  
+  /* Improved mobile typography */
+  .mobile-heading {
+    @apply text-xl sm:text-2xl lg:text-3xl font-bold;
+  }
+  
+  .mobile-subheading {
+    @apply text-lg sm:text-xl font-semibold;
+  }
+  
+  .mobile-body {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-caption {
+    @apply text-xs sm:text-sm;
+  }
+  
+  /* Mobile performance optimizations */
+  .mobile-optimized {
+    -webkit-overflow-scrolling: touch;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  /* Better mobile animations */
+  @media (prefers-reduced-motion: reduce) {
+    .hover-lift, .touch-feedback, .nav-item-mobile {
+      transition: none;
+      animation: none;
+    }
+  }
+  
+  /* Mobile-specific responsive utilities */
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .mobile-flex {
+    @apply flex flex-col sm:flex-row gap-4;
+  }
+  
+  /* Enhanced focus states for accessibility */
+  .mobile-focus {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
+  }
+}
+
+/* Mobile viewport meta and global mobile styles */
+@media screen and (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  /* Improve tap targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimize scroll performance */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* iPhone notch and dynamic island support */
+@supports (padding: max(0px)) {
+  .mobile-safe-header {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  
+  .mobile-safe-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 }

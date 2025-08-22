@@ -32,51 +32,52 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/50">
-      <div className="container mx-auto px-4 py-3">
+    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/50 mobile-safe-header">
+      <div className="mobile-container mx-auto py-3">
         <div className="flex items-center justify-between">
           <Logo imagePath="/src/assets/logo.png" alt="GymSeven" />
           
           <div className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="glass-card rounded-full p-1 hover-lift cursor-pointer">
-                  <Avatar className="w-8 h-8">
+                <div className="glass-card rounded-full p-1 hover-lift cursor-pointer touch-feedback mobile-touch-target" data-testid="user-menu-trigger">
+                  <Avatar className="w-8 h-8 sm:w-9 sm:h-9">
                     <AvatarImage src={user?.profileImageUrl || ""} alt={user?.username || ""} />
-                    <AvatarFallback className="bg-blue-600 text-white text-sm">
+                    <AvatarFallback className="bg-blue-600 text-white text-sm font-semibold">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-card/95 border-border backdrop-blur-sm">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium text-foreground">
+              <DropdownMenuContent align="end" className="w-60 sm:w-56 bg-card/95 border-border backdrop-blur-sm mr-2 mobile-glass" sideOffset={8}>
+                <div className="px-3 py-2">
+                  <p className="mobile-body font-semibold text-foreground truncate">
                     {user?.firstName && user?.lastName 
                       ? `${user.firstName} ${user.lastName}` 
                       : user?.username}
                   </p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="mobile-caption text-muted-foreground truncate">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator className="bg-border" />
                 <Link href="/profile">
-                  <DropdownMenuItem className="text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem className="mobile-button text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer mobile-focus" data-testid="menu-profile">
+                    <User className="mr-3 h-4 w-4" />
                     <span>Perfil</span>
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/settings">
-                  <DropdownMenuItem className="text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem className="mobile-button text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer mobile-focus" data-testid="menu-settings">
+                    <Settings className="mr-3 h-4 w-4" />
                     <span>Configurações</span>
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem 
-                  className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                  className="mobile-button text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer mobile-focus"
                   onClick={handleLogout}
+                  data-testid="menu-logout"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="mr-3 h-4 w-4" />
                   <span>Sair</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
