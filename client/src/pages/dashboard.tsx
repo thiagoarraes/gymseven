@@ -613,7 +613,7 @@ export default function Dashboard() {
                   value={selectedExerciseId || firstExerciseId || ""} 
                   onValueChange={(value) => setSelectedExerciseId(value)}
                 >
-                  <SelectTrigger className="w-56 bg-muted/50 border border-border text-foreground transition-all duration-200 hover:bg-muted/70">
+                  <SelectTrigger className="w-full sm:w-56 bg-muted/50 border border-border text-foreground transition-all duration-200 hover:bg-muted/70">
                     <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
                   </SelectTrigger>
                   <SelectContent 
@@ -636,42 +636,42 @@ export default function Dashboard() {
 
             {/* Progress Stats */}
             {chartData.length > 0 && (
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-4 border border-blue-500/20">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-3 sm:p-4 border border-blue-500/20">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-blue-400" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                      <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
                     </div>
-                    <span className="text-sm font-medium text-blue-400 whitespace-nowrap">Peso Máximo</span>
+                    <span className="text-xs sm:text-sm font-medium text-blue-400">Peso Máximo</span>
                   </div>
-                  <div className="text-2xl font-bold text-foreground">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">
                     {chartData.length > 0 && chartData.some((d: any) => d.weight > 0) 
                       ? Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight))
                       : 0
                     }kg
                   </div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Maior peso atingido</div>
+                  <div className="text-xs text-muted-foreground overflow-hidden text-ellipsis">Maior peso atingido</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 border border-emerald-500/20">
+                <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-3 sm:p-4 border border-emerald-500/20">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <Target className="w-4 h-4 text-emerald-400" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <Target className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
                     </div>
-                    <span className="text-sm font-medium text-emerald-400 whitespace-nowrap">Total Sessões</span>
+                    <span className="text-xs sm:text-sm font-medium text-emerald-400">Total Sessões</span>
                   </div>
-                  <div className="text-2xl font-bold text-foreground">{chartData.length}</div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Treinos registrados</div>
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">{chartData.length}</div>
+                  <div className="text-xs text-muted-foreground overflow-hidden text-ellipsis">Treinos registrados</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 border border-purple-500/20">
+                <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-3 sm:p-4 border border-purple-500/20">
                   <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                      <Calendar className="w-4 h-4 text-purple-400" />
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
                     </div>
-                    <span className="text-sm font-medium text-purple-400 whitespace-nowrap">Último Treino</span>
+                    <span className="text-xs sm:text-sm font-medium text-purple-400">Último Treino</span>
                   </div>
-                  <div className="text-2xl font-bold text-foreground">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">
                     {chartData.length > 0 
                       ? (() => {
                           try {
@@ -740,14 +740,14 @@ export default function Dashboard() {
                       : "Nunca"
                     }
                   </div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Última execução</div>
+                  <div className="text-xs text-muted-foreground overflow-hidden text-ellipsis">Última execução</div>
                 </div>
               </div>
             )}
             
             {/* Progress Chart */}
-            <div className="bg-blue-50/80 dark:bg-slate-900/50 rounded-xl p-4 border border-blue-200/40 dark:border-slate-700/30">
-              <div className="h-64 relative overflow-hidden">
+            <div className="bg-blue-50/80 dark:bg-slate-900/50 rounded-xl p-3 sm:p-4 border border-blue-200/40 dark:border-slate-700/30">
+              <div className="h-48 sm:h-64 relative overflow-hidden">
                 {chartLoading ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center text-slate-400">
