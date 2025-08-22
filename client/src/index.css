@@ -437,4 +437,8 @@
   .header-offset {
     padding-top: max(100px, calc(100px + env(safe-area-inset-top)));
   }
+
+  .footer-offset {
+    padding-bottom: max(100px, calc(100px + env(safe-area-inset-bottom)));
+  }
 }
