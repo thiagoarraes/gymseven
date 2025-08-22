@@ -177,7 +177,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'deadlift_200',
-    name: 'Gorila Selvagem',
+    name: 'Força Máxima',
     description: 'Levantamento terra com 200kg ou mais',
     icon: Zap,
     category: 'strength',
@@ -241,7 +241,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   // Conquistas Divertidas de Musculação
   {
     id: 'gym_bro',
-    name: 'Mano da Academia',
+    name: 'Especialista em Peito',
     description: 'Complete 5 treinos de peito e bíceps em uma semana',
     icon: Medal,
     category: 'special',
@@ -288,18 +288,6 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     progress: 0
   },
   {
-    id: 'mass_monster',
-    name: 'Monstro da Massa',
-    description: 'Ganhe 5kg de peso corporal em 3 meses',
-    icon: Crown,
-    category: 'milestone',
-    tier: 'épico',
-    points: 750,
-    requirement: { type: 'custom', target: 5 },
-    unlocked: false,
-    progress: 0
-  },
-  {
     id: 'iron_addiction',
     name: 'Viciado em Ferro',
     description: 'Treine todos os dias por 2 semanas seguidas',
@@ -308,18 +296,6 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'diamante',
     points: 500,
     requirement: { type: 'consecutive_days', target: 14 },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'bicep_flex',
-    name: 'Flexão de Ego',
-    description: 'Tire 10 selfies no espelho da academia',
-    icon: Star,
-    category: 'special',
-    tier: 'bronze',
-    points: 15,
-    requirement: { type: 'custom', target: 10 },
     unlocked: false,
     progress: 0
   },
@@ -372,30 +348,6 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     progress: 0
   },
   {
-    id: 'gym_shark',
-    name: 'Tubarão da Academia',
-    description: 'Seja o primeiro a chegar na academia 10 vezes',
-    icon: Crown,
-    category: 'special',
-    tier: 'prata',
-    points: 120,
-    requirement: { type: 'custom', target: 10 },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'mirror_magnet',
-    name: 'Ímã de Espelho',
-    description: 'Passe mais de 30 minutos checando a forma nos espelhos',
-    icon: Star,
-    category: 'special',
-    tier: 'bronze',
-    points: 20,
-    requirement: { type: 'time_based', target: 30 },
-    unlocked: false,
-    progress: 0
-  },
-  {
     id: 'gains_goblin',
     name: 'Duende dos Ganhos',
     description: 'Aumente a carga em pelo menos 3 exercícios na mesma semana',
@@ -404,18 +356,6 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
     tier: 'ouro',
     points: 250,
     requirement: { type: 'custom', target: 3 },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'sweat_waterfall',
-    name: 'Cachoeira de Suor',
-    description: 'Termine um treino completamente encharcado',
-    icon: Trophy,
-    category: 'special',
-    tier: 'prata',
-    points: 80,
-    requirement: { type: 'custom', target: 1 },
     unlocked: false,
     progress: 0
   },
