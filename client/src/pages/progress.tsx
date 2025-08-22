@@ -53,7 +53,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   // Conquistas de Treino
   {
     id: 'first_workout',
-    name: 'Primeiro Passo',
+    name: 'Saindo do Sedentarismo',
     description: 'Complete seu primeiro treino',
     icon: Trophy,
     category: 'milestone',
@@ -65,7 +65,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'workout_10',
-    name: 'Veterano',
+    name: 'Deixou de ser Frango',
     description: 'Complete 10 treinos',
     icon: Medal,
     category: 'workout',
@@ -77,7 +77,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'workout_50',
-    name: 'Dedicado',
+    name: 'Marombeiro Raiz',
     description: 'Complete 50 treinos',
     icon: Crown,
     category: 'workout',
@@ -89,7 +89,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'workout_100',
-    name: 'Imortal',
+    name: 'Monstro da Academia',
     description: 'Complete 100 treinos',
     icon: Shield,
     category: 'workout',
@@ -103,7 +103,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   // Conquistas de Consistência
   {
     id: 'streak_3',
-    name: 'Consistência',
+    name: 'No Foco',
     description: 'Treine por 3 dias consecutivos',
     icon: Flame,
     category: 'consistency',
@@ -115,7 +115,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'streak_7',
-    name: 'Semana Perfeita',
+    name: 'Beast Mode Ativado',
     description: 'Treine por 7 dias consecutivos',
     icon: Calendar,
     category: 'consistency',
@@ -127,7 +127,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'streak_30',
-    name: 'Disciplina de Ferro',
+    name: 'Viciado em Ferro',
     description: 'Treine por 30 dias consecutivos',
     icon: Shield,
     category: 'consistency',
@@ -139,7 +139,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'streak_100',
-    name: 'Lenda Viva',
+    name: 'Tanque de Guerra',
     description: 'Treine por 100 dias consecutivos',
     icon: Crown,
     category: 'consistency',
@@ -153,7 +153,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   // Conquistas de Força
   {
     id: 'total_weight_1000',
-    name: 'Força Bruta',
+    name: 'Búfalo da Academia',
     description: 'Levante um total de 1.000kg em uma sessão',
     icon: Zap,
     category: 'strength',
@@ -165,7 +165,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'benchpress_100',
-    name: 'Centurião',
+    name: 'Peitoral Trincado',
     description: 'Supino com 100kg ou mais',
     icon: Target,
     category: 'strength',
@@ -177,7 +177,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'deadlift_200',
-    name: 'Destruidor',
+    name: 'Gorila Selvagem',
     description: 'Levantamento terra com 200kg ou mais',
     icon: Zap,
     category: 'strength',
@@ -191,7 +191,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   // Conquistas Especiais
   {
     id: 'early_bird',
-    name: 'Madrugador',
+    name: 'Guerreiro da Madrugada',
     description: 'Complete um treino antes das 7h da manhã',
     icon: Star,
     category: 'special',
@@ -203,7 +203,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'weekend_warrior',
-    name: 'Guerreiro de Fim de Semana',
+    name: 'Sem Desculpinha',
     description: 'Complete treinos em todos os finais de semana por um mês',
     icon: Award,
     category: 'special',
@@ -215,7 +215,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'perfect_month',
-    name: 'Mestre dos Treinos',
+    name: 'Máquina de Treinar',
     description: 'Complete pelo menos 20 treinos em um mês',
     icon: Crown,
     category: 'special',
@@ -227,7 +227,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'year_champion',
-    name: 'Campeão Anual',
+    name: 'Lenda da Maromba',
     description: 'Complete pelo menos 300 treinos em um ano',
     icon: Trophy,
     category: 'special',
@@ -361,7 +361,7 @@ const SAMPLE_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'bench_warrior',
-    name: 'Guerreiro do Supino',
+    name: 'Rei do Supino',
     description: 'Supino com o próprio peso corporal',
     icon: Medal,
     category: 'strength',
