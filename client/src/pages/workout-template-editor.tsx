@@ -696,7 +696,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                     Descanso
                                   </label>
                                 </div>
-                                <div className="flex items-center justify-center space-x-3">
+                                <div className="flex items-center justify-center space-x-3 px-2">
                                   <Button
                                     variant="outline"
                                     size="sm"
