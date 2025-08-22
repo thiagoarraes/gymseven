@@ -79,8 +79,10 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     mutationFn: ({ exerciseId, updates }: { exerciseId: string; updates: any }) => 
       workoutTemplateApi.updateExercise(exerciseId, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
+      // Não invalidar queries para atualizações rápidas - preserva a ordem
+      // queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
+      // queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
+      
       // Visual feedback for successful update
       setRecentlyUpdated('success');
       setTimeout(() => setRecentlyUpdated(null), 2000);
@@ -155,7 +157,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   }, [template?.name, isEditingTemplateName]);
 
   useEffect(() => {
-    if (templateExercises.length > 0) {
+    if (templateExercises.length > 0 && reorderedExercises.length === 0) {
+      // Só atualiza se não há exercícios no estado local (primeira carga)
       setReorderedExercises([...templateExercises]);
     }
   }, [templateExercises]);
@@ -234,6 +237,16 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   };
 
   const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
+    // Atualização otimista - atualiza o estado local primeiro
+    setReorderedExercises(prev => 
+      prev.map(exercise => 
+        exercise.id === exerciseId 
+          ? { ...exercise, [field]: value }
+          : exercise
+      )
+    );
+    
+    // Depois envia para o servidor
     updateExerciseMutation.mutate({
       exerciseId,
       updates: { [field]: value }
