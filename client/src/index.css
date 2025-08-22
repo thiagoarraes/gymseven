@@ -435,6 +435,6 @@
   }
 
   .header-offset {
-    padding-top: max(80px, calc(80px + env(safe-area-inset-top)));
+    padding-top: max(100px, calc(100px + env(safe-area-inset-top)));
   }
 }
