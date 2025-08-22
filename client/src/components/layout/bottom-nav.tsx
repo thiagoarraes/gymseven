@@ -12,7 +12,7 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glassmorphism border-t border-border/40 shadow-2xl mobile-safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glassmorphism border-t border-border/20 shadow-2xl mobile-safe-bottom backdrop-blur-xl">
       <div className="safe-area-bottom mobile-optimized">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
