@@ -261,23 +261,23 @@ export default function Settings() {
                     control={preferencesForm.control}
                     name="soundEffects"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base text-foreground flex items-center">
-                            {field.value ? <Volume2 className="mr-2 h-4 w-4" /> : <VolumeX className="mr-2 h-4 w-4" />}
-                            Efeitos Sonoros
+                      <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border p-4 space-y-3 sm:space-y-0">
+                        <div className="space-y-1 flex-1">
+                          <FormLabel className="text-base text-foreground flex items-center flex-wrap gap-2">
+                            {field.value ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                            <span>Efeitos Sonoros</span>
                             {!soundEffects.isSupported && (
-                              <span className="ml-2 text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                              <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
                                 Não suportado
                               </span>
                             )}
                             {soundEffects.isSupported && field.value && (
-                              <span className="ml-2 text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">
+                              <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">
                                 Ativo
                               </span>
                             )}
                           </FormLabel>
-                          <FormDescription className="text-muted-foreground">
+                          <FormDescription className="text-muted-foreground text-sm">
                             {soundEffects.isSupported 
                               ? 'Sons de feedback durante treinos e descanso'
                               : 'Seu navegador não suporta áudio'
@@ -285,18 +285,19 @@ export default function Settings() {
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center justify-end gap-3 sm:flex-shrink-0">
                             <Switch
                               checked={field.value && soundEffects.isSupported}
                               disabled={!soundEffects.isSupported}
                               onCheckedChange={field.onChange}
+                              className="shrink-0"
                             />
                             {field.value && soundEffects.isSupported && (
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => soundEffects.testSound()}
-                                className="text-xs px-2 py-1 h-6"
+                                className="text-xs px-3 py-1 h-7 shrink-0"
                               >
                                 Testar
                               </Button>
@@ -326,20 +327,23 @@ export default function Settings() {
                     control={preferencesForm.control}
                     name="restTimerAutoStart"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
-                        <div className="space-y-0.5">
+                      <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border p-4 space-y-3 sm:space-y-0">
+                        <div className="space-y-1 flex-1">
                           <FormLabel className="text-base text-foreground">
                             Timer Automático
                           </FormLabel>
-                          <FormDescription className="text-muted-foreground">
+                          <FormDescription className="text-muted-foreground text-sm">
                             Iniciar timer de descanso automaticamente
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <div className="flex justify-end sm:flex-shrink-0">
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="shrink-0"
+                            />
+                          </div>
                         </FormControl>
                       </FormItem>
                     )}
