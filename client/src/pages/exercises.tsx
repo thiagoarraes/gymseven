@@ -358,46 +358,50 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
       {/* Search & Filters */}
       <Card className="bg-blue-50/60 dark:bg-slate-800/40 rounded-2xl border border-blue-200/30 dark:border-slate-600/30">
-        <CardContent className="p-4 space-y-4">
+        <CardContent className="mobile-card-padding space-y-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="Buscar exercícios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50"
+              className="pl-10 mobile-button bg-white/80 dark:bg-slate-800/50 border-blue-200/50 dark:border-slate-700 text-foreground placeholder-muted-foreground focus:border-blue-400/60 dark:focus:border-blue-500/50 mobile-focus"
+              data-testid="input-search-exercises"
             />
           </div>
           
-          {/* Muscle Group Filters */}
-          <div className="flex overflow-x-auto space-x-2 pb-2">
-            <Button
-              variant={selectedMuscleGroup === "Todos" ? "default" : "outline"}
-              size="sm"
-              className={`whitespace-nowrap ${
-                selectedMuscleGroup === "Todos" 
-                  ? "gradient-accent text-white" 
-                  : "bg-white/70 dark:bg-slate-700/50 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-600/50"
-              }`}
-              onClick={() => setSelectedMuscleGroup("Todos")}
-            >
-              Todos
-            </Button>
-            {MUSCLE_GROUPS.map((group) => (
+          {/* Muscle Group Filters - Mobile Optimized */}
+          <div className="space-y-3">
+            <h3 className="mobile-body font-medium text-foreground">Filtrar por grupo muscular</h3>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <Button
-                key={group}
-                variant={selectedMuscleGroup === group ? "default" : "outline"}
-                size="sm"
-                className={`whitespace-nowrap ${
-                  selectedMuscleGroup === group
-                    ? "gradient-accent text-white"
-                    : "bg-white/70 dark:bg-slate-700/50 border-blue-200/50 dark:border-slate-700 text-foreground hover:bg-blue-100/60 dark:hover:bg-slate-600/50"
+                variant={selectedMuscleGroup === "Todos" ? "default" : "outline"}
+                className={`mobile-button px-4 py-2.5 rounded-xl font-medium transition-all duration-200 touch-feedback mobile-focus ${
+                  selectedMuscleGroup === "Todos" 
+                    ? "gradient-accent text-white shadow-lg hover:scale-105" 
+                    : "bg-white/80 dark:bg-slate-700/60 border-blue-200/60 dark:border-slate-600 text-foreground hover:bg-blue-100/80 dark:hover:bg-slate-600/80 hover:border-blue-300/80 dark:hover:border-blue-500/60"
                 }`}
-                onClick={() => setSelectedMuscleGroup(group)}
+                onClick={() => setSelectedMuscleGroup("Todos")}
+                data-testid="filter-muscle-group-todos"
               >
-                {group}
+                <span className="mobile-body">Todos</span>
               </Button>
-            ))}
+              {MUSCLE_GROUPS.map((group) => (
+                <Button
+                  key={group}
+                  variant={selectedMuscleGroup === group ? "default" : "outline"}
+                  className={`mobile-button px-4 py-2.5 rounded-xl font-medium transition-all duration-200 touch-feedback mobile-focus ${
+                    selectedMuscleGroup === group
+                      ? "gradient-accent text-white shadow-lg hover:scale-105"
+                      : "bg-white/80 dark:bg-slate-700/60 border-blue-200/60 dark:border-slate-600 text-foreground hover:bg-blue-100/80 dark:hover:bg-slate-600/80 hover:border-blue-300/80 dark:hover:border-blue-500/60"
+                  }`}
+                  onClick={() => setSelectedMuscleGroup(group)}
+                  data-testid={`filter-muscle-group-${group.toLowerCase()}`}
+                >
+                  <span className="mobile-body">{group}</span>
+                </Button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
