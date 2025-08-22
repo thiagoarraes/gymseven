@@ -150,7 +150,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         name: "Supino Reto",
-        userId: systemUserId,
+        user_id: systemUserId,
         muscleGroup: "Peito",
         description: "Exercício fundamental para o desenvolvimento do peitoral",
         imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
@@ -160,7 +160,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         name: "Agachamento Livre",
-        userId: systemUserId,
+        user_id: systemUserId,
         muscleGroup: "Pernas",
         description: "Exercício composto para pernas e glúteos",
         imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
@@ -170,7 +170,7 @@ export class MemStorage implements IStorage {
       {
         id: randomUUID(),
         name: "Puxada Frontal",
-        userId: systemUserId,
+        user_id: systemUserId,
         muscleGroup: "Costas",
         description: "Desenvolvimento do latíssimo do dorso",
         imageUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
@@ -273,7 +273,7 @@ export class MemStorage implements IStorage {
     if (!exercise) return undefined;
     
     // Check user ownership if userId is provided
-    if (userId && exercise.userId !== userId) return undefined;
+    if (userId && exercise.user_id !== userId) return undefined;
     
     const updated = { ...exercise, ...updates };
     this.exercises.set(id, updated);
@@ -290,7 +290,7 @@ export class MemStorage implements IStorage {
 
   async getExercises(userId?: string): Promise<Exercise[]> {
     if (userId) {
-      return Array.from(this.exercises.values()).filter(ex => ex.userId === userId);
+      return Array.from(this.exercises.values()).filter(ex => ex.user_id === userId);
     }
     return Array.from(this.exercises.values());
   }
@@ -794,7 +794,7 @@ class DatabaseStorage implements IStorage {
 
   async getExercises(userId?: string): Promise<Exercise[]> {
     if (userId) {
-      return await this.db.select().from(exercises).where(eq(exercises.userId, userId));
+      return await this.db.select().from(exercises).where(eq(exercises.user_id, userId));
     }
     return await this.db.select().from(exercises);
   }
@@ -867,7 +867,7 @@ class DatabaseStorage implements IStorage {
 
   async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
     if (userId) {
-      return await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.userId, userId));
+      return await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.user_id, userId));
     }
     // Return empty array when no user specified - no global templates
     return [];
@@ -1037,7 +1037,7 @@ class DatabaseStorage implements IStorage {
 
   // User Achievements methods
   async getUserAchievements(userId: string): Promise<UserAchievement[]> {
-    return await this.db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+    return await this.db.select().from(userAchievements).where(eq(userAchievements.user_id, userId));
   }
 
   async createUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement> {
