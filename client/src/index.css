@@ -71,7 +71,7 @@
   }
   
   .mobile-spacing {
-    @apply space-y-4 sm:space-y-6 pb-0;
+    @apply space-y-4 sm:space-y-6;
   }
   
   .mobile-card-padding {
@@ -236,7 +236,7 @@
   }
   
   .mobile-scroll-container {
-    @apply overflow-y-auto max-h-[calc(100vh-140px)] overscroll-contain;
+    @apply overflow-y-auto h-full overscroll-contain;
   }
   
   /* Light mode loading skeleton */
