@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3, Target, Heart, ArrowUp, Zap, Layers, Activity } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3, Target, Heart, ArrowUp, Zap, Layers, Activity, Timer, Flame, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -559,16 +559,45 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   {/* Stats Section */}
                   <div className="px-4 pb-4">
                     <div className="bg-blue-100/50 dark:bg-slate-800/30 rounded-xl p-3 space-y-3 border border-blue-200/40 dark:border-slate-700/30">
-                      {/* Max Weight */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                          <span className="text-xs text-muted-foreground">Peso máx.</span>
-                        </div>
-                        <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
-                          {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
-                        </span>
-                      </div>
+                      {exercise.muscleGroup === "Cardio" ? (
+                        <>
+                          {/* Total Time for Cardio */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Timer className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                              <span className="text-xs text-muted-foreground">Tempo total</span>
+                            </div>
+                            <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
+                              {/* Mock data for now - will be real data later */}
+                              0min
+                            </span>
+                          </div>
+                          
+                          {/* Calories Burned */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Flame className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                              <span className="text-xs text-muted-foreground">Calorias</span>
+                            </div>
+                            <span className="text-sm font-bold text-orange-500 dark:text-orange-400">
+                              0kcal
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Max Weight for Strength */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                              <span className="text-xs text-muted-foreground">Peso máx.</span>
+                            </div>
+                            <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
+                              {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
+                            </span>
+                          </div>
+                        </>
+                      )}
 
                       {/* Last Workout */}
                       <div className="flex items-center justify-between">
@@ -632,8 +661,14 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center space-x-2">
-                              <BarChart3 className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
-                              <span className="text-sm font-medium text-foreground">Histórico de Peso</span>
+                              {exercise.muscleGroup === "Cardio" ? (
+                                <Timer className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
+                              ) : (
+                                <BarChart3 className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
+                              )}
+                              <span className="text-sm font-medium text-foreground">
+                                {exercise.muscleGroup === "Cardio" ? "Histórico de Tempo" : "Histórico de Peso"}
+                              </span>
                             </div>
                             {expandedExercise === exercise.id ? (
                               <ChevronUp className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
@@ -710,9 +745,15 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                           ) : (
                             <div className="text-center py-6">
                               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
-                                <BarChart3 className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                                {exercise.muscleGroup === "Cardio" ? (
+                                  <Timer className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                                ) : (
+                                  <BarChart3 className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                                )}
                               </div>
-                              <p className="text-sm font-medium text-muted-foreground mb-1">Nenhum histórico de peso</p>
+                              <p className="text-sm font-medium text-muted-foreground mb-1">
+                                {exercise.muscleGroup === "Cardio" ? "Nenhum histórico de tempo" : "Nenhum histórico de peso"}
+                              </p>
                               <p className="text-xs text-muted-foreground/80">Complete treinos para ver o progresso</p>
                             </div>
                           )}
