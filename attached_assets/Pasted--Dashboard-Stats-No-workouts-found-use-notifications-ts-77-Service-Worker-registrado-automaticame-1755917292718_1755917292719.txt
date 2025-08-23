@@ -1,0 +1,27 @@
+📊 Dashboard Stats: No workouts found
+use-notifications.ts:77 Service Worker registrado automaticamente: ServiceWorkerRegistration
+dashboard.tsx:106 📊 Dashboard Stats: No workouts found
+dashboard.tsx:116 📊 Dashboard Stats: Total workouts found: 20
+dashboard.tsx:125 📊 Week range: 8/17/2025 to 8/23/2025
+dashboard.tsx:128 📊 All workouts: Array(20)
+dashboard.tsx:141 📊 Workout Treino E - Cardio e Funcional: 8/16/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino D - Braços e Antebraços: 8/15/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino C - Pernas, Glúteos e Abdômen: 8/14/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino B - Costas e Bíceps: 8/13/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino A - Peito, Ombros e Tríceps: 8/12/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino E - Cardio e Funcional: 8/6/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino D - Braços e Antebraços: 8/5/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino C - Pernas, Glúteos e Abdômen: 8/4/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino B - Costas e Bíceps: 8/3/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino A - Peito, Ombros e Tríceps: 8/2/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino E - Cardio e Funcional: 7/27/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino D - Braços e Antebraços: 7/26/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino C - Pernas, Glúteos e Abdômen: 7/25/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino B - Costas e Bíceps: 7/24/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino A - Peito, Ombros e Tríceps: 7/23/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino E - Cardio e Funcional: 7/16/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino D - Braços e Antebraços: 7/15/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino C - Pernas, Glúteos e Abdômen: 7/14/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino B - Costas e Bíceps: 7/13/2025, in week: false, completed: true
+dashboard.tsx:141 📊 Workout Treino A - Peito, Ombros e Tríceps: 7/12/2025, in week: false, completed: true
+dashboard.tsx:146 📊 Workouts this week: 0

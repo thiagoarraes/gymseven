@@ -103,7 +103,6 @@ export default function Dashboard() {
   // Calculate comprehensive weekly stats
   const stats = useMemo(() => {
     if (!recentWorkouts || recentWorkouts.length === 0) {
-      console.log('📊 Dashboard Stats: No workouts found');
       return {
         weeklyWorkouts: 0,
         bestVolumeDay: 'N/A',
@@ -113,8 +112,6 @@ export default function Dashboard() {
       };
     }
 
-    console.log('📊 Dashboard Stats: Total workouts found:', recentWorkouts.length);
-
     // Calculate workouts this week (Sunday to Saturday)
     const now = new Date();
     const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
@@ -122,28 +119,14 @@ export default function Dashboard() {
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
     
-    console.log('📊 Week range:', startOfWeek.toLocaleDateString(), 'to', endOfWeek.toLocaleDateString());
-    
-    // First, let's see all workouts with their dates
-    console.log('📊 All workouts:', recentWorkouts.map(w => ({
-      name: w.name,
-      startTime: w.startTime,
-      endTime: w.endTime,
-      hasEndTime: !!w.endTime
-    })));
-    
     const workoutsThisWeek = recentWorkouts.filter(w => {
       if (!w.startTime) return false;
       const workoutDate = new Date(w.startTime);
       const isInWeek = workoutDate >= startOfWeek && workoutDate <= endOfWeek;
       const isCompleted = !!w.endTime; // completed workouts have endTime
       
-      console.log(`📊 Workout ${w.name}: ${workoutDate.toLocaleDateString()}, in week: ${isInWeek}, completed: ${isCompleted}`);
-      
       return isInWeek && isCompleted;
     });
-    
-    console.log('📊 Workouts this week:', workoutsThisWeek.length);
 
     // Calculate average duration from all completed workouts
     const completedWorkouts = recentWorkouts.filter(w => w.endTime && w.startTime);
@@ -512,7 +495,7 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="text-3xl font-black text-foreground mb-1">{stats.weeklyWorkouts}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Treinos esta semana</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Esta semana (Dom-Sáb)</div>
           </CardContent>
         </Card>
 
