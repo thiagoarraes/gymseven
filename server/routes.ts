@@ -656,15 +656,15 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           .from('workoutLogSets')
           .select(`
             weight,
-            workoutLogExercise:workout_log_exercises!inner(
+            workoutLogExercise:workoutLogExercises!inner(
               exerciseId,
               exercise:exercises!inner(*),
-              workoutLog:workout_logs!inner(startTime, endTime, name, user_id)
+              workoutLog:workoutLogs!inner(startTime, endTime, name, user_id)
             )
           `)
           .gt('weight', 0)
-          .eq('workout_log_exercises.workout_logs.user_id', req.user!.id)
-          .not('workout_log_exercises.workout_logs.endTime', 'is', null); // Only completed workouts
+          .eq('workoutLogExercises.workoutLogs.user_id', req.user!.id)
+          .not('workoutLogExercises.workoutLogs.endTime', 'is', null); // Only completed workouts
         
         if (error) {
           console.error('Error fetching exercises with weights:', error);
@@ -758,13 +758,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         
         // Get workout log exercises for this specific exercise for authenticated user
         const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
-          .from('workout_log_exercises')
+          .from('workoutLogExercises')
           .select(`
             *,
-            workoutLog:workout_logs!inner(*, user_id)
+            workoutLog:workoutLogs!inner(*, user_id)
           `)
           .eq('exerciseId', exerciseId)
-          .eq('workout_logs.user_id', req.user!.id)
+          .eq('workoutLogs.user_id', req.user!.id)
           .order('order');
 
         if (logExercisesError) {
@@ -867,7 +867,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const validatedData = insertWorkoutLogExerciseSchema.parse(logExerciseData);
       
       const { data, error } = await supabaseStorage.supabase
-        .from('workout_log_exercises')
+        .from('workoutLogExercises')
         .insert(validatedData)
         .select()
         .single();
@@ -980,7 +980,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         // Para cada workout, verificar se tem este exercício
         for (const workoutLog of workout_logs) {
           const { data: logExercises } = await supabaseStorage.supabase
-            .from('workout_log_exercises')
+            .from('workoutLogExercises')
             .select('*')
             .eq('exerciseId', exercise.id)
             .eq('workoutLogId', workoutLog.id);
@@ -1126,7 +1126,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       // Get workout log exercises using Supabase directly to get correct structure
       const supabaseStorage = storage as any; // Cast to access supabase property
       const { data: logExercises, error: exercisesError } = await supabaseStorage.supabase
-        .from('workout_log_exercises')
+        .from('workoutLogExercises')
         .select('*')
         .eq('logId', req.params.id);
 
