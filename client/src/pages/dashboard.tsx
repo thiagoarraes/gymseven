@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap, Award } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap, Award, Activity } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -204,22 +204,49 @@ export default function Dashboard() {
       }
     }
 
-    // Calculate total volume lifted (estimate from workout duration and exercises)
-    let totalVolumeLifted = 0;
-    if (exercises && exercises.length > 0) {
-      exercises.forEach((ex: any) => {
-        if (ex.maxWeight && ex.totalSets) {
-          // Estimate total volume: maxWeight * avgReps * totalSets
-          const avgReps = 10; // Average reps assumption
-          totalVolumeLifted += (ex.maxWeight * avgReps * ex.totalSets);
+    // Calculate consecutive weeks with workouts
+    let consecutiveWeeks = 0;
+    if (completedWorkouts.length > 0) {
+      const now = new Date();
+      const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      
+      let weekToCheck = new Date(currentWeekStart);
+      
+      while (true) {
+        const weekEnd = new Date(weekToCheck);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        
+        // Check if there's at least one workout in this week
+        const workoutsInWeek = completedWorkouts.filter(w => {
+          if (!w.startTime) return false;
+          const workoutDate = new Date(w.startTime);
+          return workoutDate >= weekToCheck && workoutDate <= weekEnd;
+        });
+        
+        if (workoutsInWeek.length > 0) {
+          consecutiveWeeks++;
+          // Move to previous week
+          weekToCheck.setDate(weekToCheck.getDate() - 7);
+        } else {
+          break;
         }
-      });
+      }
     }
 
-    // Find personal record (highest weight across all exercises)
-    let personalRecord = 0;
+    // Find last exercise that had weight increase
+    let lastImprovedExercise = "Nenhum";
     if (exercises && exercises.length > 0) {
-      personalRecord = Math.max(...exercises.filter((ex: any) => ex.maxWeight).map((ex: any) => ex.maxWeight || 0));
+      // Look for exercises with recent progress (this is a simplified approach)
+      // In a real app, you'd track weight history better
+      const exercisesWithProgress = exercises.filter((ex: any) => ex.maxWeight && ex.maxWeight > 0);
+      if (exercisesWithProgress.length > 0) {
+        // For now, show the exercise with highest weight as a proxy for recent improvement
+        const bestExercise = exercisesWithProgress.reduce((best: any, current: any) => 
+          (current.maxWeight || 0) > (best.maxWeight || 0) ? current : best
+        );
+        lastImprovedExercise = bestExercise.name || "Nenhum";
+      }
     }
 
     // Total completed workouts
@@ -228,8 +255,8 @@ export default function Dashboard() {
     return {
       currentStreak: streak,
       totalWorkouts: totalWorkouts,
-      totalVolumeLifted: Math.round(totalVolumeLifted),
-      personalRecord: personalRecord,
+      consecutiveWeeks: consecutiveWeeks,
+      lastImprovedExercise: lastImprovedExercise,
       avgDuration: avgDurationStr || "0m",
     };
   }, [recentWorkouts, exercises]);
@@ -520,42 +547,42 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Card 2: Volume total */}
+        {/* Card 2: Semanas consecutivas */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
-                <Dumbbell className="text-purple-400 w-5 h-5" />
+                <Calendar className="text-purple-400 w-5 h-5" />
               </div>
               <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 whitespace-nowrap flex-shrink-0">
-                Volume
+                📅 Constância
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">
-              {(stats.totalVolumeLifted || 0) > 999 
-                ? `${((stats.totalVolumeLifted || 0) / 1000).toFixed(1)}k` 
-                : (stats.totalVolumeLifted || 0)
-              }
-            </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">kg levantados</div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.consecutiveWeeks}</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Semanas consecutivas</div>
           </CardContent>
         </Card>
 
-        {/* Card 3: Record pessoal */}
+        {/* Card 3: Último progresso */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex-shrink-0">
-                <Award className="text-emerald-400 w-5 h-5" />
+                <Activity className="text-emerald-400 w-5 h-5" />
               </div>
               <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20 whitespace-nowrap flex-shrink-0">
-                💪 Record
+                🔥 Progresso
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.personalRecord}kg</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Maior peso</div>
+            <div className="text-lg font-black text-foreground mb-1 leading-tight">
+              {stats.lastImprovedExercise.length > 15 
+                ? `${stats.lastImprovedExercise.substring(0, 15)}...` 
+                : stats.lastImprovedExercise
+              }
+            </div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Última melhoria</div>
           </CardContent>
         </Card>
         
