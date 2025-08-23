@@ -538,7 +538,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Card 1: Total de treinos */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative">
+          <CardContent className="p-5 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex-shrink-0">
@@ -548,14 +548,16 @@ export default function Dashboard() {
                 🏆 Total
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.totalWorkouts}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Treinos concluídos</div>
+            <div className="min-h-[60px] flex items-center">
+              <div className="text-3xl font-black text-foreground">{stats.totalWorkouts}</div>
+            </div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Treinos concluídos</div>
           </CardContent>
         </Card>
 
         {/* Card 2: Semanas consecutivas */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative">
+          <CardContent className="p-5 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
@@ -565,14 +567,16 @@ export default function Dashboard() {
                 📅 Constância
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.consecutiveWeeks}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Semanas consecutivas</div>
+            <div className="min-h-[60px] flex items-center">
+              <div className="text-3xl font-black text-foreground">{stats.consecutiveWeeks}</div>
+            </div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Semanas consecutivas</div>
           </CardContent>
         </Card>
 
         {/* Card 3: Último progresso */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative">
+          <CardContent className="p-5 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex-shrink-0">
@@ -582,26 +586,26 @@ export default function Dashboard() {
                 🔥 Progresso
               </span>
             </div>
-            <div className="flex flex-col">
-              <div className="text-2xl font-black text-foreground mb-1 leading-tight">
-                {(stats.lastImprovedExercise || "Nenhum").length > 12 
-                  ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 12)}...` 
+            <div className="min-h-[60px] flex flex-col justify-center">
+              <div className="text-3xl font-black text-foreground mb-1">
+                {(stats.lastImprovedExercise || "Nenhum").length > 8 
+                  ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 8)}...` 
                   : (stats.lastImprovedExercise || "Nenhum")
                 }
               </div>
               {(stats.weightIncrease || 0) > 0 && (
-                <div className="text-sm font-bold text-emerald-400">
+                <div className="text-xs font-bold text-emerald-400 -mt-1">
                   +{stats.weightIncrease}kg
                 </div>
               )}
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Última melhoria</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Última melhoria</div>
           </CardContent>
         </Card>
         
         {/* Card 4: Tempo médio */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative">
+          <CardContent className="p-5 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-amber-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20 flex-shrink-0">
@@ -611,8 +615,10 @@ export default function Dashboard() {
                 ⏱️ Duração
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.avgDuration}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Tempo médio</div>
+            <div className="min-h-[60px] flex items-center">
+              <div className="text-3xl font-black text-foreground">{stats.avgDuration}</div>
+            </div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Tempo médio</div>
           </CardContent>
         </Card>
       </div>
