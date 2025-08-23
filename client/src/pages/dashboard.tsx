@@ -232,33 +232,35 @@ export default function Dashboard() {
           {/* Last Workout & Streak Cards */}
           <div className="mobile-flex relative z-10">
             {/* Last Workout Card */}
-            <div className="bg-blue-100/70 hover:bg-blue-200/80 dark:bg-slate-800/40 dark:hover:bg-slate-700/60 rounded-2xl mobile-card-padding border border-blue-200/40 dark:border-slate-600/30 hover:border-blue-300/60 dark:hover:border-slate-500/50 transition-all duration-200 cursor-pointer touch-feedback mobile-focus">
+            <div className="bg-gradient-to-br from-slate-50/90 to-blue-50/70 dark:from-slate-900/80 dark:to-slate-800/60 hover:from-blue-50/80 hover:to-indigo-50/70 dark:hover:from-slate-800/90 dark:hover:to-slate-700/80 rounded-2xl mobile-card-padding border border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300/70 dark:hover:border-slate-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm">
               {recentWorkouts.length > 0 ? (
                 <div className="space-y-3 sm:space-y-4">
                   {/* Header */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
-                      <Play className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-400/30 dark:to-indigo-500/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/50 shadow-lg">
+                        <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Último Treino</h3>
+                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">Suas atividades recentes</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm sm:text-base font-bold text-foreground">Último Treino</h3>
-                      <p className="text-xs text-muted-foreground hidden sm:block">Suas atividades recentes</p>
-                    </div>
-                    <div className="text-right">
-                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
                         recentWorkouts[0]?.endTime 
-                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
-                          : 'bg-orange-500/10 text-orange-300 border-orange-500/20'
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
+                          : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
                       }`}>
                         {recentWorkouts[0]?.endTime ? (
                           <>
-                            <CheckCircle className="w-3 h-3 mr-1" />
+                            <CheckCircle className="w-3 h-3 mr-1.5" />
                             <span className="hidden sm:inline">Concluído</span>
                             <span className="sm:hidden">✓</span>
                           </>
                         ) : (
                           <>
-                            <Clock className="w-3 h-3 mr-1" />
+                            <Clock className="w-3 h-3 mr-1.5" />
                             <span className="hidden sm:inline">Em andamento</span>
                             <span className="sm:hidden">...</span>
                           </>
@@ -268,24 +270,24 @@ export default function Dashboard() {
                   </div>
                   
                   {/* Workout Info */}
-                  <div className="bg-blue-50/60 dark:bg-muted/30 rounded-xl p-3 space-y-2 border border-blue-200/30 dark:border-border/30">
+                  <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-3 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Treino</span>
-                      <span className="text-sm font-medium text-foreground truncate max-w-[120px] sm:max-w-[150px]">
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Treino</span>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[120px] sm:max-w-[150px]">
                         {recentWorkouts[0]?.name || "Treino personalizado"}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Data</span>
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Data</span>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {formatDate(recentWorkouts[0]?.startTime)}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">Duração</span>
-                      <span className="text-sm font-medium text-primary">
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Duração</span>
+                      <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
                         {recentWorkouts[0]?.endTime ? 
                           calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
                           "Em andamento"
@@ -295,11 +297,11 @@ export default function Dashboard() {
                     
                     {/* Muscle Groups */}
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Grupos</span>
+                      <div className="flex items-center gap-1.5">
+                        <Zap className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Grupos</span>
                       </div>
-                      <div className="flex flex-wrap gap-1 max-w-[130px] sm:max-w-[170px] justify-end">
+                      <div className="flex flex-wrap gap-1.5 max-w-[130px] sm:max-w-[170px] justify-end">
                         {(() => {
                           const workoutName = recentWorkouts[0]?.name?.toLowerCase() || '';
                           let muscleGroups: string[] = [];
@@ -333,7 +335,7 @@ export default function Dashboard() {
                           return muscleGroups.map((group, index) => (
                             <span 
                               key={index}
-                              className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-300 border border-indigo-500/20"
+                              className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-indigo-500/15 to-purple-500/15 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30 dark:border-indigo-400/40 shadow-sm"
                             >
                               {group}
                             </span>
@@ -343,10 +345,10 @@ export default function Dashboard() {
                     </div>
                     
                     {/* Quick Stats */}
-                    <div className="pt-2 border-t border-border/50">
-                      <div className="grid grid-cols-2 gap-2 text-center">
-                        <div>
-                          <div className="text-lg font-bold text-emerald-400">
+                    <div className="pt-3 border-t border-slate-300/50 dark:border-slate-600/50">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl p-2.5 border border-emerald-500/20 dark:border-emerald-400/30">
+                          <div className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
                             {(() => {
                               // Simulate exercise count based on workout type
                               const workoutName = recentWorkouts[0]?.name?.toLowerCase() || '';
@@ -357,10 +359,10 @@ export default function Dashboard() {
                               return '5';
                             })()}
                           </div>
-                          <div className="text-xs text-muted-foreground">Exercícios</div>
+                          <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Exercícios</div>
                         </div>
-                        <div>
-                          <div className="text-lg font-bold text-purple-400">
+                        <div className="bg-purple-500/10 dark:bg-purple-500/15 rounded-xl p-2.5 border border-purple-500/20 dark:border-purple-400/30">
+                          <div className="text-lg font-bold text-purple-500 dark:text-purple-400">
                             {(() => {
                               // Simulate volume based on workout duration
                               const duration = recentWorkouts[0]?.endTime 
@@ -370,7 +372,7 @@ export default function Dashboard() {
                               return Math.round(hours * 1200 + Math.random() * 400);
                             })()}kg
                           </div>
-                          <div className="text-xs text-muted-foreground">Volume</div>
+                          <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Volume</div>
                         </div>
                       </div>
                     </div>
@@ -378,10 +380,10 @@ export default function Dashboard() {
                   
                   {/* Action Button */}
                   <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-3 sm:px-4 py-2.5 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-xs sm:text-sm"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 rounded-2xl px-4 sm:px-5 py-3 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 w-full text-sm sm:text-base backdrop-blur-sm"
                     onClick={() => navigate("/treinos")}
                   >
-                    <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                     <span className="hidden sm:inline">Iniciar Novo Treino</span>
                     <span className="sm:hidden">Novo Treino</span>
                   </Button>
