@@ -204,33 +204,41 @@ export default function Dashboard() {
       }
     }
 
-    // Calculate consecutive weeks with workouts
+    // Calculate consecutive weeks with workouts (more flexible logic)
     let consecutiveWeeks = 0;
     if (completedWorkouts.length > 0) {
       const now = new Date();
       const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       
-      let weekToCheck = new Date(currentWeekStart);
-      
-      while (true) {
-        const weekEnd = new Date(weekToCheck);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-        
-        // Check if there's at least one workout in this week
-        const workoutsInWeek = completedWorkouts.filter(w => {
-          if (!w.startTime) return false;
+      // Get all weeks with workouts
+      const weeksWithWorkouts = new Set();
+      completedWorkouts.forEach(w => {
+        if (w.startTime) {
           const workoutDate = new Date(w.startTime);
-          return workoutDate >= weekToCheck && workoutDate <= weekEnd;
-        });
+          const weekStart = new Date(workoutDate.getFullYear(), workoutDate.getMonth(), workoutDate.getDate() - workoutDate.getDay());
+          weeksWithWorkouts.add(weekStart.getTime());
+        }
+      });
+      
+      // Start checking from current week and go back
+      let weekToCheck = new Date(currentWeekStart);
+      let foundCurrentOrRecentWeek = false;
+      
+      // Check up to last 12 weeks (3 months)
+      for (let i = 0; i < 12; i++) {
+        const weekTime = weekToCheck.getTime();
+        const hasWorkoutThisWeek = weeksWithWorkouts.has(weekTime);
         
-        if (workoutsInWeek.length > 0) {
+        if (hasWorkoutThisWeek) {
+          foundCurrentOrRecentWeek = true;
           consecutiveWeeks++;
-          // Move to previous week
-          weekToCheck.setDate(weekToCheck.getDate() - 7);
-        } else {
+        } else if (foundCurrentOrRecentWeek) {
+          // Stop counting if we hit a week without workouts after finding weeks with workouts
           break;
         }
+        
+        // Move to previous week
+        weekToCheck.setDate(weekToCheck.getDate() - 7);
       }
     }
 
