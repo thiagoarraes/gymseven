@@ -1062,7 +1062,7 @@ async function initializeStorage(): Promise<IStorage> {
   
   try {
     // OPTION 1: Supabase SDK with credentials (prioritize ANON_KEY or SERVICE_ROLE_KEY)
-    if (process.env.SUPABASE_URL && (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) {
+    if (process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) {
       console.log('🚀 Using Supabase SDK configuration');
       console.log('✅ Supabase credentials detected');
       const { SupabaseStorage } = await import('./supabase-storage');

@@ -24,7 +24,7 @@ function extractSupabaseCredentials(): { url: string | null, key: string | null 
   
   return {
     url: process.env.SUPABASE_URL || null,
-    key: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || null
+    key: process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || null
   };
 }
 
