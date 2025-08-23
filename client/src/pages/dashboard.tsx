@@ -234,25 +234,26 @@ export default function Dashboard() {
       }
     }
 
-    // Find last exercise that had weight increase with improvement details
-    let lastImprovedExercise = "Nenhum";
-    let weightIncrease = 0;
+    // Calculate total volume (weight × reps) across all completed workouts
+    let totalVolume = 0;
     if (exercises && exercises.length > 0) {
-      // Look for exercises with recent progress (this is a simplified approach)
-      // In a real app, you'd track weight history better
-      const exercisesWithProgress = exercises.filter((ex: any) => ex.maxWeight && ex.maxWeight > 0);
-      if (exercisesWithProgress.length > 0) {
-        // For now, show the exercise with highest weight as a proxy for recent improvement
-        const bestExercise = exercisesWithProgress.reduce((best: any, current: any) => 
-          (current.maxWeight || 0) > (best.maxWeight || 0) ? current : best
-        );
-        if (bestExercise) {
-          lastImprovedExercise = bestExercise.name || "Nenhum";
-          // Estimate improvement (simplified: assume started at 60% of current max)
-          weightIncrease = Math.round((bestExercise.maxWeight || 0) * 0.4);
+      // Sum up total volume from all exercises that have weight and sets data
+      exercises.forEach((exercise: any) => {
+        if (exercise.maxWeight && exercise.totalSets) {
+          // Estimate volume: max weight × total sets × average reps (assume 10 reps)
+          const exerciseVolume = (exercise.maxWeight || 0) * (exercise.totalSets || 0) * 10;
+          totalVolume += exerciseVolume;
         }
-      }
+      });
     }
+    
+    // Format volume for display (convert to tons if > 1000kg)
+    const formatVolume = (volume: number) => {
+      if (volume >= 1000) {
+        return `${(volume / 1000).toFixed(1)}t`;
+      }
+      return `${Math.round(volume)}kg`;
+    };
 
     // Total completed workouts
     const totalWorkouts = completedWorkouts.length;
@@ -261,8 +262,8 @@ export default function Dashboard() {
       currentStreak: streak,
       totalWorkouts: totalWorkouts,
       consecutiveWeeks: consecutiveWeeks,
-      lastImprovedExercise: lastImprovedExercise,
-      weightIncrease: weightIncrease,
+      totalVolume: totalVolume,
+      formattedVolume: formatVolume(totalVolume),
       avgDuration: avgDurationStr || "0m",
     };
   }, [recentWorkouts, exercises]);
@@ -574,32 +575,24 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Card 3: Último progresso */}
+        {/* Card 3: Volume Total */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex-shrink-0">
-                <Activity className="text-emerald-400 w-5 h-5" />
+                <BarChart3 className="text-emerald-400 w-5 h-5" />
               </div>
               <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20 whitespace-nowrap flex-shrink-0">
-                🔥 Progresso
+                💪 Volume
               </span>
             </div>
             <div className="min-h-[60px] flex items-center">
               <div className="text-3xl font-black text-foreground">
-                {(stats.lastImprovedExercise || "Nenhum").length > 8 
-                  ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 8)}...` 
-                  : (stats.lastImprovedExercise || "Nenhum")
-                }
-                {(stats.weightIncrease || 0) > 0 && (
-                  <span className="text-sm font-bold text-emerald-400 ml-2">
-                    +{stats.weightIncrease}kg
-                  </span>
-                )}
+                {stats.formattedVolume || "0kg"}
               </div>
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Última melhoria</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Volume total levantado</div>
           </CardContent>
         </Card>
         
