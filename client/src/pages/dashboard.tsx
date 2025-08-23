@@ -539,7 +539,7 @@ export default function Dashboard() {
                 <Trophy className="text-blue-400 w-5 h-5" />
               </div>
               <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20 whitespace-nowrap flex-shrink-0">
-                Total
+                🏆 Total
               </span>
             </div>
             <div className="text-3xl font-black text-foreground mb-1">{stats.totalWorkouts}</div>
@@ -576,9 +576,9 @@ export default function Dashboard() {
                 🔥 Progresso
               </span>
             </div>
-            <div className="text-lg font-black text-foreground mb-1 leading-tight">
-              {(stats.lastImprovedExercise || "Nenhum").length > 15 
-                ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 15)}...` 
+            <div className="text-3xl font-black text-foreground mb-1">
+              {(stats.lastImprovedExercise || "Nenhum").length > 12 
+                ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 12)}...` 
                 : (stats.lastImprovedExercise || "Nenhum")
               }
             </div>
