@@ -559,9 +559,12 @@ export class SupabaseStorage implements IStorage {
         *,
         exercises (*)
       `)
-      .eq('template_id', templateId);
+      .eq('templateId', templateId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching template exercises:', error);
+      throw error;
+    }
     return data.map(item => ({
       ...item,
       exercise: item.exercises
@@ -604,8 +607,8 @@ export class SupabaseStorage implements IStorage {
     const { error } = await supabase
       .from('workoutTemplateExercises')
       .delete()
-      .eq('template_id', templateId)
-      .eq('exercise_id', exerciseId);
+      .eq('templateId', templateId)
+      .eq('exerciseId', exerciseId);
 
     return !error;
   }

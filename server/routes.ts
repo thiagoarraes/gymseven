@@ -510,6 +510,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const exercises = await storage.getWorkoutTemplateExercises(req.params.id);
       res.json(exercises);
     } catch (error) {
+      console.error('Error fetching template exercises for template:', req.params.id, error);
       res.status(500).json({ message: "Erro ao buscar exercícios do treino" });
     }
   });
