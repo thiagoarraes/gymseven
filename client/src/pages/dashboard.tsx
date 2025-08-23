@@ -1161,29 +1161,27 @@ export default function Dashboard() {
                                       </div>
                                     </div>
                                     
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="bg-slate-800/40 rounded-lg p-2 border border-slate-600/20">
-                                        <div className="flex items-center space-x-2">
+                                    <div className="flex items-center justify-between bg-slate-800/30 rounded-lg p-2 border border-slate-600/20">
+                                      <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-1.5">
                                           <div className="w-4 h-4 rounded bg-yellow-500/20 flex items-center justify-center">
                                             <span className="text-yellow-400 text-xs font-bold">#</span>
                                           </div>
-                                          <span className="text-xs text-slate-400 font-medium">Repetições</span>
-                                        </div>
-                                        <div className="text-lg font-bold text-yellow-400 mt-1">
-                                          {set.reps && set.reps > 0 ? set.reps : '---'}
+                                          <span className="text-xs text-slate-400 font-medium">Reps:</span>
+                                          <span className="text-sm font-bold text-yellow-400">
+                                            {set.reps && set.reps > 0 ? set.reps : '---'}
+                                          </span>
                                         </div>
                                       </div>
                                       
-                                      <div className="bg-slate-800/40 rounded-lg p-2 border border-slate-600/20">
-                                        <div className="flex items-center space-x-2">
-                                          <div className="w-4 h-4 rounded bg-purple-500/20 flex items-center justify-center">
-                                            <span className="text-purple-400 text-xs font-bold">kg</span>
-                                          </div>
-                                          <span className="text-xs text-slate-400 font-medium">Carga</span>
+                                      <div className="flex items-center space-x-1.5">
+                                        <div className="w-4 h-4 rounded bg-purple-500/20 flex items-center justify-center">
+                                          <span className="text-purple-400 text-xs font-bold">kg</span>
                                         </div>
-                                        <div className="text-lg font-bold text-purple-400 mt-1">
+                                        <span className="text-xs text-slate-400 font-medium">Peso:</span>
+                                        <span className="text-sm font-bold text-purple-400">
                                           {set.weight && set.weight > 0 ? `${set.weight}kg` : '---'}
-                                        </div>
+                                        </span>
                                       </div>
                                     </div>
                                   </div>
