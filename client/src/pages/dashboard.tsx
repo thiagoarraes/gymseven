@@ -236,17 +236,17 @@ export default function Dashboard() {
               {recentWorkouts.length > 0 ? (
                 <div className="space-y-3 sm:space-y-4">
                   {/* Header */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-400/30 dark:to-indigo-500/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/50 shadow-lg">
                         <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <div>
+                      <div className="mr-4">
                         <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Último Treino</h3>
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block">Suas atividades recentes</p>
+                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block mt-1">Suas atividades recentes</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 mt-1">
                       <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
                         recentWorkouts[0]?.endTime 
                           ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
@@ -273,7 +273,7 @@ export default function Dashboard() {
                   <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-3 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Treino</span>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[120px] sm:max-w-[150px]">
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {recentWorkouts[0]?.name || "Treino personalizado"}
                       </span>
                     </div>
@@ -296,12 +296,12 @@ export default function Dashboard() {
                     </div>
                     
                     {/* Muscle Groups */}
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Zap className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                         <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Grupos</span>
                       </div>
-                      <div className="flex flex-wrap gap-1.5 max-w-[130px] sm:max-w-[170px] justify-end">
+                      <div className="flex gap-1.5 justify-end overflow-x-auto scrollbar-hide">
                         {(() => {
                           const workoutName = recentWorkouts[0]?.name?.toLowerCase() || '';
                           let muscleGroups: string[] = [];
