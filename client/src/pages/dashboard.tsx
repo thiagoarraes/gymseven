@@ -204,7 +204,7 @@ export default function Dashboard() {
       }
     }
 
-    // Calculate consecutive weeks with workouts (more flexible logic)
+    // Calculate consecutive weeks with workouts (strict consecutive logic)
     let consecutiveWeeks = 0;
     if (completedWorkouts.length > 0) {
       const now = new Date();
@@ -220,25 +220,19 @@ export default function Dashboard() {
         }
       });
       
-      // Start checking from current week and go back
+      // Start from current week
       let weekToCheck = new Date(currentWeekStart);
-      let foundCurrentOrRecentWeek = false;
       
-      // Check up to last 12 weeks (3 months)
-      for (let i = 0; i < 12; i++) {
-        const weekTime = weekToCheck.getTime();
-        const hasWorkoutThisWeek = weeksWithWorkouts.has(weekTime);
-        
-        if (hasWorkoutThisWeek) {
-          foundCurrentOrRecentWeek = true;
+      // Check if current week has workouts - if not, return 0 immediately
+      if (!weeksWithWorkouts.has(weekToCheck.getTime())) {
+        consecutiveWeeks = 0;
+      } else {
+        // Count consecutive weeks going back in time (no limit)
+        while (weeksWithWorkouts.has(weekToCheck.getTime())) {
           consecutiveWeeks++;
-        } else if (foundCurrentOrRecentWeek) {
-          // Stop counting if we hit a week without workouts after finding weeks with workouts
-          break;
+          // Move to previous week
+          weekToCheck.setDate(weekToCheck.getDate() - 7);
         }
-        
-        // Move to previous week
-        weekToCheck.setDate(weekToCheck.getDate() - 7);
       }
     }
 
