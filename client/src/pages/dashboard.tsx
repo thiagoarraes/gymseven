@@ -1140,22 +1140,51 @@ export default function Dashboard() {
 
                           {/* Sets */}
                           {exercise.sets && exercise.sets.length > 0 ? (
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                               {exercise.sets.map((set: any, setIndex: number) => {
                                 const setKey = `${uniqueKey}-set-${set.id || setIndex}`;
                                 return (
-                                  <div key={setKey} className="flex items-center justify-between py-2 px-3 bg-slate-700/30 rounded-lg">
-                                    <span className="text-sm text-slate-300">Série {set.setNumber || (setIndex + 1)}</span>
-                                    <div className="flex items-center space-x-4 text-sm">
-                                      {set.reps && set.reps > 0 && (
-                                        <span className="text-yellow-400">{set.reps} reps</span>
-                                      )}
-                                      {set.weight && set.weight > 0 && (
-                                        <span className="text-purple-400">{set.weight}kg</span>
-                                      )}
-                                      <div className={`w-2 h-2 rounded-full ${
-                                        set.completed ? "bg-emerald-400" : "bg-slate-500"
-                                      }`}></div>
+                                  <div key={setKey} className="bg-slate-700/40 rounded-lg p-3 border border-slate-600/30">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center space-x-2">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                          set.completed ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-slate-600/50 text-slate-400 border border-slate-500/40"
+                                        }`}>
+                                          {set.setNumber || (setIndex + 1)}
+                                        </div>
+                                        <span className="text-sm font-medium text-slate-200">Série {set.setNumber || (setIndex + 1)}</span>
+                                      </div>
+                                      <div className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                        set.completed ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-600/40 text-slate-400"
+                                      }`}>
+                                        {set.completed ? "Concluída" : "Pendente"}
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="bg-slate-800/40 rounded-lg p-2 border border-slate-600/20">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-4 h-4 rounded bg-yellow-500/20 flex items-center justify-center">
+                                            <span className="text-yellow-400 text-xs font-bold">#</span>
+                                          </div>
+                                          <span className="text-xs text-slate-400 font-medium">Repetições</span>
+                                        </div>
+                                        <div className="text-lg font-bold text-yellow-400 mt-1">
+                                          {set.reps && set.reps > 0 ? set.reps : '---'}
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="bg-slate-800/40 rounded-lg p-2 border border-slate-600/20">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-4 h-4 rounded bg-purple-500/20 flex items-center justify-center">
+                                            <span className="text-purple-400 text-xs font-bold">kg</span>
+                                          </div>
+                                          <span className="text-xs text-slate-400 font-medium">Carga</span>
+                                        </div>
+                                        <div className="text-lg font-bold text-purple-400 mt-1">
+                                          {set.weight && set.weight > 0 ? `${set.weight}kg` : '---'}
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 );
