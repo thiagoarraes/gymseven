@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -204,12 +204,33 @@ export default function Dashboard() {
       }
     }
 
+    // Calculate total volume lifted (estimate from workout duration and exercises)
+    let totalVolumeLifted = 0;
+    if (exercises && exercises.length > 0) {
+      exercises.forEach((ex: any) => {
+        if (ex.maxWeight && ex.totalSets) {
+          // Estimate total volume: maxWeight * avgReps * totalSets
+          const avgReps = 10; // Average reps assumption
+          totalVolumeLifted += (ex.maxWeight * avgReps * ex.totalSets);
+        }
+      });
+    }
+
+    // Find personal record (highest weight across all exercises)
+    let personalRecord = 0;
+    if (exercises && exercises.length > 0) {
+      personalRecord = Math.max(...exercises.filter((ex: any) => ex.maxWeight).map((ex: any) => ex.maxWeight || 0));
+    }
+
+    // Total completed workouts
+    const totalWorkouts = completedWorkouts.length;
+
     return {
-      weeklyWorkouts: workoutsThisWeek.length,
-      bestVolumeDay: bestDay,
-      avgDuration: avgDurationStr || "0m",
-      exercisesWithIncrease: Math.max(0, exercisesWithIncrease),
       currentStreak: streak,
+      totalWorkouts: totalWorkouts,
+      totalVolumeLifted: Math.round(totalVolumeLifted),
+      personalRecord: personalRecord,
+      avgDuration: avgDurationStr || "0m",
     };
   }, [recentWorkouts, exercises]);
 
@@ -482,71 +503,76 @@ export default function Dashboard() {
       
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Card 1: Treinos desta semana */}
+        {/* Card 1: Total de treinos */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex-shrink-0">
-                <Calendar className="text-blue-400 w-5 h-5" />
+                <Trophy className="text-blue-400 w-5 h-5" />
               </div>
               <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20 whitespace-nowrap flex-shrink-0">
-                Esta semana
+                Total
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.weeklyWorkouts}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Esta semana (Dom-Sáb)</div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.totalWorkouts}</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Treinos concluídos</div>
           </CardContent>
         </Card>
 
-        {/* Card 2: Melhor dia da semana */}
+        {/* Card 2: Volume total */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
-                <Flame className="text-purple-400 w-5 h-5" />
+                <Dumbbell className="text-purple-400 w-5 h-5" />
               </div>
               <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 whitespace-nowrap flex-shrink-0">
-                Melhor dia
+                Volume
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.bestVolumeDay}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Maior volume</div>
+            <div className="text-3xl font-black text-foreground mb-1">
+              {stats.totalVolumeLifted > 999 
+                ? `${(stats.totalVolumeLifted / 1000).toFixed(1)}k` 
+                : stats.totalVolumeLifted
+              }
+            </div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">kg levantados</div>
           </CardContent>
         </Card>
 
-        {/* Card 3: Tempo médio */}
+        {/* Card 3: Record pessoal */}
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-green-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
-              <div className="p-2 bg-green-500/10 rounded-xl border border-green-500/20 flex-shrink-0">
-                <Clock className="text-green-400 w-5 h-5" />
+              <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex-shrink-0">
+                <Award className="text-emerald-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-green-400 font-bold bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20 whitespace-nowrap flex-shrink-0">
-                Média geral
+              <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+                💪 Record
+              </span>
+            </div>
+            <div className="text-3xl font-black text-foreground mb-1">{stats.personalRecord}kg</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Maior peso</div>
+          </CardContent>
+        </Card>
+        
+        {/* Card 4: Tempo médio */}
+        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
+          <CardContent className="p-5 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-amber-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
+              <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20 flex-shrink-0">
+                <Clock className="text-amber-400 w-5 h-5" />
+              </div>
+              <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-2 py-1 rounded-full border border-amber-500/20 whitespace-nowrap flex-shrink-0">
+                ⏱️ Duração
               </span>
             </div>
             <div className="text-3xl font-black text-foreground mb-1">{stats.avgDuration}</div>
             <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Tempo médio</div>
-          </CardContent>
-        </Card>
-        
-        {/* Card 4: Exercícios com peso aumentado */}
-        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-yellow-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
-              <div className="p-2 bg-yellow-500/10 rounded-xl border border-yellow-500/20 flex-shrink-0">
-                <TrendingUp className="text-yellow-400 w-5 h-5" />
-              </div>
-              <span className="text-xs text-yellow-400 font-bold bg-yellow-500/10 px-2 py-1 rounded-full border border-yellow-500/20 animate-pulse whitespace-nowrap flex-shrink-0">
-                Progresso
-              </span>
-            </div>
-            <div className="text-3xl font-black text-foreground mb-1">{stats.exercisesWithIncrease}</div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Pesos aumentados</div>
           </CardContent>
         </Card>
       </div>
