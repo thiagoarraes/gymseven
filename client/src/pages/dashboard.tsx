@@ -103,6 +103,7 @@ export default function Dashboard() {
   // Calculate comprehensive weekly stats
   const stats = useMemo(() => {
     if (!recentWorkouts || recentWorkouts.length === 0) {
+      console.log('📊 Dashboard Stats: No workouts found');
       return {
         weeklyWorkouts: 0,
         bestVolumeDay: 'N/A',
@@ -112,6 +113,8 @@ export default function Dashboard() {
       };
     }
 
+    console.log('📊 Dashboard Stats: Total workouts found:', recentWorkouts.length);
+
     // Calculate workouts this week (Sunday to Saturday)
     const now = new Date();
     const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
@@ -119,11 +122,28 @@ export default function Dashboard() {
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
     
+    console.log('📊 Week range:', startOfWeek.toLocaleDateString(), 'to', endOfWeek.toLocaleDateString());
+    
+    // First, let's see all workouts with their dates
+    console.log('📊 All workouts:', recentWorkouts.map(w => ({
+      name: w.name,
+      startTime: w.startTime,
+      endTime: w.endTime,
+      hasEndTime: !!w.endTime
+    })));
+    
     const workoutsThisWeek = recentWorkouts.filter(w => {
       if (!w.startTime) return false;
       const workoutDate = new Date(w.startTime);
-      return workoutDate >= startOfWeek && workoutDate <= endOfWeek && w.endTime; // completed workouts have endTime
+      const isInWeek = workoutDate >= startOfWeek && workoutDate <= endOfWeek;
+      const isCompleted = !!w.endTime; // completed workouts have endTime
+      
+      console.log(`📊 Workout ${w.name}: ${workoutDate.toLocaleDateString()}, in week: ${isInWeek}, completed: ${isCompleted}`);
+      
+      return isInWeek && isCompleted;
     });
+    
+    console.log('📊 Workouts this week:', workoutsThisWeek.length);
 
     // Calculate average duration from all completed workouts
     const completedWorkouts = recentWorkouts.filter(w => w.endTime && w.startTime);
@@ -138,56 +158,23 @@ export default function Dashboard() {
     const avgMinutes = Math.floor((avgDurationMs % (1000 * 60 * 60)) / (1000 * 60));
     const avgDurationStr = avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`;
 
-    // Find day with highest volume this week
-    const dayVolumes = new Map();
+    // Find day with most workouts this week (based on workout count)
     const dayWorkoutCounts = new Map();
     const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
     workoutsThisWeek.forEach(w => {
       const dayOfWeek = new Date(w.startTime).getDay();
       const dayName = dayNames[dayOfWeek];
-      
-      // Calculate volume from available workout data
-      let workoutVolume = 0;
-      if (w.totalVolume && w.totalVolume > 0) {
-        workoutVolume = w.totalVolume;
-      } else if (w.sets && Array.isArray(w.sets)) {
-        // Calculate volume from sets if available
-        workoutVolume = w.sets.reduce((sum: number, set: any) => {
-          const weight = set.weight || 0;
-          const reps = set.reps || 0;
-          return sum + (weight * reps);
-        }, 0);
-      } else {
-        // Fallback: just count workout as 1 unit of volume
-        workoutVolume = 100; // Base volume for completed workout
-      }
-      
-      dayVolumes.set(dayName, (dayVolumes.get(dayName) || 0) + workoutVolume);
       dayWorkoutCounts.set(dayName, (dayWorkoutCounts.get(dayName) || 0) + 1);
     });
 
     let bestDay = 'N/A';
-    let maxVolume = 0;
+    let maxCount = 0;
     
-    // If we have volume data, use it, otherwise use workout count
-    if (dayVolumes.size > 0) {
-      for (const [day, volume] of dayVolumes.entries()) {
-        if (volume > maxVolume) {
-          maxVolume = volume;
-          bestDay = day;
-        }
-      }
-    }
-    
-    // Fallback to most workout count if no volume found
-    if (bestDay === 'N/A' && dayWorkoutCounts.size > 0) {
-      let maxCount = 0;
-      for (const [day, count] of dayWorkoutCounts.entries()) {
-        if (count > maxCount) {
-          maxCount = count;
-          bestDay = day;
-        }
+    for (const [day, count] of dayWorkoutCounts.entries()) {
+      if (count > maxCount) {
+        maxCount = count;
+        bestDay = day;
       }
     }
 
