@@ -589,8 +589,8 @@ export default function Dashboard() {
                   : (stats.lastImprovedExercise || "Nenhum")
                 }
               </div>
-              {stats.weightIncrease > 0 && (
-                <div className="text-lg font-bold text-emerald-300">
+              {(stats.weightIncrease || 0) > 0 && (
+                <div className="text-sm font-bold text-emerald-400">
                   +{stats.weightIncrease}kg
                 </div>
               )}
