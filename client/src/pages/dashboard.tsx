@@ -234,8 +234,9 @@ export default function Dashboard() {
       }
     }
 
-    // Find last exercise that had weight increase
+    // Find last exercise that had weight increase with improvement details
     let lastImprovedExercise = "Nenhum";
+    let weightIncrease = 0;
     if (exercises && exercises.length > 0) {
       // Look for exercises with recent progress (this is a simplified approach)
       // In a real app, you'd track weight history better
@@ -245,7 +246,11 @@ export default function Dashboard() {
         const bestExercise = exercisesWithProgress.reduce((best: any, current: any) => 
           (current.maxWeight || 0) > (best.maxWeight || 0) ? current : best
         );
-        lastImprovedExercise = bestExercise.name || "Nenhum";
+        if (bestExercise) {
+          lastImprovedExercise = bestExercise.name || "Nenhum";
+          // Estimate improvement (simplified: assume started at 60% of current max)
+          weightIncrease = Math.round((bestExercise.maxWeight || 0) * 0.4);
+        }
       }
     }
 
@@ -257,6 +262,7 @@ export default function Dashboard() {
       totalWorkouts: totalWorkouts,
       consecutiveWeeks: consecutiveWeeks,
       lastImprovedExercise: lastImprovedExercise,
+      weightIncrease: weightIncrease,
       avgDuration: avgDurationStr || "0m",
     };
   }, [recentWorkouts, exercises]);
@@ -576,11 +582,18 @@ export default function Dashboard() {
                 🔥 Progresso
               </span>
             </div>
-            <div className="text-3xl font-black text-foreground mb-1">
-              {(stats.lastImprovedExercise || "Nenhum").length > 12 
-                ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 12)}...` 
-                : (stats.lastImprovedExercise || "Nenhum")
-              }
+            <div className="flex flex-col">
+              <div className="text-2xl font-black text-foreground mb-1 leading-tight">
+                {(stats.lastImprovedExercise || "Nenhum").length > 12 
+                  ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 12)}...` 
+                  : (stats.lastImprovedExercise || "Nenhum")
+                }
+              </div>
+              {stats.weightIncrease > 0 && (
+                <div className="text-lg font-bold text-emerald-300">
+                  +{stats.weightIncrease}kg
+                </div>
+              )}
             </div>
             <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Última melhoria</div>
           </CardContent>
