@@ -1177,8 +1177,17 @@ export async function registerRoutes(app: Express, createServerInstance = true):
                 // Calculate volume as weight × reps for proper volume calculation
                 const weight = parseFloat(set.weight) || 0;
                 const reps = parseInt(set.reps) || 0;
+                
+                // Skip volume calculation for cardio exercises and exercises with no weight
                 if (weight > 0 && reps > 0) {
-                  totalVolume += weight * reps;
+                  // For bodyweight exercises with high reps (>100), limit weight calculation  
+                  // to avoid unrealistic volumes
+                  if (reps > 100 && weight < 50) {
+                    // Likely bodyweight exercise - use lower effective weight
+                    totalVolume += Math.min(weight, 5) * Math.min(reps, 50);
+                  } else {
+                    totalVolume += weight * reps;
+                  }
                 }
               }
             }
