@@ -586,18 +586,18 @@ export default function Dashboard() {
                 🔥 Progresso
               </span>
             </div>
-            <div className="min-h-[60px] flex flex-col justify-center">
-              <div className="text-3xl font-black text-foreground mb-1">
+            <div className="min-h-[60px] flex items-center">
+              <div className="text-3xl font-black text-foreground">
                 {(stats.lastImprovedExercise || "Nenhum").length > 8 
                   ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 8)}...` 
                   : (stats.lastImprovedExercise || "Nenhum")
                 }
+                {(stats.weightIncrease || 0) > 0 && (
+                  <span className="text-sm font-bold text-emerald-400 ml-2">
+                    +{stats.weightIncrease}kg
+                  </span>
+                )}
               </div>
-              {(stats.weightIncrease || 0) > 0 && (
-                <div className="text-xs font-bold text-emerald-400 -mt-1">
-                  +{stats.weightIncrease}kg
-                </div>
-              )}
             </div>
             <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Última melhoria</div>
           </CardContent>
