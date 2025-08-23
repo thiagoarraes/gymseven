@@ -577,9 +577,9 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="text-lg font-black text-foreground mb-1 leading-tight">
-              {stats.lastImprovedExercise.length > 15 
-                ? `${stats.lastImprovedExercise.substring(0, 15)}...` 
-                : stats.lastImprovedExercise
+              {(stats.lastImprovedExercise || "Nenhum").length > 15 
+                ? `${(stats.lastImprovedExercise || "Nenhum").substring(0, 15)}...` 
+                : (stats.lastImprovedExercise || "Nenhum")
               }
             </div>
             <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">Última melhoria</div>
