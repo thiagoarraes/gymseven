@@ -85,9 +85,11 @@ export default function Dashboard() {
 
   // Fetch workout summary when modal opens
   const { data: workoutSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/workout-logs', selectedWorkout, 'summary'],
+    queryKey: ['/api/workout-logs', selectedWorkout, 'summary', Date.now()],
     queryFn: () => workoutLogApi.getSummary(selectedWorkout!),
     enabled: !!selectedWorkout && showSummaryModal,
+    staleTime: 0, // Always refetch
+    cacheTime: 0, // Don't cache
   });
 
   const handleWorkoutClick = (workoutId: string) => {

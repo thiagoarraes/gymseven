@@ -1178,16 +1178,23 @@ export async function registerRoutes(app: Express, createServerInstance = true):
                 const weight = parseFloat(set.weight) || 0;
                 const reps = parseInt(set.reps) || 0;
                 
+                console.log(`Processing set: ${weight}kg × ${reps} reps for exercise ${exercise?.name}`);
+                
                 // Skip volume calculation for cardio exercises and exercises with no weight
                 if (weight > 0 && reps > 0) {
+                  let setVolume = 0;
                   // For bodyweight exercises with high reps (>100), limit weight calculation  
                   // to avoid unrealistic volumes
                   if (reps > 100 && weight < 50) {
                     // Likely bodyweight exercise - use lower effective weight
-                    totalVolume += Math.min(weight, 5) * Math.min(reps, 50);
+                    setVolume = Math.min(weight, 5) * Math.min(reps, 50);
+                    console.log(`High reps exercise - limited volume: ${setVolume}kg`);
                   } else {
-                    totalVolume += weight * reps;
+                    setVolume = weight * reps;
+                    console.log(`Normal exercise volume: ${setVolume}kg`);
                   }
+                  totalVolume += setVolume;
+                  console.log(`Running total volume: ${totalVolume}kg`);
                 }
               }
             }
