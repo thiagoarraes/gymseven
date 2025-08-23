@@ -682,28 +682,34 @@ export default function Dashboard() {
               {recentWorkouts.slice(0, 3).map((workout) => (
                 <div 
                   key={workout.id} 
-                  className="flex items-center justify-between p-3 bg-blue-50/60 dark:bg-muted/30 rounded-xl border border-blue-200/30 dark:border-border/50 hover-lift cursor-pointer hover:bg-blue-100/70 dark:hover:bg-muted/40 transition-colors"
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 dark:from-slate-800/60 dark:to-slate-700/40 rounded-xl border border-blue-200/40 dark:border-slate-600/50 hover-lift cursor-pointer hover:from-blue-100/80 hover:to-indigo-100/60 dark:hover:from-slate-700/80 dark:hover:to-slate-600/60 transition-all duration-300 group backdrop-blur-sm"
                   onClick={() => handleWorkoutClick(workout.id)}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 gradient-accent rounded-lg flex items-center justify-center">
-                      <Play className="text-white text-sm w-4 h-4" />
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/25 dark:group-hover:shadow-blue-400/25 group-hover:scale-105 transition-all duration-300">
+                      <Play className="text-white w-5 h-5" />
                     </div>
                     <div>
-                      <div className="font-medium text-foreground">{workout.name}</div>
-                      <div className="text-sm text-muted-foreground">{formatDate(workout.startTime)}</div>
+                      <div className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                        {workout.name}
+                      </div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+                        {formatDate(workout.startTime)}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <div className="text-right">
-                      <div className="text-sm font-medium text-emerald-400">
+                      <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
                         {workout.endTime ? calculateDuration(workout.startTime, workout.endTime) : "Em andamento"}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
                         {workout.endTime ? "Concluído" : "Incompleto"}
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    <div className="w-8 h-8 rounded-lg bg-slate-100/80 dark:bg-slate-700/60 group-hover:bg-slate-200/90 dark:group-hover:bg-slate-600/80 flex items-center justify-center transition-all duration-300">
+                      <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all duration-300" />
+                    </div>
                   </div>
                 </div>
               ))}
