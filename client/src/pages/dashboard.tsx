@@ -1093,8 +1093,6 @@ export default function Dashboard() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-slate-200">Exercícios realizados</h4>
                   {(() => {
-                    console.log('workoutSummary.exercises:', workoutSummary.exercises);
-                    
                     // Group exercises by ID and name, combining their sets
                     const exerciseGroups = workoutSummary.exercises.reduce((acc: any, exercise: any) => {
                       const key = `${exercise.id}-${exercise.name}`;
@@ -1106,7 +1104,6 @@ export default function Dashboard() {
                       }
                       // Combine sets from all instances of this exercise, avoiding duplicates
                       if (exercise.sets && exercise.sets.length > 0) {
-                        console.log(`Exercise ${exercise.name} has ${exercise.sets.length} sets:`, exercise.sets);
                         exercise.sets.forEach((set: any) => {
                           // Only add if not already present (check by set ID)
                           const exists = acc[key].sets.find((existingSet: any) => existingSet.id === set.id);
@@ -1123,8 +1120,6 @@ export default function Dashboard() {
                       ...exercise,
                       sets: exercise.sets.sort((a: any, b: any) => a.setNumber - b.setNumber)
                     }));
-                    
-                    console.log('uniqueExercises after grouping:', uniqueExercises);
 
                     return uniqueExercises.map((exercise: any, index: number) => {
                       const uniqueKey = `${exercise.id || 'unknown'}-${exercise.name || 'unnamed'}-${index}`;

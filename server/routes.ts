@@ -1146,11 +1146,17 @@ export async function registerRoutes(app: Express, createServerInstance = true):
             .single();
 
           // Get sets for this exercise
-          const { data: sets } = await supabaseStorage.supabase
+          const { data: sets, error: setsError } = await supabaseStorage.supabase
             .from('workoutLogSets')
             .select('*')
             .eq('logExerciseId', logExercise.id)
             .order('setNumber');
+          
+          if (setsError) {
+            console.error('Error fetching sets for exercise:', logExercise.id, setsError);
+          } else {
+            console.log(`Found ${sets?.length || 0} sets for exercise ${logExercise.id}:`, sets);
+          }
 
           const exerciseData = {
             id: logExercise.exerciseId,
