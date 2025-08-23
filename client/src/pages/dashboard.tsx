@@ -236,17 +236,39 @@ export default function Dashboard() {
       }
     }
 
-    // Calculate total volume (weight × reps) across all completed workouts
+    // Calculate total volume for current week only
     let totalVolume = 0;
-    if (exercises && exercises.length > 0) {
-      // Sum up total volume from all exercises that have weight and sets data
-      exercises.forEach((exercise: any) => {
-        if (exercise.maxWeight && exercise.totalSets) {
-          // Estimate volume: max weight × total sets × average reps (assume 10 reps)
-          const exerciseVolume = (exercise.maxWeight || 0) * (exercise.totalSets || 0) * 10;
-          totalVolume += exerciseVolume;
-        }
+    if (completedWorkouts.length > 0) {
+      // Get current week boundaries
+      const now = new Date();
+      const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      currentWeekStart.setHours(0, 0, 0, 0);
+      
+      const currentWeekEnd = new Date(currentWeekStart);
+      currentWeekEnd.setDate(currentWeekEnd.getDate() + 6);
+      currentWeekEnd.setHours(23, 59, 59, 999);
+      
+      // Filter workouts from current week
+      const currentWeekWorkouts = completedWorkouts.filter(w => {
+        if (!w.startTime) return false;
+        const workoutDate = new Date(w.startTime);
+        return workoutDate >= currentWeekStart && workoutDate <= currentWeekEnd;
       });
+      
+      // Calculate volume from current week workouts
+      if (exercises && exercises.length > 0 && currentWeekWorkouts.length > 0) {
+        // Get workout IDs from current week
+        const currentWeekWorkoutIds = new Set(currentWeekWorkouts.map(w => w.id));
+        
+        // Sum up volume from exercises in current week workouts
+        exercises.forEach((exercise: any) => {
+          if (exercise.maxWeight && exercise.totalSets && exercise.workoutId && currentWeekWorkoutIds.has(exercise.workoutId)) {
+            // Estimate volume: max weight × total sets × average reps (assume 10 reps)
+            const exerciseVolume = (exercise.maxWeight || 0) * (exercise.totalSets || 0) * 10;
+            totalVolume += exerciseVolume;
+          }
+        });
+      }
     }
     
     // Format volume for display (convert to tons if > 1000kg)
@@ -594,7 +616,7 @@ export default function Dashboard() {
                 {stats.formattedVolume || "0kg"}
               </div>
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Volume total levantado</div>
+            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Volume semanal</div>
           </CardContent>
         </Card>
         
