@@ -533,9 +533,9 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="text-3xl font-black text-foreground mb-1">
-              {stats.totalVolumeLifted > 999 
-                ? `${(stats.totalVolumeLifted / 1000).toFixed(1)}k` 
-                : stats.totalVolumeLifted
+              {(stats.totalVolumeLifted || 0) > 999 
+                ? `${((stats.totalVolumeLifted || 0) / 1000).toFixed(1)}k` 
+                : (stats.totalVolumeLifted || 0)
               }
             </div>
             <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis">kg levantados</div>
