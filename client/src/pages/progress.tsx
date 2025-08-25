@@ -670,36 +670,57 @@ function LevelSystem({ achievements, username }: { achievements: Achievement[]; 
 }
 
 // Stats Overview Component
-function StatsOverview({ achievements }: { achievements: Achievement[] }) {
+function StatsOverview({ achievements, workoutLogs = [] }: { achievements: Achievement[]; workoutLogs?: any[] }) {
   const unlockedCount = achievements.filter(a => a.unlocked).length;
   const totalPoints = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + a.points, 0);
   const totalPossiblePoints = achievements.reduce((sum, a) => sum + a.points, 0);
   const completionPercentage = Math.round((unlockedCount / achievements.length) * 100);
   
-  // Calculate tier counts
-  const tierCounts = {
-    bronze: achievements.filter(a => a.unlocked && a.tier === 'bronze').length,
-    prata: achievements.filter(a => a.unlocked && a.tier === 'prata').length,
-    ouro: achievements.filter(a => a.unlocked && a.tier === 'ouro').length,
-    diamante: achievements.filter(a => a.unlocked && a.tier === 'diamante').length,
-    épico: achievements.filter(a => a.unlocked && a.tier === 'épico').length,
-    lendário: achievements.filter(a => a.unlocked && a.tier === 'lendário').length,
-    mítico: achievements.filter(a => a.unlocked && a.tier === 'mítico').length,
+  // Calculate new interesting stats
+  const completedWorkouts = workoutLogs.filter(log => log.endTime);
+  const totalWorkouts = completedWorkouts.length;
+  
+  // Calculate current streak
+  const calculateCurrentStreak = () => {
+    if (!completedWorkouts.length) return 0;
+    
+    const sortedDates = completedWorkouts
+      .map(w => new Date(w.endTime).toDateString())
+      .filter((date, index, arr) => arr.indexOf(date) === index)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    
+    let streak = 0;
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
+    for (const dateStr of sortedDates) {
+      const workoutDate = new Date(dateStr);
+      workoutDate.setHours(0, 0, 0, 0);
+      
+      const daysDiff = Math.floor((currentDate.getTime() - workoutDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff === streak) {
+        streak++;
+        continue;
+      }
+      
+      if (daysDiff === 0 && streak === 0) {
+        streak++;
+        continue;
+      }
+      
+      break;
+    }
+    
+    return streak;
   };
-
-  // Count highest tier achieved
-  const getHighestTier = () => {
-    if (tierCounts.mítico > 0) return "Mítico";
-    if (tierCounts.lendário > 0) return "Lendário";
-    if (tierCounts.épico > 0) return "Épico";
-    if (tierCounts.diamante > 0) return "Diamante";
-    if (tierCounts.ouro > 0) return "Ouro";
-    if (tierCounts.prata > 0) return "Prata";
-    if (tierCounts.bronze > 0) return "Bronze";
-    return "Nenhum";
-  };
-
-  const highestTier = getHighestTier();
+  
+  const currentStreak = calculateCurrentStreak();
+  
+  // Calculate progress average
+  const averageProgress = Math.round(
+    achievements.reduce((sum, a) => sum + a.progress, 0) / achievements.length
+  );
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -732,12 +753,12 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
       <Card className="bg-gradient-to-br from-purple-500/10 to-pink-600/10 border-purple-500/20">
         <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center mb-3">
-            <Crown className="w-8 h-8 text-purple-400" />
+            <Flame className="w-8 h-8 text-purple-400" />
           </div>
-          <div className="text-3xl font-bold text-purple-400 mb-2">{tierCounts.mítico + tierCounts.lendário + tierCounts.épico}</div>
-          <div className="text-sm text-muted-foreground">Elite</div>
+          <div className="text-3xl font-bold text-purple-400 mb-2">{currentStreak}</div>
+          <div className="text-sm text-muted-foreground">Dias Seguidos</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Épico+ desbloqueadas
+            Sequência atual
           </div>
         </CardContent>
       </Card>
@@ -745,12 +766,12 @@ function StatsOverview({ achievements }: { achievements: Achievement[] }) {
       <Card className="bg-gradient-to-br from-orange-500/10 to-yellow-600/10 border-orange-500/20">
         <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center mb-3">
-            <Star className="w-8 h-8 text-orange-400" />
+            <Target className="w-8 h-8 text-orange-400" />
           </div>
-          <div className="text-2xl font-bold text-orange-400 mb-2">{highestTier}</div>
-          <div className="text-sm text-muted-foreground">Maior Nível</div>
+          <div className="text-3xl font-bold text-orange-400 mb-2">{averageProgress}%</div>
+          <div className="text-sm text-muted-foreground">Progresso Médio</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Conquista alcançada
+            De todas conquistas
           </div>
         </CardContent>
       </Card>
@@ -919,7 +940,7 @@ export default function AchievementsPage() {
         <LevelSystem achievements={achievementsWithProgress} username={user?.username || 'Usuário'} />
 
         {/* Stats Overview */}
-        <StatsOverview achievements={achievementsWithProgress} />
+        <StatsOverview achievements={achievementsWithProgress} workoutLogs={workoutLogs} />
 
         {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-center">
