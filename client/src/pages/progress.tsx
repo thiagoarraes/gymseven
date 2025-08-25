@@ -676,51 +676,38 @@ function StatsOverview({ achievements, workoutLogs = [] }: { achievements: Achie
   const totalPossiblePoints = achievements.reduce((sum, a) => sum + a.points, 0);
   const completionPercentage = Math.round((unlockedCount / achievements.length) * 100);
   
-  // Calculate new interesting stats
-  const completedWorkouts = workoutLogs.filter(log => log.endTime);
-  const totalWorkouts = completedWorkouts.length;
+  // Calculate conquest-focused stats
+  const unlockedAchievements = achievements.filter(a => a.unlocked);
+  const lockedAchievements = achievements.filter(a => !a.unlocked);
   
-  // Calculate current streak
-  const calculateCurrentStreak = () => {
-    if (!completedWorkouts.length) return 0;
+  // Find next closest achievement to unlock
+  const getNextClosestAchievement = () => {
+    const achievementsWithProgress = lockedAchievements
+      .filter(a => a.progress > 0)
+      .sort((a, b) => b.progress - a.progress);
     
-    const sortedDates = completedWorkouts
-      .map(w => new Date(w.endTime).toDateString())
-      .filter((date, index, arr) => arr.indexOf(date) === index)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-    
-    let streak = 0;
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    
-    for (const dateStr of sortedDates) {
-      const workoutDate = new Date(dateStr);
-      workoutDate.setHours(0, 0, 0, 0);
-      
-      const daysDiff = Math.floor((currentDate.getTime() - workoutDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (daysDiff === streak) {
-        streak++;
-        continue;
-      }
-      
-      if (daysDiff === 0 && streak === 0) {
-        streak++;
-        continue;
-      }
-      
-      break;
-    }
-    
-    return streak;
+    return achievementsWithProgress[0] || lockedAchievements[0] || null;
   };
   
-  const currentStreak = calculateCurrentStreak();
+  const nextAchievement = getNextClosestAchievement();
   
-  // Calculate progress average
-  const averageProgress = Math.round(
-    achievements.reduce((sum, a) => sum + a.progress, 0) / achievements.length
-  );
+  // Calculate XP needed for next achievement
+  const xpToNextAchievement = nextAchievement ? nextAchievement.points : 0;
+  
+  // Count achievements by category that are unlocked
+  const unlockedByCategory = {
+    workout: unlockedAchievements.filter(a => a.category === 'workout').length,
+    consistency: unlockedAchievements.filter(a => a.category === 'consistency').length,
+    strength: unlockedAchievements.filter(a => a.category === 'strength').length,
+    milestone: unlockedAchievements.filter(a => a.category === 'milestone').length,
+    special: unlockedAchievements.filter(a => a.category === 'special').length,
+  };
+  
+  const topCategory = Object.entries(unlockedByCategory)
+    .sort(([,a], [,b]) => b - a)[0];
+  
+  const topCategoryName = topCategory ? topCategory[0] : 'nenhuma';
+  const topCategoryCount = topCategory ? topCategory[1] : 0;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -740,12 +727,12 @@ function StatsOverview({ achievements, workoutLogs = [] }: { achievements: Achie
       <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-600/10 border-blue-500/20">
         <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center mb-3">
-            <Zap className="w-8 h-8 text-blue-400" />
+            <CheckCircle2 className="w-8 h-8 text-blue-400" />
           </div>
-          <div className="text-3xl font-bold text-blue-400 mb-2">{totalPoints}</div>
-          <div className="text-sm text-muted-foreground">XP Alcançado</div>
+          <div className="text-3xl font-bold text-blue-400 mb-2">{unlockedCount}/{achievements.length}</div>
+          <div className="text-sm text-muted-foreground">Conquistas</div>
           <div className="text-xs text-muted-foreground mt-1">
-            de {totalPossiblePoints} possíveis
+            Desbloqueadas
           </div>
         </CardContent>
       </Card>
@@ -753,12 +740,12 @@ function StatsOverview({ achievements, workoutLogs = [] }: { achievements: Achie
       <Card className="bg-gradient-to-br from-purple-500/10 to-pink-600/10 border-purple-500/20">
         <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center mb-3">
-            <Flame className="w-8 h-8 text-purple-400" />
+            <Zap className="w-8 h-8 text-purple-400" />
           </div>
-          <div className="text-3xl font-bold text-purple-400 mb-2">{currentStreak}</div>
-          <div className="text-sm text-muted-foreground">Dias Seguidos</div>
+          <div className="text-3xl font-bold text-purple-400 mb-2">{xpToNextAchievement}</div>
+          <div className="text-sm text-muted-foreground">XP para Próxima</div>
           <div className="text-xs text-muted-foreground mt-1">
-            Sequência atual
+            {nextAchievement ? `${nextAchievement.progress}% completa` : 'Nenhuma pendente'}
           </div>
         </CardContent>
       </Card>
@@ -766,12 +753,16 @@ function StatsOverview({ achievements, workoutLogs = [] }: { achievements: Achie
       <Card className="bg-gradient-to-br from-orange-500/10 to-yellow-600/10 border-orange-500/20">
         <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center mb-3">
-            <Target className="w-8 h-8 text-orange-400" />
+            <Star className="w-8 h-8 text-orange-400" />
           </div>
-          <div className="text-3xl font-bold text-orange-400 mb-2">{averageProgress}%</div>
-          <div className="text-sm text-muted-foreground">Progresso Médio</div>
+          <div className="text-3xl font-bold text-orange-400 mb-2">{topCategoryCount}</div>
+          <div className="text-sm text-muted-foreground">Categoria Top</div>
           <div className="text-xs text-muted-foreground mt-1">
-            De todas conquistas
+            {topCategoryName === 'workout' ? 'Treinos' : 
+             topCategoryName === 'consistency' ? 'Consistência' :
+             topCategoryName === 'strength' ? 'Força' :
+             topCategoryName === 'milestone' ? 'Marcos' :
+             topCategoryName === 'special' ? 'Especiais' : 'Nenhuma'}
           </div>
         </CardContent>
       </Card>
