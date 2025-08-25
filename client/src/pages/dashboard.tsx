@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap, Award, Activity } from "lucide-react";
+import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap, Award, Activity, Medal, Star, Crown, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,89 @@ import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "rec
 import { workoutLogApi, exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
+
+// Achievement types and data (copied from progress page)
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  category: 'workout' | 'strength' | 'consistency' | 'milestone' | 'special';
+  tier: 'bronze' | 'prata' | 'ouro' | 'diamante' | 'épico' | 'lendário' | 'mítico';
+  points: number;
+  requirement: {
+    type: 'workout_count' | 'consecutive_days' | 'total_weight' | 'single_weight' | 'time_based' | 'custom';
+    target: number;
+    timeframe?: 'daily' | 'weekly' | 'monthly' | 'all_time';
+  };
+  unlocked: boolean;
+  progress: number;
+  unlockedAt?: Date;
+}
+
+// Sample achievements data
+const SAMPLE_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first_workout',
+    name: 'Saindo do Sedentarismo',
+    description: 'Complete seu primeiro treino',
+    icon: Trophy,
+    category: 'milestone',
+    tier: 'bronze',
+    points: 10,
+    requirement: { type: 'workout_count', target: 1, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'workout_10',
+    name: 'Deixou de ser Frango',
+    description: 'Complete 10 treinos',
+    icon: Medal,
+    category: 'workout',
+    tier: 'prata',
+    points: 50,
+    requirement: { type: 'workout_count', target: 10, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'workout_50',
+    name: 'Marombeiro Raiz',
+    description: 'Complete 50 treinos',
+    icon: Crown,
+    category: 'workout',
+    tier: 'ouro',
+    points: 200,
+    requirement: { type: 'workout_count', target: 50, timeframe: 'all_time' },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'streak_3',
+    name: 'No Foco',
+    description: 'Treine por 3 dias consecutivos',
+    icon: Flame,
+    category: 'consistency',
+    tier: 'bronze',
+    points: 25,
+    requirement: { type: 'consecutive_days', target: 3 },
+    unlocked: false,
+    progress: 0
+  },
+  {
+    id: 'streak_7',
+    name: 'Beast Mode Ativado',
+    description: 'Treine por 7 dias consecutivos',
+    icon: Calendar,
+    category: 'consistency',
+    tier: 'prata',
+    points: 75,
+    requirement: { type: 'consecutive_days', target: 7 },
+    unlocked: false,
+    progress: 0
+  }
+];
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -22,6 +105,95 @@ export default function Dashboard() {
     queryKey: ["/api/workout-logs"],
     queryFn: workoutLogApi.getAll,
   });
+
+  // Calculate achievements progress based on workout data
+  const achievementsWithProgress = useMemo(() => {
+    if (!recentWorkouts.length) return SAMPLE_ACHIEVEMENTS;
+
+    const completedWorkouts = recentWorkouts.filter(log => log.endTime);
+    const totalWorkouts = completedWorkouts.length;
+
+    // Helper function to calculate consecutive days
+    const calculateConsecutiveDays = (workouts: any[]) => {
+      if (!workouts.length) return 0;
+
+      const sortedDates = workouts
+        .map(w => new Date(w.endTime).toDateString())
+        .filter((date, index, arr) => arr.indexOf(date) === index)
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+      let streak = 0;
+      let currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+
+      for (const dateStr of sortedDates) {
+        const workoutDate = new Date(dateStr);
+        workoutDate.setHours(0, 0, 0, 0);
+        
+        const daysDiff = Math.floor((currentDate.getTime() - workoutDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === streak) {
+          streak++;
+          continue;
+        }
+        
+        if (daysDiff === 0 && streak === 0) {
+          streak++;
+          continue;
+        }
+        
+        break;
+      }
+
+      return streak;
+    };
+
+    return SAMPLE_ACHIEVEMENTS.map(achievement => {
+      let progress = 0;
+      let unlocked = false;
+
+      switch (achievement.requirement.type) {
+        case 'workout_count': {
+          progress = Math.min((totalWorkouts / achievement.requirement.target) * 100, 100);
+          unlocked = totalWorkouts >= achievement.requirement.target;
+          break;
+        }
+        
+        case 'consecutive_days': {
+          const streak = calculateConsecutiveDays(completedWorkouts);
+          progress = Math.min((streak / achievement.requirement.target) * 100, 100);
+          unlocked = streak >= achievement.requirement.target;
+          break;
+        }
+        
+        default:
+          progress = achievement.progress;
+          unlocked = achievement.unlocked;
+      }
+
+      return {
+        ...achievement,
+        progress: Math.round(progress),
+        unlocked,
+        unlockedAt: unlocked && !achievement.unlocked ? new Date() : achievement.unlockedAt
+      };
+    });
+  }, [recentWorkouts]);
+
+  // Get last unlocked and next closest achievements
+  const lastUnlockedAchievement = useMemo(() => {
+    const unlocked = achievementsWithProgress.filter(a => a.unlocked);
+    return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
+  }, [achievementsWithProgress]);
+
+  const nextClosestAchievement = useMemo(() => {
+    const locked = achievementsWithProgress
+      .filter(a => !a.unlocked && a.progress > 0)
+      .sort((a, b) => b.progress - a.progress);
+    
+    return locked.length > 0 ? locked[0] : 
+           achievementsWithProgress.find(a => !a.unlocked) || null;
+  }, [achievementsWithProgress]);
 
   // Get exercises with actual progress data
   const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
@@ -516,46 +688,72 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Streak Card */}
-            <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl p-3 sm:p-5 border border-emerald-500/20 hover:border-emerald-500/30 transition-all duration-200">
+            {/* Conquistas Card */}
+            <div className="bg-gradient-to-r from-purple-500/10 to-orange-500/10 rounded-2xl p-3 sm:p-5 border border-purple-500/20 hover:border-purple-500/30 transition-all duration-200 cursor-pointer" onClick={() => navigate("/progress")}>
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 dark:from-blue-500/30 dark:to-blue-600/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/40">
-                  <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-orange-600/20 dark:from-purple-500/30 dark:to-orange-600/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/40">
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-foreground">Sequência</h3>
-                  <p className="text-xs text-muted-foreground hidden sm:block">Dias consecutivos</p>
+                  <h3 className="text-sm sm:text-base font-bold text-foreground">Conquistas</h3>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Últimas e próximas</p>
                 </div>
               </div>
               
-              <div className="text-center py-2 sm:py-3">
-                <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
-                  <div className="text-2xl sm:text-3xl font-black text-transparent bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text">
-                    {stats.currentStreak}
+              {/* Última conquista desbloqueada */}
+              {lastUnlockedAchievement ? (
+                <div className="mb-3 p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                      <lastUnlockedAchievement.icon className="w-3 h-3 text-emerald-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-semibold text-emerald-400 truncate">
+                        {lastUnlockedAchievement.name}
+                      </div>
+                      <div className="text-xs text-emerald-300/70">Última desbloqueada ✨</div>
+                    </div>
                   </div>
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
                 </div>
-                <div className="text-xs text-emerald-400 font-semibold tracking-wide mb-1 sm:mb-2">
-                  dias em sequência
-                </div>
-                {stats.currentStreak > 0 && (
-                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    Continue assim! 💪
+              ) : (
+                <div className="mb-3 p-2 bg-muted/20 rounded-xl border border-border/20">
+                  <div className="text-xs text-muted-foreground text-center">
+                    Nenhuma conquista desbloqueada ainda
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               
-              <div className="mt-3 pt-3 border-t border-border/50">
-                <div className="text-center">
-                  <div className="text-xs text-muted-foreground mb-1">Próximo objetivo</div>
-                  <div className="text-xs font-medium text-foreground">
-                    {stats.currentStreak < 7 ? `${7 - stats.currentStreak} dias para 1 semana` :
-                     stats.currentStreak < 30 ? `${30 - stats.currentStreak} dias para 1 mês` :
-                     'Mantenha o ritmo!'}
+              {/* Próxima conquista */}
+              {nextClosestAchievement ? (
+                <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                      <nextClosestAchievement.icon className="w-3 h-3 text-blue-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-semibold text-blue-400 truncate">
+                        {nextClosestAchievement.name}
+                      </div>
+                      <div className="text-xs text-blue-300/70">Próxima meta 🎯</div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-blue-900/20 rounded-full h-1.5">
+                    <div 
+                      className="bg-gradient-to-r from-blue-400 to-purple-400 h-1.5 rounded-full transition-all duration-300"
+                      style={{ width: `${nextClosestAchievement.progress}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-blue-300/80 mt-1">
+                    {nextClosestAchievement.progress}% concluída
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="p-2 bg-muted/20 rounded-xl border border-border/20">
+                  <div className="text-xs text-muted-foreground text-center">
+                    Todas conquistas desbloqueadas! 🏆
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
