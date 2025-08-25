@@ -398,6 +398,10 @@
   .mobile-flex {
     @apply flex flex-col sm:flex-row gap-4;
   }
+
+  .mobile-flex > * {
+    @apply sm:flex-1 sm:basis-0;
+  }
   
   /* Enhanced focus states for accessibility */
   .mobile-focus {
