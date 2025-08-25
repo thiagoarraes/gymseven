@@ -725,68 +725,47 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                {/* Achievement Info */}
-                <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-3 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
+                {/* Achievement Info - Simplified */}
+                <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-4 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
+                  {/* Última Conquista */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Progresso</span>
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {achievementsWithProgress.filter(a => a.unlocked).length}/{achievementsWithProgress.length} desbloqueadas
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Categoria Top</span>
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {(() => {
-                        const categories = achievementsWithProgress.filter(a => a.unlocked).reduce((acc: any, achievement: any) => {
-                          const category = achievement.category || 'Geral';
-                          acc[category] = (acc[category] || 0) + 1;
-                          return acc;
-                        }, {});
-                        const topCategory = Object.keys(categories).length > 0 
-                          ? Object.keys(categories).reduce((a, b) => categories[a] > categories[b] ? a : b)
-                          : 'Iniciante';
-                        return topCategory;
-                      })()}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Última</span>
-                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Última Conquista</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 text-right max-w-[160px] truncate">
                       {lastUnlockedAchievement ? (
-                        (() => {
-                          const now = new Date();
-                          const achievementDate = new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-                          const diffDays = Math.floor((now.getTime() - achievementDate.getTime()) / (1000 * 60 * 60 * 24));
-                          if (diffDays === 0) return "Hoje";
-                          if (diffDays === 1) return "Ontem";
-                          if (diffDays < 7) return `${diffDays} dias atrás`;
-                          return "Há mais tempo";
-                        })()
-                      ) : "Nenhuma"}
+                        <>
+                          {lastUnlockedAchievement.name}
+                          <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                            {(() => {
+                              const now = new Date();
+                              const achievementDate = new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
+                              const diffDays = Math.floor((now.getTime() - achievementDate.getTime()) / (1000 * 60 * 60 * 24));
+                              if (diffDays === 0) return "Hoje";
+                              if (diffDays === 1) return "Ontem";
+                              if (diffDays < 7) return `${diffDays} dias atrás`;
+                              return "Há mais tempo";
+                            })()}
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">Nenhuma ainda</span>
+                      )}
                     </span>
                   </div>
                   
-                  {/* Achievement Categories */}
+                  {/* Próxima Conquista */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <Zap className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Tipos</span>
-                    </div>
-                    <div className="flex gap-1.5 justify-end overflow-x-auto scrollbar-hide">
-                      {['Força', 'Constância', 'Progresso'].map((type, index) => (
-                        <span 
-                          key={index}
-                          className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-indigo-500/15 to-purple-500/15 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30 dark:border-indigo-400/40 shadow-sm"
-                        >
-                          {type}
-                        </span>
-                      ))}
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Próxima Conquista</span>
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 block max-w-[160px] truncate">
+                        {nextClosestAchievement ? nextClosestAchievement.name : "Todas completas!"}
+                      </span>
+                      <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
+                        {nextClosestAchievement ? `${Math.round(nextClosestAchievement.progress)}% completa` : "100%"}
+                      </span>
                     </div>
                   </div>
                   
-                  {/* Quick Stats */}
+                  {/* Contadores de Conquistas */}
                   <div className="pt-3 border-t border-slate-300/50 dark:border-slate-600/50">
                     <div className="grid grid-cols-2 gap-4 text-center">
                       <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl p-2.5 border border-emerald-500/20 dark:border-emerald-400/30">
@@ -795,11 +774,11 @@ export default function Dashboard() {
                         </div>
                         <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Desbloqueadas</div>
                       </div>
-                      <div className="bg-purple-500/10 dark:bg-purple-500/15 rounded-xl p-2.5 border border-purple-500/20 dark:border-purple-400/30">
-                        <div className="text-lg font-bold text-purple-500 dark:text-purple-400">
-                          {nextClosestAchievement ? Math.round(nextClosestAchievement.progress) : 0}%
+                      <div className="bg-orange-500/10 dark:bg-orange-500/15 rounded-xl p-2.5 border border-orange-500/20 dark:border-orange-400/30">
+                        <div className="text-lg font-bold text-orange-500 dark:text-orange-400">
+                          {achievementsWithProgress.filter(a => !a.unlocked).length}
                         </div>
-                        <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Próxima</div>
+                        <div className="text-xs font-medium text-orange-600 dark:text-orange-300">Restantes</div>
                       </div>
                     </div>
                   </div>
