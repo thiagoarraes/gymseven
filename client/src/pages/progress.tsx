@@ -764,15 +764,107 @@ export default function AchievementsPage() {
   const [selectedTier, setSelectedTier] = useState<string>("all");
   const { user } = useAuth();
 
-  // Fetch workout logs to calculate real progress (for future implementation)
+  // Fetch workout logs to calculate real progress
   const { data: workoutLogs = [], isLoading } = useQuery({
     queryKey: ["/api/workout-logs"],
     queryFn: workoutLogApi.getAll,
   });
 
+  // Calculate achievements progress based on real workout data
+  const achievementsWithProgress = useMemo(() => {
+    if (!workoutLogs.length) return SAMPLE_ACHIEVEMENTS;
+
+    // Helper function to calculate consecutive days (defined inside useMemo)
+    const calculateConsecutiveDays = (workouts: any[]) => {
+      if (!workouts.length) return 0;
+
+      // Sort workouts by date (most recent first)
+      const sortedDates = workouts
+        .map(w => new Date(w.endTime).toDateString())
+        .filter((date, index, arr) => arr.indexOf(date) === index) // Remove duplicates
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+      let streak = 0;
+      let currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+
+      for (const dateStr of sortedDates) {
+        const workoutDate = new Date(dateStr);
+        workoutDate.setHours(0, 0, 0, 0);
+        
+        const daysDiff = Math.floor((currentDate.getTime() - workoutDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === streak) {
+          streak++;
+          continue;
+        }
+        
+        // Allow for today if it's the first day of streak
+        if (daysDiff === 0 && streak === 0) {
+          streak++;
+          continue;
+        }
+        
+        break;
+      }
+
+      return streak;
+    };
+
+    // Filter completed workouts (those with endTime)
+    const completedWorkouts = workoutLogs.filter(log => log.endTime);
+    const totalWorkouts = completedWorkouts.length;
+
+    return SAMPLE_ACHIEVEMENTS.map(achievement => {
+      let progress = 0;
+      let unlocked = false;
+
+      switch (achievement.requirement.type) {
+        case 'workout_count': {
+          progress = Math.min((totalWorkouts / achievement.requirement.target) * 100, 100);
+          unlocked = totalWorkouts >= achievement.requirement.target;
+          break;
+        }
+        
+        case 'consecutive_days': {
+          // Calculate consecutive days streak
+          const streak = calculateConsecutiveDays(completedWorkouts);
+          progress = Math.min((streak / achievement.requirement.target) * 100, 100);
+          unlocked = streak >= achievement.requirement.target;
+          break;
+        }
+        
+        case 'total_weight': {
+          // For now, return 0 until workout sets data is available
+          progress = 0;
+          unlocked = false;
+          break;
+        }
+        
+        case 'single_weight': {
+          // For now, return 0 until workout sets data is available
+          progress = 0;
+          unlocked = false;
+          break;
+        }
+        
+        default:
+          progress = achievement.progress;
+          unlocked = achievement.unlocked;
+      }
+
+      return {
+        ...achievement,
+        progress: Math.round(progress),
+        unlocked,
+        unlockedAt: unlocked && !achievement.unlocked ? new Date() : achievement.unlockedAt
+      };
+    });
+  }, [workoutLogs]);
+
   // Filter achievements based on search and filters
   const filteredAchievements = useMemo(() => {
-    return SAMPLE_ACHIEVEMENTS.filter(achievement => {
+    return achievementsWithProgress.filter(achievement => {
       const matchesSearch = achievement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            achievement.description.toLowerCase().includes(searchTerm.toLowerCase());
       
@@ -781,7 +873,7 @@ export default function AchievementsPage() {
       
       return matchesSearch && matchesCategory && matchesTier;
     });
-  }, [searchTerm, selectedCategory, selectedTier]);
+  }, [achievementsWithProgress, searchTerm, selectedCategory, selectedTier]);
 
   const unlockedAchievements = filteredAchievements.filter(a => a.unlocked);
   const lockedAchievements = filteredAchievements.filter(a => !a.unlocked);
@@ -824,10 +916,10 @@ export default function AchievementsPage() {
         </div>
 
         {/* Level System */}
-        <LevelSystem achievements={SAMPLE_ACHIEVEMENTS} username={user?.username || 'Usuário'} />
+        <LevelSystem achievements={achievementsWithProgress} username={user?.username || 'Usuário'} />
 
         {/* Stats Overview */}
-        <StatsOverview achievements={SAMPLE_ACHIEVEMENTS} />
+        <StatsOverview achievements={achievementsWithProgress} />
 
         {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-center">
