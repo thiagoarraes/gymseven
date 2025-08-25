@@ -689,7 +689,7 @@ export default function Dashboard() {
             </div>
 
             {/* Conquistas Card */}
-            <div className="bg-gradient-to-r from-purple-500/10 to-orange-500/10 rounded-2xl p-3 sm:p-5 border border-purple-500/20 hover:border-purple-500/30 transition-all duration-200 cursor-pointer" onClick={() => navigate("/progress")}>
+            <div className="bg-gradient-to-br from-purple-50/90 to-orange-50/70 dark:from-purple-900/80 dark:to-orange-800/60 hover:from-purple-50/80 hover:to-orange-50/70 dark:hover:from-purple-800/90 dark:hover:to-orange-700/80 rounded-2xl mobile-card-padding border border-purple-200/60 dark:border-purple-700/60 hover:border-purple-300/70 dark:hover:border-purple-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm" onClick={() => navigate("/progress")}>
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-orange-600/20 dark:from-purple-500/30 dark:to-orange-600/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/40">
                   <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400" />
