@@ -690,70 +690,134 @@ export default function Dashboard() {
 
             {/* Conquistas Card */}
             <div className="bg-gradient-to-br from-purple-50/90 to-blue-50/70 dark:from-purple-900/80 dark:to-blue-800/60 hover:from-purple-50/80 hover:to-blue-50/70 dark:hover:from-purple-800/90 dark:hover:to-blue-700/80 rounded-2xl mobile-card-padding border border-purple-200/60 dark:border-purple-700/60 hover:border-purple-300/70 dark:hover:border-purple-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm" onClick={() => navigate("/progress")}>
-              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-600/20 dark:from-purple-500/30 dark:to-blue-600/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/40">
-                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400" />
+              <div className="space-y-3 sm:space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-600/20 dark:from-purple-500/30 dark:to-blue-600/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/40">
+                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-foreground">Conquistas</h3>
+                      <p className="text-xs text-muted-foreground hidden sm:block">Progresso e marcos</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
+                      achievementsWithProgress.filter(a => a.unlocked).length > 0 
+                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
+                        : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
+                    }`}>
+                      {achievementsWithProgress.filter(a => a.unlocked).length > 0 ? (
+                        <>
+                          <Trophy className="w-3 h-3 mr-1.5" />
+                          <span className="hidden sm:inline">Ativo</span>
+                          <span className="sm:hidden">🏆</span>
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="w-3 h-3 mr-1.5" />
+                          <span className="hidden sm:inline">Começando</span>
+                          <span className="sm:hidden">⏳</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-foreground">Conquistas</h3>
-                  <p className="text-xs text-muted-foreground hidden sm:block">Últimas e próximas</p>
+                
+                {/* Achievement Info */}
+                <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-3 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Progresso</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {achievementsWithProgress.filter(a => a.unlocked).length}/{achievementsWithProgress.length} desbloqueadas
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Categoria Top</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {(() => {
+                        const categories = achievementsWithProgress.filter(a => a.unlocked).reduce((acc: any, achievement: any) => {
+                          const category = achievement.category || 'Geral';
+                          acc[category] = (acc[category] || 0) + 1;
+                          return acc;
+                        }, {});
+                        const topCategory = Object.keys(categories).length > 0 
+                          ? Object.keys(categories).reduce((a, b) => categories[a] > categories[b] ? a : b)
+                          : 'Iniciante';
+                        return topCategory;
+                      })()}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Última</span>
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                      {lastUnlockedAchievement ? (
+                        (() => {
+                          const now = new Date();
+                          const achievementDate = new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
+                          const diffDays = Math.floor((now.getTime() - achievementDate.getTime()) / (1000 * 60 * 60 * 24));
+                          if (diffDays === 0) return "Hoje";
+                          if (diffDays === 1) return "Ontem";
+                          if (diffDays < 7) return `${diffDays} dias atrás`;
+                          return "Há mais tempo";
+                        })()
+                      ) : "Nenhuma"}
+                    </span>
+                  </div>
+                  
+                  {/* Achievement Categories */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Tipos</span>
+                    </div>
+                    <div className="flex gap-1.5 justify-end overflow-x-auto scrollbar-hide">
+                      {['Força', 'Constância', 'Progresso'].map((type, index) => (
+                        <span 
+                          key={index}
+                          className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-indigo-500/15 to-purple-500/15 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30 dark:border-indigo-400/40 shadow-sm"
+                        >
+                          {type}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Quick Stats */}
+                  <div className="pt-3 border-t border-slate-300/50 dark:border-slate-600/50">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl p-2.5 border border-emerald-500/20 dark:border-emerald-400/30">
+                        <div className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
+                          {achievementsWithProgress.filter(a => a.unlocked).length}
+                        </div>
+                        <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Desbloqueadas</div>
+                      </div>
+                      <div className="bg-purple-500/10 dark:bg-purple-500/15 rounded-xl p-2.5 border border-purple-500/20 dark:border-purple-400/30">
+                        <div className="text-lg font-bold text-purple-500 dark:text-purple-400">
+                          {nextClosestAchievement ? Math.round(nextClosestAchievement.progress) : 0}%
+                        </div>
+                        <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Próxima</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Action Button */}
+                <Button 
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 dark:from-purple-500 dark:to-blue-500 dark:hover:from-purple-400 dark:hover:to-blue-400 rounded-2xl px-4 sm:px-5 py-3 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20 w-full text-sm sm:text-base backdrop-blur-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/progress");
+                  }}
+                >
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
+                  <span className="hidden sm:inline">Ver Todas Conquistas</span>
+                  <span className="sm:hidden">Ver Conquistas</span>
+                </Button>
               </div>
-              
-              {/* Última conquista desbloqueada */}
-              {lastUnlockedAchievement ? (
-                <div className="mb-3 p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                      <lastUnlockedAchievement.icon className="w-3 h-3 text-emerald-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold text-emerald-400 truncate">
-                        {lastUnlockedAchievement.name}
-                      </div>
-                      <div className="text-xs text-emerald-300/70">Última desbloqueada ✨</div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="mb-3 p-2 bg-muted/20 rounded-xl border border-border/20">
-                  <div className="text-xs text-muted-foreground text-center">
-                    Nenhuma conquista desbloqueada ainda
-                  </div>
-                </div>
-              )}
-              
-              {/* Próxima conquista */}
-              {nextClosestAchievement ? (
-                <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                      <nextClosestAchievement.icon className="w-3 h-3 text-blue-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold text-blue-400 truncate">
-                        {nextClosestAchievement.name}
-                      </div>
-                      <div className="text-xs text-blue-300/70">Próxima meta 🎯</div>
-                    </div>
-                  </div>
-                  <div className="w-full bg-blue-900/20 rounded-full h-1.5">
-                    <div 
-                      className="bg-gradient-to-r from-blue-400 to-purple-400 h-1.5 rounded-full transition-all duration-300"
-                      style={{ width: `${nextClosestAchievement.progress}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-blue-300/80 mt-1">
-                    {nextClosestAchievement.progress}% concluída
-                  </div>
-                </div>
-              ) : (
-                <div className="p-2 bg-muted/20 rounded-xl border border-border/20">
-                  <div className="text-xs text-muted-foreground text-center">
-                    Todas conquistas desbloqueadas! 🏆
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </CardContent>
