@@ -499,7 +499,7 @@ export default function Dashboard() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
           
           {/* Header Section */}
-          <div className="relative z-10 text-center mb-6">
+          <div className="relative z-10 text-center">
             <h2 className="text-2xl sm:text-3xl font-black text-foreground bg-gradient-to-r from-foreground via-primary/80 to-foreground bg-clip-text mb-2">
               Olá, {user?.username || 'Usuário'}!🔥
             </h2>
@@ -507,10 +507,12 @@ export default function Dashboard() {
               Pronto para progredir carga hoje?
             </p>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Last Workout & Streak Cards */}
-          <div className="mobile-flex relative z-10">
-            {/* Last Workout Card */}
+      {/* Last Workout & Achievements Cards */}
+      <div className="mobile-flex relative z-10">
+        {/* Last Workout Card */}
             <div className="bg-gradient-to-br from-slate-50/90 to-blue-50/70 dark:from-slate-900/80 dark:to-slate-800/60 hover:from-blue-50/80 hover:to-indigo-50/70 dark:hover:from-slate-800/90 dark:hover:to-slate-700/80 rounded-2xl mobile-card-padding border border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300/70 dark:hover:border-slate-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm">
               {recentWorkouts.length > 0 ? (
                 <div className="space-y-3 sm:space-y-4">
@@ -799,8 +801,8 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

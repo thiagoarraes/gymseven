@@ -68,6 +68,8 @@
   /* Mobile-first optimizations */
   .mobile-container {
     @apply px-4 sm:px-6 lg:px-8;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
   
   .mobile-spacing {
