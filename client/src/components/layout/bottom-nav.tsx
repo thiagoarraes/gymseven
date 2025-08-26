@@ -12,9 +12,9 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="glassmorphism border-t border-border/20 shadow-2xl mobile-safe-bottom backdrop-blur-xl">
-      <div className="safe-area-bottom mobile-optimized">
-        <div className="flex items-center justify-around px-2 py-2">
+    <nav className="glassmorphism border-t border-border/20 shadow-2xl backdrop-blur-xl">
+      <div className="pb-safe mobile-optimized">
+        <div className="flex items-center justify-around px-2 py-3">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
