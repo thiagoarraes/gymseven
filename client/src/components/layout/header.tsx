@@ -32,7 +32,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/50" style={{ position: 'fixed' }}>
+    <header className="fixed-header fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/50" style={{ position: 'fixed', top: '0', left: '0', right: '0', zIndex: 10000 }}>
       <div className="mobile-container mx-auto h-16 flex items-center">
         <div className="flex items-center justify-between w-full">
           <Logo imagePath="/src/assets/logo.png" alt="GymSeven" />
