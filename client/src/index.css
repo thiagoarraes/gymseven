@@ -407,6 +407,88 @@
   .mobile-focus {
     @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
   }
+
+  /* Overlay scrollbar styles */
+  .scroll-container::-webkit-scrollbar {
+    width: 8px;
+    position: absolute;
+    z-index: 99999;
+  }
+
+  .scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 4px;
+    border: none;
+    margin: 2px;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb:active {
+    background: rgba(59, 130, 246, 1);
+  }
+
+  /* Dark mode scrollbar */
+  .dark .scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.5);
+  }
+
+  .dark .scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.8);
+  }
+
+  .dark .scroll-container::-webkit-scrollbar-thumb:active {
+    background: rgba(148, 163, 184, 1);
+  }
+
+  /* Firefox scrollbar overlay */
+  .scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  .dark .scroll-container {
+    scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+  }
+
+  /* Enhanced mobile scroll container */
+  .mobile-scroll-container {
+    position: relative;
+    z-index: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar on inactive state for cleaner look */
+  .mobile-scroll-container:not(:hover):not(:focus)::-webkit-scrollbar-thumb {
+    opacity: 0.3;
+  }
+
+  .mobile-scroll-container:hover::-webkit-scrollbar-thumb,
+  .mobile-scroll-container:focus::-webkit-scrollbar-thumb {
+    opacity: 1;
+  }
+
+  /* Ensure scrollbar stays above fixed elements */
+  .mobile-scroll-container {
+    --scrollbar-z-index: 99999;
+  }
+
+  .mobile-scroll-container::-webkit-scrollbar {
+    z-index: var(--scrollbar-z-index);
+  }
 }
 
 /* Mobile viewport meta and global mobile styles */
