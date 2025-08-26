@@ -126,9 +126,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-24">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 max-w-2xl">
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Header com seletor de tema */}
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold text-foreground flex items-center justify-center">

@@ -892,8 +892,8 @@ export default function AchievementsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 pb-32 header-offset">
-        <div className="space-y-6">
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-4">
           <div className="loading-skeleton h-12 w-64 rounded-lg"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
@@ -911,8 +911,8 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-32 header-offset">
-      <div className="space-y-8">
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full border border-purple-500/20">
@@ -980,7 +980,7 @@ export default function AchievementsPage() {
         </div>
 
         {/* Achievement Tabs */}
-        <Tabs defaultValue="unlocked" className="space-y-6">
+        <Tabs defaultValue="unlocked" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:flex lg:gap-2">
             <TabsTrigger value="unlocked" className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />

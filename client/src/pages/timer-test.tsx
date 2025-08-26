@@ -41,8 +41,8 @@ export default function TimerTest() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-24">
-      <div className="container mx-auto px-4 max-w-2xl space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 max-w-2xl space-y-4">
         
         {/* Header */}
         <div className="text-center space-y-2">

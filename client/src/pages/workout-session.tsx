@@ -264,7 +264,7 @@ export default function WorkoutSession() {
     : 0;
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto px-4 py-6 space-y-4">
       {/* Workout Header */}
       <Card className="glass-card rounded-2xl">
         <CardContent className="p-6">
