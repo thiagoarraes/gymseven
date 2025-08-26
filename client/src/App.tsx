@@ -37,8 +37,8 @@ function AuthenticatedRouter() {
       <div className="min-h-screen bg-background" style={{ position: 'relative' }}>
         <Header />
         <BottomNavigation />
-        <div className="overflow-y-auto" style={{ height: '100vh', paddingTop: '64px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
-          <main className="mobile-container mobile-spacing py-4">
+        <div className="overflow-y-auto scroll-behind-fixed" style={{ height: '100vh', paddingTop: '0px', paddingBottom: '0px' }}>
+          <main className="mobile-container mobile-spacing" style={{ paddingTop: '80px', paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
             <Switch>
               <Route path="/" component={Dashboard} />
               <Route path="/exercicios" component={ExercisesRoute} />
