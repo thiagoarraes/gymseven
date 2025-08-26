@@ -34,9 +34,10 @@ function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
 function AuthenticatedRouter() {
   return (
     <WorkoutProvider>
-      <div className="min-h-screen bg-background mobile-optimized">
+      <div className="min-h-screen bg-background" style={{ position: 'relative' }}>
         <Header />
-        <div className="min-h-screen mobile-scroll-container scroll-container overflow-y-auto" style={{ paddingTop: '64px', paddingBottom: '80px' }}>
+        <BottomNavigation />
+        <div className="overflow-y-auto" style={{ height: '100vh', paddingTop: '64px', paddingBottom: '80px' }}>
           <main className="mobile-container mobile-spacing py-4">
             <Switch>
               <Route path="/" component={Dashboard} />
@@ -55,7 +56,6 @@ function AuthenticatedRouter() {
             </Switch>
           </main>
         </div>
-        <BottomNavigation />
       </div>
     </WorkoutProvider>
   );
