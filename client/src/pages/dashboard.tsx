@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Flame, Clock, Trophy, Play, List, ChevronRight, TrendingUp, CheckCircle, XCircle, Dumbbell, X, Target, BarChart3, Zap, Award, Activity, Medal, Star, Crown, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -148,83 +148,44 @@ export default function Dashboard() {
       return streak;
     };
 
+    const currentStreak = calculateConsecutiveDays(completedWorkouts);
+
     return SAMPLE_ACHIEVEMENTS.map(achievement => {
       let progress = 0;
       let unlocked = false;
 
       switch (achievement.requirement.type) {
-        case 'workout_count': {
-          progress = Math.min((totalWorkouts / achievement.requirement.target) * 100, 100);
+        case 'workout_count':
+          progress = Math.min(totalWorkouts / achievement.requirement.target, 1);
           unlocked = totalWorkouts >= achievement.requirement.target;
           break;
-        }
-        
-        case 'consecutive_days': {
-          const streak = calculateConsecutiveDays(completedWorkouts);
-          progress = Math.min((streak / achievement.requirement.target) * 100, 100);
-          unlocked = streak >= achievement.requirement.target;
+        case 'consecutive_days':
+          progress = Math.min(currentStreak / achievement.requirement.target, 1);
+          unlocked = currentStreak >= achievement.requirement.target;
           break;
-        }
-        
         default:
-          progress = achievement.progress;
-          unlocked = achievement.unlocked;
+          progress = 0;
+          unlocked = false;
       }
 
       return {
         ...achievement,
-        progress: Math.round(progress),
+        progress,
         unlocked,
-        unlockedAt: unlocked && !achievement.unlocked ? new Date() : achievement.unlockedAt
+        unlockedAt: unlocked ? new Date() : undefined
       };
     });
   }, [recentWorkouts]);
 
-  // Get last unlocked and next closest achievements
-  const lastUnlockedAchievement = useMemo(() => {
-    const unlocked = achievementsWithProgress.filter(a => a.unlocked);
-    return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
-  }, [achievementsWithProgress]);
-
-  const nextClosestAchievement = useMemo(() => {
-    const locked = achievementsWithProgress
-      .filter(a => !a.unlocked && a.progress > 0)
-      .sort((a, b) => b.progress - a.progress);
-    
-    return locked.length > 0 ? locked[0] : 
-           achievementsWithProgress.find(a => !a.unlocked) || null;
-  }, [achievementsWithProgress]);
-
-  // Get exercises with actual progress data
-  const { data: exercises = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/exercises-with-progress"],
-    queryFn: exerciseProgressApi.getExercisesWithProgress,
+  // Weight history data
+  const { data: weightHistory = [] } = useQuery({
+    queryKey: ["/api/exercise-progress/weight"],
+    queryFn: exerciseProgressApi.getWeightHistory,
   });
-
-  // Auto-select first exercise for progress chart from exercises with progress
-  const firstExerciseId = useMemo(() => {
-    if (exercises.length > 0 && !selectedExerciseId) {
-      // Prefer "Supino reto" if available, otherwise use first exercise with progress
-      const supinoReto = exercises.find((e: any) => e.name === "Supino reto");
-      return supinoReto ? supinoReto.id : exercises[0].id;
-    }
-    return selectedExerciseId;
-  }, [exercises, selectedExerciseId]);
-
-  // Fetch weight history for selected exercise
-  const { data: weightHistory = [], isLoading: chartLoading } = useQuery({
-    queryKey: ['/api/exercise-weight-history', firstExerciseId],
-    queryFn: () => exerciseProgressApi.getWeightHistory(firstExerciseId!, 10),
-    enabled: !!firstExerciseId,
-  });
-
-  // Find selected exercise name
-  const selectedExercise = exercises.find((e: any) => e.id === (selectedExerciseId || firstExerciseId));
-  const selectedExerciseName = selectedExercise?.name || "Selecione um exercício";
 
   // Process chart data
   const chartData = useMemo(() => {
-    if (!weightHistory || weightHistory.length === 0) return [];
+    if (!weightHistory || !Array.isArray(weightHistory) || weightHistory.length === 0) return [];
     
     // Data already comes from API in chronological order (oldest to newest)
     return weightHistory.map((entry: any, index: number) => {
@@ -261,7 +222,7 @@ export default function Dashboard() {
     queryFn: () => workoutLogApi.getSummary(selectedWorkout!),
     enabled: !!selectedWorkout && showSummaryModal,
     staleTime: 0, // Always refetch
-    cacheTime: 0, // Don't cache
+    gcTime: 0, // Don't cache (replaces cacheTime in v5)
   });
 
   const handleWorkoutClick = (workoutId: string) => {
@@ -293,7 +254,7 @@ export default function Dashboard() {
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
     
-    const workoutsThisWeek = recentWorkouts.filter(w => {
+    const workoutsThisWeek = recentWorkouts.filter((w: any) => {
       if (!w.startTime) return false;
       const workoutDate = new Date(w.startTime);
       const isInWeek = workoutDate >= startOfWeek && workoutDate <= endOfWeek;
@@ -303,149 +264,67 @@ export default function Dashboard() {
     });
 
     // Calculate average duration from all completed workouts
-    const completedWorkouts = recentWorkouts.filter(w => w.endTime && w.startTime);
-    const avgDurationMs = completedWorkouts.length > 0 
-      ? completedWorkouts.reduce((sum, w) => {
-          const duration = new Date(w.endTime!).getTime() - new Date(w.startTime).getTime();
-          return sum + duration;
-        }, 0) / completedWorkouts.length
-      : 0;
-
-    const avgHours = Math.floor(avgDurationMs / (1000 * 60 * 60));
-    const avgMinutes = Math.floor((avgDurationMs % (1000 * 60 * 60)) / (1000 * 60));
-    const avgDurationStr = avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`;
-
-    // Find day with most workouts this week (based on workout count)
-    const dayWorkoutCounts = new Map();
-    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const completedWorkouts = recentWorkouts.filter((w: any) => w.endTime && w.startTime);
+    let avgDurationMinutes = 0;
     
-    workoutsThisWeek.forEach(w => {
-      const dayOfWeek = new Date(w.startTime).getDay();
-      const dayName = dayNames[dayOfWeek];
-      dayWorkoutCounts.set(dayName, (dayWorkoutCounts.get(dayName) || 0) + 1);
+    if (completedWorkouts.length > 0) {
+      const totalMinutes = completedWorkouts.reduce((total: number, workout: any) => {
+        const start = new Date(workout.startTime);
+        const end = new Date(workout.endTime);
+        const durationMs = end.getTime() - start.getTime();
+        const minutes = Math.round(durationMs / (1000 * 60));
+        return total + minutes;
+      }, 0);
+      
+      avgDurationMinutes = Math.round(totalMinutes / completedWorkouts.length);
+    }
+
+    // Calculate total workouts for the streak
+    const totalWorkouts = completedWorkouts.length;
+
+    // Calculate consecutive weeks of training
+    const weeksWithWorkouts = new Set();
+    completedWorkouts.forEach((workout: any) => {
+      const date = new Date(workout.endTime);
+      const weekStart = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+      const weekKey = weekStart.toISOString().split('T')[0];
+      weeksWithWorkouts.add(weekKey);
     });
 
-    let bestDay = 'N/A';
-    let maxCount = 0;
+    // Count consecutive weeks from current week backwards
+    let consecutiveWeeks = 0;
+    let checkDate = new Date(startOfWeek);
     
-    for (const [day, count] of dayWorkoutCounts.entries()) {
-      if (count > maxCount) {
-        maxCount = count;
-        bestDay = day;
-      }
-    }
-
-    // Calculate exercises with weight increases based on actual exercise data
-    let exercisesWithIncrease = 0;
-    if (exercises && exercises.length > 0) {
-      // Count exercises that have recent activity and progression
-      exercisesWithIncrease = exercises.filter((ex: any) => {
-        // Check if exercise has lastUsed and recent activity
-        if (!ex.lastUsed) return false;
-        
-        // If exercise has progression data, check for increases
-        if (ex.maxWeight || ex.totalSets) {
-          return true;
-        }
-        
-        return false;
-      }).length;
-    }
-
-    // Calculate current streak (consecutive days with workouts)
-    const sortedWorkouts = recentWorkouts
-      .filter(w => w.endTime && w.startTime) // completed workouts have endTime
-      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-    
-    let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    for (let i = 0; i < 30; i++) { // Check last 30 days
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() - i);
-      
-      const hasWorkout = sortedWorkouts.some(w => {
-        const workoutDate = new Date(w.startTime);
-        workoutDate.setHours(0, 0, 0, 0);
-        return workoutDate.getTime() === checkDate.getTime();
-      });
-      
-      if (hasWorkout) {
-        streak++;
-      } else if (i > 0) { // Allow today to not have a workout yet
+    while (consecutiveWeeks < 52) { // Max 52 weeks to prevent infinite loop
+      const weekKey = checkDate.toISOString().split('T')[0];
+      if (weeksWithWorkouts.has(weekKey)) {
+        consecutiveWeeks++;
+        checkDate.setDate(checkDate.getDate() - 7); // Go back one week
+      } else {
         break;
       }
     }
 
-    // Calculate consecutive weeks with workouts (strict consecutive logic)
-    let consecutiveWeeks = 0;
-    if (completedWorkouts.length > 0) {
-      const now = new Date();
-      const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    // Calculate weekly volume (total weight moved this week)
+    const weeklyVolume = workoutsThisWeek.reduce((total: number, workout: any) => {
+      if (!workout.exercises) return total;
       
-      // Get all weeks with workouts
-      const weeksWithWorkouts = new Set();
-      completedWorkouts.forEach(w => {
-        if (w.startTime) {
-          const workoutDate = new Date(w.startTime);
-          const weekStart = new Date(workoutDate.getFullYear(), workoutDate.getMonth(), workoutDate.getDate() - workoutDate.getDay());
-          weeksWithWorkouts.add(weekStart.getTime());
-        }
-      });
-      
-      // Start from current week
-      let weekToCheck = new Date(currentWeekStart);
-      
-      // Check if current week has workouts - if not, return 0 immediately
-      if (!weeksWithWorkouts.has(weekToCheck.getTime())) {
-        consecutiveWeeks = 0;
-      } else {
-        // Count consecutive weeks going back in time (no limit)
-        while (weeksWithWorkouts.has(weekToCheck.getTime())) {
-          consecutiveWeeks++;
-          // Move to previous week
-          weekToCheck.setDate(weekToCheck.getDate() - 7);
-        }
-      }
-    }
-
-    // Calculate total volume for current week only
-    let totalVolume = 0;
-    if (completedWorkouts.length > 0) {
-      // Get current week boundaries
-      const now = new Date();
-      const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-      currentWeekStart.setHours(0, 0, 0, 0);
-      
-      const currentWeekEnd = new Date(currentWeekStart);
-      currentWeekEnd.setDate(currentWeekEnd.getDate() + 6);
-      currentWeekEnd.setHours(23, 59, 59, 999);
-      
-      // Filter workouts from current week
-      const currentWeekWorkouts = completedWorkouts.filter(w => {
-        if (!w.startTime) return false;
-        const workoutDate = new Date(w.startTime);
-        return workoutDate >= currentWeekStart && workoutDate <= currentWeekEnd;
-      });
-      
-      // Calculate volume from current week workouts
-      if (exercises && exercises.length > 0 && currentWeekWorkouts.length > 0) {
-        // Get workout IDs from current week
-        const currentWeekWorkoutIds = new Set(currentWeekWorkouts.map(w => w.id));
+      const workoutVolume = workout.exercises.reduce((exerciseTotal: number, exercise: any) => {
+        if (!exercise.sets) return exerciseTotal;
         
-        // Sum up volume from exercises in current week workouts
-        exercises.forEach((exercise: any) => {
-          if (exercise.maxWeight && exercise.totalSets && exercise.workoutId && currentWeekWorkoutIds.has(exercise.workoutId)) {
-            // Estimate volume: max weight × total sets × average reps (assume 10 reps)
-            const exerciseVolume = (exercise.maxWeight || 0) * (exercise.totalSets || 0) * 10;
-            totalVolume += exerciseVolume;
-          }
-        });
-      }
-    }
-    
-    // Format volume for display (convert to tons if > 1000kg)
+        const setsVolume = exercise.sets.reduce((setTotal: number, set: any) => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseInt(set.reps) || 0;
+          return setTotal + (weight * reps);
+        }, 0);
+        
+        return exerciseTotal + setsVolume;
+      }, 0);
+      
+      return total + workoutVolume;
+    }, 0);
+
+    // Format volume for display
     const formatVolume = (volume: number) => {
       if (volume >= 1000) {
         return `${(volume / 1000).toFixed(1)}t`;
@@ -453,18 +332,15 @@ export default function Dashboard() {
       return `${Math.round(volume)}kg`;
     };
 
-    // Total completed workouts
-    const totalWorkouts = completedWorkouts.length;
-
     return {
-      currentStreak: streak,
+      weeklyWorkouts: workoutsThisWeek.length,
       totalWorkouts: totalWorkouts,
       consecutiveWeeks: consecutiveWeeks,
-      totalVolume: totalVolume,
-      formattedVolume: formatVolume(totalVolume),
-      avgDuration: avgDurationStr || "0m",
+      avgDuration: avgDurationMinutes > 0 ? `${avgDurationMinutes}m` : "0m",
+      weeklyVolume: weeklyVolume,
+      formattedVolume: formatVolume(weeklyVolume),
     };
-  }, [recentWorkouts, exercises]);
+  }, [recentWorkouts]);
 
   const formatDate = (date: string | Date) => {
     const d = new Date(date);
@@ -513,293 +389,214 @@ export default function Dashboard() {
       {/* Last Workout & Achievements Cards */}
       <div className="mobile-flex relative z-10">
         {/* Last Workout Card */}
-            <div className="bg-gradient-to-br from-slate-50/90 to-blue-50/70 dark:from-slate-900/80 dark:to-slate-800/60 hover:from-blue-50/80 hover:to-indigo-50/70 dark:hover:from-slate-800/90 dark:hover:to-slate-700/80 rounded-2xl mobile-card-padding border border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300/70 dark:hover:border-slate-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm">
-              {recentWorkouts.length > 0 ? (
-                <div className="space-y-3 sm:space-y-4">
-                  {/* Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-400/30 dark:to-indigo-500/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/50 shadow-lg">
-                        <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="mr-4">
-                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Último Treino</h3>
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block mt-1">Suas atividades recentes</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 sm:gap-2 mt-1">
-                      <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
-                        recentWorkouts[0]?.endTime 
-                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
-                          : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
-                      }`}>
-                        {recentWorkouts[0]?.endTime ? (
-                          <>
-                            <CheckCircle className="w-3 h-3 mr-1.5" />
-                            <span className="hidden sm:inline">Concluído</span>
-                            <span className="sm:hidden">✓</span>
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="w-3 h-3 mr-1.5" />
-                            <span className="hidden sm:inline">Em andamento</span>
-                            <span className="sm:hidden">...</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
+        <div className="bg-gradient-to-br from-slate-50/90 to-blue-50/70 dark:from-slate-900/80 dark:to-slate-800/60 hover:from-blue-50/80 hover:to-indigo-50/70 dark:hover:from-slate-800/90 dark:hover:to-slate-700/80 rounded-2xl mobile-card-padding border border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300/70 dark:hover:border-slate-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm">
+          {recentWorkouts.length > 0 ? (
+            <div className="space-y-3 sm:space-y-4">
+              {/* Header */}
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-400/30 dark:to-indigo-500/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/50 shadow-lg">
+                    <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  
-                  {/* Workout Info */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-3 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Treino</span>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        {recentWorkouts[0]?.name || "Treino personalizado"}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Data</span>
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        {formatDate(recentWorkouts[0]?.startTime)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Duração</span>
-                      <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                        {recentWorkouts[0]?.endTime ? 
-                          calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime) : 
-                          "Em andamento"
-                        }
-                      </span>
-                    </div>
-                    
-                    {/* Muscle Groups */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Zap className="w-3 h-3 text-slate-500 dark:text-slate-400" />
-                        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Grupos</span>
-                      </div>
-                      <div className="flex gap-1.5 justify-end overflow-x-auto scrollbar-hide">
-                        {(() => {
-                          const workoutName = recentWorkouts[0]?.name?.toLowerCase() || '';
-                          let muscleGroups: string[] = [];
-                          
-                          // More comprehensive muscle group detection
-                          if (workoutName.includes('push') || workoutName.includes('peito') || workoutName.includes('empurrar')) {
-                            muscleGroups = ['Peito', 'Ombro', 'Tríceps'];
-                          } else if (workoutName.includes('pull') || workoutName.includes('costa') || workoutName.includes('puxar') || workoutName.includes('costas')) {
-                            muscleGroups = ['Costa', 'Bíceps', 'Trapézio'];
-                          } else if (workoutName.includes('leg') || workoutName.includes('perna') || workoutName.includes('quadríceps') || workoutName.includes('glúteo')) {
-                            muscleGroups = ['Quadríceps', 'Glúteos', 'Panturrilha'];
-                          } else if (workoutName.includes('full') || workoutName.includes('completo') || workoutName.includes('corpo inteiro')) {
-                            muscleGroups = ['Corpo todo'];
-                          } else if (workoutName.includes('upper') || workoutName.includes('superior') || workoutName.includes('tronco')) {
-                            muscleGroups = ['Peito', 'Costa', 'Ombro'];
-                          } else if (workoutName.includes('lower') || workoutName.includes('inferior') || workoutName.includes('membros inferiores')) {
-                            muscleGroups = ['Pernas', 'Glúteos'];
-                          } else if (workoutName.includes('cardio') || workoutName.includes('aeróbico')) {
-                            muscleGroups = ['Cardio'];
-                          } else if (workoutName.includes('core') || workoutName.includes('abdômen') || workoutName.includes('abdominal')) {
-                            muscleGroups = ['Core', 'Abdômen'];
-                          } else if (workoutName.includes('ombro')) {
-                            muscleGroups = ['Ombro', 'Trapézio'];
-                          } else if (workoutName.includes('braço') || workoutName.includes('bíceps') || workoutName.includes('tríceps')) {
-                            muscleGroups = ['Bíceps', 'Tríceps'];
-                          } else {
-                            // Default for mixed or unspecified workouts
-                            muscleGroups = ['Variado'];
-                          }
-                          
-                          return muscleGroups.map((group, index) => (
-                            <span 
-                              key={index}
-                              className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-indigo-500/15 to-purple-500/15 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30 dark:border-indigo-400/40 shadow-sm"
-                            >
-                              {group}
-                            </span>
-                          ));
-                        })()}
-                      </div>
-                    </div>
-                    
-                    {/* Quick Stats */}
-                    <div className="pt-3 border-t border-slate-300/50 dark:border-slate-600/50">
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl p-2.5 border border-emerald-500/20 dark:border-emerald-400/30">
-                          <div className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
-                            {(() => {
-                              // Simulate exercise count based on workout type
-                              const workoutName = recentWorkouts[0]?.name?.toLowerCase() || '';
-                              if (workoutName.includes('push') || workoutName.includes('peito')) return '6';
-                              if (workoutName.includes('pull') || workoutName.includes('costa')) return '7';
-                              if (workoutName.includes('leg') || workoutName.includes('perna')) return '8';
-                              if (workoutName.includes('full')) return '12';
-                              return '5';
-                            })()}
-                          </div>
-                          <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Exercícios</div>
-                        </div>
-                        <div className="bg-purple-500/10 dark:bg-purple-500/15 rounded-xl p-2.5 border border-purple-500/20 dark:border-purple-400/30">
-                          <div className="text-lg font-bold text-purple-500 dark:text-purple-400">
-                            {(() => {
-                              // Simulate volume based on workout duration
-                              const duration = recentWorkouts[0]?.endTime 
-                                ? new Date(recentWorkouts[0].endTime).getTime() - new Date(recentWorkouts[0].startTime).getTime()
-                                : Date.now() - new Date(recentWorkouts[0]?.startTime || Date.now()).getTime();
-                              const hours = duration / (1000 * 60 * 60);
-                              return Math.round(hours * 1200 + Math.random() * 400);
-                            })()}kg
-                          </div>
-                          <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Volume</div>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="mr-4">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Último Treino</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block mt-1">Suas atividades recentes</p>
                   </div>
-                  
-                  {/* Action Button */}
-                  <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 rounded-2xl px-4 sm:px-5 py-3 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 w-full text-sm sm:text-base backdrop-blur-sm"
-                    onClick={() => navigate("/treinos")}
-                  >
-                    <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-                    <span className="hidden sm:inline">Iniciar Novo Treino</span>
-                    <span className="sm:hidden">Novo Treino</span>
-                  </Button>
                 </div>
-              ) : (
-                <div className="text-center space-y-3">
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50/60 dark:bg-blue-500/10 flex items-center justify-center border border-blue-200/30 dark:border-blue-500/20">
-                    <Play className="w-6 h-6 text-blue-500 dark:text-blue-500" />
+                <div className="flex items-center gap-1 sm:gap-2 mt-1">
+                  <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
+                    recentWorkouts[0]?.endTime 
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
+                      : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
+                  }`}>
+                    {recentWorkouts[0]?.endTime ? (
+                      <>
+                        <CheckCircle className="w-3 h-3 mr-1.5" />
+                        <span className="hidden sm:inline">Concluído</span>
+                        <span className="sm:hidden">✓</span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-3 h-3 mr-1.5" />
+                        <span className="hidden sm:inline">Em andamento</span>
+                        <span className="sm:hidden">...</span>
+                      </>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-foreground mb-1">Primeiro Treino</h3>
-                    <p className="text-muted-foreground text-xs mb-3">Comece sua jornada fitness hoje!</p>
-                  </div>
-                  <Button 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl px-3 sm:px-4 py-2.5 font-semibold text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-blue-500/25 w-full text-xs sm:text-sm"
-                    onClick={() => navigate("/treinos")}
-                  >
-                    <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Começar Primeiro Treino</span>
-                    <span className="sm:hidden">Primeiro Treino</span>
-                  </Button>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Conquistas Card */}
-            <div className="bg-gradient-to-br from-purple-50/90 to-blue-50/70 dark:from-purple-900/80 dark:to-blue-800/60 hover:from-purple-50/80 hover:to-blue-50/70 dark:hover:from-purple-800/90 dark:hover:to-blue-700/80 rounded-2xl mobile-card-padding border border-purple-200/60 dark:border-purple-700/60 hover:border-purple-300/70 dark:hover:border-purple-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm" onClick={() => navigate("/progress")}>
-              <div className="space-y-3 sm:space-y-4">
-                {/* Header */}
+              {/* Workout Details */}
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-600/20 dark:from-purple-500/30 dark:to-blue-600/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/40">
-                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm sm:text-base font-bold text-foreground">Conquistas</h3>
-                      <p className="text-xs text-muted-foreground hidden sm:block">Progresso e marcos</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
-                      achievementsWithProgress.filter(a => a.unlocked).length > 0 
-                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
-                        : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
-                    }`}>
-                      {achievementsWithProgress.filter(a => a.unlocked).length > 0 ? (
-                        <>
-                          <Trophy className="w-3 h-3 mr-1.5" />
-                          <span className="hidden sm:inline">Ativo</span>
-                          <span className="sm:hidden">🏆</span>
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="w-3 h-3 mr-1.5" />
-                          <span className="hidden sm:inline">Começando</span>
-                          <span className="sm:hidden">⏳</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate flex-1 mr-2">
+                    {(recentWorkouts[0] as any)?.templateName || recentWorkouts[0]?.name || "Treino personalizado"}
+                  </h4>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 px-2 py-1 h-auto text-xs font-medium flex-shrink-0"
+                    onClick={() => handleWorkoutClick(recentWorkouts[0]?.id)}
+                  >
+                    <span className="hidden sm:inline">Ver detalhes</span>
+                    <span className="sm:hidden">Ver</span>
+                    <ChevronRight className="w-3 h-3 ml-1" />
+                  </Button>
                 </div>
                 
-                {/* Achievement Info - Simplified */}
-                <div className="bg-slate-50/80 dark:bg-slate-800/60 rounded-2xl p-4 space-y-4 border border-slate-200/50 dark:border-slate-700/50 shadow-inner backdrop-blur-sm">
-                  {/* Última Conquista */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Última Conquista</span>
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 text-right max-w-[160px] truncate">
-                      {lastUnlockedAchievement ? (
-                        <>
-                          {lastUnlockedAchievement.name}
-                          <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                            {(() => {
-                              const now = new Date();
-                              const achievementDate = new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-                              const diffDays = Math.floor((now.getTime() - achievementDate.getTime()) / (1000 * 60 * 60 * 24));
-                              if (diffDays === 0) return "Hoje";
-                              if (diffDays === 1) return "Ontem";
-                              if (diffDays < 7) return `${diffDays} dias atrás`;
-                              return "Há mais tempo";
-                            })()}
-                          </div>
-                        </>
-                      ) : (
-                        <span className="text-muted-foreground">Nenhuma ainda</span>
-                      )}
-                    </span>
-                  </div>
-                  
-                  {/* Próxima Conquista */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Próxima Conquista</span>
-                    <div className="text-right">
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 block max-w-[160px] truncate">
-                        {nextClosestAchievement ? nextClosestAchievement.name : "Todas completas!"}
-                      </span>
-                      <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
-                        {nextClosestAchievement ? `${Math.round(nextClosestAchievement.progress)}% completa` : "100%"}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Contadores de Conquistas */}
-                  <div className="pt-3 border-t border-slate-300/50 dark:border-slate-600/50">
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                      <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl p-2.5 border border-emerald-500/20 dark:border-emerald-400/30">
-                        <div className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
-                          {achievementsWithProgress.filter(a => a.unlocked).length}
-                        </div>
-                        <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Desbloqueadas</div>
-                      </div>
-                      <div className="bg-orange-500/10 dark:bg-orange-500/15 rounded-xl p-2.5 border border-orange-500/20 dark:border-orange-400/30">
-                        <div className="text-lg font-bold text-orange-500 dark:text-orange-400">
-                          {achievementsWithProgress.filter(a => !a.unlocked).length}
-                        </div>
-                        <div className="text-xs font-medium text-orange-600 dark:text-orange-300">Restantes</div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  {formatDate(recentWorkouts[0]?.startTime || recentWorkouts[0]?.endTime)}
                 </div>
-                
-                {/* Action Button */}
+
+                {/* Workout Stats */}
+                {recentWorkouts[0]?.endTime && (
+                  <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm pt-2 border-t border-slate-200/50 dark:border-slate-600/50">
+                    <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="font-medium">
+                        {calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime)}
+                      </span>
+                    </div>
+                    {(recentWorkouts[0] as any)?.exercises && (
+                      <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                        <Dumbbell className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="font-medium">
+                          {(recentWorkouts[0] as any).exercises.length} exercício{(recentWorkouts[0] as any).exercises.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 sm:gap-3 pt-2">
+                {!recentWorkouts[0]?.endTime && (
+                  <Button 
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg text-sm shadow-md"
+                    onClick={() => navigate(`/workout-session/${recentWorkouts[0]?.id}`)}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Continuar</span>
+                    <span className="sm:hidden">▶</span>
+                  </Button>
+                )}
                 <Button 
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 dark:from-purple-500 dark:to-blue-500 dark:hover:from-purple-400 dark:hover:to-blue-400 rounded-2xl px-4 sm:px-5 py-3 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20 w-full text-sm sm:text-base backdrop-blur-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/progress");
-                  }}
+                  variant="outline" 
+                  className="flex-1 sm:flex-none bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 border-slate-300/60 dark:border-slate-600/60 text-slate-700 dark:text-slate-300 font-medium py-2 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-md text-sm backdrop-blur-sm"
+                  onClick={() => navigate("/treinos")}
                 >
-                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-                  <span className="hidden sm:inline">Ver Todas Conquistas</span>
-                  <span className="sm:hidden">Ver Conquistas</span>
+                  <List className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Ver Todos</span>
+                  <span className="sm:hidden">Todos</span>
                 </Button>
               </div>
             </div>
+          ) : (
+            <div className="space-y-4 text-center py-6">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-blue-100/60 to-purple-100/40 dark:from-blue-500/10 dark:to-purple-500/5 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/20">
+                <Dumbbell className="w-8 h-8 text-blue-500 dark:text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Nenhum treino iniciado</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  Comece sua jornada fitness hoje mesmo
+                </p>
+                <Button 
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg text-sm shadow-md"
+                  onClick={() => navigate("/treinos")}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Começar Treino
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Achievements Card */}
+        <div 
+          className="bg-gradient-to-br from-purple-50/90 to-pink-50/70 dark:from-purple-900/30 dark:to-pink-900/20 hover:from-purple-50/95 hover:to-pink-50/80 dark:hover:from-purple-900/40 dark:hover:to-pink-900/30 rounded-2xl mobile-card-padding border border-purple-200/60 dark:border-purple-700/40 hover:border-purple-300/70 dark:hover:border-purple-600/50 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm"
+          onClick={() => navigate("/progress")}
+        >
+          <div className="space-y-3 sm:space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 dark:from-purple-400/30 dark:to-pink-500/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/50 shadow-lg">
+                  <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="mr-4">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Conquistas</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block mt-1">Seu progresso e medalhas</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Achievement Progress */}
+            <div className="space-y-3">
+              {/* Recent Achievement Preview */}
+              {achievementsWithProgress.length > 0 && (
+                <div className="bg-white/60 dark:bg-slate-800/60 rounded-xl p-3 border border-purple-200/50 dark:border-purple-700/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 dark:from-purple-400/30 dark:to-pink-400/30 flex items-center justify-center border border-purple-500/30 dark:border-purple-400/40">
+                      {React.createElement(achievementsWithProgress.find(a => a.progress > 0)?.icon || Trophy, { 
+                        className: "w-4 h-4 text-purple-600 dark:text-purple-400" 
+                      })}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                        {achievementsWithProgress.find(a => a.progress > 0)?.name || "Primeira conquista aguardando"}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 bg-slate-200/60 dark:bg-slate-700/60 rounded-full h-1.5 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-400 dark:to-pink-400 transition-all duration-500 ease-out rounded-full"
+                            style={{ 
+                              width: `${Math.max(5, (achievementsWithProgress.find(a => a.progress > 0)?.progress || 0) * 100)}%` 
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-purple-600 dark:text-purple-300 min-w-fit">
+                          {Math.round((achievementsWithProgress.find(a => a.progress > 0)?.progress || 0) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Contadores de Conquistas */}
+              <div className="pt-3 border-t border-slate-300/50 dark:border-slate-600/50">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl p-2.5 border border-emerald-500/20 dark:border-emerald-400/30">
+                    <div className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
+                      {achievementsWithProgress.filter(a => a.unlocked).length}
+                    </div>
+                    <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Desbloqueadas</div>
+                  </div>
+                  <div className="bg-orange-500/10 dark:bg-orange-500/15 rounded-xl p-2.5 border border-orange-500/20 dark:border-orange-400/30">
+                    <div className="text-lg font-bold text-orange-500 dark:text-orange-400">
+                      {achievementsWithProgress.filter(a => !a.unlocked).length}
+                    </div>
+                    <div className="text-xs font-medium text-orange-600 dark:text-orange-300">Restantes</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action Button */}
+            <Button 
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 dark:from-purple-500 dark:to-blue-500 dark:hover:from-purple-400 dark:hover:to-blue-400 rounded-2xl px-4 sm:px-5 py-3 font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20 w-full text-sm sm:text-base backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/progress");
+              }}
+            >
+              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
+              <span className="hidden sm:inline">Ver Todas Conquistas</span>
+              <span className="sm:hidden">Ver Conquistas</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -893,355 +690,143 @@ export default function Dashboard() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-100/80 dark:hover:bg-blue-500/20 transition-all duration-200 rounded-lg px-3 py-1.5 border border-blue-200/40 dark:border-blue-500/30 hover:border-blue-300/60 dark:hover:border-blue-400/50"
+              className="text-muted-foreground hover:text-foreground"
               onClick={() => navigate("/workout-history")}
             >
               Ver todos
+              <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
           
-          {workoutsLoading ? (
+          {recentWorkouts.length > 0 ? (
             <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-3 bg-blue-50/60 dark:bg-muted/30 rounded-xl border border-blue-200/30 dark:border-border/30">
-                  <div className="loading-skeleton h-4 rounded mb-2"></div>
-                  <div className="loading-skeleton h-3 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : recentWorkouts.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50/60 dark:bg-blue-500/10 flex items-center justify-center border border-blue-200/30 dark:border-blue-500/20">
-                <List className="w-8 h-8 text-blue-500 dark:text-blue-500" />
-              </div>
-              <p className="text-muted-foreground mb-4">Nenhum treino registrado ainda</p>
-              <Button 
-                className="gradient-accent"
-                onClick={() => navigate("/treinos")}
-              >
-                Começar primeiro treino
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentWorkouts.slice(0, 3).map((workout) => (
+              {recentWorkouts.slice(0, 5).map((workout) => (
                 <div 
-                  key={workout.id} 
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 dark:from-slate-800/60 dark:to-slate-700/40 rounded-xl border border-blue-200/40 dark:border-slate-600/50 hover-lift cursor-pointer hover:from-blue-100/80 hover:to-indigo-100/60 dark:hover:from-slate-700/80 dark:hover:to-slate-600/60 transition-all duration-300 group backdrop-blur-sm"
+                  key={workout.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
                   onClick={() => handleWorkoutClick(workout.id)}
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/25 dark:group-hover:shadow-blue-400/25 group-hover:scale-105 transition-all duration-300">
-                      <Play className="text-white w-5 h-5" />
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 ${
+                      workout.endTime 
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
+                        : 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                    }`}>
+                      {workout.endTime ? <CheckCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-800 dark:text-slate-100 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                        {workout.name}
+                      <div className="font-medium text-foreground">
+                        {(workout as any).templateName || workout.name || "Treino personalizado"}
                       </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
-                        {formatDate(workout.startTime)}
+                      <div className="text-sm text-muted-foreground">
+                        {formatDate(workout.startTime || workout.endTime)}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
-                        {workout.endTime ? calculateDuration(workout.startTime, workout.endTime) : "Em andamento"}
-                      </div>
-                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
-                        {workout.endTime ? "Concluído" : "Incompleto"}
-                      </div>
-                    </div>
-                    <div className="w-8 h-8 rounded-lg bg-slate-100/80 dark:bg-slate-700/60 group-hover:bg-slate-200/90 dark:group-hover:bg-slate-600/80 flex items-center justify-center transition-all duration-300">
-                      <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all duration-300" />
-                    </div>
+                  <div className="flex items-center gap-2">
+                    {workout.endTime && (
+                      <span className="text-sm text-muted-foreground">
+                        {calculateDuration(workout.startTime, workout.endTime)}
+                      </span>
+                    )}
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </div>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Dumbbell className="w-12 h-12 mx-auto mb-4" />
+              <p>Nenhum treino encontrado</p>
+              <p className="text-sm">Comece seu primeiro treino agora!</p>
             </div>
           )}
         </CardContent>
       </Card>
-      
-      {/* Enhanced Progress Section */}
-      <div className="space-y-4">
-        {/* Progress Header Card */}
-        <Card className="glass-card rounded-2xl hover-lift">
-          <CardContent className="p-4 sm:p-6">
-            <div className="space-y-6">
-              {/* Header Section with more breathing room */}
-              <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="mobile-subheading text-foreground">Progresso de Treino</h3>
-                    <p className="mobile-caption text-muted-foreground">Acompanhe sua evolução</p>
-                  </div>
-                </div>
-              
-                <div className="w-full sm:w-auto">
-                  <Select 
-                    value={selectedExerciseId || firstExerciseId || ""} 
-                    onValueChange={(value) => setSelectedExerciseId(value)}
-                  >
-                    <SelectTrigger className="w-full sm:w-56 mobile-button bg-muted/50 border border-border text-foreground transition-all duration-200 hover:bg-muted/70 mobile-focus">
-                      <SelectValue placeholder={selectedExerciseName || "Selecione um exercício"} />
-                    </SelectTrigger>
-                    <SelectContent 
-                      className="bg-background border border-border max-h-60 overflow-auto backdrop-blur-md"
-                      sideOffset={4}
-                    >
-                      {exercises.map((exercise: any, index: number) => (
-                        <SelectItem 
-                          key={`exercise-select-${exercise.id}-${index}`} 
-                          value={exercise.id}
-                          className="text-foreground focus:bg-muted focus:text-foreground cursor-pointer transition-colors"
-                        >
-                          {exercise.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
-              {/* Progress Stats */}
-              {chartData.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-4 sm:p-5 border border-blue-500/20 touch-feedback">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                      </div>
-                      <span className="mobile-body font-medium text-blue-400">Peso Máximo</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                    {chartData.length > 0 && chartData.some((d: any) => d.weight > 0) 
-                      ? Math.max(...chartData.filter((d: any) => d.weight > 0).map((d: any) => d.weight))
-                      : 0
-                    }kg
-                  </div>
-                    <div className="mobile-caption text-muted-foreground">Maior peso atingido</div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-xl p-4 sm:p-5 border border-emerald-500/20 touch-feedback">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                        <Target className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
-                      </div>
-                      <span className="mobile-body font-medium text-emerald-400">Total Sessões</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{chartData.length}</div>
-                    <div className="mobile-caption text-muted-foreground">Treinos registrados</div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl p-4 sm:p-5 border border-purple-500/20 touch-feedback">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                      </div>
-                      <span className="mobile-body font-medium text-purple-400">Último Treino</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                    {chartData.length > 0 
-                      ? (() => {
-                          try {
-                            // Get the most recent date from chartData
-                            const sortedData = [...chartData].sort((a: any, b: any) => {
-                              const dateA = new Date(a.fullDate || a.date);
-                              const dateB = new Date(b.fullDate || b.date);
-                              return dateB.getTime() - dateA.getTime();
-                            });
-                            
-                            const lastDate = sortedData[0]?.fullDate || sortedData[0]?.date;
-                            if (lastDate) {
-                              // Try to parse the date correctly
-                              let date: Date;
-                              
-                              // If it's in DD/MM/YYYY format, convert to proper Date
-                              if (typeof lastDate === 'string' && lastDate.includes('/')) {
-                                const parts = lastDate.split('/');
-                                if (parts.length === 3) {
-                                  // Convert DD/MM/YYYY to MM/DD/YYYY for Date constructor
-                                  date = new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
-                                } else {
-                                  date = new Date(lastDate);
-                                }
-                              } else {
-                                date = new Date(lastDate);
-                              }
-                              
-                              // Check if date is valid
-                              if (isNaN(date.getTime())) {
-                                return "Data inválida";
-                              }
-                              
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0); // Reset time for accurate day comparison
-                              date.setHours(0, 0, 0, 0);
-                              
-                              const diffTime = today.getTime() - date.getTime();
-                              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                              
-                              if (diffDays === 0) return "Hoje";
-                              if (diffDays === 1) return "Ontem";
-                              if (diffDays < 7) return `${diffDays} dias atrás`;
-                              if (diffDays < 30) {
-                                const weeks = Math.floor(diffDays / 7);
-                                return weeks === 1 ? "1 semana atrás" : `${weeks} semanas atrás`;
-                              }
-                              
-                              // For older dates, show format like "12 de junho"
-                              const months = [
-                                'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-                                'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
-                              ];
-                              
-                              const day = date.getDate();
-                              const month = months[date.getMonth()];
-                              
-                              return `${day} de ${month}`;
-                            }
-                            return "N/A";
-                          } catch (error) {
-                            console.error('Error processing last workout date:', error);
-                            return "Erro na data";
-                          }
-                        })()
-                      : "Nunca"
-                    }
-                  </div>
-                    <div className="mobile-caption text-muted-foreground">Última execução</div>
-                  </div>
-                </div>
-              )}
-            
-              {/* Progress Chart */}
-              <div className="bg-blue-50/80 dark:bg-slate-900/50 rounded-xl p-4 sm:p-6 border border-blue-200/40 dark:border-slate-700/30">
-                <div className="h-56 sm:h-72 relative overflow-hidden">
-                {chartLoading ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-slate-400">
-                      <div className="loading-skeleton h-6 w-24 mb-2 mx-auto"></div>
-                      <div className="loading-skeleton h-40 w-full"></div>
-                    </div>
-                  </div>
-                ) : chartData.length > 0 ? (
-                  <div className="h-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
-                        <defs>
-                          <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                            <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                          </linearGradient>
-                        </defs>
-                        <XAxis 
-                          dataKey="date" 
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                        />
-                        <YAxis 
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                          domain={chartData.length > 0 ? ['dataMin - 5', 'dataMax + 5'] : [0, 100]}
-                        />
-                        <Tooltip 
-                          contentStyle={{
-                            backgroundColor: 'rgba(248, 250, 252, 0.95)',
-                            border: '1px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: '16px',
-                            color: '#1E293B',
-                            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(59, 130, 246, 0.1)',
-                            fontSize: '13px',
-                            padding: '12px 16px',
-                            backdropFilter: 'blur(12px)',
-                            WebkitBackdropFilter: 'blur(12px)'
-                          }}
-                          cursor={{ stroke: 'rgba(59, 130, 246, 0.5)', strokeWidth: 1 }}
-                          content={({ active, payload, label }) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-4 shadow-2xl shadow-blue-500/20">
-                                  <div className="flex items-center space-x-3 mb-2">
-                                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                                    <div className="text-slate-800 dark:text-white font-semibold text-sm">Progressão</div>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <div className="flex items-center justify-between text-xs">
-                                      <span className="text-slate-600 dark:text-slate-400">Peso máximo:</span>
-                                      <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">{data.weight}kg</span>
-                                    </div>
-                                    {data.workoutName && (
-                                      <div className="mt-2 pt-2 border-t border-slate-300/50 dark:border-slate-700/50">
-                                        <div className="text-xs text-slate-500 dark:text-slate-500 truncate max-w-[180px]">
-                                          {data.workoutName}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="weight"
-                          stroke="#3B82F6"
-                          strokeWidth={3}
-                          fill="url(#weightGradient)"
-                          dot={{ 
-                            fill: '#3B82F6', 
-                            strokeWidth: 2, 
-                            r: 5,
-                            style: { filter: 'drop-shadow(0 2px 6px rgba(59, 130, 246, 0.4))' }
-                          }}
-                          activeDot={{ 
-                            r: 8, 
-                            stroke: '#3B82F6', 
-                            strokeWidth: 3, 
-                            fill: '#fff',
-                            style: { 
-                              filter: 'drop-shadow(0 4px 16px rgba(59, 130, 246, 0.7))',
-                              cursor: 'pointer'
-                            }
-                          }}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-muted-foreground">
-                      <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100/60 to-purple-100/40 dark:from-blue-500/10 dark:to-purple-500/5 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/20">
-                        <TrendingUp className="w-10 h-10 text-blue-500 dark:text-blue-400" />
-                      </div>
-                      <p className="text-lg font-medium text-foreground mb-2">Nenhum progresso registrado</p>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Complete treinos com peso para visualizar sua evolução
-                      </p>
-                      <div className="inline-flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-300 bg-blue-100/60 dark:bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-200/50 dark:border-blue-500/20">
-                        <Play className="w-3 h-3" />
-                        <span>Inicie um treino para começar</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                </div>
-              </div>
+      {/* Progress Chart */}
+      <Card className="glass-card rounded-2xl hover-lift">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Progresso de Peso</h3>
+              <p className="text-sm text-muted-foreground">Sua evolução ao longo do tempo</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
+            <Select value={selectedExerciseId || "all"} onValueChange={setSelectedExerciseId}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Selecione um exercício" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os exercícios</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="h-80 relative">
+            {chartData.length > 0 ? (
+              <div className="h-full w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false}
+                      tickLine={false}
+                      className="text-muted-foreground text-xs"
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      className="text-muted-foreground text-xs"
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                      formatter={(value: any, name: string) => {
+                        return [`${value}kg`, 'Peso máximo'];
+                      }}
+                      labelFormatter={(label: string) => `Data: ${label}`}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="weight"
+                      stroke="hsl(var(--primary))"
+                      fill="url(#colorWeight)"
+                      strokeWidth={2}
+                    />
+                    <defs>
+                      <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100/60 to-purple-100/40 dark:from-blue-500/10 dark:to-purple-500/5 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/20">
+                    <TrendingUp className="w-10 h-10 text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <p className="text-lg font-medium text-foreground mb-2">Nenhum progresso registrado</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Complete treinos com peso para visualizar sua evolução
+                  </p>
+                  <div className="inline-flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-300 bg-blue-100/60 dark:bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-200/50 dark:border-blue-500/20">
+                    <Play className="w-3 h-3" />
+                    <span>Inicie um treino para começar</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
       {/* Workout Summary Modal */}
       <Dialog open={showSummaryModal} onOpenChange={setShowSummaryModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
@@ -1260,192 +845,12 @@ export default function Dashboard() {
             </div>
           ) : workoutSummary ? (
             <div className="space-y-6 max-h-[60vh] overflow-y-auto">
-              {/* Workout Info */}
+              {/* Basic workout info display */}
               <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                <h3 className="font-semibold text-white text-lg mb-3">{workoutSummary.name}</h3>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-lg font-bold text-blue-400">
-                      {workoutSummary.exercises ? 
-                        workoutSummary.exercises.filter((exercise: any, index: number, arr: any[]) => {
-                          const firstIndex = arr.findIndex(e => e.id === exercise.id && e.name === exercise.name);
-                          return firstIndex === index;
-                        }).length 
-                        : 0
-                      }
-                    </div>
-                    <div className="text-xs text-slate-400">Exercícios</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-emerald-400">
-                      {Math.max(0, workoutSummary.totalSets || 0)}
-                    </div>
-                    <div className="text-xs text-slate-400">Total de séries</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-purple-400">
-                      {Math.max(0, Math.round((workoutSummary.totalVolume || 0) * 100) / 100)}kg
-                    </div>
-                    <div className="text-xs text-slate-400">Volume total</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-orange-400">
-                      {workoutSummary.duration || "00:00:00"}
-                    </div>
-                    <div className="text-xs text-slate-400">Duração</div>
-                  </div>
-                </div>
+                <h3 className="font-semibold text-white text-lg mb-3">
+                  {(workoutSummary as any)?.name || 'Treino'}
+                </h3>
               </div>
-
-              {/* Simple workout info when full summary not available */}
-              {!workoutSummary.exercises && (
-                <div className="space-y-3">
-                  <h4 className="font-medium text-slate-200">Informações do Treino</h4>
-                  <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                        workoutSummary.completed ? "gradient-accent" : "bg-slate-700/50"
-                      }`}>
-                        {workoutSummary.completed ? (
-                          <CheckCircle className="w-6 h-6 text-white" />
-                        ) : (
-                          <XCircle className="w-6 h-6 text-slate-400" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-medium text-white">{workoutSummary.name}</div>
-                        <div className="text-sm text-slate-400">
-                          {workoutSummary.startTime ? formatDate(workoutSummary.startTime) : "Data não disponível"}
-                        </div>
-                        <Badge 
-                          variant={workoutSummary.completed ? "default" : "secondary"}
-                          className={workoutSummary.completed 
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
-                            : "bg-slate-700/50 text-slate-400 border-slate-600/50"
-                          }
-                        >
-                          {workoutSummary.completed ? "Concluído" : "Incompleto"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Exercises - if available */}
-              {workoutSummary.exercises && workoutSummary.exercises.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-medium text-slate-200">Exercícios realizados</h4>
-                  {(() => {
-                    // Group exercises by ID and name, combining their sets
-                    const exerciseGroups = workoutSummary.exercises.reduce((acc: any, exercise: any) => {
-                      const key = `${exercise.id}-${exercise.name}`;
-                      if (!acc[key]) {
-                        acc[key] = {
-                          ...exercise,
-                          sets: []
-                        };
-                      }
-                      // Combine sets from all instances of this exercise, avoiding duplicates
-                      if (exercise.sets && exercise.sets.length > 0) {
-                        exercise.sets.forEach((set: any) => {
-                          // Only add if not already present (check by set ID)
-                          const exists = acc[key].sets.find((existingSet: any) => existingSet.id === set.id);
-                          if (!exists) {
-                            acc[key].sets.push(set);
-                          }
-                        });
-                      }
-                      return acc;
-                    }, {});
-
-                    // Convert back to array and sort sets by setNumber
-                    const uniqueExercises = Object.values(exerciseGroups).map((exercise: any) => ({
-                      ...exercise,
-                      sets: exercise.sets.sort((a: any, b: any) => a.setNumber - b.setNumber)
-                    }));
-
-                    return uniqueExercises.map((exercise: any, index: number) => {
-                      const uniqueKey = `${exercise.id || 'unknown'}-${exercise.name || 'unnamed'}-${index}`;
-                      return (
-                        <div key={uniqueKey} className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30">
-                              <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
-                            </div>
-                            <div>
-                              <h5 className="font-medium text-white">{exercise.name || 'Exercício sem nome'}</h5>
-                              <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                                <span className="text-sm text-blue-300">{exercise.muscleGroup || 'Grupo não especificado'}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Sets */}
-                          {exercise.sets && exercise.sets.length > 0 ? (
-                            <div className="space-y-3">
-                              {exercise.sets.map((set: any, setIndex: number) => {
-                                const setKey = `${uniqueKey}-set-${set.id || setIndex}`;
-                                return (
-                                  <div key={setKey} className="bg-slate-700/40 rounded-lg p-3 border border-slate-600/30">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="flex items-center space-x-2">
-                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                                          set.completed ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-slate-600/50 text-slate-400 border border-slate-500/40"
-                                        }`}>
-                                          {set.setNumber || (setIndex + 1)}
-                                        </div>
-                                        <span className="text-sm font-medium text-slate-200">Série {set.setNumber || (setIndex + 1)}</span>
-                                      </div>
-                                      <div className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                        set.completed ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-600/40 text-slate-400"
-                                      }`}>
-                                        {set.completed ? "Concluída" : "Pendente"}
-                                      </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center justify-between bg-slate-800/30 rounded-lg p-2 border border-slate-600/20">
-                                      <div className="flex items-center space-x-3">
-                                        <div className="flex items-center space-x-1.5">
-                                          <div className="w-4 h-4 rounded bg-yellow-500/20 flex items-center justify-center">
-                                            <span className="text-yellow-400 text-xs font-bold">#</span>
-                                          </div>
-                                          <span className="text-xs text-slate-400 font-medium">Reps:</span>
-                                          <span className="text-sm font-bold text-yellow-400">
-                                            {set.reps && set.reps > 0 ? set.reps : '---'}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      
-                                      <div className="flex items-center space-x-1.5">
-                                        <div className="w-4 h-4 rounded bg-purple-500/20 flex items-center justify-center">
-                                          <span className="text-purple-400 text-xs font-bold">kg</span>
-                                        </div>
-                                        <span className="text-xs text-slate-400 font-medium">Peso:</span>
-                                        <span className="text-sm font-bold text-purple-400">
-                                          {set.weight && set.weight > 0 ? `${set.weight}kg` : '---'}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <div className="text-center py-3 text-slate-400 text-sm">
-                              <span>Nenhuma série registrada</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              )}
-
-
             </div>
           ) : (
             <div className="text-center py-8 text-slate-400">
