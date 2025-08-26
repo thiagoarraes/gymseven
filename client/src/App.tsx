@@ -34,10 +34,10 @@ function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
 function AuthenticatedRouter() {
   return (
     <WorkoutProvider>
-      <div className="min-h-screen bg-background mobile-optimized relative">
+      <div className="min-h-screen bg-background mobile-optimized">
         <Header />
-        <div className="absolute inset-0 mobile-scroll-container scroll-container overflow-y-auto">
-          <main className="mobile-container mobile-spacing pt-20 pb-24">
+        <div className="min-h-screen mobile-scroll-container scroll-container overflow-y-auto" style={{ paddingTop: '64px', paddingBottom: '80px' }}>
+          <main className="mobile-container mobile-spacing py-4">
             <Switch>
               <Route path="/" component={Dashboard} />
               <Route path="/exercicios" component={ExercisesRoute} />
