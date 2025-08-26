@@ -54,8 +54,8 @@ function AuthenticatedRouter() {
               <Route component={NotFound} />
             </Switch>
           </main>
-          <BottomNavigation />
         </div>
+        <BottomNavigation />
       </div>
     </WorkoutProvider>
   );
