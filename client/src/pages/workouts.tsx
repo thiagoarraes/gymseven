@@ -146,7 +146,7 @@ export default function Workouts() {
     if (editingWorkout) {
       updateMutation.mutate({ id: editingWorkout.id, data });
     } else {
-      createMutation.mutate({ ...data, userId: user?.id || "" });
+      createMutation.mutate({ ...data, user_id: user?.id || "" });
     }
   };
 

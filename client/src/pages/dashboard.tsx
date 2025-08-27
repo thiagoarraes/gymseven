@@ -180,7 +180,7 @@ export default function Dashboard() {
   // Weight history data
   const { data: weightHistory = [] } = useQuery({
     queryKey: ["/api/exercise-progress/weight"],
-    queryFn: exerciseProgressApi.getWeightHistory,
+    queryFn: () => exerciseProgressApi.getExercisesWeightSummary(),
   });
 
   // Process chart data

@@ -165,7 +165,7 @@ export default function Settings() {
 
 
           {/* Notifications */}
-          <Card className="glassmorphism">
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-foreground flex items-center justify-between">
                 <div className="flex items-center">
