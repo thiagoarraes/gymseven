@@ -100,7 +100,7 @@ export default function Register() {
       </div>
 
       {/* Right side - Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
+      <div className="w-full lg:w-1/2 flex items-center justify-center" style={{ paddingTop: '80px', paddingBottom: '130px', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
         <div className={`w-full max-w-md transition-all duration-1000 ease-out ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>

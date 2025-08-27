@@ -223,7 +223,7 @@ export default function WorkoutSession() {
 
   if (logLoading || exercisesLoading) {
     return (
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4">
         <div className="space-y-6">
           <Card className="glass-card rounded-2xl">
             <CardContent className="p-6">
@@ -247,7 +247,7 @@ export default function WorkoutSession() {
 
   if (!workoutLog) {
     return (
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4">
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-white mb-4">Treino não encontrado</h2>
           <Button onClick={() => navigate("/treinos")}>
@@ -264,7 +264,7 @@ export default function WorkoutSession() {
     : 0;
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-4">
+    <div className="container mx-auto px-4 space-y-4">
       {/* Workout Header */}
       <Card className="glass-card rounded-2xl">
         <CardContent className="p-6">

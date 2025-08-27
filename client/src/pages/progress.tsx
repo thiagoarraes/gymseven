@@ -892,7 +892,7 @@ export default function AchievementsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         <div className="space-y-4">
           <div className="loading-skeleton h-12 w-64 rounded-lg"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -911,7 +911,7 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4">
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
