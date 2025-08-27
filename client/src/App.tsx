@@ -38,7 +38,7 @@ function AuthenticatedRouter() {
         <Header />
         <BottomNavigation />
         <div className="overflow-y-auto scroll-behind-fixed" style={{ height: '100vh', paddingTop: '0px', paddingBottom: '0px' }}>
-          <main className="mobile-container mobile-spacing" style={{ paddingTop: '56px', paddingBottom: '72px', paddingLeft: '1rem', paddingRight: '1rem' }}>
+          <main className="mobile-container mobile-spacing" style={{ paddingTop: '80px', paddingBottom: '72px', paddingLeft: '1rem', paddingRight: '1rem' }}>
             <Switch>
               <Route path="/" component={Dashboard} />
               <Route path="/exercicios" component={ExercisesRoute} />
