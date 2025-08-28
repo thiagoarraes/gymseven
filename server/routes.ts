@@ -405,6 +405,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         exercises = await storage.getExercises(req.user!.id);
       }
       
+      // Disable all caching
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': Math.random().toString()
+      });
+      
       res.json(exercises);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar exercícios" });
@@ -1094,6 +1102,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         // Get user-specific logs only
         logs = await storage.getWorkoutLogs(req.user!.id);
       }
+      
+      // Disable all caching
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'ETag': Math.random().toString()
+      });
       
       res.json(logs);
     } catch (error) {
