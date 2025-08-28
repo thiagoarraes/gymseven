@@ -98,12 +98,21 @@ export default function Dashboard() {
   const [, navigate] = useLocation();
   const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showWorkoutDetailsModal, setShowWorkoutDetailsModal] = useState(false);
+  const [selectedWorkoutForDetails, setSelectedWorkoutForDetails] = useState<any>(null);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
   const { user } = useAuth();
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
     queryKey: ["/api/workout-logs"],
     queryFn: workoutLogApi.getAll,
+  });
+
+  // Get detailed workout data for modal
+  const { data: workoutDetails, isLoading: workoutDetailsLoading } = useQuery({
+    queryKey: ["/api/workout-logs", selectedWorkoutForDetails?.id, "details"],
+    queryFn: () => workoutLogApi.getById(selectedWorkoutForDetails?.id),
+    enabled: !!selectedWorkoutForDetails?.id,
   });
 
   // Calculate achievements progress based on workout data
@@ -233,6 +242,49 @@ export default function Dashboard() {
   const closeSummaryModal = () => {
     setShowSummaryModal(false);
     setSelectedWorkout(null);
+  };
+
+  // Handle workout details modal
+  const handleWorkoutDetails = (workout: any) => {
+    setSelectedWorkoutForDetails(workout);
+    setShowWorkoutDetailsModal(true);
+  };
+
+  // Get muscle groups from workout
+  const getMuscleGroupsFromWorkout = (workout: any) => {
+    if (!workout) return ['Peito', 'Tríceps', 'Ombros']; // fallback
+    
+    // Try to get from workoutDetails first, then from workout directly
+    const exercises = (workoutDetails as any)?.exercises || (workout as any)?.exercises;
+    if (!exercises || !Array.isArray(exercises)) return ['Peito', 'Tríceps', 'Ombros'];
+    
+    const muscleGroups = new Set<string>();
+    exercises.forEach((exercise: any) => {
+      if (exercise.muscleGroup) {
+        muscleGroups.add(exercise.muscleGroup);
+      }
+    });
+    
+    return Array.from(muscleGroups).length > 0 ? Array.from(muscleGroups) : ['Peito', 'Tríceps', 'Ombros'];
+  };
+
+  // Format date for workout card
+  const formatWorkoutDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Hoje';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Ontem';
+    } else {
+      return date.toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit' 
+      });
+    }
   };
 
   // Calculate comprehensive weekly stats
@@ -393,102 +445,93 @@ export default function Dashboard() {
           {recentWorkouts.length > 0 ? (
             <div className="space-y-3 sm:space-y-4">
               {/* Header */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-400/30 dark:to-indigo-500/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/50 shadow-lg">
-                    <Play className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 dark:from-blue-400/30 dark:to-indigo-500/30 flex items-center justify-center border border-blue-500/30 dark:border-blue-400/50 shadow-lg">
+                    <Dumbbell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div className="mr-4">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Último Treino</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hidden sm:block mt-1">Suas atividades recentes</p>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Último Treino</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Sua atividade mais recente</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 sm:gap-2 mt-1">
-                  <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
-                    recentWorkouts[0]?.endTime 
-                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
-                      : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
-                  }`}>
-                    {recentWorkouts[0]?.endTime ? (
-                      <>
-                        <CheckCircle className="w-3 h-3 mr-1.5" />
-                        <span className="hidden sm:inline">Concluído</span>
-                        <span className="sm:hidden">✓</span>
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="w-3 h-3 mr-1.5" />
-                        <span className="hidden sm:inline">Em andamento</span>
-                        <span className="sm:hidden">...</span>
-                      </>
-                    )}
-                  </div>
+                <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
+                  recentWorkouts[0]?.endTime 
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
+                    : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
+                }`}>
+                  {recentWorkouts[0]?.endTime ? (
+                    <>
+                      <CheckCircle className="w-3 h-3 mr-1.5" />
+                      <span>Concluído</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-3 h-3 mr-1.5" />
+                      <span>Em andamento</span>
+                    </>
+                  )}
                 </div>
               </div>
 
               {/* Workout Details */}
-              <div className="space-y-2 sm:space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate flex-1 mr-2">
+              <div className="space-y-4">
+                {/* Workout Name and Date */}
+                <div>
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                     {(recentWorkouts[0] as any)?.templateName || recentWorkouts[0]?.name || "Treino personalizado"}
                   </h4>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 px-2 py-1 h-auto text-xs font-medium flex-shrink-0"
-                    onClick={() => handleWorkoutClick(recentWorkouts[0]?.id)}
-                  >
-                    <span className="hidden sm:inline">Ver detalhes</span>
-                    <span className="sm:hidden">Ver</span>
-                    <ChevronRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </div>
-                
-                <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
-                  {formatDate(recentWorkouts[0]?.startTime || recentWorkouts[0]?.endTime)}
-                </div>
-
-                {/* Workout Stats */}
-                {recentWorkouts[0]?.endTime && (
-                  <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm pt-2 border-t border-slate-200/50 dark:border-slate-600/50">
-                    <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="font-medium">
-                        {calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime)}
-                      </span>
-                    </div>
-                    {(recentWorkouts[0] as any)?.exercises && (
-                      <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                        <Dumbbell className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <Calendar className="w-4 h-4" />
+                    <span className="font-medium">
+                      {formatWorkoutDate((recentWorkouts[0]?.startTime || recentWorkouts[0]?.endTime)?.toString() || '')}
+                    </span>
+                    {recentWorkouts[0]?.endTime && (
+                      <>
+                        <span className="text-slate-400 dark:text-slate-500">•</span>
+                        <Clock className="w-4 h-4" />
                         <span className="font-medium">
-                          {(recentWorkouts[0] as any).exercises.length} exercício{(recentWorkouts[0] as any).exercises.length !== 1 ? 's' : ''}
+                          {calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime)}
                         </span>
-                      </div>
+                      </>
                     )}
                   </div>
-                )}
+                </div>
+
+                {/* Muscle Groups */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Grupos Musculares</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {getMuscleGroupsFromWorkout(recentWorkouts[0]).map((group, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                        {group}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2 sm:gap-3 pt-2">
+              <div className="flex gap-3 pt-4 border-t border-slate-200/50 dark:border-slate-600/50">
                 {!recentWorkouts[0]?.endTime && (
                   <Button 
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg text-sm shadow-md"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg text-sm shadow-md"
                     onClick={() => navigate(`/workout-session/${recentWorkouts[0]?.id}`)}
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Continuar</span>
-                    <span className="sm:hidden">▶</span>
+                    Continuar Treino
                   </Button>
                 )}
                 <Button 
                   variant="outline" 
-                  className="flex-1 sm:flex-none bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 border-slate-300/60 dark:border-slate-600/60 text-slate-700 dark:text-slate-300 font-medium py-2 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-md text-sm backdrop-blur-sm"
-                  onClick={() => navigate("/treinos")}
+                  className="bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 border-slate-300/60 dark:border-slate-600/60 text-slate-700 dark:text-slate-300 font-medium py-2.5 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-md text-sm backdrop-blur-sm"
+                  onClick={() => handleWorkoutDetails(recentWorkouts[0])}
                 >
-                  <List className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Ver Todos</span>
-                  <span className="sm:hidden">Todos</span>
+                  <Activity className="w-4 h-4 mr-2" />
+                  Ver Detalhes
                 </Button>
               </div>
             </div>
@@ -827,6 +870,181 @@ export default function Dashboard() {
         </CardContent>
       </Card>
       
+      {/* Workout Details Modal */}
+      <Dialog open={showWorkoutDetailsModal} onOpenChange={setShowWorkoutDetailsModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden glass-card border-slate-700">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-white text-xl font-semibold">
+              {selectedWorkoutForDetails?.name || "Detalhes do Treino"}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Visualize todos os detalhes, séries, cargas e estatísticas do treino.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {workoutDetailsLoading ? (
+            <div className="space-y-4">
+              <div className="loading-skeleton h-8 rounded w-3/4"></div>
+              <div className="loading-skeleton h-20 rounded"></div>
+              <div className="loading-skeleton h-32 rounded"></div>
+            </div>
+          ) : workoutDetails ? (
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+              {/* Workout Info */}
+              <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-white text-lg mb-1">
+                      {workoutDetails.name}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-slate-400">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{formatWorkoutDate(workoutDetails.startTime?.toString() || '')}</span>
+                      </div>
+                      {workoutDetails.endTime && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{calculateDuration(workoutDetails.startTime, workoutDetails.endTime)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                    workoutDetails.endTime 
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' 
+                      : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                  }`}>
+                    {workoutDetails.endTime ? (
+                      <>
+                        <CheckCircle className="w-3 h-3 mr-1.5" />
+                        Concluído
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-3 h-3 mr-1.5" />
+                        Em andamento
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Muscle Groups */}
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-slate-300 mb-2">Grupos Musculares</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {getMuscleGroupsFromWorkout(workoutDetails || selectedWorkoutForDetails).map((group, index) => (
+                      <Badge key={index} variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                        {group}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                {(workoutDetails as any)?.exercises && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">{(workoutDetails as any).exercises.length}</div>
+                      <div className="text-xs text-slate-400">Exercícios</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">
+                        {(workoutDetails as any).exercises.reduce((total: number, ex: any) => total + (ex.sets?.length || 0), 0)}
+                      </div>
+                      <div className="text-xs text-slate-400">Total de Séries</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">
+                        {(workoutDetails as any).exercises.reduce((total: number, ex: any) => {
+                          return total + (ex.sets?.reduce((setTotal: number, set: any) => setTotal + (set.reps || 0), 0) || 0);
+                        }, 0)}
+                      </div>
+                      <div className="text-xs text-slate-400">Total de Reps</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">
+                        {Math.round((workoutDetails as any).exercises.reduce((total: number, ex: any) => {
+                          return total + (ex.sets?.reduce((setTotal: number, set: any) => {
+                            return setTotal + ((set.weight || 0) * (set.reps || 0));
+                          }, 0) || 0);
+                        }, 0))}kg
+                      </div>
+                      <div className="text-xs text-slate-400">Volume Total</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Exercises */}
+              {(workoutDetails as any)?.exercises && (workoutDetails as any).exercises.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-white">Exercícios Realizados</h4>
+                  {(workoutDetails as any).exercises.map((exercise: any, exerciseIndex: number) => (
+                    <div key={exerciseIndex} className="bg-slate-800/20 rounded-xl p-4 border border-slate-700/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h5 className="font-semibold text-white text-base">{exercise.name}</h5>
+                          <p className="text-sm text-slate-400">{exercise.muscleGroup}</p>
+                        </div>
+                        <Badge variant="outline" className="text-slate-300 border-slate-600">
+                          {exercise.sets?.length || 0} séries
+                        </Badge>
+                      </div>
+
+                      {/* Sets */}
+                      {exercise.sets && exercise.sets.length > 0 && (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-slate-700/50">
+                                <th className="text-left py-2 px-3 text-slate-300 font-medium">Série</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Peso (kg)</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Reps</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Volume</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {exercise.sets.map((set: any, setIndex: number) => (
+                                <tr key={setIndex} className="border-b border-slate-700/30">
+                                  <td className="py-2 px-3 text-slate-200 font-medium">{setIndex + 1}</td>
+                                  <td className="py-2 px-3 text-center text-slate-200">
+                                    {set.weight ? `${set.weight}kg` : '-'}
+                                  </td>
+                                  <td className="py-2 px-3 text-center text-slate-200">
+                                    {set.reps || '-'}
+                                  </td>
+                                  <td className="py-2 px-3 text-center text-slate-200">
+                                    {set.weight && set.reps ? `${(set.weight * set.reps).toFixed(1)}kg` : '-'}
+                                  </td>
+                                  <td className="py-2 px-3 text-center">
+                                    {set.completed ? (
+                                      <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" />
+                                    ) : (
+                                      <XCircle className="w-4 h-4 text-slate-500 mx-auto" />
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-400">
+              <TrendingUp className="w-12 h-12 mx-auto mb-4" />
+              <p>Erro ao carregar detalhes do treino</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Workout Summary Modal */}
       <Dialog open={showSummaryModal} onOpenChange={setShowSummaryModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
