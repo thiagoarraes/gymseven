@@ -115,8 +115,8 @@ export class MemStorage implements IStorage {
     this.workoutLogExercises = new Map();
     this.workoutLogSets = new Map();
     
-    // Initialize with sample data
-    this.initializeSampleData();
+    // Sample data disabled - uncomment to re-enable
+    // this.initializeSampleData();
   }
 
   private initializeSampleData() {
