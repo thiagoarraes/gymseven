@@ -132,6 +132,7 @@ export const workoutLogSets = pgTable("workout_log_sets", {
 // Insert schemas
 export const insertExerciseSchema = createInsertSchema(exercises).omit({
   id: true,
+  user_id: true, // Server will add this automatically
   createdAt: true,
 }).extend({
   // Make optional fields truly optional

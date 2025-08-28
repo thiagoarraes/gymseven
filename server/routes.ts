@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       const validatedData = insertExerciseSchema.parse({
         ...req.body,
-        userId: req.user!.id // Ensure exercise belongs to authenticated user
+        user_id: req.user!.id // Ensure exercise belongs to authenticated user
       });
       const exercise = await storage.createExercise(validatedData);
       res.status(201).json(exercise);
