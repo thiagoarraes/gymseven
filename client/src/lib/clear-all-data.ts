@@ -50,9 +50,25 @@ export async function clearAllAppData(): Promise<void> {
     console.log('✅ TODOS os dados locais e cache foram limpos');
     console.log('🔄 Forçando reload completo...');
     
-    // 6. Força reload completo ignorando cache
+    // 6. Fazer logout forçado para limpar sessão
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.log('Logout automático falhou, mas continuando...');
+    }
+    
+    // 7. Limpar service worker se houver
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => {
+          registration.unregister();
+        });
+      });
+    }
+    
+    // 8. Força reload completo ignorando cache
     setTimeout(() => {
-      window.location.href = window.location.href + '?nocache=' + Date.now();
+      window.location.href = window.location.protocol + '//' + window.location.host + '/?nocache=' + Date.now();
     }, 500);
     
   } catch (error) {
