@@ -1063,12 +1063,139 @@ export default function Dashboard() {
             </div>
           ) : workoutSummary ? (
             <div className="space-y-6 max-h-[60vh] overflow-y-auto">
-              {/* Basic workout info display */}
+              {/* Workout Info */}
               <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-                <h3 className="font-semibold text-white text-lg mb-3">
-                  {(workoutSummary as any)?.name || 'Treino'}
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-white text-lg mb-1">
+                      {(workoutSummary as any)?.name || 'Treino'}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-slate-400">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{formatWorkoutDate((workoutSummary as any)?.startTime?.toString() || '')}</span>
+                      </div>
+                      {(workoutSummary as any)?.endTime && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{calculateDuration((workoutSummary as any).startTime, (workoutSummary as any).endTime)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                    (workoutSummary as any)?.endTime 
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' 
+                      : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                  }`}>
+                    {(workoutSummary as any)?.endTime ? (
+                      <>
+                        <CheckCircle className="w-3 h-3 mr-1.5" />
+                        Concluído
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-3 h-3 mr-1.5" />
+                        Em andamento
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                {(workoutSummary as any)?.exercises && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">{(workoutSummary as any).exercises.length}</div>
+                      <div className="text-xs text-slate-400">Exercícios</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">
+                        {(workoutSummary as any).exercises.reduce((total: number, ex: any) => total + (ex.sets?.length || 0), 0)}
+                      </div>
+                      <div className="text-xs text-slate-400">Total de Séries</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">
+                        {(workoutSummary as any).exercises.reduce((total: number, ex: any) => {
+                          return total + (ex.sets?.reduce((setTotal: number, set: any) => setTotal + (set.reps || 0), 0) || 0);
+                        }, 0)}
+                      </div>
+                      <div className="text-xs text-slate-400">Total de Reps</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-700/30 rounded-lg">
+                      <div className="text-lg font-bold text-white">
+                        {Math.round((workoutSummary as any).exercises.reduce((total: number, ex: any) => {
+                          return total + (ex.sets?.reduce((setTotal: number, set: any) => {
+                            return setTotal + ((set.weight || 0) * (set.reps || 0));
+                          }, 0) || 0);
+                        }, 0))}kg
+                      </div>
+                      <div className="text-xs text-slate-400">Volume Total</div>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Exercises */}
+              {(workoutSummary as any)?.exercises && (workoutSummary as any).exercises.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-white">Exercícios Realizados</h4>
+                  {(workoutSummary as any).exercises.map((exercise: any, exerciseIndex: number) => (
+                    <div key={exerciseIndex} className="bg-slate-800/20 rounded-xl p-4 border border-slate-700/30">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h5 className="font-semibold text-white text-base">{exercise.name}</h5>
+                          <p className="text-sm text-slate-400">{exercise.muscleGroup}</p>
+                        </div>
+                        <Badge variant="outline" className="text-slate-300 border-slate-600">
+                          {exercise.sets?.length || 0} séries
+                        </Badge>
+                      </div>
+
+                      {/* Sets */}
+                      {exercise.sets && exercise.sets.length > 0 && (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-slate-700/50">
+                                <th className="text-left py-2 px-3 text-slate-300 font-medium">Série</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Peso (kg)</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Reps</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Volume</th>
+                                <th className="text-center py-2 px-3 text-slate-300 font-medium">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {exercise.sets.map((set: any, setIndex: number) => (
+                                <tr key={setIndex} className="border-b border-slate-700/30">
+                                  <td className="py-2 px-3 text-slate-200 font-medium">{setIndex + 1}</td>
+                                  <td className="py-2 px-3 text-center text-slate-200">
+                                    {set.weight ? `${set.weight}kg` : '-'}
+                                  </td>
+                                  <td className="py-2 px-3 text-center text-slate-200">
+                                    {set.reps || '-'}
+                                  </td>
+                                  <td className="py-2 px-3 text-center text-slate-200">
+                                    {set.weight && set.reps ? `${(set.weight * set.reps).toFixed(1)}kg` : '-'}
+                                  </td>
+                                  <td className="py-2 px-3 text-center">
+                                    {set.completed ? (
+                                      <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" />
+                                    ) : (
+                                      <XCircle className="w-4 h-4 text-slate-500 mx-auto" />
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-8 text-slate-400">
