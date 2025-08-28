@@ -943,12 +943,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       console.log('🔍 [API] Buscando exercises-weight-summary (versão simplificada)...');
       
-      // Buscar exercícios que sabemos que têm dados
-      const knownExercisesWithData = [
-        'Supino reto',
-        'Rosca direta com barra W',
-        'Cadeira extensora'
-      ];
+      // No fallback data - return empty when no real data exists
+      const knownExercisesWithData = [];
       
       const exerciseSummaries = [];
       
@@ -1054,16 +1050,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
 
       if (!logs || logs.length === 0) {
-        // Return sample data for testing if no real data exists
-        const sampleData = [
-          {
-            date: new Date().toDateString(),
-            dayName: new Date().toLocaleDateString('pt-BR', { weekday: 'short' }),
-            volume: 480,
-            workoutName: 'Segunda S1'
-          }
-        ];
-        return res.json(sampleData);
+        // Return empty array when no real data exists
+        return res.json([]);
       }
 
       const dailyData = logs.map((log: any) => {
