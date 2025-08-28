@@ -111,8 +111,10 @@ export default function Dashboard() {
   // Get detailed workout data for modal
   const { data: workoutDetails, isLoading: workoutDetailsLoading } = useQuery({
     queryKey: ["/api/workout-logs", selectedWorkoutForDetails?.id, "details"],
-    queryFn: () => workoutLogApi.getById(selectedWorkoutForDetails?.id),
+    queryFn: () => workoutLogApi.getSummary(selectedWorkoutForDetails?.id),
     enabled: !!selectedWorkoutForDetails?.id,
+    staleTime: 0, // Always refetch
+    gcTime: 0, // Don't cache
   });
 
   // Calculate achievements progress based on workout data
@@ -246,6 +248,7 @@ export default function Dashboard() {
 
   // Handle workout details modal
   const handleWorkoutDetails = (workout: any) => {
+    console.log('Opening details modal for workout:', workout);
     setSelectedWorkoutForDetails(workout);
     setShowWorkoutDetailsModal(true);
   };
