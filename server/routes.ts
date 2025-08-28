@@ -561,12 +561,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const deleted = await storage.deleteWorkoutTemplate(req.params.id);
+      const deleted = await storage.deleteWorkoutTemplate(req.params.id, req.user!.id);
       if (!deleted) {
-        return res.status(404).json({ message: "Modelo de treino não encontrado" });
+        return res.status(404).json({ message: "Modelo de treino não encontrado ou você não tem permissão para excluí-lo" });
       }
       res.status(204).send();
     } catch (error) {
+      console.error('Error deleting workout template:', error);
       res.status(500).json({ message: "Erro ao deletar modelo de treino" });
     }
   });

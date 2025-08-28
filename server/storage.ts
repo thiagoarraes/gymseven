@@ -69,7 +69,7 @@ export interface IStorage {
   getWorkoutTemplate(id: string): Promise<WorkoutTemplate | undefined>;
   createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate>;
   updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined>;
-  deleteWorkoutTemplate(id: string): Promise<boolean>;
+  deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean>;
   
   // Workout Template Exercises
   getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]>;
@@ -325,7 +325,13 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteWorkoutTemplate(id: string): Promise<boolean> {
+  async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
+    if (userId) {
+      const template = this.workoutTemplates.get(id);
+      if (!template || template.user_id !== userId) {
+        return false;
+      }
+    }
     return this.workoutTemplates.delete(id);
   }
 
@@ -819,9 +825,15 @@ class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async deleteWorkoutTemplate(id: string): Promise<boolean> {
-    const result = await this.db.delete(workoutTemplates).where(eq(workoutTemplates.id, id));
-    return (result.rowCount ?? 0) > 0;
+  async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
+    if (userId) {
+      const result = await this.db.delete(workoutTemplates)
+        .where(and(eq(workoutTemplates.id, id), eq(workoutTemplates.user_id, userId)));
+      return (result.rowCount ?? 0) > 0;
+    } else {
+      const result = await this.db.delete(workoutTemplates).where(eq(workoutTemplates.id, id));
+      return (result.rowCount ?? 0) > 0;
+    }
   }
 
   // Workout Template Exercise methods
