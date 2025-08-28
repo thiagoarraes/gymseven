@@ -34,6 +34,36 @@ export class LocalStorage {
       localStorage.removeItem(key);
     });
   }
+
+  // Função para limpar TODOS os dados do aplicativo (incluindo autenticação)
+  static clearAll(): void {
+    try {
+      // Limpar todas as chaves específicas do app
+      Object.values(STORAGE_KEYS).forEach(key => {
+        localStorage.removeItem(key);
+      });
+      
+      // Limpar dados de autenticação e sessão
+      localStorage.removeItem('gymseven_auth');
+      localStorage.removeItem('gymseven_user');
+      localStorage.removeItem('gymseven_token');
+      sessionStorage.clear();
+      
+      // Limpar todos os dados que começam com 'gymseven_'
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('gymseven_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      console.log('🧹 LocalStorage completamente limpo');
+    } catch (error) {
+      console.error('❌ Erro ao limpar LocalStorage:', error);
+    }
+  }
 }
 
 export class OfflineStorage {

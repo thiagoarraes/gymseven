@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./lib/clear-all-data"; // Importar função de limpeza
 
 // Comprehensive ResizeObserver error suppression
 const originalError = console.error;
