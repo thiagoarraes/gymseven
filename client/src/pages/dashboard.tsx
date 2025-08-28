@@ -104,8 +104,10 @@ export default function Dashboard() {
   const { user } = useAuth();
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
-    queryKey: ["/api/workout-logs"],
+    queryKey: ["/api/workout-logs", Date.now()],
     queryFn: workoutLogApi.getAll,
+    staleTime: 0, // Always refetch
+    gcTime: 0, // Don't cache
   });
 
   // Get detailed workout data for modal
@@ -192,6 +194,8 @@ export default function Dashboard() {
   const { data: weightHistory = [] } = useQuery({
     queryKey: ["/api/exercise-progress/weight"],
     queryFn: () => exerciseProgressApi.getExercisesWeightSummary(),
+    staleTime: 0, // Always refetch
+    gcTime: 0, // Don't cache
   });
 
   // Process chart data
