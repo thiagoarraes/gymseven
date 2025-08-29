@@ -670,7 +670,7 @@ export default function Dashboard() {
             
             {/* Valor principal */}
             <div className="flex items-center justify-center mb-2">
-              <div className="text-4xl font-black text-foreground">{stats.totalWorkouts}</div>
+              <div className="text-4xl font-black text-foreground">{stats.totalWorkouts || 0}</div>
             </div>
             
             {/* Descrição */}
@@ -697,7 +697,7 @@ export default function Dashboard() {
             
             {/* Valor principal */}
             <div className="flex items-center justify-center mb-2">
-              <div className="text-4xl font-black text-foreground">{stats.consecutiveWeeks}</div>
+              <div className="text-4xl font-black text-foreground">{stats.consecutiveWeeks || 0}</div>
             </div>
             
             {/* Descrição */}
@@ -753,7 +753,7 @@ export default function Dashboard() {
             
             {/* Valor principal */}
             <div className="flex items-center justify-center mb-2">
-              <div className="text-4xl font-black text-foreground">{stats.avgDuration}</div>
+              <div className="text-4xl font-black text-foreground">{stats.avgDuration || "0m"}</div>
             </div>
             
             {/* Descrição */}
