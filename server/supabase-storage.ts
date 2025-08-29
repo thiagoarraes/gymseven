@@ -418,7 +418,7 @@ export class SupabaseStorage implements IStorage {
       description: exercise.description,
       imageUrl: exercise.imageUrl,
       videoUrl: exercise.videoUrl,
-      user_id: exercise.user_id
+      user_id: (exercise as any).user_id
     };
 
     const { data, error } = await supabase
@@ -442,7 +442,7 @@ export class SupabaseStorage implements IStorage {
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
     if (exercise.imageUrl !== undefined) dbUpdate.imageUrl = exercise.imageUrl;
     if (exercise.videoUrl !== undefined) dbUpdate.videoUrl = exercise.videoUrl;
-    if (exercise.user_id !== undefined) dbUpdate.user_id = exercise.user_id;
+    if ((exercise as any).user_id !== undefined) dbUpdate.user_id = (exercise as any).user_id;
 
     let query = supabase
       .from('exercises')
