@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3, Target, Heart, ArrowUp, Zap, Layers, Activity, Timer, Flame, MapPin } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Dumbbell, Check, Clock, TrendingUp, Calendar, ChevronDown, ChevronUp, BarChart3, Target, Heart, ArrowUp, Zap, Layers } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -75,12 +75,6 @@ const getMuscleGroupInfo = (muscleGroup: string) => {
       textColor: "text-orange-700 dark:text-orange-400", 
       borderColor: "border-orange-300/50 dark:border-orange-500/30" 
     },
-    "Cardio": { 
-      icon: Activity, 
-      bgColor: "bg-red-100/80 dark:bg-red-500/20", 
-      textColor: "text-red-700 dark:text-red-400", 
-      borderColor: "border-red-300/50 dark:border-red-500/30" 
-    }
   };
 
   return groups[muscleGroup] || { 
@@ -559,44 +553,16 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                   {/* Stats Section */}
                   <div className="px-4 pb-4">
                     <div className="bg-blue-100/50 dark:bg-slate-800/30 rounded-xl p-3 space-y-3 border border-blue-200/40 dark:border-slate-700/30">
-                      {exercise.muscleGroup === "Cardio" ? (
-                        <>
-                          {/* Duration for Cardio */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Timer className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                              <span className="text-xs text-muted-foreground">Duração</span>
-                            </div>
-                            <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
-                              0min
-                            </span>
-                          </div>
-                          
-                          {/* Distance for Cardio */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <MapPin className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                              <span className="text-xs text-muted-foreground">Distância</span>
-                            </div>
-                            <span className="text-sm font-bold text-blue-500 dark:text-blue-400">
-                              0km
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {/* Max Weight for Strength */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                              <span className="text-xs text-muted-foreground">Peso máx.</span>
-                            </div>
-                            <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
-                              {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
-                            </span>
-                          </div>
-                        </>
-                      )}
+                      {/* Max Weight for Strength */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                          <span className="text-xs text-muted-foreground">Peso máx.</span>
+                        </div>
+                        <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
+                          {exercise.maxWeight > 0 ? `${exercise.maxWeight}kg` : "0kg"}
+                        </span>
+                      </div>
 
                       {/* Last Workout */}
                       <div className="flex items-center justify-between">
@@ -660,13 +626,9 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center space-x-2">
-                              {exercise.muscleGroup === "Cardio" ? (
-                                <Timer className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
-                              ) : (
-                                <BarChart3 className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
-                              )}
+                              <BarChart3 className="w-4 h-4 text-blue-500 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
                               <span className="text-sm font-medium text-foreground">
-                                {exercise.muscleGroup === "Cardio" ? "Histórico de Tempo" : "Histórico de Peso"}
+                                Histórico de Peso
                               </span>
                             </div>
                             {expandedExercise === exercise.id ? (
@@ -744,14 +706,10 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                           ) : (
                             <div className="text-center py-6">
                               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
-                                {exercise.muscleGroup === "Cardio" ? (
-                                  <Timer className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-                                ) : (
-                                  <BarChart3 className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-                                )}
+                                <BarChart3 className="w-6 h-6 text-blue-500 dark:text-blue-400" />
                               </div>
                               <p className="text-sm font-medium text-muted-foreground mb-1">
-                                {exercise.muscleGroup === "Cardio" ? "Nenhum histórico de tempo" : "Nenhum histórico de peso"}
+                                Nenhum histórico de peso
                               </p>
                               <p className="text-xs text-muted-foreground/80">Complete treinos para ver o progresso</p>
                             </div>
