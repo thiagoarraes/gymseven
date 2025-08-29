@@ -658,15 +658,11 @@ export default function Dashboard() {
           <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            {/* Header com ícone */}
-            <div className="flex items-center justify-center mb-4 relative z-10">
+            {/* Header com ícone e badge */}
+            <div className="flex items-center justify-between mb-4 relative z-10">
               <div className="p-3 bg-blue-500/15 rounded-2xl border border-blue-500/30">
                 <Trophy className="text-blue-400 w-6 h-6" />
               </div>
-            </div>
-            
-            {/* Badge categoria */}
-            <div className="flex justify-center mb-4">
               <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20 whitespace-nowrap">
                 🏆 Total
               </span>
@@ -689,15 +685,11 @@ export default function Dashboard() {
           <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            {/* Header com ícone */}
-            <div className="flex items-center justify-center mb-4 relative z-10">
+            {/* Header com ícone e badge */}
+            <div className="flex items-center justify-between mb-4 relative z-10">
               <div className="p-3 bg-purple-500/15 rounded-2xl border border-purple-500/30">
                 <Calendar className="text-purple-400 w-6 h-6" />
               </div>
-            </div>
-            
-            {/* Badge categoria */}
-            <div className="flex justify-center mb-4">
               <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-full border border-purple-500/20 whitespace-nowrap">
                 📅 Constância
               </span>
@@ -720,15 +712,11 @@ export default function Dashboard() {
           <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            {/* Header com ícone */}
-            <div className="flex items-center justify-center mb-4 relative z-10">
+            {/* Header com ícone e badge */}
+            <div className="flex items-center justify-between mb-4 relative z-10">
               <div className="p-3 bg-emerald-500/15 rounded-2xl border border-emerald-500/30">
                 <BarChart3 className="text-emerald-400 w-6 h-6" />
               </div>
-            </div>
-            
-            {/* Badge categoria */}
-            <div className="flex justify-center mb-4">
               <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 whitespace-nowrap">
                 💪 Volume
               </span>
@@ -753,15 +741,11 @@ export default function Dashboard() {
           <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-amber-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            {/* Header com ícone */}
-            <div className="flex items-center justify-center mb-4 relative z-10">
+            {/* Header com ícone e badge */}
+            <div className="flex items-center justify-between mb-4 relative z-10">
               <div className="p-3 bg-amber-500/15 rounded-2xl border border-amber-500/30">
                 <Clock className="text-amber-400 w-6 h-6" />
               </div>
-            </div>
-            
-            {/* Badge categoria */}
-            <div className="flex justify-center mb-4">
               <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 whitespace-nowrap">
                 ⏱️ Duração
               </span>
