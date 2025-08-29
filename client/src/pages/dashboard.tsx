@@ -660,21 +660,23 @@ export default function Dashboard() {
             
             {/* Content */}
             <div className="relative z-10 flex items-center justify-between">
-              {/* Left side - Icon + Info */}
-              <div className="flex items-center gap-6">
-                <div className="p-4 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-2xl border border-blue-500/30 shadow-lg">
-                  <Trophy className="text-blue-400 w-8 h-8" />
+              {/* Left side - Info */}
+              <div className="space-y-3">
+                {/* Icon + Badge na mesma linha */}
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-2xl border border-blue-500/30 shadow-lg">
+                    <Trophy className="text-blue-400 w-8 h-8" />
+                  </div>
+                  <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20">
+                    🏆 Total
+                  </span>
                 </div>
                 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20">
-                      🏆 Total
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground">Treinos concluídos</h3>
-                  <p className="text-sm text-muted-foreground">Seu progresso total de treinos finalizados</p>
-                </div>
+                {/* Título sozinho */}
+                <h3 className="text-lg font-semibold text-foreground">Treinos concluídos</h3>
+                
+                {/* Descrição sozinha */}
+                <p className="text-sm text-muted-foreground">Seu progresso total de treinos finalizados</p>
               </div>
               
               {/* Right side - Value */}
@@ -695,21 +697,23 @@ export default function Dashboard() {
             
             {/* Content */}
             <div className="relative z-10 flex items-center justify-between">
-              {/* Left side - Icon + Info */}
-              <div className="flex items-center gap-6">
-                <div className="p-4 bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-2xl border border-purple-500/30 shadow-lg">
-                  <Calendar className="text-purple-400 w-8 h-8" />
+              {/* Left side - Info */}
+              <div className="space-y-3">
+                {/* Icon + Badge na mesma linha */}
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-2xl border border-purple-500/30 shadow-lg">
+                    <Calendar className="text-purple-400 w-8 h-8" />
+                  </div>
+                  <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-full border border-purple-500/20">
+                    📅 Constância
+                  </span>
                 </div>
                 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-full border border-purple-500/20">
-                      📅 Constância
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground">Semanas consecutivas</h3>
-                  <p className="text-sm text-muted-foreground">Sua sequência atual de treinos semanais</p>
-                </div>
+                {/* Título sozinho */}
+                <h3 className="text-lg font-semibold text-foreground">Semanas consecutivas</h3>
+                
+                {/* Descrição sozinha */}
+                <p className="text-sm text-muted-foreground">Sua sequência atual de treinos semanais</p>
               </div>
               
               {/* Right side - Value */}
@@ -730,21 +734,23 @@ export default function Dashboard() {
             
             {/* Content */}
             <div className="relative z-10 flex items-center justify-between">
-              {/* Left side - Icon + Info */}
-              <div className="flex items-center gap-6">
-                <div className="p-4 bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 rounded-2xl border border-emerald-500/30 shadow-lg">
-                  <BarChart3 className="text-emerald-400 w-8 h-8" />
+              {/* Left side - Info */}
+              <div className="space-y-3">
+                {/* Icon + Badge na mesma linha */}
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 rounded-2xl border border-emerald-500/30 shadow-lg">
+                    <BarChart3 className="text-emerald-400 w-8 h-8" />
+                  </div>
+                  <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                    💪 Volume
+                  </span>
                 </div>
                 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
-                      💪 Volume
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground">Volume semanal</h3>
-                  <p className="text-sm text-muted-foreground">Total de peso levantado esta semana</p>
-                </div>
+                {/* Título sozinho */}
+                <h3 className="text-lg font-semibold text-foreground">Volume semanal</h3>
+                
+                {/* Descrição sozinha */}
+                <p className="text-sm text-muted-foreground">Total de peso levantado esta semana</p>
               </div>
               
               {/* Right side - Value */}
@@ -765,21 +771,23 @@ export default function Dashboard() {
             
             {/* Content */}
             <div className="relative z-10 flex items-center justify-between">
-              {/* Left side - Icon + Info */}
-              <div className="flex items-center gap-6">
-                <div className="p-4 bg-gradient-to-br from-amber-500/20 to-amber-600/10 rounded-2xl border border-amber-500/30 shadow-lg">
-                  <Clock className="text-amber-400 w-8 h-8" />
+              {/* Left side - Info */}
+              <div className="space-y-3">
+                {/* Icon + Badge na mesma linha */}
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-gradient-to-br from-amber-500/20 to-amber-600/10 rounded-2xl border border-amber-500/30 shadow-lg">
+                    <Clock className="text-amber-400 w-8 h-8" />
+                  </div>
+                  <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
+                    ⏱️ Duração
+                  </span>
                 </div>
                 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
-                      ⏱️ Duração
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground">Tempo médio</h3>
-                  <p className="text-sm text-muted-foreground">Duração média dos seus treinos</p>
-                </div>
+                {/* Título sozinho */}
+                <h3 className="text-lg font-semibold text-foreground">Tempo médio</h3>
+                
+                {/* Descrição sozinha */}
+                <p className="text-sm text-muted-foreground">Duração média dos seus treinos</p>
               </div>
               
               {/* Right side - Value */}
