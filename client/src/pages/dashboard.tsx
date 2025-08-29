@@ -676,12 +676,13 @@ export default function Dashboard() {
         <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
           <CardContent className="p-5 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
+            <div className="flex items-center justify-between mb-3 relative z-10 gap-1">
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
                 <Calendar className="text-purple-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 whitespace-nowrap flex-shrink-0">
-                📅 Constância
+              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 whitespace-nowrap min-w-0 overflow-visible">
+                <span className="block sm:hidden">📅</span>
+                <span className="hidden sm:block">📅 Constância</span>
               </span>
             </div>
             <div className="min-h-[60px] flex items-center">
