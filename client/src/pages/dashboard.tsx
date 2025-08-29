@@ -104,10 +104,10 @@ export default function Dashboard() {
   const { user } = useAuth();
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
-    queryKey: ["/api/workout-logs", Date.now()],
+    queryKey: ["/api/workout-logs"],
     queryFn: workoutLogApi.getAll,
-    staleTime: 0, // Always refetch
-    gcTime: 0, // Don't cache
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Get detailed workout data for modal
@@ -115,8 +115,8 @@ export default function Dashboard() {
     queryKey: ["/api/workout-logs", selectedWorkoutForDetails?.id, "details"],
     queryFn: () => workoutLogApi.getSummary(selectedWorkoutForDetails?.id),
     enabled: !!selectedWorkoutForDetails?.id,
-    staleTime: 0, // Always refetch
-    gcTime: 0, // Don't cache
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Calculate achievements progress based on workout data
