@@ -652,83 +652,130 @@ export default function Dashboard() {
       </div>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total de treinos */}
-        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative flex flex-col h-full">
+        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
-              <div className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20 flex-shrink-0">
-                <Trophy className="text-blue-400 w-5 h-5" />
+            
+            {/* Header com ícone */}
+            <div className="flex items-center justify-center mb-4 relative z-10">
+              <div className="p-3 bg-blue-500/15 rounded-2xl border border-blue-500/30">
+                <Trophy className="text-blue-400 w-6 h-6" />
               </div>
-              <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20 whitespace-nowrap flex-shrink-0">
+            </div>
+            
+            {/* Badge categoria */}
+            <div className="flex justify-center mb-4">
+              <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20 whitespace-nowrap">
                 🏆 Total
               </span>
             </div>
-            <div className="min-h-[60px] flex items-center">
-              <div className="text-3xl font-black text-foreground">{stats.totalWorkouts}</div>
+            
+            {/* Valor principal */}
+            <div className="flex items-center justify-center mb-2">
+              <div className="text-4xl font-black text-foreground">{stats.totalWorkouts}</div>
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Treinos concluídos</div>
+            
+            {/* Descrição */}
+            <div className="text-center text-sm text-muted-foreground font-medium mt-auto">
+              Treinos concluídos
+            </div>
           </CardContent>
         </Card>
 
         {/* Card 2: Semanas consecutivas */}
-        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative flex flex-col h-full">
+        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between mb-3 relative z-10 gap-1">
-              <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
-                <Calendar className="text-purple-400 w-5 h-5" />
+            
+            {/* Header com ícone */}
+            <div className="flex items-center justify-center mb-4 relative z-10">
+              <div className="p-3 bg-purple-500/15 rounded-2xl border border-purple-500/30">
+                <Calendar className="text-purple-400 w-6 h-6" />
               </div>
-              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 whitespace-nowrap min-w-0 overflow-visible">
-                <span className="block sm:hidden">📅</span>
-                <span className="hidden sm:block">📅 Constância</span>
+            </div>
+            
+            {/* Badge categoria */}
+            <div className="flex justify-center mb-4">
+              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1.5 rounded-full border border-purple-500/20 whitespace-nowrap">
+                📅 Constância
               </span>
             </div>
-            <div className="min-h-[60px] flex items-center">
-              <div className="text-3xl font-black text-foreground">{stats.consecutiveWeeks}</div>
+            
+            {/* Valor principal */}
+            <div className="flex items-center justify-center mb-2">
+              <div className="text-4xl font-black text-foreground">{stats.consecutiveWeeks}</div>
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Semanas consecutivas</div>
+            
+            {/* Descrição */}
+            <div className="text-center text-sm text-muted-foreground font-medium mt-auto">
+              Semanas consecutivas
+            </div>
           </CardContent>
         </Card>
 
         {/* Card 3: Volume Total */}
-        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative flex flex-col h-full">
+        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
-              <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex-shrink-0">
-                <BarChart3 className="text-emerald-400 w-5 h-5" />
+            
+            {/* Header com ícone */}
+            <div className="flex items-center justify-center mb-4 relative z-10">
+              <div className="p-3 bg-emerald-500/15 rounded-2xl border border-emerald-500/30">
+                <BarChart3 className="text-emerald-400 w-6 h-6" />
               </div>
-              <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+            </div>
+            
+            {/* Badge categoria */}
+            <div className="flex justify-center mb-4">
+              <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 whitespace-nowrap">
                 💪 Volume
               </span>
             </div>
-            <div className="min-h-[60px] flex items-center">
-              <div className="text-3xl font-black text-foreground">
+            
+            {/* Valor principal */}
+            <div className="flex items-center justify-center mb-2">
+              <div className="text-4xl font-black text-foreground">
                 {stats.formattedVolume || "0kg"}
               </div>
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Volume semanal</div>
+            
+            {/* Descrição */}
+            <div className="text-center text-sm text-muted-foreground font-medium mt-auto">
+              Volume semanal
+            </div>
           </CardContent>
         </Card>
         
         {/* Card 4: Tempo médio */}
-        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden">
-          <CardContent className="p-5 relative flex flex-col h-full">
+        <Card className="neo-card rounded-2xl hover-lift group cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6 relative flex flex-col h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-amber-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="flex items-center justify-between mb-3 relative z-10 gap-2">
-              <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20 flex-shrink-0">
-                <Clock className="text-amber-400 w-5 h-5" />
+            
+            {/* Header com ícone */}
+            <div className="flex items-center justify-center mb-4 relative z-10">
+              <div className="p-3 bg-amber-500/15 rounded-2xl border border-amber-500/30">
+                <Clock className="text-amber-400 w-6 h-6" />
               </div>
-              <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-2 py-1 rounded-full border border-amber-500/20 whitespace-nowrap flex-shrink-0">
+            </div>
+            
+            {/* Badge categoria */}
+            <div className="flex justify-center mb-4">
+              <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 whitespace-nowrap">
                 ⏱️ Duração
               </span>
             </div>
-            <div className="min-h-[60px] flex items-center">
-              <div className="text-3xl font-black text-foreground">{stats.avgDuration}</div>
+            
+            {/* Valor principal */}
+            <div className="flex items-center justify-center mb-2">
+              <div className="text-4xl font-black text-foreground">{stats.avgDuration}</div>
             </div>
-            <div className="text-sm text-muted-foreground font-medium whitespace-nowrap overflow-hidden text-ellipsis mt-auto">Tempo médio</div>
+            
+            {/* Descrição */}
+            <div className="text-center text-sm text-muted-foreground font-medium mt-auto">
+              Tempo médio
+            </div>
           </CardContent>
         </Card>
       </div>
