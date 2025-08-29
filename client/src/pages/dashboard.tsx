@@ -680,7 +680,7 @@ export default function Dashboard() {
               <div className="p-2 bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0">
                 <Calendar className="text-purple-400 w-5 h-5" />
               </div>
-              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 whitespace-nowrap flex-shrink-0">
+              <span className="text-xs text-purple-400 font-bold bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 whitespace-nowrap flex-shrink-0">
                 📅 Constância
               </span>
             </div>
