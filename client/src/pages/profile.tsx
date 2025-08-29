@@ -377,10 +377,10 @@ export default function Profile() {
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border border-slate-600/50 shadow-2xl rounded-xl backdrop-blur-sm" align="start">
-                            <div className="p-4">
+                          <PopoverContent className="w-auto p-0 bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border border-slate-600/50 shadow-2xl rounded-xl backdrop-blur-sm max-h-[420px] overflow-y-auto" align="center" side="bottom" sideOffset={8}>
+                            <div className="p-3">
                               {/* Header personalizado com seletores */}
-                              <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-700/50">
+                              <div className="flex justify-between items-center pb-3 mb-3 border-b border-slate-700/50">
                                 <button
                                   type="button"
                                   className="h-8 w-8 bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-600/60 border border-slate-600/30 rounded-lg transition-all duration-200 shadow-sm backdrop-blur-sm"
@@ -409,7 +409,7 @@ export default function Profile() {
                                           field.onChange(formatDateForInput(newDate));
                                         }
                                       }}
-                                      className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[120px]"
+                                      className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-2 py-1.5 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[100px] max-h-[200px] overflow-y-auto"
                                     >
                                       {Array.from({ length: 12 }, (_, i) => (
                                         <option key={i} value={i}>
@@ -431,7 +431,7 @@ export default function Profile() {
                                           field.onChange(formatDateForInput(newDate));
                                         }
                                       }}
-                                      className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-3 py-2 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[90px]"
+                                      className="bg-slate-700/80 border border-slate-600/50 text-white text-sm rounded-lg px-2 py-1.5 shadow-lg hover:bg-slate-600/80 transition-all duration-200 backdrop-blur-sm font-medium min-w-[80px] max-h-[200px] overflow-y-auto"
                                     >
                                       {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => (
                                         <option key={i} value={1900 + i}>
@@ -504,13 +504,9 @@ export default function Profile() {
                               />
                               
                               {/* Footer with additional info */}
-                              <div className="mt-4 pt-3 border-t border-slate-700/50">
-                                <div className="flex items-center justify-between text-xs text-slate-400">
+                              <div className="mt-3 pt-2 border-t border-slate-700/50">
+                                <div className="flex items-center justify-center text-xs text-slate-400">
                                   <span>Selecione sua data de nascimento</span>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    <span>Hoje</span>
-                                  </div>
                                 </div>
                               </div>
                             </div>
