@@ -515,16 +515,35 @@ export default function Profile() {
                         <FormMessage />
                         {user?.dateOfBirth && (
                           <p className="text-xs text-blue-400 mt-1 flex items-center gap-1">
-                            <span>🎂</span>
                             {(() => {
-                              const today = new Date();
                               const birthDate = new Date(user.dateOfBirth);
-                              let age = today.getFullYear() - birthDate.getFullYear();
-                              const monthDiff = today.getMonth() - birthDate.getMonth();
-                              if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                                age--;
-                              }
-                              return `${age} anos de experiência de vida!`;
+                              const month = birthDate.getMonth() + 1;
+                              const day = birthDate.getDate();
+                              
+                              // Função para calcular o signo
+                              const getZodiacSign = (month: number, day: number) => {
+                                if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return { sign: 'Áries', emoji: '♈', message: 'Sua determinação move montanhas nos treinos!' };
+                                if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return { sign: 'Touro', emoji: '♉', message: 'Sua persistência constrói músculos de aço!' };
+                                if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return { sign: 'Gêmeos', emoji: '♊', message: 'Sua versatilidade domina qualquer exercício!' };
+                                if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return { sign: 'Câncer', emoji: '♋', message: 'Sua dedicação alimenta força interior!' };
+                                if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return { sign: 'Leão', emoji: '♌', message: 'Sua coragem brilha em cada repetição!' };
+                                if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return { sign: 'Virgem', emoji: '♍', message: 'Sua disciplina esculpe o corpo perfeito!' };
+                                if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return { sign: 'Libra', emoji: '♎', message: 'Seu equilíbrio harmoniza mente e corpo!' };
+                                if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return { sign: 'Escorpião', emoji: '♏', message: 'Sua intensidade quebra todos os limites!' };
+                                if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return { sign: 'Sagitário', emoji: '♐', message: 'Sua energia mira sempre mais alto!' };
+                                if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return { sign: 'Capricórnio', emoji: '♑', message: 'Sua ambição conquista cada meta!' };
+                                if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return { sign: 'Aquário', emoji: '♒', message: 'Sua originalidade inova os treinos!' };
+                                if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return { sign: 'Peixes', emoji: '♓', message: 'Sua intuição guia cada movimento!' };
+                                return { sign: 'Signo', emoji: '⭐', message: 'Energia positiva nos treinos!' };
+                              };
+                              
+                              const zodiac = getZodiacSign(month, day);
+                              return (
+                                <>
+                                  <span>{zodiac.emoji}</span>
+                                  <span>{zodiac.sign}: {zodiac.message}</span>
+                                </>
+                              );
                             })()}
                           </p>
                         )}
