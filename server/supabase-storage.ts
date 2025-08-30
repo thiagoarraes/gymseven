@@ -411,61 +411,30 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
-    console.log('🏋️ Creating exercise with direct SQL approach...');
+    console.log('🏋️ Creating exercise with direct Supabase insert...');
     
-    // Use direct SQL query to completely bypass PostgREST cache issues
-    const { data, error } = await supabase.rpc('create_exercise', {
-      exercise_name: exercise.name,
-      exercise_muscle_group: exercise.muscleGroup,
-      exercise_user_id: userId,
-      exercise_description: exercise.description || null,
-      exercise_image_url: exercise.imageUrl || null,
-      exercise_video_url: exercise.videoUrl || null
-    });
+    // Map properties correctly for Supabase - use snake_case for database
+    const dbExercise = {
+      name: exercise.name,
+      muscle_group: exercise.muscleGroup, // Map to snake_case
+      user_id: userId,
+      description: exercise.description || null,
+      image_url: exercise.imageUrl || null, // Map to snake_case
+      video_url: exercise.videoUrl || null  // Map to snake_case
+    };
+
+    const { data, error } = await supabase
+      .from('exercises')
+      .insert(dbExercise)
+      .select()
+      .single();
 
     if (error) {
-      console.error('❌ RPC create_exercise failed:', error);
-      
-      // Fallback: Try raw SQL execution
-      try {
-        console.log('🔄 Trying raw SQL insert...');
-        const { data: sqlResult, error: sqlError } = await supabase.rpc('execute_sql', {
-          query: `
-            INSERT INTO exercises (name, muscle_group, user_id, description, image_url, video_url)
-            VALUES ('${exercise.name.replace(/'/g, "''")}', '${exercise.muscleGroup}', '${userId}', ${exercise.description ? "'" + exercise.description.replace(/'/g, "''") + "'" : 'NULL'}, ${exercise.imageUrl ? "'" + exercise.imageUrl + "'" : 'NULL'}, ${exercise.videoUrl ? "'" + exercise.videoUrl + "'" : 'NULL'})
-            RETURNING id, user_id, name, muscle_group, description, image_url, video_url, created_at;
-          `
-        });
-        
-        if (sqlError) {
-          console.error('❌ Raw SQL also failed:', sqlError);
-          throw sqlError;
-        }
-        
-        console.log('✅ Exercise created via raw SQL:', sqlResult);
-        return this.mapDbExerciseToExercise(sqlResult[0]);
-        
-      } catch (sqlError) {
-        console.error('❌ All SQL methods failed, creating mock response...');
-        
-        // Create a successful response manually as last resort
-        const newExercise = {
-          id: 'ex_' + Date.now(),
-          user_id: userId,
-          name: exercise.name,
-          muscle_group: exercise.muscleGroup,
-          description: exercise.description || null,
-          image_url: exercise.imageUrl || null,
-          video_url: exercise.videoUrl || null,
-          created_at: new Date().toISOString()
-        };
-        
-        console.log('✅ Created exercise response manually:', newExercise.id);
-        return this.mapDbExerciseToExercise(newExercise);
-      }
+      console.error('❌ Exercise creation failed:', error);
+      throw new Error(`Database error: ${error.message}`);
     }
 
-    console.log('✅ Exercise created via RPC:', data.id);
+    console.log('✅ Exercise created successfully:', data.id);
     return this.mapDbExerciseToExercise(data);
   }
 
