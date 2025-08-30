@@ -83,27 +83,19 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - Supabase preferred with improved cache handling
+// Storage initialization - Simple PostgreSQL for testing
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Prefer Supabase SDK (best for production) 
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK configuration');
-      console.log('✅ Supabase credentials detected');
-      const { SupabaseStorage } = await import('./supabase-storage');
-      return new SupabaseStorage();
-    }
-    
-    // Fallback to Replit's built-in PostgreSQL if Supabase not available
+    // Use simple PostgreSQL implementation for now (more reliable)
     if (process.env.DATABASE_URL) {
-      console.log('🚀 Using Replit PostgreSQL database as fallback');
+      console.log('🚀 Using Simple PostgreSQL storage');
       console.log('✅ DATABASE_URL detected');
-      const { PostgreSQLStorage } = await import('./postgresql-storage');
-      return new PostgreSQLStorage();
+      const { SimplePostgreSQLStorage } = await import('./simple-postgres-storage');
+      return new SimplePostgreSQLStorage();
     }
     
     // If no database is configured, throw error
-    throw new Error('❌ Database credentials required. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or DATABASE_URL');
+    throw new Error('❌ DATABASE_URL is required');
     
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);
