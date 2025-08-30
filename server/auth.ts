@@ -156,7 +156,7 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   const decoded = verifyToken(token);
   if (!decoded) {
     console.error('Token verification failed:', { token: token.substring(0, 20) + '...' });
-    return res.status(403).json({ message: 'Token inválido' });
+    return res.status(403).json({ message: 'Token inválido ou expirado - faça login novamente' });
   }
   
   try {
@@ -164,7 +164,7 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
     const user = await storage.getUser(decoded.userId);
     if (!user) {
       console.error('User not found in database:', decoded.userId);
-      return res.status(403).json({ message: 'Usuário não encontrado' });
+      return res.status(403).json({ message: 'Sessão expirada - faça login novamente' });
     }
     
     console.log('Authentication successful for user:', user.id);
