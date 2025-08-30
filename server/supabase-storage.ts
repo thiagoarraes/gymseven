@@ -54,7 +54,7 @@ export class SupabaseStorage implements IStorage {
       description: dbExercise.description,
       imageUrl: null, // Removed from database
       videoUrl: null, // Removed from database
-      createdAt: dbExercise.created_at
+      createdAt: dbExercise.createdAt || dbExercise.created_at // Try both naming conventions
     } as Exercise;
   }
 
@@ -394,9 +394,9 @@ export class SupabaseStorage implements IStorage {
 
     const { data, error } = await supabase
       .from('exercises')
-      .select('id, user_id, name, muscleGroup, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, createdAt')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (error) {
       console.error('❌ [SUPABASE] Error getting exercises:', error);
@@ -410,7 +410,7 @@ export class SupabaseStorage implements IStorage {
   async getExercise(id: string): Promise<Exercise | undefined> {
     const { data, error } = await supabase
       .from('exercises')
-      .select('id, user_id, name, muscleGroup, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, createdAt')
       .eq('id', id)
       .single();
 
@@ -434,7 +434,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .insert(dbExercise)
-      .select('id, user_id, name, muscleGroup, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, createdAt')
       .single();
 
     if (error) {
