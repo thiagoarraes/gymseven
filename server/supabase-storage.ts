@@ -50,7 +50,7 @@ export class SupabaseStorage implements IStorage {
       id: dbExercise.id,
       user_id: dbExercise.user_id,
       name: dbExercise.name,
-      muscleGroup: dbExercise.muscle_group, // Database uses snake_case
+      muscleGroup: dbExercise.muscleGroup || dbExercise.muscle_group, // Try both naming conventions
       description: dbExercise.description,
       imageUrl: null, // Removed from database
       videoUrl: null, // Removed from database
@@ -394,7 +394,7 @@ export class SupabaseStorage implements IStorage {
 
     const { data, error } = await supabase
       .from('exercises')
-      .select('id, user_id, name, muscle_group, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -410,7 +410,7 @@ export class SupabaseStorage implements IStorage {
   async getExercise(id: string): Promise<Exercise | undefined> {
     const { data, error } = await supabase
       .from('exercises')
-      .select('id, user_id, name, muscle_group, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, created_at')
       .eq('id', id)
       .single();
 
@@ -424,7 +424,7 @@ export class SupabaseStorage implements IStorage {
     // Only use fields that definitely exist in the database
     const dbExercise = {
       name: exercise.name,
-      muscle_group: exercise.muscleGroup,
+      muscleGroup: exercise.muscleGroup,
       user_id: userId,
       description: exercise.description || null
     };
@@ -434,7 +434,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await supabase
       .from('exercises')
       .insert(dbExercise)
-      .select('id, user_id, name, muscle_group, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, created_at')
       .single();
 
     if (error) {
