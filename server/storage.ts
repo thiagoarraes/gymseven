@@ -48,7 +48,7 @@ export interface IStorage {
   getAllExercises(): Promise<Exercise[]>;
   getExercises(userId?: string): Promise<Exercise[]>;
   getExercise(id: string): Promise<Exercise | undefined>;
-  createExercise(exercise: InsertExercise): Promise<Exercise>;
+  createExercise(exercise: InsertExercise, userId: string): Promise<Exercise>;
   updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined>;
   deleteExercise(id: string): Promise<boolean>;
   getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]>;

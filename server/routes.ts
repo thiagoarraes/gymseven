@@ -445,14 +445,11 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
       
-      const validatedData = insertExerciseSchema.parse({
-        ...req.body,
-        user_id: req.user.id // Ensure exercise belongs to authenticated user
-      });
+      const validatedData = insertExerciseSchema.parse(req.body);
       
       console.log('Validated exercise data:', validatedData);
       
-      const exercise = await storage.createExercise(validatedData);
+      const exercise = await storage.createExercise(validatedData, req.user.id);
       res.status(201).json(exercise);
     } catch (error: any) {
       if (error.name === 'ZodError') {

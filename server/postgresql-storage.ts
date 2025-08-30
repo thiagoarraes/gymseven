@@ -170,8 +170,11 @@ export class PostgreSQLStorage implements IStorage {
     return result[0];
   }
 
-  async createExercise(exercise: InsertExercise): Promise<Exercise> {
-    const result = await this.db.insert(exercises).values(exercise).returning();
+  async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
+    const result = await this.db.insert(exercises).values({
+      ...exercise,
+      user_id: userId
+    }).returning();
     return result[0];
   }
 

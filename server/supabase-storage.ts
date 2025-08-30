@@ -410,7 +410,7 @@ export class SupabaseStorage implements IStorage {
     return this.mapDbExerciseToExercise(data);
   }
 
-  async createExercise(exercise: InsertExercise): Promise<Exercise> {
+  async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
     // Map properties correctly for Supabase - use snake_case for database
     const dbExercise = {
       name: exercise.name,
@@ -418,7 +418,7 @@ export class SupabaseStorage implements IStorage {
       description: exercise.description,
       image_url: exercise.imageUrl,  // Map camelCase to snake_case
       video_url: exercise.videoUrl,  // Map camelCase to snake_case
-      user_id: (exercise as any).user_id
+      user_id: userId
     };
 
     console.log('Creating exercise in database:', dbExercise);
