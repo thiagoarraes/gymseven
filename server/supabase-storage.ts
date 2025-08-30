@@ -50,11 +50,11 @@ export class SupabaseStorage implements IStorage {
       id: dbExercise.id,
       user_id: dbExercise.user_id,
       name: dbExercise.name,
-      muscleGroup: dbExercise.muscleGroup || dbExercise.muscle_group,
+      muscleGroup: dbExercise.muscle_group, // Database uses snake_case
       description: dbExercise.description,
-      imageUrl: dbExercise.imageUrl || dbExercise.image_url || null,
-      videoUrl: dbExercise.videoUrl || dbExercise.video_url || null,
-      createdAt: dbExercise.created_at || dbExercise.createdAt
+      imageUrl: dbExercise.image_url || null, // Database uses snake_case
+      videoUrl: dbExercise.video_url || null, // Database uses snake_case
+      createdAt: dbExercise.created_at
     } as Exercise;
   }
 
@@ -411,15 +411,17 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise): Promise<Exercise> {
-    // Map properties correctly for Supabase - use camelCase for database
+    // Map properties correctly for Supabase - use snake_case for database
     const dbExercise = {
       name: exercise.name,
-      muscleGroup: exercise.muscleGroup,
+      muscle_group: exercise.muscleGroup, // Map camelCase to snake_case
       description: exercise.description,
-      imageUrl: exercise.imageUrl,
-      videoUrl: exercise.videoUrl,
+      image_url: exercise.imageUrl,  // Map camelCase to snake_case
+      video_url: exercise.videoUrl,  // Map camelCase to snake_case
       user_id: (exercise as any).user_id
     };
+
+    console.log('Creating exercise in database:', dbExercise);
 
     const { data, error } = await supabase
       .from('exercises')
@@ -435,13 +437,13 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
-    // Map properties correctly for Supabase - use camelCase for database
+    // Map properties correctly for Supabase - use snake_case for database
     const dbUpdate: any = {};
     if (exercise.name !== undefined) dbUpdate.name = exercise.name;
-    if (exercise.muscleGroup !== undefined) dbUpdate.muscleGroup = exercise.muscleGroup;
+    if (exercise.muscleGroup !== undefined) dbUpdate.muscle_group = exercise.muscleGroup; // Map to snake_case
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
-    if (exercise.imageUrl !== undefined) dbUpdate.imageUrl = exercise.imageUrl;
-    if (exercise.videoUrl !== undefined) dbUpdate.videoUrl = exercise.videoUrl;
+    if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl; // Map to snake_case
+    if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl; // Map to snake_case
     if ((exercise as any).user_id !== undefined) dbUpdate.user_id = (exercise as any).user_id;
 
     let query = supabase
