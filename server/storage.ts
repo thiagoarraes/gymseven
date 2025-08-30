@@ -83,27 +83,27 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - Supabase preferred, PostgreSQL as fallback
+// Storage initialization - Use PostgreSQL directly due to Supabase PostgREST cache issues
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Prefer Supabase if configured (better for production)
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK configuration');
-      console.log('✅ Supabase credentials detected');
-      const { SupabaseStorage } = await import('./supabase-storage');
-      return new SupabaseStorage();
-    }
-    
-    // Fallback to Replit's built-in PostgreSQL
+    // Use direct PostgreSQL connection to avoid PostgREST schema cache issues
     if (process.env.DATABASE_URL) {
-      console.log('🚀 Using Replit PostgreSQL database as fallback');
+      console.log('🚀 Using direct PostgreSQL connection (bypassing Supabase PostgREST cache issues)');
       console.log('✅ DATABASE_URL detected');
       const { PostgreSQLStorage } = await import('./postgresql-storage');
       return new PostgreSQLStorage();
     }
     
+    // Fallback to Supabase if PostgreSQL is not available
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('🚀 Using Supabase SDK configuration as fallback');
+      console.log('✅ Supabase credentials detected');
+      const { SupabaseStorage } = await import('./supabase-storage');
+      return new SupabaseStorage();
+    }
+    
     // If no database is configured, throw error
-    throw new Error('❌ Database credentials required. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or DATABASE_URL');
+    throw new Error('❌ Database credentials required. Please configure DATABASE_URL or SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
     
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);
