@@ -780,11 +780,11 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden glass-card border-slate-700">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[80vh] glass-card border-slate-700 flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white">Adicionar Exercícios</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
             <Exercises
               selectionMode={true}
               selectedExercises={selectedExercises}
