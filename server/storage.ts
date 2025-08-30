@@ -83,19 +83,19 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - Simple PostgreSQL for testing
+// Storage initialization - Supabase only
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Use simple PostgreSQL implementation for now (more reliable)
-    if (process.env.DATABASE_URL) {
-      console.log('🚀 Using Simple PostgreSQL storage');
-      console.log('✅ DATABASE_URL detected');
-      const { SimplePostgreSQLStorage } = await import('./simple-postgres-storage');
-      return new SimplePostgreSQLStorage();
+    // Use Supabase only as requested 
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('🚀 Using Supabase SDK configuration');
+      console.log('✅ Supabase credentials detected');
+      const { SupabaseStorage } = await import('./supabase-storage');
+      return new SupabaseStorage();
     }
     
-    // If no database is configured, throw error
-    throw new Error('❌ DATABASE_URL is required');
+    // If no Supabase is configured, throw error
+    throw new Error('❌ Supabase credentials required. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
     
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);

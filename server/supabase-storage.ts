@@ -52,8 +52,8 @@ export class SupabaseStorage implements IStorage {
       name: dbExercise.name,
       muscleGroup: dbExercise.muscle_group, // Database uses snake_case
       description: dbExercise.description,
-      imageUrl: dbExercise.image_url || null, // Database uses snake_case
-      videoUrl: dbExercise.video_url || null, // Database uses snake_case
+      imageUrl: null, // Removed from database
+      videoUrl: null, // Removed from database
       createdAt: dbExercise.created_at
     } as Exercise;
   }
@@ -390,19 +390,27 @@ export class SupabaseStorage implements IStorage {
   async getExercises(userId?: string): Promise<Exercise[]> {
     if (!userId) return [];
 
+    console.log('🔍 [SUPABASE] Getting exercises for user:', userId);
+
     const { data, error } = await supabase
       .from('exercises')
-      .select('*')
-      .eq('user_id', userId);
+      .select('id, user_id, name, muscle_group, description, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ [SUPABASE] Error getting exercises:', error);
+      throw error;
+    }
+
+    console.log(`🎯 [SUPABASE] Found ${data.length} exercises`);
     return data.map(item => this.mapDbExerciseToExercise(item));
   }
 
   async getExercise(id: string): Promise<Exercise | undefined> {
     const { data, error } = await supabase
       .from('exercises')
-      .select('*')
+      .select('id, user_id, name, muscle_group, description, created_at')
       .eq('id', id)
       .single();
 
@@ -411,34 +419,30 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
-    console.log('🏋️ Creating exercise with direct Supabase insert...');
+    console.log('🏋️ [SUPABASE] Creating exercise with simplified fields...');
     
-    // Start with only required fields to avoid cache issues
-    const dbExercise: any = {
+    // Only use fields that definitely exist in the database
+    const dbExercise = {
       name: exercise.name,
-      muscle_group: exercise.muscleGroup, // Map to snake_case
-      user_id: userId
+      muscle_group: exercise.muscleGroup,
+      user_id: userId,
+      description: exercise.description || null
     };
 
-    // Add optional fields only if they have values
-    if (exercise.description) {
-      dbExercise.description = exercise.description;
-    }
-
-    console.log('Inserting exercise with data:', dbExercise);
+    console.log('🎯 [SUPABASE] Inserting exercise:', dbExercise);
 
     const { data, error } = await supabase
       .from('exercises')
       .insert(dbExercise)
-      .select()
+      .select('id, user_id, name, muscle_group, description, created_at')
       .single();
 
     if (error) {
-      console.error('❌ Exercise creation failed:', error);
+      console.error('❌ [SUPABASE] Exercise creation failed:', error);
       throw new Error(`Database error: ${error.message}`);
     }
 
-    console.log('✅ Exercise created successfully:', data.id);
+    console.log('✅ [SUPABASE] Exercise created successfully:', data.id);
     return this.mapDbExerciseToExercise(data);
   }
 
