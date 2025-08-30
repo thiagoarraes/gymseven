@@ -83,27 +83,27 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - Use PostgreSQL directly due to Supabase PostgREST cache issues
+// Storage initialization - Supabase preferred with improved cache handling
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Use direct PostgreSQL connection to avoid PostgREST schema cache issues
-    if (process.env.DATABASE_URL) {
-      console.log('🚀 Using direct PostgreSQL connection (bypassing Supabase PostgREST cache issues)');
-      console.log('✅ DATABASE_URL detected');
-      const { PostgreSQLStorage } = await import('./postgresql-storage');
-      return new PostgreSQLStorage();
-    }
-    
-    // Fallback to Supabase if PostgreSQL is not available
+    // Prefer Supabase SDK (best for production) 
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK configuration as fallback');
+      console.log('🚀 Using Supabase SDK configuration');
       console.log('✅ Supabase credentials detected');
       const { SupabaseStorage } = await import('./supabase-storage');
       return new SupabaseStorage();
     }
     
+    // Fallback to Replit's built-in PostgreSQL if Supabase not available
+    if (process.env.DATABASE_URL) {
+      console.log('🚀 Using Replit PostgreSQL database as fallback');
+      console.log('✅ DATABASE_URL detected');
+      const { PostgreSQLStorage } = await import('./postgresql-storage');
+      return new PostgreSQLStorage();
+    }
+    
     // If no database is configured, throw error
-    throw new Error('❌ Database credentials required. Please configure DATABASE_URL or SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+    throw new Error('❌ Database credentials required. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or DATABASE_URL');
     
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);
@@ -111,5 +111,15 @@ export async function initializeStorage(): Promise<IStorage> {
   }
 }
 
+// Initialize storage instance
+let _storage: IStorage | undefined;
+
+export async function getStorage(): Promise<IStorage> {
+  if (!_storage) {
+    _storage = await initializeStorage();
+  }
+  return _storage;
+}
+
 // Export the storage instance for backward compatibility
-export const storage = await initializeStorage();
+export const storage = _storage || await initializeStorage();

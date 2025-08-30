@@ -82,9 +82,18 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.post("/api/auth/login", async (req, res) => {
     try {
+      console.log('🔐 Login attempt:', { email: req.body.email });
       const result = await loginUser(req.body);
+      console.log('✅ Login successful for user:', result.user.id);
       res.json(result);
     } catch (error: any) {
+      console.error('❌ Login error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        requestBody: { email: req.body.email }
+      });
+      
       if (error.message.includes('incorretos')) {
         res.status(401).json({ message: error.message });
       } else if (error.name === 'ZodError') {
