@@ -868,13 +868,13 @@ export default function Dashboard() {
       <Card className="glass-card rounded-2xl hover-lift">
         <CardContent className="p-6">
           <div className="mb-6 space-y-4">
-            <div className="space-y-1">
+            <div className="text-center space-y-1">
               <h3 className="text-lg font-semibold text-foreground">Progresso de Peso</h3>
               <p className="text-sm text-muted-foreground">Sua evolução ao longo do tempo</p>
             </div>
-            <div className="flex justify-end">
+            <div className="w-full">
               <Select value={selectedExerciseId || "all"} onValueChange={setSelectedExerciseId}>
-                <SelectTrigger className="w-48 h-10">
+                <SelectTrigger className="w-full h-10">
                   <SelectValue placeholder="Selecione um exercício" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
