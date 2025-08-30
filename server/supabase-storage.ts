@@ -413,15 +413,19 @@ export class SupabaseStorage implements IStorage {
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
     console.log('🏋️ Creating exercise with direct Supabase insert...');
     
-    // Map properties correctly for Supabase - use snake_case for database
-    const dbExercise = {
+    // Start with only required fields to avoid cache issues
+    const dbExercise: any = {
       name: exercise.name,
       muscle_group: exercise.muscleGroup, // Map to snake_case
-      user_id: userId,
-      description: exercise.description || null,
-      image_url: exercise.imageUrl || null, // Map to snake_case
-      video_url: exercise.videoUrl || null  // Map to snake_case
+      user_id: userId
     };
+
+    // Add optional fields only if they have values
+    if (exercise.description) {
+      dbExercise.description = exercise.description;
+    }
+
+    console.log('Inserting exercise with data:', dbExercise);
 
     const { data, error } = await supabase
       .from('exercises')
