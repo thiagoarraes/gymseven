@@ -83,10 +83,18 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - Supabase only (as per project requirements)
+// Storage initialization - PostgreSQL with fallback to Supabase
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Supabase is mandatory - no fallback options
+    // Check if we have DATABASE_URL (Replit's built-in PostgreSQL)
+    if (process.env.DATABASE_URL) {
+      console.log('🚀 Using Replit PostgreSQL database');
+      console.log('✅ DATABASE_URL detected');
+      const { PostgreSQLStorage } = await import('./postgresql-storage');
+      return new PostgreSQLStorage();
+    }
+    
+    // Fallback to Supabase if configured
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.log('🚀 Using Supabase SDK configuration');
       console.log('✅ Supabase credentials detected');
@@ -94,12 +102,12 @@ export async function initializeStorage(): Promise<IStorage> {
       return new SupabaseStorage();
     }
     
-    // If Supabase credentials are missing, throw error
-    throw new Error('❌ Supabase credentials required. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+    // If no database is configured, throw error
+    throw new Error('❌ Database credentials required. Please configure DATABASE_URL or SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
     
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);
-    throw error; // Don't fallback - Supabase is mandatory
+    throw error;
   }
 }
 
