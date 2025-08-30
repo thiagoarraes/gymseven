@@ -155,18 +155,23 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   
   const decoded = verifyToken(token);
   if (!decoded) {
+    console.error('Token verification failed:', { token: token.substring(0, 20) + '...' });
     return res.status(403).json({ message: 'Token inválido' });
   }
   
   try {
+    console.log('Looking for user with ID:', decoded.userId);
     const user = await storage.getUser(decoded.userId);
     if (!user) {
+      console.error('User not found in database:', decoded.userId);
       return res.status(403).json({ message: 'Usuário não encontrado' });
     }
     
+    console.log('Authentication successful for user:', user.id);
     req.user = user;
     next();
   } catch (error) {
+    console.error('Error in authenticateToken:', error);
     return res.status(500).json({ message: 'Erro interno do servidor' });
   }
 }

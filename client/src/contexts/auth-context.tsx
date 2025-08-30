@@ -54,15 +54,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+        console.log('User authenticated successfully:', data.user.username);
       } else {
-        // Token is invalid, remove it
+        // Token is invalid, remove it and clear all auth data
+        console.warn('Invalid token detected, clearing authentication');
         localStorage.removeItem('auth-token');
         setToken(null);
+        setUser(null);
       }
     } catch (error) {
       console.error('Error fetching user:', error);
       localStorage.removeItem('auth-token');
       setToken(null);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -125,9 +129,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
+    console.log('Logging out user');
     setUser(null);
     setToken(null);
     localStorage.removeItem('auth-token');
+    // Clear any cached query data
+    window.location.reload();
   };
 
   const updateProfile = async (updates: Partial<User>) => {

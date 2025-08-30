@@ -433,10 +433,25 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.post("/api/exercicios", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      // Debug logging
+      console.log('Exercise creation request:', {
+        body: req.body,
+        userId: req.user?.id,
+        userExists: !!req.user
+      });
+      
+      if (!req.user || !req.user.id) {
+        console.error('No authenticated user found');
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      
       const validatedData = insertExerciseSchema.parse({
         ...req.body,
-        user_id: req.user!.id // Ensure exercise belongs to authenticated user
+        user_id: req.user.id // Ensure exercise belongs to authenticated user
       });
+      
+      console.log('Validated exercise data:', validatedData);
+      
       const exercise = await storage.createExercise(validatedData);
       res.status(201).json(exercise);
     } catch (error: any) {
