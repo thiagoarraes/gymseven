@@ -514,8 +514,18 @@ export default function Profile() {
                         </Popover>
                         <FormMessage />
                         {user?.dateOfBirth && (
-                          <p className="text-xs text-slate-400 mt-1">
-                            Atual: {formatDateForDisplay(user.dateOfBirth)}
+                          <p className="text-xs text-blue-400 mt-1 flex items-center gap-1">
+                            <span>🎂</span>
+                            {(() => {
+                              const today = new Date();
+                              const birthDate = new Date(user.dateOfBirth);
+                              let age = today.getFullYear() - birthDate.getFullYear();
+                              const monthDiff = today.getMonth() - birthDate.getMonth();
+                              if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                                age--;
+                              }
+                              return `${age} anos de experiência de vida!`;
+                            })()}
                           </p>
                         )}
                       </FormItem>
