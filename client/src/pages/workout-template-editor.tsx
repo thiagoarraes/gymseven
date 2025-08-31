@@ -544,6 +544,14 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
         </div>
       </div>
 
+      {/* Debug Info */}
+      <div className="mobile-container mobile-spacing mb-4 bg-red-900/20 p-4 rounded">
+        <p className="text-red-300 text-sm">
+          DEBUG: reorderedExercises.length = {reorderedExercises.length} | 
+          templateExercises.length = {templateExercises.length}
+        </p>
+      </div>
+
       {/* Template Exercises */}
       <div className="mobile-container mobile-spacing">
         {exercisesLoading ? (
@@ -1004,6 +1012,23 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
               </Button>
             </div>
           </>
+        )}
+
+        {/* Reorder Button - Always visible when exercises exist */}
+        {(reorderedExercises.length > 0 || templateExercises.length > 0) && (
+          <div className="mt-6">
+            <Card className="glass-card rounded-xl border-dashed border-purple-600/50 hover:border-purple-500/50 transition-all duration-200 hover:bg-purple-800/20 cursor-pointer"
+                  onClick={openReorderModal}>
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-purple-400 transition-colors">
+                  <ArrowUpDown className="w-5 h-5" />
+                  <span className="font-medium">
+                    Reordenar exercícios ({reorderedExercises.length || templateExercises.length})
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
 
