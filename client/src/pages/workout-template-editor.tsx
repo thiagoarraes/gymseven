@@ -967,13 +967,15 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
             {/* Action Buttons */}
             <div className="space-y-4">
               {/* Reorder Exercises Button */}
-              {reorderedExercises.length > 1 && (
+              {reorderedExercises.length > 0 && (
                 <Card className="glass-card rounded-xl border-dashed border-purple-600/50 hover:border-purple-500/50 transition-all duration-200 hover:bg-purple-800/20 cursor-pointer"
                       onClick={openReorderModal}>
                   <CardContent className="p-6 text-center">
                     <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-purple-400 transition-colors">
                       <ArrowUpDown className="w-5 h-5" />
-                      <span className="font-medium">Reordenar exercícios</span>
+                      <span className="font-medium">
+                        Reordenar exercícios ({reorderedExercises.length})
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
