@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
+import { showSuccess } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { loginSchema, type LoginUser } from '@shared/schema';
 
@@ -17,7 +17,6 @@ export default function Login() {
   const [isVisible, setIsVisible] = useState(false);
   const [loginError, setLoginError] = useState<string>('');
   const { login } = useAuth();
-  const { toast } = useToast();
   const [, setLocation] = useLocation();
 
   const form = useForm<LoginUser>({
@@ -47,10 +46,7 @@ export default function Login() {
     setLoginError(''); // Clear any previous errors
     try {
       await login(data.email, data.password);
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo de volta ao GymSeven",
-      });
+      showSuccess("Login realizado com sucesso!", "Bem-vindo de volta ao GymSeven");
       setLocation('/');
     } catch (error: any) {
       // Set custom error instead of toast

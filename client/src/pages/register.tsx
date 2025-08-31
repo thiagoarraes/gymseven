@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
+import { showSuccess, showError } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
 import { registerSchema, type RegisterUser } from '@shared/schema';
 
@@ -16,7 +16,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const { register } = useAuth();
-  const { toast } = useToast();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -38,17 +37,10 @@ export default function Register() {
     setLoading(true);
     try {
       await register(data);
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Bem-vindo ao GymSeven! Sua jornada fitness começa agora.",
-      });
+      showSuccess("Conta criada com sucesso!", "Bem-vindo ao GymSeven! Sua jornada fitness começa agora.");
       setLocation('/');
     } catch (error: any) {
-      toast({
-        title: "Erro ao criar conta",
-        description: error.message || "Tente novamente",
-        variant: "destructive",
-      });
+      showError("Erro ao criar conta", error.message || "Tente novamente");
     } finally {
       setLoading(false);
     }

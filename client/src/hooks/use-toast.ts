@@ -5,8 +5,8 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 3
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -188,4 +188,37 @@ function useToast() {
   }
 }
 
-export { useToast, toast }
+// Helper functions for different toast variants
+const showSuccess = (title: string, description?: string) => {
+  return toast({
+    title,
+    description,
+    variant: "success" as any,
+  })
+}
+
+const showError = (title: string, description?: string) => {
+  return toast({
+    title,
+    description,
+    variant: "destructive",
+  })
+}
+
+const showWarning = (title: string, description?: string) => {
+  return toast({
+    title,
+    description,
+    variant: "warning" as any,
+  })
+}
+
+const showInfo = (title: string, description?: string) => {
+  return toast({
+    title,
+    description,
+    variant: "default",
+  })
+}
+
+export { useToast, toast, showSuccess, showError, showWarning, showInfo }
