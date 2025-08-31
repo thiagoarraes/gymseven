@@ -1153,7 +1153,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       // Get workout log exercises using Supabase directly to get correct structure
       const supabaseStorage = storage as any; // Cast to access supabase property
       const { data: logExercises, error: exercisesError } = await supabaseStorage.supabase
-        .from('workoutLogExercises')
+        .from('workout_log_exercises')
         .select('*')
         .eq('logId', req.params.id);
 
@@ -1173,7 +1173,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
           // Get sets for this exercise
           const { data: sets, error: setsError } = await supabaseStorage.supabase
-            .from('workoutLogSets')
+            .from('workout_log_sets')
             .select('*')
             .eq('logExerciseId', logExercise.id)
             .order('setNumber');
@@ -1231,7 +1231,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       // If no log exercises found OR no actual sets were performed, use template data
       if ((exercises.length === 0 || !hasActualSets) && log.templateId) {
         const { data: templateExercises } = await supabaseStorage.supabase
-          .from('workoutTemplateExercises')
+          .from('workout_template_exercises')
           .select(`
             *,
             exercise:exercises(*)
