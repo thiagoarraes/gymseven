@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical, Check, CheckCircle2, Menu, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical, Check, CheckCircle2, Menu, ChevronUp, ChevronDown, Search, Heart, Target, Layers, Zap, TrendingUp, Calendar, ArrowUp } from "lucide-react";
 import { motion, Reorder, useDragControls } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,160 @@ import { workoutTemplateApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import Exercises from "./exercises";
+
+// Quick Exercise Selector Component
+interface QuickExerciseSelectorProps {
+  onExerciseAdd: (exerciseId: string) => void;
+  excludeExercises: string[];
+}
+
+function QuickExerciseSelector({ onExerciseAdd, excludeExercises }: QuickExerciseSelectorProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("Todos");
+
+  const { data: exercises = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/exercicios"],
+  });
+
+  const getMuscleGroupInfo = (muscleGroup: string) => {
+    const groups: Record<string, { icon: any; bgColor: string; textColor: string; borderColor: string }> = {
+      "Peito": { 
+        icon: Heart, 
+        bgColor: "bg-rose-100/80 dark:bg-rose-500/20", 
+        textColor: "text-rose-700 dark:text-rose-400", 
+        borderColor: "border-rose-300/50 dark:border-rose-500/30" 
+      },
+      "Costas": { 
+        icon: ArrowUp, 
+        bgColor: "bg-blue-100/80 dark:bg-blue-500/20", 
+        textColor: "text-blue-700 dark:text-blue-400", 
+        borderColor: "border-blue-300/50 dark:border-blue-500/30" 
+      },
+      "Ombros": { 
+        icon: Layers, 
+        bgColor: "bg-amber-100/80 dark:bg-amber-500/20", 
+        textColor: "text-amber-700 dark:text-amber-400", 
+        borderColor: "border-amber-300/50 dark:border-amber-500/30" 
+      },
+      "Bíceps": { 
+        icon: Zap, 
+        bgColor: "bg-purple-100/80 dark:bg-purple-500/20", 
+        textColor: "text-purple-700 dark:text-purple-400", 
+        borderColor: "border-purple-300/50 dark:border-purple-500/30" 
+      },
+      "Tríceps": { 
+        icon: TrendingUp, 
+        bgColor: "bg-indigo-100/80 dark:bg-indigo-500/20", 
+        textColor: "text-indigo-700 dark:text-indigo-400", 
+        borderColor: "border-indigo-300/50 dark:border-indigo-500/30" 
+      },
+      "Pernas": { 
+        icon: Target, 
+        bgColor: "bg-emerald-100/80 dark:bg-emerald-500/20", 
+        textColor: "text-emerald-700 dark:text-emerald-400", 
+        borderColor: "border-emerald-300/50 dark:border-emerald-500/30" 
+      },
+      "Abdômen": { 
+        icon: Calendar, 
+        bgColor: "bg-orange-100/80 dark:bg-orange-500/20", 
+        textColor: "text-orange-700 dark:text-orange-400", 
+        borderColor: "border-orange-300/50 dark:border-orange-500/30" 
+      },
+    };
+
+    return groups[muscleGroup] || { 
+      icon: Dumbbell, 
+      bgColor: "bg-gray-100/80 dark:bg-gray-500/20", 
+      textColor: "text-gray-700 dark:text-gray-400", 
+      borderColor: "border-gray-300/50 dark:border-gray-500/30" 
+    };
+  };
+
+  const filteredExercises = exercises.filter((exercise: any) => {
+    const matchesSearch = exercise.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.muscleGroup === selectedMuscleGroup;
+    const notExcluded = !excludeExercises.includes(exercise.id);
+    return matchesSearch && matchesMuscleGroup && notExcluded;
+  });
+
+  const muscleGroups = ["Todos", ...Array.from(new Set(exercises.map((ex: any) => ex.muscleGroup).filter(Boolean)))];
+
+  if (isLoading) {
+    return <div className="text-center py-8 text-slate-400">Carregando exercícios...</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Search and Filter */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            placeholder="Buscar exercícios..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-slate-800/50 border-slate-600/50 text-white"
+          />
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {muscleGroups.map((group) => (
+            <Button
+              key={group}
+              size="sm"
+              variant={selectedMuscleGroup === group ? "default" : "outline"}
+              onClick={() => setSelectedMuscleGroup(group as string)}
+              className={selectedMuscleGroup === group 
+                ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                : "border-slate-600 text-slate-300 hover:bg-slate-700"
+              }
+            >
+              {group as string}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Exercise Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+        {filteredExercises.map((exercise: any) => {
+          const info = getMuscleGroupInfo(exercise.muscleGroup);
+          const IconComponent = info.icon;
+          
+          return (
+            <Card
+              key={exercise.id}
+              className="cursor-pointer hover:bg-slate-700/50 transition-all duration-200 border-slate-600/50 bg-slate-800/30"
+              onClick={() => onExerciseAdd(exercise.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${info.bgColor} ${info.borderColor} border`}>
+                    <IconComponent className={`w-5 h-5 ${info.textColor}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white truncate">{exercise.name}</h3>
+                    <p className="text-sm text-slate-400">{exercise.muscleGroup}</p>
+                  </div>
+                  <Plus className="w-5 h-5 text-green-400 flex-shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {filteredExercises.length === 0 && (
+        <div className="text-center py-8 text-slate-400">
+          {excludeExercises.length > 0 && searchTerm === "" && selectedMuscleGroup === "Todos"
+            ? "Todos os exercícios já foram adicionados ao treino!"
+            : "Nenhum exercício encontrado."
+          }
+        </div>
+      )}
+    </div>
+  );
+}
 
 const exerciseFormSchema = z.object({
   sets: z.number().min(1, "Pelo menos 1 série"),
@@ -783,36 +937,35 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
         )}
       </div>
 
-      {/* Exercise Selector Dialog */}
+      {/* Exercise Selector Dialog - Simplified */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
-        <DialogContent className="max-w-4xl max-h-[80vh] glass-card border-slate-700 flex flex-col">
+        <DialogContent className="max-w-3xl max-h-[85vh] glass-card border-slate-700 flex flex-col">
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-white">Adicionar Exercícios</DialogTitle>
+            <DialogTitle className="text-white text-xl font-bold">Escolher Exercícios</DialogTitle>
+            <p className="text-slate-400 text-sm">Clique nos exercícios para adicionar ao treino (mais rápido!)</p>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">
-            <Exercises
-              selectionMode={true}
-              selectedExercises={selectedExercises}
-              onExerciseSelect={handleExerciseSelect}
+            <QuickExerciseSelector
+              onExerciseAdd={(exerciseId) => {
+                const exerciseData = {
+                  exerciseId,
+                  sets: 3,
+                  reps: "8-12",
+                  weight: null,
+                  order: reorderedExercises.length + 1,
+                };
+                addExerciseMutation.mutate(exerciseData);
+              }}
+              excludeExercises={reorderedExercises.map(ex => ex.exerciseId)}
             />
           </div>
-          <div className="flex justify-between pt-4 border-t border-slate-700">
+          <div className="flex justify-center pt-4 border-t border-slate-700">
             <Button
               variant="outline"
-              onClick={() => {
-                setSelectedExercises([]);
-                setShowExerciseSelector(false);
-              }}
+              onClick={() => setShowExerciseSelector(false)}
               className="border-slate-700 text-slate-300"
             >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleAddSelectedExercises}
-              disabled={selectedExercises.length === 0 || addExerciseMutation.isPending}
-              className="gradient-accent"
-            >
-              Adicionar {selectedExercises.length > 0 && `(${selectedExercises.length})`}
+              Fechar
             </Button>
           </div>
         </DialogContent>
