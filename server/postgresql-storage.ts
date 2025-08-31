@@ -60,7 +60,12 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    const result = await this.db.update(users).set(updates).where(eq(users.id, id)).returning();
+    // Convert dateOfBirth string to Date if present
+    const processedUpdates = { ...updates };
+    if (processedUpdates.dateOfBirth && typeof processedUpdates.dateOfBirth === 'string') {
+      processedUpdates.dateOfBirth = new Date(processedUpdates.dateOfBirth);
+    }
+    const result = await this.db.update(users).set(processedUpdates).where(eq(users.id, id)).returning();
     return result[0];
   }
 
@@ -179,11 +184,11 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
-    let query = this.db.update(exercises).set(exercise).where(eq(exercises.id, id));
+    let whereCondition = eq(exercises.id, id);
     if (userId) {
-      query = query.where(eq(exercises.user_id, userId)) as any;
+      whereCondition = and(whereCondition, eq(exercises.user_id, userId));
     }
-    const result = await query.returning();
+    const result = await this.db.update(exercises).set(exercise).where(whereCondition).returning();
     return result[0];
   }
 
@@ -193,11 +198,11 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]> {
-    let query = this.db.select().from(exercises).where(eq(exercises.muscleGroup, muscleGroup));
+    let whereCondition = eq(exercises.muscleGroup, muscleGroup);
     if (userId) {
-      query = query.where(eq(exercises.user_id, userId)) as any;
+      whereCondition = and(whereCondition, eq(exercises.user_id, userId));
     }
-    return await query;
+    return await this.db.select().from(exercises).where(whereCondition);
   }
 
   // Workout Templates
@@ -228,11 +233,11 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
-    let query = this.db.delete(workoutTemplates).where(eq(workoutTemplates.id, id));
+    let whereCondition = eq(workoutTemplates.id, id);
     if (userId) {
-      query = query.where(eq(workoutTemplates.user_id, userId)) as any;
+      whereCondition = and(whereCondition, eq(workoutTemplates.user_id, userId));
     }
-    const result = await query;
+    const result = await this.db.delete(workoutTemplates).where(whereCondition);
     return result.rowCount !== null && result.rowCount > 0;
   }
 
