@@ -13,14 +13,14 @@ import {
   workoutLogs, workoutLogExercises, workoutLogSets,
   weightHistory, userGoals, userPreferences, userAchievements
 } from "@shared/schema";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { eq, desc, and } from "drizzle-orm";
 import type { IStorage } from './storage';
 
 export class PostgreSQLStorage implements IStorage {
   private db: ReturnType<typeof drizzle>;
-  private sql: ReturnType<typeof neon>;
+  private pool: Pool;
   
   constructor() {
     if (!process.env.DATABASE_URL) {
@@ -29,11 +29,11 @@ export class PostgreSQLStorage implements IStorage {
     
     console.log('🚀 Initializing PostgreSQL storage...');
     
-    // Create neon client
-    this.sql = neon(process.env.DATABASE_URL);
+    // Create PostgreSQL pool
+    this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
     
     // Create drizzle instance
-    this.db = drizzle(this.sql);
+    this.db = drizzle({ client: this.pool });
     
     console.log('✅ PostgreSQL storage initialized');
   }

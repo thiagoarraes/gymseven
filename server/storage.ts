@@ -83,19 +83,19 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - Supabase SDK
+// Storage initialization - PostgreSQL
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Use Supabase SDK as requested
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('🚀 Using Supabase SDK configuration');
-      console.log('✅ Supabase credentials detected');
-      const { SupabaseStorage } = await import('./supabase-storage');
-      return new SupabaseStorage();
+    // Use PostgreSQL with Drizzle ORM
+    if (process.env.DATABASE_URL) {
+      console.log('🚀 Using PostgreSQL with Drizzle ORM');
+      console.log('✅ Database URL detected');
+      const { PostgreSQLStorage } = await import('./postgresql-storage');
+      return new PostgreSQLStorage();
     }
     
-    // If no Supabase is configured, throw error
-    throw new Error('❌ Supabase credentials required. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+    // If no database is configured, throw error
+    throw new Error('❌ DATABASE_URL required. Please ensure the database is provisioned.');
     
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);
