@@ -98,7 +98,10 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
   const removeExerciseMutation = useMutation({
     mutationFn: (exerciseId: string) => workoutTemplateApi.removeExercise(exerciseId),
-    onSuccess: () => {
+    onSuccess: (_, exerciseId) => {
+      // Atualização otimista - remove do estado local imediatamente
+      setReorderedExercises(prev => prev.filter(exercise => exercise.id !== exerciseId));
+      
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
       toast({
@@ -157,8 +160,10 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   }, [template?.name, isEditingTemplateName]);
 
   useEffect(() => {
-    if (templateExercises.length > 0 && reorderedExercises.length === 0) {
-      // Só atualiza se não há exercícios no estado local (primeira carga)
+    // Sempre sincroniza o estado local com os dados do servidor
+    // mas preserva a ordem se o usuário está reorganizando
+    if (templateExercises.length !== reorderedExercises.length || 
+        (templateExercises.length > 0 && reorderedExercises.length === 0)) {
       setReorderedExercises([...templateExercises]);
     }
   }, [templateExercises]);
