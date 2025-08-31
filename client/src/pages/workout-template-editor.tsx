@@ -590,49 +590,65 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                     {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
                                   </h4>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></div>
-                                  <span className="mobile-caption text-blue-300 font-medium truncate">
-                                    {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
-                                  </span>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></div>
+                                    <span className="mobile-caption text-blue-300 font-medium truncate">
+                                      {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-slate-400 font-medium">
+                                    ↕ Reordenar
+                                  </div>
                                 </div>
                               </div>
                             </div>
 
                             {/* Mobile-Optimized Action Menu */}
                             <div className="flex flex-row items-center gap-1 flex-shrink-0">
-                              {/* Reorder Controls - Horizontal Layout */}
-                              <div className="flex sm:hidden gap-1">
+                              {/* Reorder Controls - More Visible */}
+                              <div className="flex gap-1">
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="sm"
-                                  className="w-7 h-7 p-0 hover:bg-blue-500/20 rounded-md transition-colors touch-feedback mobile-focus"
+                                  className={`w-8 h-8 p-0 rounded-lg transition-all duration-200 touch-feedback mobile-focus ${
+                                    index === 0 
+                                      ? 'opacity-30 bg-slate-800/30 border-slate-700/30' 
+                                      : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-400/50'
+                                  }`}
                                   onClick={() => moveExercise(exercise.id, 'up')}
                                   disabled={index === 0}
                                   data-testid={`move-up-${exercise.id}`}
+                                  title="Mover para cima"
                                 >
-                                  <ChevronUp className="w-3 h-3 text-blue-400" />
+                                  <ChevronUp className={`w-4 h-4 ${index === 0 ? 'text-slate-500' : 'text-blue-400'}`} />
                                 </Button>
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="sm"
-                                  className="w-7 h-7 p-0 hover:bg-blue-500/20 rounded-md transition-colors touch-feedback mobile-focus"
+                                  className={`w-8 h-8 p-0 rounded-lg transition-all duration-200 touch-feedback mobile-focus ${
+                                    index === reorderedExercises.length - 1 
+                                      ? 'opacity-30 bg-slate-800/30 border-slate-700/30' 
+                                      : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-400/50'
+                                  }`}
                                   onClick={() => moveExercise(exercise.id, 'down')}
                                   disabled={index === reorderedExercises.length - 1}
                                   data-testid={`move-down-${exercise.id}`}
+                                  title="Mover para baixo"
                                 >
-                                  <ChevronDown className="w-3 h-3 text-blue-400" />
+                                  <ChevronDown className={`w-4 h-4 ${index === reorderedExercises.length - 1 ? 'text-slate-500' : 'text-blue-400'}`} />
                                 </Button>
                               </div>
                               
-                              {/* Desktop Drag Handle */}
+                              {/* Desktop Drag Handle - Now shown but with visual indicator */}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="hidden sm:flex w-8 h-8 p-0 hover:bg-slate-700/50 rounded-md cursor-grab active:cursor-grabbing touch-feedback mobile-focus"
+                                className="hidden sm:flex w-8 h-8 p-0 hover:bg-slate-700/50 rounded-lg cursor-grab active:cursor-grabbing touch-feedback mobile-focus border border-slate-600/30"
                                 data-testid={`drag-handle-${exercise.id}`}
+                                title="Arrastar para reordenar"
                               >
-                                <Menu className="w-4 h-4 text-slate-400" />
+                                <GripVertical className="w-4 h-4 text-slate-400" />
                               </Button>
                               
                               {/* Remove Button */}
