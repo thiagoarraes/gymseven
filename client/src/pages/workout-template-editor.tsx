@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical, Check, CheckCircle2, Menu, ChevronUp, ChevronDown, Search, Heart, Target, Layers, Zap, TrendingUp, Calendar, ArrowUp } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical, Check, CheckCircle2, Menu, ChevronUp, ChevronDown, Search, Heart, Target, Layers, Zap, TrendingUp, Calendar, ArrowUp, ArrowUpDown } from "lucide-react";
 import { motion, Reorder, useDragControls } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -193,6 +193,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   const [recentlyUpdated, setRecentlyUpdated] = useState<string | null>(null);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [reorderedExercises, setReorderedExercises] = useState<any[]>([]);
+  const [showReorderModal, setShowReorderModal] = useState(false);
+  const [tempReorderedExercises, setTempReorderedExercises] = useState<any[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -428,6 +430,40 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
   const handleSaveWorkout = () => {
     navigate("/treinos");
+  };
+
+  // Modal de reordenação
+  const openReorderModal = () => {
+    setTempReorderedExercises([...reorderedExercises]);
+    setShowReorderModal(true);
+  };
+
+  const handleReorderModalSave = () => {
+    setReorderedExercises(tempReorderedExercises);
+    setShowReorderModal(false);
+    
+    toast({
+      title: "Exercícios reordenados!",
+      description: "A nova ordem foi aplicada ao treino.",
+    });
+  };
+
+  const handleReorderModalCancel = () => {
+    setTempReorderedExercises([]);
+    setShowReorderModal(false);
+  };
+
+  const moveExerciseInModal = (exerciseId: string, direction: 'up' | 'down') => {
+    const currentIndex = tempReorderedExercises.findIndex(ex => ex.id === exerciseId);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= tempReorderedExercises.length) return;
+    
+    const newOrder = [...tempReorderedExercises];
+    [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+    
+    setTempReorderedExercises(newOrder);
   };
 
   if (templateLoading) {
@@ -928,16 +964,32 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
               ))}
             </Reorder.Group>
             
-            {/* Add More Exercises Button */}
-            <Card className="glass-card rounded-xl border-dashed border-slate-600/50 hover:border-blue-500/50 transition-all duration-200 hover:bg-slate-800/30 cursor-pointer"
-                  onClick={() => setShowExerciseSelector(true)}>
-              <CardContent className="p-6 text-center">
-                <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-blue-400 transition-colors">
-                  <Plus className="w-5 h-5" />
-                  <span className="font-medium">Adicionar mais exercícios</span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              {/* Reorder Exercises Button */}
+              {reorderedExercises.length > 1 && (
+                <Card className="glass-card rounded-xl border-dashed border-purple-600/50 hover:border-purple-500/50 transition-all duration-200 hover:bg-purple-800/20 cursor-pointer"
+                      onClick={openReorderModal}>
+                  <CardContent className="p-6 text-center">
+                    <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-purple-400 transition-colors">
+                      <ArrowUpDown className="w-5 h-5" />
+                      <span className="font-medium">Reordenar exercícios</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Add More Exercises Button */}
+              <Card className="glass-card rounded-xl border-dashed border-slate-600/50 hover:border-blue-500/50 transition-all duration-200 hover:bg-slate-800/30 cursor-pointer"
+                    onClick={() => setShowExerciseSelector(true)}>
+                <CardContent className="p-6 text-center">
+                  <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-blue-400 transition-colors">
+                    <Plus className="w-5 h-5" />
+                    <span className="font-medium">Adicionar mais exercícios</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
             
             {/* Save Workout Button */}
             <div className="flex justify-center pt-6">
@@ -1073,6 +1125,95 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reorder Exercises Modal */}
+      <Dialog open={showReorderModal} onOpenChange={setShowReorderModal}>
+        <DialogContent className="max-w-lg max-h-[85vh] glass-card border-slate-700 flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="text-white text-xl font-bold">Reordenar Exercícios</DialogTitle>
+            <p className="text-slate-400 text-sm">Use os botões para mover os exercícios para cima ou para baixo</p>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto">
+            <div className="space-y-3">
+              {tempReorderedExercises.map((exercise: any, index: number) => (
+                <Card key={exercise.id} className="glass-card rounded-xl border-slate-700/50 bg-slate-800/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        {/* Exercise Number Badge */}
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                          <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-white leading-tight truncate">
+                            {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
+                          </h4>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></div>
+                            <span className="text-xs text-blue-300 font-medium truncate">
+                              {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Move Controls */}
+                      <div className="flex gap-1 flex-shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`w-8 h-8 p-0 rounded-lg transition-all duration-200 ${
+                            index === 0 
+                              ? 'opacity-30 bg-slate-800/30 border-slate-700/30' 
+                              : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-400/50'
+                          }`}
+                          onClick={() => moveExerciseInModal(exercise.id, 'up')}
+                          disabled={index === 0}
+                          title="Mover para cima"
+                        >
+                          <ChevronUp className={`w-4 h-4 ${index === 0 ? 'text-slate-500' : 'text-blue-400'}`} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`w-8 h-8 p-0 rounded-lg transition-all duration-200 ${
+                            index === tempReorderedExercises.length - 1 
+                              ? 'opacity-30 bg-slate-800/30 border-slate-700/30' 
+                              : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-400/50'
+                          }`}
+                          onClick={() => moveExerciseInModal(exercise.id, 'down')}
+                          disabled={index === tempReorderedExercises.length - 1}
+                          title="Mover para baixo"
+                        >
+                          <ChevronDown className={`w-4 h-4 ${index === tempReorderedExercises.length - 1 ? 'text-slate-500' : 'text-blue-400'}`} />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-between pt-4 border-t border-slate-700 gap-3">
+            <Button
+              variant="outline"
+              onClick={handleReorderModalCancel}
+              className="flex-1 border-slate-700 text-slate-300"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleReorderModalSave}
+              className="flex-1 gradient-accent"
+            >
+              Aplicar Nova Ordem
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
