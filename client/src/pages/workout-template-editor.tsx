@@ -832,24 +832,24 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                       <div className="w-2 h-2 rounded-full bg-green-400"></div>
                                       <label className="text-xs text-slate-300 font-semibold uppercase tracking-wider">Séries</label>
                                     </div>
-                                    <div className="flex items-center justify-center space-x-3">
+                                    <div className="flex items-center justify-center space-x-3 px-4">
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                                        className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg flex-shrink-0"
                                         onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                         disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                                       >
                                         <Minus className="w-4 h-4" />
                                       </Button>
-                                      <div className="text-center">
+                                      <div className="text-center flex-shrink-0 min-w-[60px]">
                                         <div className="text-2xl font-bold text-white">{exercise.sets}</div>
                                         <div className="text-xs text-slate-400">séries</div>
                                       </div>
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                                        className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg flex-shrink-0"
                                         onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                         disabled={updateExerciseMutation.isPending}
                                       >
@@ -937,11 +937,11 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                     Descanso
                                   </label>
                                 </div>
-                                <div className="flex items-center justify-center space-x-3 px-2">
+                                <div className="flex items-center justify-center space-x-3 px-4">
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                                    className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg flex-shrink-0"
                                     onClick={() => {
                                       const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
                                       const newRest = Math.max(30, currentRest - 15);
@@ -951,7 +951,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                   >
                                     <Minus className="w-4 h-4" />
                                   </Button>
-                                  <div className="text-center">
+                                  <div className="text-center flex-shrink-0 min-w-[80px]">
                                     <div className="text-2xl font-bold text-orange-400">
                                       {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
                                     </div>
@@ -960,7 +960,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg"
+                                    className="w-9 h-9 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-lg flex-shrink-0"
                                     onClick={() => {
                                       const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
                                       const newRest = Math.min(300, currentRest + 15);
