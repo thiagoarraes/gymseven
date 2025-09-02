@@ -1140,12 +1140,16 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-logs/:id/summary", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/workout-logs/:id/summary", optionalAuth, async (req: AuthRequest, res) => {
     try {
+      console.log('📊 Fetching workout summary for ID:', req.params.id);
       const log = await db.getWorkoutLog(req.params.id);
       if (!log) {
+        console.log('❌ Workout log not found:', req.params.id);
         return res.status(404).json({ message: "Treino não encontrado" });
       }
+      
+      console.log('✅ Found workout log:', log.name, 'ID:', log.id);
 
       // Calculate duration
       const duration = log.endTime 
@@ -1279,6 +1283,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         totalSets,
         totalVolume,
       };
+
+      console.log('📊 Workout summary prepared:', {
+        name: summary.name,
+        exerciseCount: exercises.length,
+        totalSets,
+        totalVolume
+      });
 
       res.json(summary);
     } catch (error) {
