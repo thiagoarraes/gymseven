@@ -229,7 +229,7 @@ export default function WorkoutHistory() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="[&_.rdp]:text-white [&_.rdp-button]:text-white [&_.rdp-button:hover]:bg-slate-700/50 [&_.rdp-day_selected]:bg-gradient-to-r [&_.rdp-day_selected]:from-blue-500 [&_.rdp-day_selected]:to-purple-600 [&_.rdp-day_selected]:text-white [&_.rdp-nav_button]:text-slate-400 [&_.rdp-nav_button:hover]:text-white [&_.rdp-nav_button:hover]:bg-slate-700/50">
+                  <div>
                     <DayPicker
                       mode="single"
                       selected={selectedDate}
@@ -239,15 +239,10 @@ export default function WorkoutHistory() {
                       locale={ptBR}
                       className="mx-auto"
                       modifiers={{
-                        hasWorkout: workoutDates
+                        "has-workout": workoutDates
                       }}
-                      modifiersStyles={{
-                        hasWorkout: {
-                          backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                          border: '2px solid rgb(59, 130, 246)',
-                          borderRadius: '8px',
-                          fontWeight: 'bold'
-                        }
+                      modifiersClassNames={{
+                        "has-workout": "rdp-day_has-workout"
                       }}
                       components={{
                         IconLeft: () => <ChevronLeft className="w-4 h-4" />,

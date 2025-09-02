@@ -600,6 +600,139 @@
   }
 }
 
+/* Custom Calendar Styling */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: rgb(59, 130, 246);
+  --rdp-background-color: rgba(59, 130, 246, 0.1);
+  margin: 0;
+}
+
+.rdp-months {
+  display: flex;
+  justify-content: center;
+}
+
+.rdp-month {
+  margin: 0;
+}
+
+.rdp-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+}
+
+.rdp-head_cell {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 8px 4px;
+  color: rgb(148, 163, 184);
+}
+
+.rdp-cell {
+  text-align: center;
+  position: relative;
+  padding: 0;
+}
+
+.rdp-button {
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  cursor: pointer;
+  position: relative;
+  width: var(--rdp-cell-size);
+  height: var(--rdp-cell-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: white;
+  font-weight: 500;
+}
+
+.rdp-button:hover {
+  background-color: rgba(71, 85, 105, 0.5);
+}
+
+.rdp-button_reset {
+  border: none;
+  background: none;
+}
+
+.rdp-day_selected {
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(147, 51, 234)) !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+.rdp-day_today {
+  color: rgb(59, 130, 246);
+  font-weight: bold;
+}
+
+.rdp-day_outside {
+  color: rgb(71, 85, 105);
+}
+
+/* Custom modifier for workout days */
+.rdp-day_has-workout {
+  position: relative;
+}
+
+.rdp-day_has-workout::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: rgb(34, 197, 94);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.rdp-day_has-workout.rdp-day_selected::after {
+  background: rgb(255, 255, 255);
+}
+
+.rdp-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.rdp-nav_button {
+  border: none;
+  background: rgba(71, 85, 105, 0.3);
+  color: rgb(148, 163, 184);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rdp-nav_button:hover {
+  background: rgba(71, 85, 105, 0.5);
+  color: white;
+}
+
+.rdp-caption_label {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+}
+
 /* iPhone notch and dynamic island support */
 @supports (padding: max(0px)) {
   .mobile-safe-header {
