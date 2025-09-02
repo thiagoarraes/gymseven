@@ -930,28 +930,12 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                             {/* Rest Duration */}
                             <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
                               <div className="mb-5">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <div className="w-4 h-4 rounded-full bg-orange-400"></div>
-                                    <label className="text-lg text-slate-200 font-semibold flex items-center">
-                                      <Timer className="w-5 h-5 mr-2" />
-                                      Tempo de Descanso
-                                    </label>
-                                  </div>
-                                  {/* Quick rest time buttons */}
-                                  <div className="flex space-x-2">
-                                    {[60, 90, 120].map(seconds => (
-                                      <Button
-                                        key={seconds}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="px-3 h-10 text-sm bg-orange-400/10 hover:bg-orange-400/20 text-orange-300 rounded-lg"
-                                        onClick={() => handleQuickUpdate(exercise.id, 'restDurationSeconds', seconds)}
-                                      >
-                                        {Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}
-                                      </Button>
-                                    ))}
-                                  </div>
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-4 h-4 rounded-full bg-orange-400"></div>
+                                  <label className="text-lg text-slate-200 font-semibold flex items-center">
+                                    <Timer className="w-5 h-5 mr-2" />
+                                    Tempo de Descanso
+                                  </label>
                                 </div>
                               </div>
                               <div className="flex items-center justify-between">
