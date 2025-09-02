@@ -54,6 +54,8 @@ const uploadAvatar = multer({
 });
 
 export async function registerRoutes(app: Express, createServerInstance = true): Promise<Server | null> {
+  // Initialize storage once for all routes
+  const db = await getStorage();
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
     try {
@@ -121,7 +123,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       // Check if email is being changed and if it's already in use
       if (req.body.email && req.body.email !== req.user!.email) {
-        const existingUser = await storage.getUserByEmail(req.body.email);
+        const existingUser = await db.getUserByEmail(req.body.email);
         if (existingUser && existingUser.id !== req.user!.id) {
           return res.status(409).json({ message: "Email já está em uso" });
         }
@@ -129,7 +131,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       // Check if username is being changed and if it's already in use
       if (req.body.username && req.body.username !== req.user!.username) {
-        const existingUser = await storage.getUserByUsername(req.body.username);
+        const existingUser = await db.getUserByUsername(req.body.username);
         if (existingUser && existingUser.id !== req.user!.id) {
           return res.status(409).json({ message: "Nome de usuário já está em uso" });
         }
@@ -143,7 +145,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         weight: updateData.weight === null ? undefined : updateData.weight,
       };
       
-      const updatedUser = await storage.updateUser(req.user!.id, storageData);
+      const updatedUser = await db.updateUser(req.user!.id, storageData);
       if (!updatedUser) {
         return res.status(404).json({ message: 'Usuário não encontrado' });
       }
@@ -191,7 +193,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const avatarUrl = `/uploads/avatars/${req.file.filename}`;
       
       // Update user's profile image URL
-      const updatedUser = await storage.updateUser(req.user!.id, {
+      const updatedUser = await db.updateUser(req.user!.id, {
         profileImageUrl: avatarUrl
       });
 
@@ -227,7 +229,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.get("/api/weight-history", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      const history = await storage.getWeightHistory(req.user!.id, limit);
+      const history = await db.getWeightHistory(req.user!.id, limit);
       res.json(history);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar histórico de peso" });
@@ -240,7 +242,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         ...req.body,
         userId: req.user!.id
       });
-      const entry = await storage.addWeightEntry(validatedData);
+      const entry = await db.addWeightEntry(validatedData);
       res.status(201).json(entry);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -257,7 +259,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/weight-history/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertWeightHistorySchema.partial().parse(req.body);
-      const entry = await storage.updateWeightEntry(req.params.id, validatedData);
+      const entry = await db.updateWeightEntry(req.params.id, validatedData);
       
       if (!entry) {
         return res.status(404).json({ message: "Entrada não encontrada" });
@@ -278,7 +280,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/weight-history/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const success = await storage.deleteWeightEntry(req.params.id);
+      const success = await db.deleteWeightEntry(req.params.id);
       if (!success) {
         return res.status(404).json({ message: "Entrada não encontrada" });
       }
@@ -291,7 +293,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // User Goals routes
   app.get("/api/goals", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const goals = await storage.getUserGoals(req.user!.id);
+      const goals = await db.getUserGoals(req.user!.id);
       res.json(goals);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar objetivos" });
@@ -304,7 +306,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         ...req.body,
         userId: req.user!.id
       });
-      const goal = await storage.createUserGoal(validatedData);
+      const goal = await db.createUserGoal(validatedData);
       res.status(201).json(goal);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -321,7 +323,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/goals/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertUserGoalSchema.partial().parse(req.body);
-      const goal = await storage.updateUserGoal(req.params.id, validatedData);
+      const goal = await db.updateUserGoal(req.params.id, validatedData);
       
       if (!goal) {
         return res.status(404).json({ message: "Objetivo não encontrado" });
@@ -342,7 +344,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/goals/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const success = await storage.deleteUserGoal(req.params.id);
+      const success = await db.deleteUserGoal(req.params.id);
       if (!success) {
         return res.status(404).json({ message: "Objetivo não encontrado" });
       }
@@ -355,10 +357,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // User Preferences routes
   app.get("/api/preferences", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const preferences = await storage.getUserPreferences(req.user!.id);
+      const preferences = await db.getUserPreferences(req.user!.id);
       if (!preferences) {
         // Create default preferences if they don't exist
-        const defaultPrefs = await storage.createUserPreferences({
+        const defaultPrefs = await db.createUserPreferences({
           userId: req.user!.id,
           theme: 'dark',
           units: 'metric',
@@ -381,7 +383,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/preferences", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = updateUserPreferencesSchema.parse(req.body);
-      const preferences = await storage.updateUserPreferences(req.user!.id, validatedData);
+      const preferences = await db.updateUserPreferences(req.user!.id, validatedData);
       
       if (!preferences) {
         return res.status(404).json({ message: "Preferências não encontradas" });
@@ -408,10 +410,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       if (muscleGroup && typeof muscleGroup === 'string') {
         // Filter by muscle group for the authenticated user only
-        exercises = await storage.getExercisesByMuscleGroup(muscleGroup, req.user!.id);
+        exercises = await db.getExercisesByMuscleGroup(muscleGroup, req.user!.id);
       } else {
         // Get user-specific exercises only
-        exercises = await storage.getExercises(req.user!.id);
+        exercises = await db.getExercises(req.user!.id);
       }
       
       // Disable all caching
@@ -430,7 +432,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.get("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const exercise = await storage.getExercise(req.params.id);
+      const exercise = await db.getExercise(req.params.id);
       if (!exercise) {
         return res.status(404).json({ message: "Exercício não encontrado" });
       }
@@ -458,7 +460,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       console.log('Validated exercise data:', validatedData);
       
-      const exercise = await storage.createExercise(validatedData, req.user.id);
+      const exercise = await db.createExercise(validatedData, req.user.id);
       res.status(201).json(exercise);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -488,7 +490,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertExerciseSchema.partial().parse(req.body);
-      const exercise = await storage.updateExercise(req.params.id, updates, req.user!.id);
+      const exercise = await db.updateExercise(req.params.id, updates, req.user!.id);
       if (!exercise) {
         return res.status(404).json({ message: "Exercício não encontrado ou você não tem permissão para editá-lo" });
       }
@@ -501,7 +503,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const deleted = await storage.deleteExercise(req.params.id);
+      const deleted = await db.deleteExercise(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Exercício não encontrado" });
       }
@@ -515,7 +517,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.get("/api/workout-templates", authenticateToken, async (req: AuthRequest, res) => {
     try {
       // Get user-specific templates only
-      const templates = await storage.getWorkoutTemplates(req.user!.id);
+      const templates = await db.getWorkoutTemplates(req.user!.id);
       res.json(templates);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar modelos de treino" });
@@ -524,7 +526,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.get("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const template = await storage.getWorkoutTemplate(req.params.id);
+      const template = await db.getWorkoutTemplate(req.params.id);
       if (!template) {
         return res.status(404).json({ message: "Modelo de treino não encontrado" });
       }
@@ -536,7 +538,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.get("/api/workout-templates/:id/exercises", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const exercises = await storage.getWorkoutTemplateExercises(req.params.id);
+      const exercises = await db.getWorkoutTemplateExercises(req.params.id);
       res.json(exercises);
     } catch (error) {
       console.error('Error fetching template exercises for template:', req.params.id, error);
@@ -555,7 +557,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         ...req.body,
         user_id: req.user!.id // Use snake_case field name to match database schema
       });
-      const template = await storage.createWorkoutTemplate(validatedData);
+      const template = await db.createWorkoutTemplate(validatedData);
       res.status(201).json(template);
     } catch (error: any) {
       console.error("Workout template creation error:", {
@@ -578,7 +580,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertWorkoutTemplateSchema.partial().parse(req.body);
-      const template = await storage.updateWorkoutTemplate(req.params.id, updates);
+      const template = await db.updateWorkoutTemplate(req.params.id, updates);
       if (!template) {
         return res.status(404).json({ message: "Modelo de treino não encontrado" });
       }
@@ -590,7 +592,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const deleted = await storage.deleteWorkoutTemplate(req.params.id, req.user!.id);
+      const deleted = await db.deleteWorkoutTemplate(req.params.id, req.user!.id);
       if (!deleted) {
         return res.status(404).json({ message: "Modelo de treino não encontrado ou você não tem permissão para excluí-lo" });
       }
@@ -627,7 +629,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         templateId
       });
       
-      const templateExercise = await storage.addExerciseToTemplate(validatedData);
+      const templateExercise = await db.addExerciseToTemplate(validatedData);
       res.status(201).json(templateExercise);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -653,7 +655,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertWorkoutTemplateExerciseSchema.partial().parse(req.body);
-      const templateExercise = await storage.updateWorkoutTemplateExercise(req.params.id, updates);
+      const templateExercise = await db.updateWorkoutTemplateExercise(req.params.id, updates);
       if (!templateExercise) {
         return res.status(404).json({ message: "Exercício do treino não encontrado" });
       }
@@ -665,7 +667,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const deleted = await storage.deleteWorkoutTemplateExercise(req.params.id);
+      const deleted = await db.deleteWorkoutTemplateExercise(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Exercício do treino não encontrado" });
       }
@@ -764,7 +766,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         res.json(exercisesWithProgress);
       } else {
         // Fallback for non-Supabase storage: return all exercises without weight data
-        const exercises = await storage.getAllExercises();
+        const exercises = await db.getAllExercises();
         res.json(exercises.map(exercise => ({
           ...exercise,
           lastWeight: 0,
@@ -915,7 +917,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.post("/api/workout-log-sets", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertWorkoutLogSetSchema.parse(req.body);
-      const result = await storage.createWorkoutLogSet(validatedData);
+      const result = await db.createWorkoutLogSet(validatedData);
       res.status(201).json(result);
     } catch (error: any) {
       console.error('Error creating workout log set:', error);
@@ -1105,11 +1107,11 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       if (recent === 'true') {
         // Get recent logs for authenticated user only
-        const allLogs = await storage.getWorkoutLogs(req.user!.id);
+        const allLogs = await db.getWorkoutLogs(req.user!.id);
         logs = allLogs.slice(0, 5);
       } else {
         // Get user-specific logs only
-        logs = await storage.getWorkoutLogs(req.user!.id);
+        logs = await db.getWorkoutLogs(req.user!.id);
       }
       
       // Disable all caching
@@ -1128,7 +1130,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.get("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const log = await storage.getWorkoutLog(req.params.id);
+      const log = await db.getWorkoutLog(req.params.id);
       if (!log) {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
@@ -1140,7 +1142,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.get("/api/workout-logs/:id/summary", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const log = await storage.getWorkoutLog(req.params.id);
+      const log = await db.getWorkoutLog(req.params.id);
       if (!log) {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
@@ -1314,7 +1316,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       };
       
       const validatedData = insertWorkoutLogSchema.parse(workoutData);
-      const log = await storage.createWorkoutLog(validatedData);
+      const log = await db.createWorkoutLog(validatedData);
       res.status(201).json(log);
     } catch (error) {
       console.error("Workout log creation error:", error);
@@ -1334,7 +1336,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const updates = insertWorkoutLogSchema.partial().parse(req.body);
       
       // First, check if the workout exists and belongs to the user
-      const existingLog = await storage.getWorkoutLog(req.params.id);
+      const existingLog = await db.getWorkoutLog(req.params.id);
       if (!existingLog) {
         console.log(`Workout log ${req.params.id} not found`);
         return res.status(404).json({ message: "Treino não encontrado" });
@@ -1346,7 +1348,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(403).json({ message: "Acesso negado" });
       }
       
-      const log = await storage.updateWorkoutLog(req.params.id, updates);
+      const log = await db.updateWorkoutLog(req.params.id, updates);
       if (!log) {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
@@ -1362,7 +1364,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.delete("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       // First check if workout belongs to authenticated user
-      const existingLog = await storage.getWorkoutLog(req.params.id);
+      const existingLog = await db.getWorkoutLog(req.params.id);
       if (!existingLog) {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
@@ -1371,7 +1373,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(403).json({ message: "Acesso negado" });
       }
       
-      const deleted = await storage.deleteWorkoutLog(req.params.id);
+      const deleted = await db.deleteWorkoutLog(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Treino não encontrado" });
       }
@@ -1384,7 +1386,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Workout Log Set routes
   app.get("/api/workout-logs/:id/sets", async (req, res) => {
     try {
-      const sets = await storage.getWorkoutLogSets(req.params.id);
+      const sets = await db.getWorkoutLogSets(req.params.id);
       res.json(sets);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar séries do treino" });
@@ -1394,7 +1396,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.post("/api/workout-log-sets", async (req, res) => {
     try {
       const validatedData = insertWorkoutLogSetSchema.parse(req.body);
-      const set = await storage.createWorkoutLogSet(validatedData);
+      const set = await db.createWorkoutLogSet(validatedData);
       res.status(201).json(set);
     } catch (error) {
       res.status(400).json({ message: "Dados inválidos para criação da série" });
@@ -1404,7 +1406,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/workout-log-sets/:id", async (req, res) => {
     try {
       const updates = insertWorkoutLogSetSchema.partial().parse(req.body);
-      const set = await storage.updateWorkoutLogSet(req.params.id, updates);
+      const set = await db.updateWorkoutLogSet(req.params.id, updates);
       if (!set) {
         return res.status(404).json({ message: "Série não encontrada" });
       }
@@ -1432,7 +1434,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // User Achievements routes - sistema de conquistas isolado por usuário
   app.get("/api/achievements", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const achievements = await storage.getUserAchievements(req.user!.id);
+      const achievements = await db.getUserAchievements(req.user!.id);
       res.json(achievements);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar conquistas do usuário" });
@@ -1441,7 +1443,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.post("/api/achievements", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const achievement = await storage.createUserAchievement({
+      const achievement = await db.createUserAchievement({
         ...req.body,
         userId: req.user!.id // Garantir isolamento por usuário
       });
