@@ -478,17 +478,17 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white pb-24">
       {/* Header */}
       <div className="glass-card rounded-none border-b border-slate-700/50 p-4 sticky top-0 z-40 backdrop-blur-xl">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/treinos")}
-            className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+            className="text-slate-500 hover:text-slate-300 hover:bg-slate-800/30 transition-colors px-2 py-1 text-xs"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-3 h-3 mr-1" />
             Voltar
           </Button>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {isEditingTemplateName ? (
               <div className="flex items-center space-x-2">
                 <Input
