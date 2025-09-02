@@ -650,48 +650,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                 </div>
                               </div>
 
-                              {/* Action Controls */}
+                              {/* Action Controls - Apenas remover */}
                               <div className="flex items-center gap-2 flex-shrink-0">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={`w-10 h-10 p-0 rounded-xl ${
-                                    index === 0 
-                                      ? 'opacity-30 bg-slate-800/30 border-slate-700/30' 
-                                      : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20'
-                                  }`}
-                                  onClick={() => moveExercise(exercise.id, 'up')}
-                                  disabled={index === 0}
-                                  title="Mover para cima"
-                                >
-                                  <ChevronUp className={`w-5 h-5 ${index === 0 ? 'text-slate-500' : 'text-blue-400'}`} />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={`w-10 h-10 p-0 rounded-xl ${
-                                    index === reorderedExercises.length - 1 
-                                      ? 'opacity-30 bg-slate-800/30 border-slate-700/30' 
-                                      : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20'
-                                  }`}
-                                  onClick={() => moveExercise(exercise.id, 'down')}
-                                  disabled={index === reorderedExercises.length - 1}
-                                  title="Mover para baixo"
-                                >
-                                  <ChevronDown className={`w-5 h-5 ${index === reorderedExercises.length - 1 ? 'text-slate-500' : 'text-blue-400'}`} />
-                                </Button>
-                                
-                                {/* Desktop Drag Handle */}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="hidden sm:flex w-10 h-10 p-0 hover:bg-slate-700/50 rounded-xl cursor-grab active:cursor-grabbing border border-slate-600/30"
-                                  title="Arrastar para reordenar"
-                                >
-                                  <GripVertical className="w-5 h-5 text-slate-400" />
-                                </Button>
-                                
-                                {/* Remove Button */}
                                 <Button
                                   variant="ghost"
                                   size="sm"
