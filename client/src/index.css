@@ -602,40 +602,55 @@
 
 /* Custom Calendar Styling */
 .rdp {
-  --rdp-cell-size: 40px;
+  --rdp-cell-size: 44px;
   --rdp-accent-color: rgb(59, 130, 246);
   --rdp-background-color: rgba(59, 130, 246, 0.1);
   margin: 0;
+  padding: 8px;
 }
 
 .rdp-months {
   display: flex;
   justify-content: center;
+  margin: 0;
 }
 
 .rdp-month {
   margin: 0;
+  width: 100%;
 }
 
 .rdp-table {
   width: 100%;
-  max-width: 100%;
+  max-width: 320px;
   border-collapse: separate;
-  border-spacing: 4px;
+  border-spacing: 6px;
+  margin: 0 auto;
+}
+
+.rdp-head_row {
+  margin-bottom: 8px;
 }
 
 .rdp-head_cell {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-align: center;
-  padding: 8px 4px;
+  padding: 8px 0;
   color: rgb(148, 163, 184);
+  width: var(--rdp-cell-size);
+}
+
+.rdp-row {
+  margin-bottom: 4px;
 }
 
 .rdp-cell {
   text-align: center;
   position: relative;
-  padding: 0;
+  padding: 2px;
+  width: var(--rdp-cell-size);
+  height: var(--rdp-cell-size);
 }
 
 .rdp-button {
@@ -705,16 +720,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding: 0 4px;
 }
 
 .rdp-nav_button {
   border: none;
   background: rgba(71, 85, 105, 0.3);
   color: rgb(148, 163, 184);
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -731,6 +747,7 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: white;
+  margin: 0 16px;
 }
 
 /* iPhone notch and dynamic island support */
