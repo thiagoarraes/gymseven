@@ -638,12 +638,12 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                   <span className="font-bold text-blue-400 text-lg">{index + 1}</span>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="text-xl font-bold text-white mb-2 leading-tight break-words">
+                                  <h4 className="text-lg font-bold text-white mb-2 leading-relaxed exercise-name">
                                     {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
                                   </h4>
-                                  <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-3 mt-3">
                                     <div className="w-3 h-3 rounded-full bg-blue-400 flex-shrink-0"></div>
-                                    <span className="text-blue-300 font-medium">
+                                    <span className="text-blue-300 font-medium text-sm truncate">
                                       {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
                                     </span>
                                   </div>
@@ -1079,8 +1079,8 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
       <Dialog open={isExerciseFormOpen} onOpenChange={setIsExerciseFormOpen}>
         <DialogContent className="glass-card border-slate-700 max-w-sm mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-white text-xl">
-              Configurar: {editingExercise?.name}
+            <DialogTitle className="text-white text-lg leading-relaxed">
+              Configurar: <span className="block mt-1 font-semibold exercise-name">{editingExercise?.name}</span>
             </DialogTitle>
             <p className="text-slate-400 text-sm">Defina os parâmetros iniciais</p>
           </DialogHeader>
