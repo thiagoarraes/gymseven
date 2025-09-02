@@ -837,6 +837,48 @@
   }
 }
 
+/* Mobile Touch Optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Enhanced button feedback for mobile */
+.touch-feedback {
+  transition: transform 0.1s ease-in-out, background-color 0.15s ease;
+}
+
+.touch-feedback:active {
+  transform: scale(0.95);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Improved mobile focus states */
+.mobile-focus:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Large touch targets for mobile */
+@media (max-width: 768px) {
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimize text inputs for mobile */
+  input[type="text"], input[type="number"] {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
 /* iPhone notch and dynamic island support */
 @supports (padding: max(0px)) {
   .mobile-safe-header {
