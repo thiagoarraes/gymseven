@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
-import { motion, PanInfo } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { DayPicker } from "react-day-picker";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import "react-day-picker/dist/style.css";
 
 interface WorkoutLog {
   id: string;
@@ -42,10 +45,10 @@ interface WorkoutSummary {
 
 export default function WorkoutHistory() {
   const [, navigate] = useLocation();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedWorkout, setSelectedWorkout] = useState<string | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
-  const [swipedWorkout, setSwipedWorkout] = useState<string | null>(null);
-  const [draggedWorkout, setDraggedWorkout] = useState<string | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -53,6 +56,31 @@ export default function WorkoutHistory() {
   const { data: workoutLogs = [], isLoading } = useQuery<WorkoutLog[]>({
     queryKey: ['/api/workout-logs'],
   });
+
+  // Group workouts by date for calendar display
+  const workoutsByDate = useMemo(() => {
+    const grouped: { [key: string]: WorkoutLog[] } = {};
+    workoutLogs.forEach(workout => {
+      const dateKey = format(parseISO(workout.startTime), 'yyyy-MM-dd');
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(workout);
+    });
+    return grouped;
+  }, [workoutLogs]);
+
+  // Get workouts for selected date
+  const selectedDateWorkouts = useMemo(() => {
+    if (!selectedDate) return [];
+    const dateKey = format(selectedDate, 'yyyy-MM-dd');
+    return workoutsByDate[dateKey] || [];
+  }, [selectedDate, workoutsByDate]);
+
+  // Get all dates that have workouts
+  const workoutDates = useMemo(() => {
+    return Object.keys(workoutsByDate).map(dateStr => parseISO(dateStr));
+  }, [workoutsByDate]);
 
   // Fetch workout summary when modal opens  
   const { data: workoutSummary, isLoading: summaryLoading } = useQuery<WorkoutSummary>({
@@ -80,7 +108,6 @@ export default function WorkoutHistory() {
         title: "Treino excluído",
         description: "O treino foi removido do seu histórico.",
       });
-      setSwipedWorkout(null);
     },
     onError: () => {
       toast({
@@ -88,7 +115,6 @@ export default function WorkoutHistory() {
         description: "Não foi possível excluir o treino. Tente novamente.",
         variant: "destructive",
       });
-      setSwipedWorkout(null);
     },
   });
 
@@ -120,32 +146,16 @@ export default function WorkoutHistory() {
   };
 
   const handleWorkoutClick = (workoutId: string) => {
-    if (swipedWorkout === workoutId) return; // Não abrir se estiver no modo swipe
     setSelectedWorkout(workoutId);
     setShowSummaryModal(true);
   };
 
-  const handleSwipeEnd = (info: PanInfo, workoutId: string) => {
-    const { offset, velocity } = info;
-    const swipeThreshold = -40;
-    const velocityThreshold = -500;
-
-    if (offset.x < swipeThreshold || velocity.x < velocityThreshold) {
-      setSwipedWorkout(workoutId);
-    } else {
-      setSwipedWorkout(null);
-    }
-    
-    // Clear dragged state
-    setDraggedWorkout(null);
-  };
-
-  const handleDragStart = (workoutId: string) => {
-    setDraggedWorkout(workoutId);
-  };
-
   const handleDeleteWorkout = (workoutId: string) => {
     deleteWorkoutMutation.mutate(workoutId);
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
   };
 
   const closeSummaryModal = () => {
@@ -154,7 +164,7 @@ export default function WorkoutHistory() {
   };
 
   return (
-    <div className="container mx-auto px-4 space-y-4">
+    <div className="container mx-auto px-4 space-y-6">
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Button
@@ -169,144 +179,157 @@ export default function WorkoutHistory() {
         <div>
           <h1 className="text-2xl font-bold text-white">Histórico de Treinos</h1>
           <p className="text-slate-400 text-sm">
-            Visualize seus treinos anteriores e acompanhe seu progresso
+            Clique em um dia com treino para ver os detalhes
           </p>
         </div>
       </div>
 
-      {/* Workout List */}
+      {/* Calendar and Workout Details */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="glass-card rounded-xl">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="loading-skeleton h-6 rounded mb-2 w-3/4"></div>
-                    <div className="loading-skeleton h-4 rounded w-1/2"></div>
+        <div className="space-y-4">
+          <Card className="glass-card rounded-xl">
+            <CardContent className="p-6">
+              <div className="loading-skeleton h-80 rounded-lg"></div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Calendar Section */}
+          <div className="lg:col-span-3">
+            <Card className="glass-card rounded-xl">
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-white mb-2">Calendário de Treinos</h2>
+                  <p className="text-slate-400 text-sm">
+                    {workoutLogs.length === 0 
+                      ? "Complete alguns treinos para vê-los no calendário"
+                      : `${workoutLogs.length} treino${workoutLogs.length > 1 ? 's' : ''} registrado${workoutLogs.length > 1 ? 's' : ''}`
+                    }
+                  </p>
+                </div>
+                
+                {workoutLogs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
+                      <Calendar className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      Nenhum treino registrado
+                    </h3>
+                    <p className="text-slate-400 mb-6">
+                      Complete alguns treinos para ver seu histórico aqui
+                    </p>
+                    <Button 
+                      className="gradient-accent"
+                      onClick={() => navigate("/workouts")}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Começar primeiro treino
+                    </Button>
                   </div>
-                  <div className="loading-skeleton h-8 w-20 rounded"></div>
+                ) : (
+                  <div className="[&_.rdp]:text-white [&_.rdp-button]:text-white [&_.rdp-button:hover]:bg-slate-700/50 [&_.rdp-day_selected]:bg-gradient-to-r [&_.rdp-day_selected]:from-blue-500 [&_.rdp-day_selected]:to-purple-600 [&_.rdp-day_selected]:text-white [&_.rdp-nav_button]:text-slate-400 [&_.rdp-nav_button:hover]:text-white [&_.rdp-nav_button:hover]:bg-slate-700/50">
+                    <DayPicker
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={handleDateSelect}
+                      month={currentMonth}
+                      onMonthChange={setCurrentMonth}
+                      locale={ptBR}
+                      className="mx-auto"
+                      modifiers={{
+                        hasWorkout: workoutDates
+                      }}
+                      modifiersStyles={{
+                        hasWorkout: {
+                          backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                          border: '2px solid rgb(59, 130, 246)',
+                          borderRadius: '8px',
+                          fontWeight: 'bold'
+                        }
+                      }}
+                      components={{
+                        IconLeft: () => <ChevronLeft className="w-4 h-4" />,
+                        IconRight: () => <ChevronRight className="w-4 h-4" />
+                      }}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Selected Date Workouts */}
+          <div className="lg:col-span-2">
+            <Card className="glass-card rounded-xl">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-white">
+                    {selectedDate 
+                      ? format(selectedDate, "d 'de' MMMM", { locale: ptBR })
+                      : "Selecione um dia"
+                    }
+                  </h3>
+                  <p className="text-slate-400 text-sm">
+                    {selectedDate
+                      ? selectedDateWorkouts.length > 0
+                        ? `${selectedDateWorkouts.length} treino${selectedDateWorkouts.length > 1 ? 's' : ''} neste dia`
+                        : "Nenhum treino neste dia"
+                      : "Clique em um dia no calendário"
+                    }
+                  </p>
+                </div>
+
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {selectedDateWorkouts.map((workout) => (
+                    <div key={workout.id} className="relative group">
+                      <Card 
+                        className="glass-card rounded-lg cursor-pointer transition-all duration-200 hover:bg-slate-700/30"
+                        onClick={() => handleWorkoutClick(workout.id)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-white mb-1">{workout.name}</h4>
+                              <div className="flex items-center space-x-3 text-xs text-slate-400">
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{calculateDuration(workout.startTime, workout.endTime)}</span>
+                                </div>
+                                <Badge 
+                                  variant={workout.endTime ? "default" : "secondary"}
+                                  className={`text-xs px-2 py-0.5 ${
+                                    workout.endTime 
+                                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
+                                      : "bg-slate-700/50 text-slate-400 border-slate-600/50"
+                                  }`}
+                                >
+                                  {workout.endTime ? "Concluído" : "Incompleto"}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteWorkout(workout.id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      ) : workoutLogs.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
-            <Calendar className="w-8 h-8 text-slate-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">
-            Nenhum treino registrado
-          </h3>
-          <p className="text-slate-400 mb-6">
-            Complete alguns treinos para ver seu histórico aqui
-          </p>
-          <Button 
-            className="gradient-accent"
-            onClick={() => navigate("/workouts")}
-          >
-            <Play className="w-4 h-4 mr-2" />
-            Começar primeiro treino
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {workoutLogs.map((workout) => (
-            <div key={workout.id} className="relative overflow-hidden">
-              {/* Background Delete Button - WhatsApp Style */}
-              <div 
-                className={`absolute right-0 top-0 bottom-0 flex transition-all duration-300 ${
-                  (swipedWorkout === workout.id || draggedWorkout === workout.id) ? 'opacity-100' : 'opacity-0'
-                }`}
-                style={{ zIndex: 1 }}
-              >
-                {/* Delete Button Column */}
-                <div
-                  className="flex items-center justify-center w-24 h-[4.75rem] bg-red-500 rounded-xl cursor-pointer hover:bg-red-600 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteWorkout(workout.id);
-                  }}
-                >
-                  <div className="flex flex-col items-center justify-center text-white">
-                    <Trash2 className="w-6 h-6 mb-1" />
-                    <span className="text-sm font-medium">Apagar</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Swipeable Card */}
-              <motion.div
-                drag="x"
-                dragConstraints={{ left: -96, right: 0, top: 0, bottom: 0 }}
-                dragElastic={{ left: 0.1, right: 0.1, top: 0, bottom: 0 }}
-                dragDirectionLock={true}
-                dragPropagation={false}
-                onDragStart={() => handleDragStart(workout.id)}
-                onDragEnd={(_, info) => handleSwipeEnd(info, workout.id)}
-                onDrag={(_, info) => {
-                  // Force y position to stay at 0 during drag
-                  if (info.point.y !== 0) {
-                    info.point.y = 0;
-                  }
-                }}
-                animate={{ 
-                  x: swipedWorkout === workout.id ? -96 : 0,
-                  y: 0
-                }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                style={{ zIndex: 2 }}
-                className="relative"
-              >
-                <Card 
-                  className="glass-card rounded-xl cursor-pointer transition-all duration-200 h-20"
-                  onClick={() => (swipedWorkout === workout.id || draggedWorkout === workout.id) ? null : handleWorkoutClick(workout.id)}
-                >
-                  <CardContent className="p-4 h-20">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                          workout.endTime ? "gradient-accent" : "bg-slate-700/50"
-                        }`}>
-                          {workout.endTime ? (
-                            <CheckCircle className="w-6 h-6 text-white" />
-                          ) : (
-                            <XCircle className="w-6 h-6 text-slate-400" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-white text-lg">{workout.name}</h4>
-                          <div className="flex items-center space-x-4 text-sm text-slate-400">
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="w-3 h-3" />
-                              <span>{formatDate(workout.startTime)}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Clock className="w-3 h-3" />
-                              <span>{calculateDuration(workout.startTime, workout.endTime)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant={workout.endTime ? "default" : "secondary"}
-                          className={workout.endTime 
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
-                            : "bg-slate-700/50 text-slate-400 border-slate-600/50"
-                          }
-                        >
-                          {workout.endTime ? "Concluído" : "Incompleto"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-          ))}
         </div>
       )}
 
