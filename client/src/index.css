@@ -602,12 +602,13 @@
 
 /* Custom Calendar Styling */
 .rdp {
-  --rdp-cell-size: 44px;
+  --rdp-cell-size: 40px;
   --rdp-accent-color: rgb(59, 130, 246);
   --rdp-background-color: rgba(59, 130, 246, 0.1);
-  margin: 0;
-  padding: 16px 8px;
+  margin: 0 auto;
+  padding: 12px;
   width: 100%;
+  max-width: 320px;
   overflow: visible;
 }
 
@@ -615,6 +616,7 @@
   display: flex;
   justify-content: center;
   margin: 0;
+  width: 100%;
 }
 
 .rdp-month {
@@ -624,36 +626,41 @@
 
 .rdp-table {
   width: 100%;
-  max-width: 350px;
   border-collapse: separate;
-  border-spacing: 8px 6px;
-  margin: 0 auto;
+  border-spacing: 4px;
+  margin: 0;
   table-layout: fixed;
 }
 
+.rdp-tbody {
+  width: 100%;
+}
+
 .rdp-head_row {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .rdp-head_cell {
   font-size: 0.75rem;
   font-weight: 600;
   text-align: center;
-  padding: 12px 0;
+  padding: 8px 2px;
   color: rgb(148, 163, 184);
-  width: var(--rdp-cell-size);
+  width: calc(100% / 7);
+  max-width: var(--rdp-cell-size);
   vertical-align: middle;
 }
 
 .rdp-row {
-  margin-bottom: 6px;
+  width: 100%;
 }
 
 .rdp-cell {
   text-align: center;
   position: relative;
-  padding: 4px;
-  width: var(--rdp-cell-size);
+  padding: 2px;
+  width: calc(100% / 7);
+  max-width: var(--rdp-cell-size);
   height: var(--rdp-cell-size);
   vertical-align: middle;
 }
@@ -664,18 +671,17 @@
   font-size: 0.875rem;
   cursor: pointer;
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: var(--rdp-cell-size);
+  height: var(--rdp-cell-size);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   color: white;
   font-weight: 500;
-  margin: 0;
-  min-width: var(--rdp-cell-size);
-  min-height: var(--rdp-cell-size);
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .rdp-button:hover {
@@ -756,6 +762,45 @@
   font-weight: 600;
   color: white;
   margin: 0 16px;
+}
+
+/* Mobile-specific calendar optimizations */
+@media (max-width: 768px) {
+  .rdp {
+    --rdp-cell-size: 36px;
+    max-width: 280px;
+    padding: 8px;
+  }
+  
+  .rdp-table {
+    border-spacing: 2px;
+  }
+  
+  .rdp-head_cell {
+    font-size: 0.7rem;
+    padding: 6px 1px;
+  }
+  
+  .rdp-cell {
+    padding: 1px;
+  }
+  
+  .rdp-button {
+    width: var(--rdp-cell-size);
+    height: var(--rdp-cell-size);
+    font-size: 0.8rem;
+    border-radius: 4px;
+  }
+  
+  .rdp-nav_button {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .rdp-caption_label {
+    font-size: 1rem;
+    margin: 0 8px;
+  }
 }
 
 /* iPhone notch and dynamic island support */
