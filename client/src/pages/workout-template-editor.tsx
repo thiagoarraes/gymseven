@@ -1070,11 +1070,11 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                           type="button"
                           variant="outline"
                           size="lg"
-                          className="w-12 h-12 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl touch-manipulation transition-all active:scale-95"
+                          className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl touch-manipulation transition-all active:scale-95"
                           onClick={() => field.onChange(Math.max(1, field.value - 1))}
                           disabled={field.value <= 1}
                         >
-                          <Minus className="w-5 h-5" />
+                          <Minus className="w-6 h-6" />
                         </Button>
                         <div className="text-center">
                           <div className="text-4xl font-bold text-green-400">{field.value}</div>
@@ -1084,10 +1084,10 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                           type="button"
                           variant="outline"
                           size="lg"
-                          className="w-12 h-12 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl touch-manipulation transition-all active:scale-95"
+                          className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl touch-manipulation transition-all active:scale-95"
                           onClick={() => field.onChange(field.value + 1)}
                         >
-                          <Plus className="w-5 h-5" />
+                          <Plus className="w-6 h-6" />
                         </Button>
                       </div>
                     </FormControl>
