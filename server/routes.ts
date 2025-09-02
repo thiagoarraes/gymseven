@@ -681,8 +681,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.get('/api/exercises-with-progress', authenticateToken, async (req: AuthRequest, res) => {
     try {
       // Check if we have Supabase storage
-      if ('supabase' in storage) {
-        const supabaseStorage = storage as any;
+      if ('supabase' in db) {
+        const supabaseStorage = db as any;
         
         // Get exercises with actual weight data in completed workouts for authenticated user
         const { data: exercisesWithWeights, error } = await supabaseStorage.supabase
@@ -786,8 +786,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { limit = 10 } = req.query;
       
       // Check if we have Supabase storage
-      if ('supabase' in storage) {
-        const supabaseStorage = storage as any;
+      if ('supabase' in db) {
+        const supabaseStorage = db as any;
         
         // Get workout log exercises for this specific exercise for authenticated user
         const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
@@ -879,7 +879,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { logId, exerciseId, order } = req.body;
       
       // First, get the exercise name from the exercises table
-      const supabaseStorage = storage as any;
+      const supabaseStorage = db as any;
       const { data: exercise, error: exerciseError } = await supabaseStorage.supabase
         .from('exercises')
         .select('name')
@@ -938,7 +938,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { id } = req.params;
       const { weight, reps, completed } = req.body;
       
-      const supabaseStorage = storage as any;
+      const supabaseStorage = db as any;
       const { data, error } = await supabaseStorage.supabase
         .from('workoutLogSets')
         .update({ weight, reps, completed })
@@ -962,7 +962,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get all exercises with their recent weight progression - user-specific
   app.get('/api/exercises-weight-summary', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const supabaseStorage = storage as any;
+      const supabaseStorage = db as any;
       
       console.log('🔍 [API] Buscando exercises-weight-summary (versão simplificada)...');
       
@@ -1059,7 +1059,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.get('/api/workout-logs-daily-volume', authenticateToken, async (req: AuthRequest, res) => {
     try {
       // Use supabase directly like in other endpoints - filter by authenticated user
-      const supabaseStorage = storage as any;
+      const supabaseStorage = db as any;
       const { data: logs, error } = await supabaseStorage.supabase
         .from('workout_logs')
         .select('*')
@@ -1153,7 +1153,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         : "Em andamento";
 
       // Get workout log exercises using Supabase directly to get correct structure
-      const supabaseStorage = storage as any; // Cast to access supabase property
+      const supabaseStorage = db as any; // Cast to access supabase property
       const { data: logExercises, error: exercisesError } = await supabaseStorage.supabase
         .from('workout_log_exercises')
         .select('*')
