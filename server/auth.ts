@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { type Request, type Response, type NextFunction } from 'express';
-import { storage } from './storage';
+import { getStorage } from './storage';
 import { 
   registerSchema, 
   loginSchema, 
@@ -62,12 +62,13 @@ export async function registerUser(userData: RegisterUser): Promise<{ user: Omit
   const validatedData = registerSchema.parse(userData);
   
   // Check if user already exists
-  const existingUserByEmail = await storage.getUserByEmail(validatedData.email);
+  const db = await getStorage();
+  const existingUserByEmail = await db.getUserByEmail(validatedData.email);
   if (existingUserByEmail) {
     throw new Error('Email já está em uso');
   }
   
-  const existingUserByUsername = await storage.getUserByUsername(validatedData.username);
+  const existingUserByUsername = await db.getUserByUsername(validatedData.username);
   if (existingUserByUsername) {
     throw new Error('Nome de usuário já está em uso');
   }
@@ -76,7 +77,7 @@ export async function registerUser(userData: RegisterUser): Promise<{ user: Omit
   const hashedPassword = await hashPassword(validatedData.password);
   
   // Create user
-  const newUser = await storage.createUser({
+  const newUser = await db.createUser({
     ...validatedData,
     password: hashedPassword,
   });
@@ -98,7 +99,8 @@ export async function loginUser(credentials: LoginUser): Promise<{ user: Omit<Us
   const validatedCredentials = loginSchema.parse(credentials);
   
   // Find user by email
-  const user = await storage.getUserByEmail(validatedCredentials.email);
+  const db = await getStorage();
+  const user = await db.getUserByEmail(validatedCredentials.email);
   if (!user) {
     throw new Error('Email ou senha incorretos');
   }
@@ -110,7 +112,7 @@ export async function loginUser(credentials: LoginUser): Promise<{ user: Omit<Us
   }
   
   // Update last login
-  await storage.updateLastLogin(user.id);
+  await db.updateLastLogin(user.id);
   
   // Generate token
   const token = generateToken(user.id);
@@ -126,7 +128,8 @@ export async function changeUserPassword(userId: string, passwordData: any): Pro
   const validatedData = changePasswordSchema.parse(passwordData);
   
   // Get current user
-  const user = await storage.getUser(userId);
+  const db = await getStorage();
+  const user = await db.getUser(userId);
   if (!user) {
     throw new Error('Usuário não encontrado');
   }
@@ -141,7 +144,7 @@ export async function changeUserPassword(userId: string, passwordData: any): Pro
   const hashedNewPassword = await hashPassword(validatedData.newPassword);
   
   // Update password
-  await storage.updateUser(userId, { password: hashedNewPassword });
+  await db.updateUser(userId, { password: hashedNewPassword });
 }
 
 // Middleware to authenticate requests
@@ -161,7 +164,8 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   
   try {
     console.log('Looking for user with ID:', decoded.userId);
-    const user = await storage.getUser(decoded.userId);
+    const db = await getStorage();
+    const user = await db.getUser(decoded.userId);
     if (!user) {
       console.error('User not found in database:', decoded.userId);
       return res.status(403).json({ message: 'Sessão expirada - faça login novamente' });
@@ -185,7 +189,8 @@ export async function optionalAuth(req: AuthRequest, res: Response, next: NextFu
     const decoded = verifyToken(token);
     if (decoded) {
       try {
-        const user = await storage.getUser(decoded.userId);
+        const db = await getStorage();
+        const user = await db.getUser(decoded.userId);
         if (user) {
           req.user = user;
         }

@@ -60,12 +60,7 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    // Convert dateOfBirth string to Date if present
-    const processedUpdates = { ...updates };
-    if (processedUpdates.dateOfBirth && typeof processedUpdates.dateOfBirth === 'string') {
-      processedUpdates.dateOfBirth = new Date(processedUpdates.dateOfBirth);
-    }
-    const result = await this.db.update(users).set(processedUpdates).where(eq(users.id, id)).returning();
+    const result = await this.db.update(users).set(updates).where(eq(users.id, id)).returning();
     return result[0];
   }
 
@@ -186,7 +181,7 @@ export class PostgreSQLStorage implements IStorage {
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
     let whereCondition = eq(exercises.id, id);
     if (userId) {
-      whereCondition = and(whereCondition, eq(exercises.user_id, userId));
+      whereCondition = and(whereCondition, eq(exercises.user_id, userId)) as any;
     }
     const result = await this.db.update(exercises).set(exercise).where(whereCondition).returning();
     return result[0];
@@ -200,7 +195,7 @@ export class PostgreSQLStorage implements IStorage {
   async getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]> {
     let whereCondition = eq(exercises.muscleGroup, muscleGroup);
     if (userId) {
-      whereCondition = and(whereCondition, eq(exercises.user_id, userId));
+      whereCondition = and(whereCondition, eq(exercises.user_id, userId)) as any;
     }
     return await this.db.select().from(exercises).where(whereCondition);
   }
@@ -235,7 +230,7 @@ export class PostgreSQLStorage implements IStorage {
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
     let whereCondition = eq(workoutTemplates.id, id);
     if (userId) {
-      whereCondition = and(whereCondition, eq(workoutTemplates.user_id, userId));
+      whereCondition = and(whereCondition, eq(workoutTemplates.user_id, userId)) as any;
     }
     const result = await this.db.delete(workoutTemplates).where(whereCondition);
     return result.rowCount !== null && result.rowCount > 0;
