@@ -834,25 +834,9 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                                   {/* Peso */}
                                   <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
                                     <div className="mb-5">
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                          <div className="w-4 h-4 rounded-full bg-purple-400"></div>
-                                          <label className="text-lg text-slate-200 font-semibold">Peso (kg)</label>
-                                        </div>
-                                        {/* Quick weight buttons */}
-                                        <div className="flex space-x-2">
-                                          {[5, 10, 20].map(weight => (
-                                            <Button
-                                              key={weight}
-                                              variant="ghost"
-                                              size="sm"
-                                              className="px-3 h-10 text-sm bg-purple-400/10 hover:bg-purple-400/20 text-purple-300 rounded-lg"
-                                              onClick={() => handleQuickUpdate(exercise.id, 'weight', weight)}
-                                            >
-                                              {weight}kg
-                                            </Button>
-                                          ))}
-                                        </div>
+                                      <div className="flex items-center space-x-3">
+                                        <div className="w-4 h-4 rounded-full bg-purple-400"></div>
+                                        <label className="text-lg text-slate-200 font-semibold">Peso (kg)</label>
                                       </div>
                                     </div>
                                     <div className="flex items-center space-x-4">
@@ -1142,27 +1126,10 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                 name="weight"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel className="text-slate-200 text-lg flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-                        <span>Peso (kg)</span>
-                      </FormLabel>
-                      {/* Quick weight buttons */}
-                      <div className="flex space-x-1">
-                        {[10, 20, 40].map(weight => (
-                          <Button
-                            key={weight}
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="px-2 h-8 text-xs bg-purple-400/10 hover:bg-purple-400/20 text-purple-300 rounded-lg touch-manipulation"
-                            onClick={() => field.onChange(weight)}
-                          >
-                            {weight}kg
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
+                    <FormLabel className="text-slate-200 text-lg flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-purple-400"></div>
+                      <span>Peso (kg)</span>
+                    </FormLabel>
                     <FormControl>
                       <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
                         <Input
