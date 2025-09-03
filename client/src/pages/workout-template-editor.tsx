@@ -291,78 +291,95 @@ export default function WorkoutTemplateEditor() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white">
       {/* Modern Header Design */}
       <div className="bg-slate-900/98 backdrop-blur-xl border-b border-blue-500/20 shadow-lg">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          {/* Navigation */}
-          <div className="flex items-center mb-4">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Top Navigation Bar */}
+          <div className="flex items-center justify-between mb-8">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setLocation("/treinos")}
-              className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 -ml-2"
+              className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-xl px-3 py-2"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
+              Voltar aos Treinos
             </Button>
+            
+            {/* Quick Info Badge */}
+            {reorderedExercises.length > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/15 rounded-xl border border-blue-500/25">
+                  <Dumbbell className="w-4 h-4 text-blue-400" />
+                  <span className="text-blue-300 text-sm font-medium">
+                    {reorderedExercises.length} exercício{reorderedExercises.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Template Title Section */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             {isEditingTemplateName ? (
-              <div className="flex items-center gap-3">
-                <Input
-                  value={tempTemplateName}
-                  onChange={(e) => setTempTemplateName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleTemplateNameSave();
-                    } else if (e.key === 'Escape') {
-                      handleTemplateNameCancel();
-                    }
-                  }}
-                  className="text-3xl font-bold bg-transparent border-b-2 border-blue-400 text-white px-0 h-auto py-2 rounded-none focus:border-blue-300"
-                  placeholder="Nome do treino"
-                  autoFocus
-                />
-                <div className="flex gap-2">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                    <Edit3 className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <Input
+                    value={tempTemplateName}
+                    onChange={(e) => setTempTemplateName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleTemplateNameSave();
+                      } else if (e.key === 'Escape') {
+                        handleTemplateNameCancel();
+                      }
+                    }}
+                    className="text-3xl font-bold bg-transparent border-b-2 border-blue-400 text-white px-0 h-auto py-3 rounded-none focus:border-blue-300 flex-1"
+                    placeholder="Nome do treino"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-3 ml-16">
                   <Button
                     size="sm"
                     onClick={handleTemplateNameSave}
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4 py-2"
                     disabled={updateTemplateNameMutation.isPending}
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="w-4 h-4 mr-2" />
+                    Salvar
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={handleTemplateNameCancel}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-800 rounded-xl px-4 py-2"
                   >
-                    ✕
+                    Cancelar
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="group cursor-pointer" onClick={handleTemplateNameEdit}>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors">
-                    {template?.name || "Novo Treino"}
-                  </h1>
-                  <Edit3 className="w-5 h-5 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0 group-hover:border-blue-400/50 transition-all duration-200">
+                    <Edit3 className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors leading-tight">
+                        {template?.name || "Novo Treino"}
+                      </h1>
+                      <div className="px-2 py-1 bg-slate-700/50 rounded-lg">
+                        <span className="text-xs font-medium text-slate-300">EDITOR</span>
+                      </div>
+                    </div>
+                    <p className="text-slate-400 text-lg leading-relaxed">
+                      {template?.description || "Toque para editar o nome e descrição do treino"}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-slate-400 text-base mt-2">
-                  {template?.description || "Toque para editar o nome do treino"}
-                </p>
-              </div>
-            )}
-            
-            {/* Exercise Count Badge */}
-            {reorderedExercises.length > 0 && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 rounded-full border border-blue-500/30">
-                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                <span className="text-blue-300 text-sm font-medium">
-                  {reorderedExercises.length} exercício{reorderedExercises.length !== 1 ? 's' : ''}
-                </span>
               </div>
             )}
           </div>
