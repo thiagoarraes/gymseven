@@ -321,10 +321,7 @@ export default function WorkoutTemplateEditor() {
           <div className="space-y-4">
             {isEditingTemplateName ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
-                    <Edit3 className="w-6 h-6 text-blue-400" />
-                  </div>
+                <div className="flex items-center gap-3">
                   <Input
                     value={tempTemplateName}
                     onChange={(e) => setTempTemplateName(e.target.value)}
@@ -340,7 +337,7 @@ export default function WorkoutTemplateEditor() {
                     autoFocus
                   />
                 </div>
-                <div className="flex gap-3 ml-16">
+                <div className="flex gap-3">
                   <Button
                     size="sm"
                     onClick={handleTemplateNameSave}
@@ -362,18 +359,13 @@ export default function WorkoutTemplateEditor() {
               </div>
             ) : (
               <div className="group cursor-pointer" onClick={handleTemplateNameEdit}>
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0 group-hover:border-blue-400/50 transition-all duration-200">
-                    <Edit3 className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
-                  </div>
+                <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-2 mb-2">
                       <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors leading-tight">
                         {template?.name || "Novo Treino"}
                       </h1>
-                      <div className="px-2 py-1 bg-slate-700/50 rounded-lg">
-                        <span className="text-xs font-medium text-slate-300">EDITOR</span>
-                      </div>
+                      <Edit3 className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors opacity-60 group-hover:opacity-100" />
                     </div>
                     <p className="text-slate-400 text-lg leading-relaxed">
                       {template?.description || "Toque para editar o nome e descrição do treino"}
