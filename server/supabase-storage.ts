@@ -607,7 +607,7 @@ export class SupabaseStorage implements IStorage {
           .select(`
             id,
             templateId,
-            workout_templates!inner(
+            workoutTemplates!inner(
               id,
               user_id
             )
