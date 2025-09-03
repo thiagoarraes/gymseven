@@ -25,6 +25,8 @@ import {
   Target
 } from "lucide-react";
 import { Reorder } from "framer-motion";
+import { workoutTemplateApi } from "@/lib/api";
+import { apiRequest } from "@/lib/queryClient";
 
 const schema = z.object({
   sets: z.number().min(1).max(50),
@@ -119,13 +121,7 @@ export default function WorkoutTemplateEditor() {
 
   const updateExerciseMutation = useMutation({
     mutationFn: async ({ exerciseId, updates }: { exerciseId: string; updates: any }) => {
-      const response = await fetch(`/api/workout-template-exercises/${exerciseId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
-      if (!response.ok) throw new Error("Erro ao atualizar exercício");
-      return response.json();
+      return await workoutTemplateApi.updateExercise(exerciseId, updates);
     },
     onMutate: async ({ exerciseId, updates }) => {
       // Optimistic update
@@ -153,11 +149,7 @@ export default function WorkoutTemplateEditor() {
 
   const removeExerciseMutation = useMutation({
     mutationFn: async (exerciseId: string) => {
-      const response = await fetch(`/api/workout-template-exercises/${exerciseId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Erro ao remover exercício");
-      return response.json();
+      return await workoutTemplateApi.removeExercise(exerciseId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
@@ -170,12 +162,7 @@ export default function WorkoutTemplateEditor() {
 
   const reorderExercisesMutation = useMutation({
     mutationFn: async (exerciseUpdates: Array<{ id: string; order: number }>) => {
-      const response = await fetch(`/api/workout-templates/${id}/reorder`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ exercises: exerciseUpdates }),
-      });
-      if (!response.ok) throw new Error("Erro ao reordenar exercícios");
+      const response = await apiRequest("PATCH", `/api/workout-templates/${id}/reorder`, { exercises: exerciseUpdates });
       return response.json();
     },
     onSuccess: () => {
