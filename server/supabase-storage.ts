@@ -566,7 +566,7 @@ export class SupabaseStorage implements IStorage {
   // Workout Template Exercises
   async getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
     const { data, error } = await supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .select(`
         *,
         exercises (*)
@@ -585,7 +585,7 @@ export class SupabaseStorage implements IStorage {
 
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
     const { data, error } = await supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .insert(exercise)
       .select()
       .single();
@@ -596,7 +596,7 @@ export class SupabaseStorage implements IStorage {
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
     const { data, error } = await supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .update(updates)
       .eq('id', id)
       .select()
@@ -608,7 +608,7 @@ export class SupabaseStorage implements IStorage {
 
   async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .delete()
       .eq('id', id);
 
@@ -617,7 +617,7 @@ export class SupabaseStorage implements IStorage {
 
   async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {
     const { error } = await supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .delete()
       .eq('templateId', templateId)
       .eq('exerciseId', exerciseId);
