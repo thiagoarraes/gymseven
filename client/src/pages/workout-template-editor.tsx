@@ -431,7 +431,7 @@ export default function WorkoutTemplateEditor() {
         ) : (
           <div className="space-y-4">
             {reorderedExercises.map((exercise: any, index: number) => (
-              <Card key={exercise.id} className="bg-slate-800/70 border-slate-600/50 rounded-2xl hover:bg-slate-700/80 transition-all duration-300 group shadow-xl">
+              <Card key={exercise.id} className="bg-slate-800/70 border-slate-600/50 rounded-2xl hover:bg-slate-800/90 hover:border-slate-500/60 transition-all duration-300 group shadow-xl hover:shadow-2xl">
                 <CardContent className="p-6">
                   {/* Exercise Header - Clean and Spacious */}
                   <div className="flex items-start gap-4 mb-6">
