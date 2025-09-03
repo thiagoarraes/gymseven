@@ -290,7 +290,7 @@ export default function WorkoutTemplateEditor() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white">
       {/* Modern Header Design */}
-      <div className="bg-slate-900/98 backdrop-blur-xl border-b border-blue-500/20 sticky top-0 z-50 shadow-lg">
+      <div className="bg-slate-900/98 backdrop-blur-xl border-b border-blue-500/20 shadow-lg">
         <div className="max-w-4xl mx-auto px-4 py-6">
           {/* Navigation */}
           <div className="flex items-center mb-4">
