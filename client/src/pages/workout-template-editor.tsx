@@ -1,349 +1,186 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Save, Trash2, Edit3, GripVertical, Minus, Timer, Dumbbell, MoreVertical, Check, CheckCircle2, Menu, ChevronUp, ChevronDown, Search, Heart, Target, Layers, Zap, TrendingUp, Calendar, ArrowUp, ArrowUpDown } from "lucide-react";
-import { motion, Reorder, useDragControls } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useParams, useLocation } from "wouter";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { workoutTemplateApi } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
-import Exercises from "./exercises";
+import { 
+  ArrowLeft, 
+  Plus, 
+  Minus, 
+  Save, 
+  Edit3, 
+  Timer, 
+  Trash2, 
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
+  Dumbbell,
+  Target
+} from "lucide-react";
+import { Reorder } from "framer-motion";
 
-// Quick Exercise Selector Component
-interface QuickExerciseSelectorProps {
-  onExerciseAdd: (exerciseId: string) => void;
-  excludeExercises: string[];
-}
-
-function QuickExerciseSelector({ onExerciseAdd, excludeExercises }: QuickExerciseSelectorProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<string>("Todos");
-
-  const { data: exercises = [], isLoading } = useQuery<any[]>({
-    queryKey: ["/api/exercicios"],
-  });
-
-  const getMuscleGroupInfo = (muscleGroup: string) => {
-    const groups: Record<string, { icon: any; bgColor: string; textColor: string; borderColor: string }> = {
-      "Peito": { 
-        icon: Heart, 
-        bgColor: "bg-rose-100/80 dark:bg-rose-500/20", 
-        textColor: "text-rose-700 dark:text-rose-400", 
-        borderColor: "border-rose-300/50 dark:border-rose-500/30" 
-      },
-      "Costas": { 
-        icon: ArrowUp, 
-        bgColor: "bg-blue-100/80 dark:bg-blue-500/20", 
-        textColor: "text-blue-700 dark:text-blue-400", 
-        borderColor: "border-blue-300/50 dark:border-blue-500/30" 
-      },
-      "Ombros": { 
-        icon: Layers, 
-        bgColor: "bg-amber-100/80 dark:bg-amber-500/20", 
-        textColor: "text-amber-700 dark:text-amber-400", 
-        borderColor: "border-amber-300/50 dark:border-amber-500/30" 
-      },
-      "Bíceps": { 
-        icon: Zap, 
-        bgColor: "bg-purple-100/80 dark:bg-purple-500/20", 
-        textColor: "text-purple-700 dark:text-purple-400", 
-        borderColor: "border-purple-300/50 dark:border-purple-500/30" 
-      },
-      "Tríceps": { 
-        icon: TrendingUp, 
-        bgColor: "bg-indigo-100/80 dark:bg-indigo-500/20", 
-        textColor: "text-indigo-700 dark:text-indigo-400", 
-        borderColor: "border-indigo-300/50 dark:border-indigo-500/30" 
-      },
-      "Pernas": { 
-        icon: Target, 
-        bgColor: "bg-emerald-100/80 dark:bg-emerald-500/20", 
-        textColor: "text-emerald-700 dark:text-emerald-400", 
-        borderColor: "border-emerald-300/50 dark:border-emerald-500/30" 
-      },
-      "Abdômen": { 
-        icon: Calendar, 
-        bgColor: "bg-orange-100/80 dark:bg-orange-500/20", 
-        textColor: "text-orange-700 dark:text-orange-400", 
-        borderColor: "border-orange-300/50 dark:border-orange-500/30" 
-      },
-    };
-
-    return groups[muscleGroup] || { 
-      icon: Dumbbell, 
-      bgColor: "bg-gray-100/80 dark:bg-gray-500/20", 
-      textColor: "text-gray-700 dark:text-gray-400", 
-      borderColor: "border-gray-300/50 dark:border-gray-500/30" 
-    };
-  };
-
-  const filteredExercises = exercises.filter((exercise: any) => {
-    const matchesSearch = exercise.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.muscleGroup === selectedMuscleGroup;
-    const notExcluded = !excludeExercises.includes(exercise.id);
-    return matchesSearch && matchesMuscleGroup && notExcluded;
-  });
-
-  const muscleGroups = ["Todos", ...Array.from(new Set(exercises.map((ex: any) => ex.muscleGroup).filter(Boolean)))];
-
-  if (isLoading) {
-    return <div className="text-center py-8 text-slate-400">Carregando exercícios...</div>;
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Search and Filter */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input
-            placeholder="Buscar exercícios..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-slate-800/50 border-slate-600/50 text-white"
-          />
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          {muscleGroups.map((group) => (
-            <Button
-              key={group}
-              size="sm"
-              variant={selectedMuscleGroup === group ? "default" : "outline"}
-              onClick={() => setSelectedMuscleGroup(group as string)}
-              className={selectedMuscleGroup === group 
-                ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                : "border-slate-600 text-slate-300 hover:bg-slate-700"
-              }
-            >
-              {group as string}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Exercise Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-        {filteredExercises.map((exercise: any) => {
-          const info = getMuscleGroupInfo(exercise.muscleGroup);
-          const IconComponent = info.icon;
-          
-          return (
-            <Card
-              key={exercise.id}
-              className="cursor-pointer hover:bg-slate-700/50 transition-all duration-200 border-slate-600/50 bg-slate-800/30"
-              onClick={() => onExerciseAdd(exercise.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg ${info.bgColor} ${info.borderColor} border`}>
-                    <IconComponent className={`w-5 h-5 ${info.textColor}`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white truncate">{exercise.name}</h3>
-                    <p className="text-sm text-slate-400">{exercise.muscleGroup}</p>
-                  </div>
-                  <Plus className="w-5 h-5 text-green-400 flex-shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {filteredExercises.length === 0 && (
-        <div className="text-center py-8 text-slate-400">
-          {excludeExercises.length > 0 && searchTerm === "" && selectedMuscleGroup === "Todos"
-            ? "Todos os exercícios já foram adicionados ao treino!"
-            : "Nenhum exercício encontrado."
-          }
-        </div>
-      )}
-    </div>
-  );
-}
-
-const exerciseFormSchema = z.object({
-  sets: z.number().min(1, "Pelo menos 1 série"),
-  reps: z.string().min(1, "Repetições obrigatórias"),
+const schema = z.object({
+  sets: z.number().min(1).max(50),
+  reps: z.string().min(1, "Repetições são obrigatórias"),
   weight: z.number().optional(),
 });
 
-type ExerciseFormValues = z.infer<typeof exerciseFormSchema>;
+type FormData = z.infer<typeof schema>;
 
-interface WorkoutTemplateEditorProps {
-  templateId?: string;
-}
-
-export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEditorProps) {
-  const [, navigate] = useLocation();
-  const [showExerciseSelector, setShowExerciseSelector] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
-  const [editingExercise, setEditingExercise] = useState<any>(null);
-  const [isExerciseFormOpen, setIsExerciseFormOpen] = useState(false);
-  const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
-  const [isEditingTemplateName, setIsEditingTemplateName] = useState(false);
-  const [tempTemplateName, setTempTemplateName] = useState("");
-  const [recentlyUpdated, setRecentlyUpdated] = useState<string | null>(null);
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [reorderedExercises, setReorderedExercises] = useState<any[]>([]);
-  const [showReorderModal, setShowReorderModal] = useState(false);
-  const [tempReorderedExercises, setTempReorderedExercises] = useState<any[]>([]);
+export default function WorkoutTemplateEditor() {
+  const { id } = useParams();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const [isEditingTemplateName, setIsEditingTemplateName] = useState(false);
+  const [tempTemplateName, setTempTemplateName] = useState("");
+  const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+  const [isExerciseFormOpen, setIsExerciseFormOpen] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<any>(null);
+  const [reorderedExercises, setReorderedExercises] = useState<any[]>([]);
+  const [showReorderModal, setShowReorderModal] = useState(false);
+  const [tempReorderedExercises, setTempReorderedExercises] = useState<any[]>([]);
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      sets: 3,
+      reps: "",
+      weight: undefined,
+    },
+  });
+
+  // Queries
   const { data: template, isLoading: templateLoading } = useQuery({
-    queryKey: ["/api/workout-templates", templateId],
-    queryFn: () => workoutTemplateApi.getById(templateId!),
-    enabled: !!templateId,
+    queryKey: ["/api/workout-templates", id],
+    enabled: !!id,
   });
 
   const { data: templateExercises = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/workout-templates", templateId, "exercises"],
-    queryFn: () => workoutTemplateApi.getExercises(templateId!),
-    enabled: !!templateId,
+    queryKey: ["/api/workout-templates", id, "exercises"],
+    enabled: !!id,
   });
 
-  const addExerciseMutation = useMutation({
-    mutationFn: (exerciseData: any) => workoutTemplateApi.addExercise(templateId!, exerciseData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
-      setIsExerciseFormOpen(false);
-      setEditingExercise(null);
-      toast({
-        title: "Exercício adicionado!",
-        description: "O exercício foi adicionado ao treino.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o exercício.",
-        variant: "destructive",
-      });
-    },
+  const { data: allExercises = [] } = useQuery({
+    queryKey: ["/api/exercises"],
   });
 
-  const updateExerciseMutation = useMutation({
-    mutationFn: ({ exerciseId, updates }: { exerciseId: string; updates: any }) => 
-      workoutTemplateApi.updateExercise(exerciseId, updates),
-    onSuccess: () => {
-      // Não invalidar queries para atualizações rápidas - preserva a ordem
-      // queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
-      // queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
-      
-      // Visual feedback for successful update
-      setRecentlyUpdated('success');
-      setTimeout(() => setRecentlyUpdated(null), 2000);
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o exercício.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const removeExerciseMutation = useMutation({
-    mutationFn: (exerciseId: string) => workoutTemplateApi.removeExercise(exerciseId),
-    onSuccess: (_, exerciseId) => {
-      // Atualização otimista - remove do estado local imediatamente
-      setReorderedExercises(prev => prev.filter(exercise => exercise.id !== exerciseId));
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates-with-exercises"] });
-      toast({
-        title: "Exercício removido!",
-        description: "O exercício foi removido do treino.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover o exercício.",
-        variant: "destructive",
-      });
-    },
-  });
-
+  // Mutations
   const updateTemplateNameMutation = useMutation({
-    mutationFn: (newName: string) => 
-      fetch(`/api/workout-templates/${templateId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName })
-      }).then(res => res.json()),
+    mutationFn: async (name: string) => {
+      const response = await fetch(`/api/workout-templates/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar nome");
+      return response.json();
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", templateId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id] });
       setIsEditingTemplateName(false);
       toast({
         title: "Nome atualizado!",
         description: "O nome do treino foi alterado com sucesso.",
       });
     },
-    onError: () => {
+  });
+
+  const addExerciseMutation = useMutation({
+    mutationFn: async (exerciseData: any) => {
+      const response = await fetch(`/api/workout-templates/${id}/exercises`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...exerciseData, workoutTemplateId: id }),
+      });
+      if (!response.ok) throw new Error("Erro ao adicionar exercício");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      setShowExerciseSelector(false);
+      setIsExerciseFormOpen(false);
       toast({
-        title: "Erro",
-        description: "Não foi possível alterar o nome do treino.",
-        variant: "destructive",
+        title: "Exercício adicionado!",
+        description: "O exercício foi adicionado ao treino.",
       });
     },
   });
 
-  const form = useForm<ExerciseFormValues>({
-    resolver: zodResolver(exerciseFormSchema),
-    defaultValues: {
-      sets: 3,
-      reps: "8-12",
-      weight: undefined,
+  const updateExerciseMutation = useMutation({
+    mutationFn: async ({ exerciseId, updates }: { exerciseId: string; updates: any }) => {
+      const response = await fetch(`/api/workout-template-exercises/${exerciseId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar exercício");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
     },
   });
 
-  // Sync template name when data changes
-  useEffect(() => {
-    if (template?.name && !isEditingTemplateName) {
-      setTempTemplateName(template.name);
-    }
-  }, [template?.name, isEditingTemplateName]);
+  const removeExerciseMutation = useMutation({
+    mutationFn: async (exerciseId: string) => {
+      const response = await fetch(`/api/workout-template-exercises/${exerciseId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Erro ao remover exercício");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      toast({
+        title: "Exercício removido!",
+        description: "O exercício foi removido do treino.",
+      });
+    },
+  });
 
+  const reorderExercisesMutation = useMutation({
+    mutationFn: async (exerciseUpdates: Array<{ id: string; order: number }>) => {
+      const response = await fetch(`/api/workout-templates/${id}/reorder`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exercises: exerciseUpdates }),
+      });
+      if (!response.ok) throw new Error("Erro ao reordenar exercícios");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+    },
+  });
+
+  // Effects
   useEffect(() => {
-    // Sempre sincroniza o estado local com os dados do servidor
-    // mas preserva a ordem se o usuário está reorganizando
-    if (templateExercises.length !== reorderedExercises.length || 
-        (templateExercises.length > 0 && reorderedExercises.length === 0)) {
-      setReorderedExercises([...templateExercises]);
+    if (templateExercises.length > 0) {
+      setReorderedExercises(templateExercises);
     }
   }, [templateExercises]);
 
-  const handleReorder = (newOrder: any[]) => {
-    setReorderedExercises(newOrder);
-  };
+  useEffect(() => {
+    if (template?.name) {
+      setTempTemplateName(template.name);
+    }
+  }, [template?.name]);
 
-  const moveExercise = (exerciseId: string, direction: 'up' | 'down') => {
-    const currentIndex = reorderedExercises.findIndex(ex => ex.id === exerciseId);
-    if (currentIndex === -1) return;
-    
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex < 0 || newIndex >= reorderedExercises.length) return;
-    
-    const newOrder = [...reorderedExercises];
-    [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
-    
-    handleReorder(newOrder);
-  };
-
+  // Handlers
   const handleTemplateNameEdit = () => {
-    setTempTemplateName(template?.name || "");
     setIsEditingTemplateName(true);
+    setTempTemplateName(template?.name || "");
   };
 
   const handleTemplateNameSave = () => {
@@ -359,80 +196,50 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     setIsEditingTemplateName(false);
   };
 
-  const handleExerciseSelect = (exerciseId: string) => {
-    setSelectedExercises(prev => 
-      prev.includes(exerciseId) 
-        ? prev.filter(id => id !== exerciseId)
-        : [...prev, exerciseId]
-    );
-  };
-
-  const handleAddSelectedExercises = () => {
-    if (selectedExercises.length === 0) {
-      toast({
-        title: "Nenhum exercício selecionado",
-        description: "Selecione pelo menos um exercício para adicionar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // For now, add exercises with default values
-    selectedExercises.forEach((exerciseId, index) => {
-      const exerciseData = {
-        exerciseId,
-        sets: 3,
-        reps: "8-12",
-        weight: null,
-        order: reorderedExercises.length + index + 1,
-      };
-      addExerciseMutation.mutate(exerciseData);
+  const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
+    updateExerciseMutation.mutate({
+      exerciseId,
+      updates: { [field]: value },
     });
-
-    setSelectedExercises([]);
-    setShowExerciseSelector(false);
   };
 
   const handleRemoveExercise = (exerciseId: string) => {
     removeExerciseMutation.mutate(exerciseId);
   };
 
-  const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
-    // Atualização otimista - atualiza o estado local primeiro
-    setReorderedExercises(prev => 
-      prev.map(exercise => 
-        exercise.id === exerciseId 
-          ? { ...exercise, [field]: value }
-          : exercise
-      )
-    );
+  const handleReorder = (newOrder: any[]) => {
+    setReorderedExercises(newOrder);
+  };
+
+  const handleSaveWorkout = async () => {
+    const exerciseUpdates = reorderedExercises.map((exercise, index) => ({
+      id: exercise.id,
+      order: index + 1,
+    }));
     
-    // Depois envia para o servidor
-    updateExerciseMutation.mutate({
-      exerciseId,
-      updates: { [field]: value }
+    if (exerciseUpdates.length > 0) {
+      reorderExercisesMutation.mutate(exerciseUpdates);
+    }
+    
+    toast({
+      title: "Treino salvo!",
+      description: "Todas as alterações foram salvas com sucesso.",
     });
   };
 
-  const onSubmit = (data: ExerciseFormValues) => {
-    if (!editingExercise) return;
-
-    const exerciseData = {
-      exerciseId: editingExercise.id,
-      sets: data.sets,
-      reps: data.reps,
-      weight: data.weight,
-      order: templateExercises.length + 1,
-    };
-
-    addExerciseMutation.mutate(exerciseData);
+  const onSubmit = (data: FormData) => {
+    if (editingExercise) {
+      const exerciseData = {
+        exerciseId: editingExercise.id,
+        sets: data.sets,
+        reps: data.reps,
+        weight: data.weight || null,
+        order: reorderedExercises.length + 1,
+      };
+      addExerciseMutation.mutate(exerciseData);
+    }
   };
 
-  const handleSaveWorkout = () => {
-    navigate("/treinos");
-  };
-
-  // Modal de reordenação
   const openReorderModal = () => {
     setTempReorderedExercises([...reorderedExercises]);
     setShowReorderModal(true);
@@ -442,6 +249,12 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
     setReorderedExercises(tempReorderedExercises);
     setShowReorderModal(false);
     
+    const exerciseUpdates = tempReorderedExercises.map((exercise, index) => ({
+      id: exercise.id,
+      order: index + 1,
+    }));
+    
+    reorderExercisesMutation.mutate(exerciseUpdates);
     toast({
       title: "Exercícios reordenados!",
       description: "A nova ordem foi aplicada ao treino.",
@@ -475,22 +288,27 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white pb-24">
-      {/* Header */}
-      <div className="glass-card rounded-none border-b border-slate-700/50 p-4 sticky top-0 z-40 backdrop-blur-xl">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/treinos")}
-            className="text-slate-500 hover:text-slate-300 hover:bg-slate-800/30 transition-colors px-2 py-1 text-xs"
-          >
-            <ArrowLeft className="w-3 h-3 mr-1" />
-            Voltar
-          </Button>
-          <div className="flex-1 min-w-0">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      {/* Modern Header Design */}
+      <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/30 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          {/* Navigation */}
+          <div className="flex items-center mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/treinos")}
+              className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 -ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+          </div>
+          
+          {/* Template Title Section */}
+          <div className="space-y-2">
             {isEditingTemplateName ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-3">
                 <Input
                   value={tempTemplateName}
                   onChange={(e) => setTempTemplateName(e.target.value)}
@@ -501,540 +319,484 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                       handleTemplateNameCancel();
                     }
                   }}
-                  className="text-2xl font-bold bg-slate-800 border-slate-700 text-white h-12"
+                  className="text-3xl font-bold bg-transparent border-b-2 border-blue-400 text-white px-0 h-auto py-2 rounded-none focus:border-blue-300"
                   placeholder="Nome do treino"
                   autoFocus
                 />
-                <Button
-                  size="sm"
-                  onClick={handleTemplateNameSave}
-                  className="gradient-accent"
-                  disabled={updateTemplateNameMutation.isPending}
-                >
-                  <Save className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleTemplateNameCancel}
-                  className="border-slate-700 text-slate-300"
-                >
-                  ✕
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleTemplateNameSave}
+                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    disabled={updateTemplateNameMutation.isPending}
+                  >
+                    <Save className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleTemplateNameCancel}
+                    className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                  >
+                    ✕
+                  </Button>
+                </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-2 group">
-                <h1 className="text-2xl font-bold text-white">
-                  {template?.name || "Novo Treino"}
-                </h1>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleTemplateNameEdit}
-                  className="opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-all duration-300 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </Button>
+              <div className="group cursor-pointer" onClick={handleTemplateNameEdit}>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors">
+                    {template?.name || "Novo Treino"}
+                  </h1>
+                  <Edit3 className="w-5 h-5 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                </div>
+                <p className="text-slate-400 text-base mt-2">
+                  {template?.description || "Toque para editar o nome do treino"}
+                </p>
               </div>
             )}
-            <p className="text-slate-400 text-sm">
-              {template?.description || "Adicione exercícios ao seu treino"}
-            </p>
+            
+            {/* Exercise Count Badge */}
+            {reorderedExercises.length > 0 && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 rounded-full border border-blue-500/30">
+                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                <span className="text-blue-300 text-sm font-medium">
+                  {reorderedExercises.length} exercício{reorderedExercises.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Reorder Button */}
-      {reorderedExercises.length > 1 && (
-        <div className="mobile-container mobile-spacing mb-4">
-          <Card className="glass-card rounded-xl border-dashed border-purple-600/50 hover:border-purple-500/50 transition-all duration-200 hover:bg-purple-800/20 cursor-pointer"
-                onClick={openReorderModal}>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-purple-400 transition-colors">
-                <ArrowUpDown className="w-5 h-5" />
-                <span className="font-medium">
-                  Reordenar exercícios
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Quick Actions */}
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowExerciseSelector(true)}
+            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-4 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Adicionar Exercícios
+          </Button>
+          
+          {reorderedExercises.length > 1 && (
+            <Button
+              onClick={openReorderModal}
+              variant="outline"
+              className="px-4 py-4 border-slate-600 text-slate-300 hover:bg-slate-800 rounded-2xl transition-all duration-300"
+            >
+              <ArrowUpDown className="w-5 h-5" />
+            </Button>
+          )}
         </div>
-      )}
 
-      {/* Template Exercises */}
-      <div className="mobile-container mobile-spacing">
+        {/* Exercise List */}
         {exercisesLoading ? (
-          [...Array(3)].map((_, i) => (
-            <Card key={i} className="glass-card rounded-xl">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="loading-skeleton h-6 rounded mb-2 w-3/4"></div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="bg-slate-800/40 border-slate-700/30 rounded-2xl">
+                <CardContent className="p-6">
+                  <div className="space-y-3">
+                    <div className="loading-skeleton h-6 rounded-lg w-3/4"></div>
                     <div className="loading-skeleton h-4 rounded w-1/2"></div>
+                    <div className="loading-skeleton h-16 rounded-xl"></div>
                   </div>
-                  <div className="loading-skeleton h-8 w-16 rounded"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : reorderedExercises.length === 0 ? (
-          <Card className="glass-card rounded-xl">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 flex items-center justify-center">
-                <Plus className="w-8 h-8 text-slate-400" />
+          <Card className="bg-slate-800/30 border-slate-700/30 rounded-2xl border-2 border-dashed">
+            <CardContent className="p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                <Plus className="w-10 h-10 text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
-                Nenhum exercício adicionado
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Seu treino está vazio
               </h3>
-              <p className="text-slate-400 mb-6">
-                Comece adicionando exercícios ao seu treino
+              <p className="text-slate-400 text-lg mb-8 max-w-md mx-auto">
+                Comece adicionando exercícios para criar sua rotina personalizada
               </p>
               <Button
                 onClick={() => setShowExerciseSelector(true)}
-                className="gradient-accent"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg transition-all duration-300"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Exercícios
+                <Plus className="w-5 h-5 mr-2" />
+                Adicionar Primeiro Exercício
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <>
-            <Reorder.Group
-              axis="y"
-              values={reorderedExercises}
-              onReorder={handleReorder}
-              className="space-y-4"
-            >
-              {reorderedExercises.map((exercise: any, index: number) => (
-                  <Reorder.Item
-                    key={exercise.id}
-                    value={exercise}
-                    className="relative"
-                    onDragStart={() => setDraggedItem(exercise.id)}
-                    onDragEnd={() => setDraggedItem(null)}
-                    whileDrag={{ 
-                      scale: 1.02, 
-                      boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
-                      zIndex: 10,
-                      rotate: 2
-                    }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card className={`glass-card rounded-2xl border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-lg transition-all duration-200 ${
-                      draggedItem === exercise.id ? 'ring-2 ring-blue-500/50 shadow-2xl' : 'hover:border-slate-600/50'
-                    }`}>
-                      <CardContent className="mobile-card-padding">
-                        <div className="space-y-3">
-                          {/* Exercise Header - Layout clean e espaçoso */}
-                          <div className="space-y-4">
-                            {/* Exercise Number + Name Section */}
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0 mt-1">
-                                <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
-                              </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-xl font-bold text-white leading-relaxed exercise-name mb-1">
-                                  {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
-                                </h3>
-                                
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400/60"></div>
-                                    <span className="text-blue-300/80 font-medium text-sm">
-                                      {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
-                                    </span>
-                                  </div>
-                                  
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-7 h-7 p-0 hover:bg-red-500/20 rounded-lg transition-colors opacity-60 hover:opacity-100"
-                                    onClick={() => handleRemoveExercise(exercise.id)}
-                                    title="Remover exercício"
-                                  >
-                                    <Trash2 className="text-red-400 w-3.5 h-3.5" />
-                                  </Button>
-                                </div>
-                              </div>
+          <div className="space-y-4">
+            {reorderedExercises.map((exercise: any, index: number) => (
+              <Card key={exercise.id} className="bg-slate-800/40 border-slate-700/30 rounded-2xl hover:bg-slate-800/60 transition-all duration-300 group">
+                <CardContent className="p-6">
+                  {/* Exercise Header - Clean and Spacious */}
+                  <div className="flex items-start gap-4 mb-6">
+                    {/* Exercise Number Badge */}
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                      <span className="font-bold text-blue-400">{index + 1}</span>
+                    </div>
+                    
+                    {/* Exercise Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-2xl font-bold text-white leading-tight exercise-name mb-2">
+                        {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                        <span className="text-blue-300 font-medium text-sm">
+                          {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Remove Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
+                      onClick={() => handleRemoveExercise(exercise.id)}
+                      title="Remover exercício"
+                    >
+                      <Trash2 className="text-red-400 w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Exercise Parameters - Modern Grid Layout */}
+                  <div className="grid gap-4">
+                    {exercise.exercise?.muscleGroup === 'Cardio' || exercise.muscleGroup === 'Cardio' ? (
+                      <>
+                        {/* Cardio Parameters */}
+                        <div className="grid md:grid-cols-3 gap-4">
+                          {/* Duration */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Timer className="w-4 h-4 text-green-400" />
+                              <label className="text-sm font-semibold text-slate-200">Duração</label>
                             </div>
+                            <Input
+                              value={exercise.reps}
+                              onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                              className="text-center bg-slate-700/50 border-slate-600/30 text-white text-lg font-bold h-12 rounded-xl"
+                              placeholder="30 min"
+                            />
                           </div>
 
-                          {/* Parameters - Layout mais espaçoso e legível */}
-                          <div className="space-y-6 mt-6">
-                            {exercise.exercise?.muscleGroup === 'Cardio' || exercise.muscleGroup === 'Cardio' ? (
-                              <>
-                                {/* Cardio Parameters */}
-                                <div className="space-y-5">
-                                  {/* Duration */}
-                                  <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                                    <div className="mb-5">
-                                      <div className="flex items-center space-x-3 mb-2">
-                                        <div className="w-4 h-4 rounded-full bg-green-400"></div>
-                                        <label className="text-lg text-slate-200 font-semibold">Duração</label>
-                                      </div>
-                                    </div>
-                                    <div className="text-center">
-                                      <Input
-                                        value={exercise.reps}
-                                        onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                                        className="text-center bg-slate-700/50 border-slate-600/50 text-white text-2xl font-bold h-20 rounded-xl focus:border-green-400/50 focus:ring-green-400/20"
-                                        placeholder="30 min"
-                                      />
-                                      <div className="text-sm text-slate-400 mt-3">tempo de exercício</div>
-                                    </div>
-                                  </div>
+                          {/* Distance */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Target className="w-4 h-4 text-yellow-400" />
+                              <label className="text-sm font-semibold text-slate-200">Distância</label>
+                            </div>
+                            <Input
+                              type="text"
+                              value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
+                              }}
+                              onBlur={(e) => {
+                                const value = e.target.value.trim();
+                                if (value === '') {
+                                  handleQuickUpdate(exercise.id, 'weight', null);
+                                  setWeightInputs(prev => {
+                                    const newInputs = { ...prev };
+                                    delete newInputs[exercise.id];
+                                    return newInputs;
+                                  });
+                                } else {
+                                  const numericValue = parseFloat(value);
+                                  if (!isNaN(numericValue)) {
+                                    handleQuickUpdate(exercise.id, 'weight', numericValue);
+                                    setWeightInputs(prev => {
+                                      const newInputs = { ...prev };
+                                      delete newInputs[exercise.id];
+                                      return newInputs;
+                                    });
+                                  }
+                                }
+                              }}
+                              className="text-center bg-slate-700/50 border-slate-600/30 text-white text-lg font-bold h-12 rounded-xl"
+                              placeholder="5 km"
+                            />
+                          </div>
 
-                                  {/* Distance */}
-                                  <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                                    <div className="mb-5">
-                                      <div className="flex items-center space-x-3 mb-2">
-                                        <div className="w-4 h-4 rounded-full bg-yellow-400"></div>
-                                        <label className="text-lg text-slate-200 font-semibold">Distância</label>
-                                      </div>
-                                    </div>
-                                    <div className="text-center">
-                                      <Input
-                                        type="text"
-                                        value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value.trim();
-                                          if (value === '') {
-                                            handleQuickUpdate(exercise.id, 'weight', null);
-                                            setWeightInputs(prev => {
-                                              const newInputs = { ...prev };
-                                              delete newInputs[exercise.id];
-                                              return newInputs;
-                                            });
-                                          } else {
-                                            const numericValue = parseFloat(value);
-                                            if (!isNaN(numericValue)) {
-                                              handleQuickUpdate(exercise.id, 'weight', numericValue);
-                                              setWeightInputs(prev => {
-                                                const newInputs = { ...prev };
-                                                delete newInputs[exercise.id];
-                                                return newInputs;
-                                              });
-                                            }
-                                          }
-                                        }}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            e.currentTarget.blur();
-                                          }
-                                        }}
-                                        className="text-center bg-slate-700/50 border-slate-600/50 text-white text-2xl font-bold h-20 rounded-xl focus:border-yellow-400/50 focus:ring-yellow-400/20"
-                                        placeholder="5 km"
-                                      />
-                                      <div className="text-sm text-slate-400 mt-3">distância percorrida</div>
-                                    </div>
-                                  </div>
-
-                                  {/* Intensity */}
-                                  <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                                    <div className="mb-5">
-                                      <div className="flex items-center space-x-3 mb-2">
-                                        <div className="w-4 h-4 rounded-full bg-purple-400"></div>
-                                        <label className="text-lg text-slate-200 font-semibold">Intensidade</label>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                        onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
-                                        disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
-                                      >
-                                        <Minus className="w-6 h-6" />
-                                      </Button>
-                                      <div className="text-center px-6">
-                                        <div className="text-5xl font-bold text-purple-400 mb-2">{exercise.sets}</div>
-                                        <div className="text-sm text-slate-400">nível de intensidade</div>
-                                      </div>
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                        onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
-                                        disabled={updateExerciseMutation.isPending}
-                                      >
-                                        <Plus className="w-6 h-6" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                {/* Regular Exercises */}
-                                <div className="space-y-5">
-                                  {/* Séries */}
-                                  <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                                    <div className="mb-5">
-                                      <div className="flex items-center space-x-3 mb-2">
-                                        <div className="w-4 h-4 rounded-full bg-green-400"></div>
-                                        <label className="text-lg text-slate-200 font-semibold">Séries</label>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                        onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
-                                        disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
-                                      >
-                                        <Minus className="w-6 h-6" />
-                                      </Button>
-                                      <div className="text-center px-6">
-                                        <div className="text-5xl font-bold text-green-400 mb-2">{exercise.sets}</div>
-                                        <div className="text-sm text-slate-400">número de séries</div>
-                                      </div>
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                        onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
-                                        disabled={updateExerciseMutation.isPending}
-                                      >
-                                        <Plus className="w-6 h-6" />
-                                      </Button>
-                                    </div>
-                                  </div>
-
-                                  {/* Repetições */}
-                                  <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                                    <div className="mb-5">
-                                      <div className="flex items-center space-x-3 mb-2">
-                                        <div className="w-4 h-4 rounded-full bg-yellow-400"></div>
-                                        <label className="text-lg text-slate-200 font-semibold">Repetições</label>
-                                      </div>
-                                    </div>
-                                    <div className="text-center">
-                                      <Input
-                                        value={exercise.reps}
-                                        onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                                        className="text-center bg-slate-700/50 border-slate-600/50 text-white text-2xl font-bold h-20 rounded-xl focus:border-yellow-400/50 focus:ring-yellow-400/20"
-                                        placeholder="8-12"
-                                      />
-                                      <div className="text-sm text-slate-400 mt-3">repetições por série</div>
-                                    </div>
-                                  </div>
-
-                                  {/* Peso */}
-                                  <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                                    <div className="mb-5">
-                                      <div className="flex items-center space-x-3">
-                                        <div className="w-4 h-4 rounded-full bg-purple-400"></div>
-                                        <label className="text-lg text-slate-200 font-semibold">Peso (kg)</label>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center space-x-4">
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                        onClick={() => {
-                                          const currentWeight = exercise.weight || 0;
-                                          const newWeight = Math.max(0, currentWeight - 2.5);
-                                          handleQuickUpdate(exercise.id, 'weight', newWeight === 0 ? null : newWeight);
-                                        }}
-                                        disabled={updateExerciseMutation.isPending}
-                                      >
-                                        <Minus className="w-6 h-6" />
-                                      </Button>
-                                      <div className="flex-1">
-                                        <Input
-                                          type="text"
-                                          value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
-                                          onChange={(e) => {
-                                            const value = e.target.value;
-                                            setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
-                                          }}
-                                          onBlur={(e) => {
-                                            const value = e.target.value.trim();
-                                            if (value === '') {
-                                              handleQuickUpdate(exercise.id, 'weight', null);
-                                              setWeightInputs(prev => {
-                                                const newInputs = { ...prev };
-                                                delete newInputs[exercise.id];
-                                                return newInputs;
-                                              });
-                                            } else {
-                                              const numericValue = parseFloat(value);
-                                              if (!isNaN(numericValue)) {
-                                                handleQuickUpdate(exercise.id, 'weight', numericValue);
-                                                setWeightInputs(prev => {
-                                                  const newInputs = { ...prev };
-                                                  delete newInputs[exercise.id];
-                                                  return newInputs;
-                                                });
-                                              }
-                                            }
-                                          }}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                              e.currentTarget.blur();
-                                            }
-                                          }}
-                                          className="text-center bg-slate-700/50 border-slate-600/50 text-white text-2xl font-bold h-20 rounded-xl focus:border-purple-400/50 focus:ring-purple-400/20"
-                                          placeholder="Ex: 20"
-                                        />
-                                        <div className="text-sm text-slate-400 mt-3 text-center">quilos utilizados</div>
-                                      </div>
-                                      <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                        onClick={() => {
-                                          const currentWeight = exercise.weight || 0;
-                                          const newWeight = currentWeight + 2.5;
-                                          handleQuickUpdate(exercise.id, 'weight', newWeight);
-                                        }}
-                                        disabled={updateExerciseMutation.isPending}
-                                      >
-                                        <Plus className="w-6 h-6" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </>
-                            )}
-
-                            {/* Rest Duration */}
-                            <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-                              <div className="mb-5">
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-4 h-4 rounded-full bg-orange-400"></div>
-                                  <label className="text-lg text-slate-200 font-semibold flex items-center">
-                                    <Timer className="w-5 h-5 mr-2" />
-                                    Tempo de Descanso
-                                  </label>
-                                </div>
+                          {/* Intensity */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Dumbbell className="w-4 h-4 text-purple-400" />
+                              <label className="text-sm font-semibold text-slate-200">Intensidade</label>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
+                                disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                              <div className="text-center flex-1">
+                                <div className="text-2xl font-bold text-purple-400">{exercise.sets}</div>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <Button
-                                  variant="outline"
-                                  size="lg"
-                                  className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                  onClick={() => {
-                                    const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
-                                    const newRest = Math.max(30, currentRest - 15);
-                                    handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
-                                  }}
-                                  disabled={updateExerciseMutation.isPending}
-                                >
-                                  <Minus className="w-6 h-6" />
-                                </Button>
-                                <div className="text-center px-6">
-                                  <div className="text-5xl font-bold text-orange-400 mb-2">
-                                    {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
-                                  </div>
-                                  <div className="text-sm text-slate-400">minutos entre séries</div>
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="lg"
-                                  className="w-16 h-16 p-0 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 rounded-xl"
-                                  onClick={() => {
-                                    const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
-                                    const newRest = Math.min(300, currentRest + 15);
-                                    handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
-                                  }}
-                                  disabled={updateExerciseMutation.isPending}
-                                >
-                                  <Plus className="w-6 h-6" />
-                                </Button>
-                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
+                                disabled={updateExerciseMutation.isPending}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Reorder.Item>
-              ))}
-            </Reorder.Group>
-            
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              {/* Reorder Exercises Button */}
-              {reorderedExercises.length > 0 && (
-                <Card className="glass-card rounded-xl border-dashed border-purple-600/50 hover:border-purple-500/50 transition-all duration-200 hover:bg-purple-800/20 cursor-pointer"
-                      onClick={openReorderModal}>
-                  <CardContent className="p-6 text-center">
-                    <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-purple-400 transition-colors">
-                      <ArrowUpDown className="w-5 h-5" />
-                      <span className="font-medium">
-                        Reordenar exercícios ({reorderedExercises.length})
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {/* Add More Exercises Button */}
-              <Card className="glass-card rounded-xl border-dashed border-slate-600/50 hover:border-blue-500/50 transition-all duration-200 hover:bg-slate-800/30 cursor-pointer"
-                    onClick={() => setShowExerciseSelector(true)}>
-                <CardContent className="p-6 text-center">
-                  <div className="flex items-center justify-center space-x-3 text-slate-400 hover:text-blue-400 transition-colors">
-                    <Plus className="w-5 h-5" />
-                    <span className="font-medium">Adicionar mais exercícios</span>
+                      </>
+                    ) : (
+                      <>
+                        {/* Regular Exercise Parameters */}
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {/* Sets */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                              <label className="text-sm font-semibold text-slate-200">Séries</label>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
+                                disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                              <div className="text-center flex-1">
+                                <div className="text-2xl font-bold text-green-400">{exercise.sets}</div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
+                                disabled={updateExerciseMutation.isPending}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Reps */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                              <label className="text-sm font-semibold text-slate-200">Repetições</label>
+                            </div>
+                            <Input
+                              value={exercise.reps}
+                              onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                              className="text-center bg-slate-700/50 border-slate-600/30 text-white text-lg font-bold h-12 rounded-xl"
+                              placeholder="8-12"
+                            />
+                          </div>
+
+                          {/* Weight */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-3 h-3 rounded-full bg-purple-400"></div>
+                              <label className="text-sm font-semibold text-slate-200">Peso (kg)</label>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => {
+                                  const currentWeight = exercise.weight || 0;
+                                  const newWeight = Math.max(0, currentWeight - 2.5);
+                                  handleQuickUpdate(exercise.id, 'weight', newWeight === 0 ? null : newWeight);
+                                }}
+                                disabled={updateExerciseMutation.isPending}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                              <div className="flex-1">
+                                <Input
+                                  type="text"
+                                  value={weightInputs[exercise.id] ?? (exercise.weight?.toString() || '')}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    setWeightInputs(prev => ({ ...prev, [exercise.id]: value }));
+                                  }}
+                                  onBlur={(e) => {
+                                    const value = e.target.value.trim();
+                                    if (value === '') {
+                                      handleQuickUpdate(exercise.id, 'weight', null);
+                                      setWeightInputs(prev => {
+                                        const newInputs = { ...prev };
+                                        delete newInputs[exercise.id];
+                                        return newInputs;
+                                      });
+                                    } else {
+                                      const numericValue = parseFloat(value);
+                                      if (!isNaN(numericValue)) {
+                                        handleQuickUpdate(exercise.id, 'weight', numericValue);
+                                        setWeightInputs(prev => {
+                                          const newInputs = { ...prev };
+                                          delete newInputs[exercise.id];
+                                          return newInputs;
+                                        });
+                                      }
+                                    }
+                                  }}
+                                  className="text-center bg-slate-700/50 border-slate-600/30 text-white text-lg font-bold h-12 rounded-xl"
+                                  placeholder="20"
+                                />
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => {
+                                  const currentWeight = exercise.weight || 0;
+                                  const newWeight = currentWeight + 2.5;
+                                  handleQuickUpdate(exercise.id, 'weight', newWeight);
+                                }}
+                                disabled={updateExerciseMutation.isPending}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Rest Duration */}
+                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Timer className="w-4 h-4 text-orange-400" />
+                              <label className="text-sm font-semibold text-slate-200">Descanso</label>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => {
+                                  const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
+                                  const newRest = Math.max(30, currentRest - 15);
+                                  handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                                }}
+                                disabled={updateExerciseMutation.isPending}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </Button>
+                              <div className="text-center flex-1">
+                                <div className="text-lg font-bold text-orange-400">
+                                  {Math.floor((exercise.restDurationSeconds || exercise.restDuration || 90) / 60)}:{((exercise.restDurationSeconds || exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-10 h-10 p-0 bg-slate-700/50 border-slate-600/30 hover:bg-slate-600/50 rounded-xl"
+                                onClick={() => {
+                                  const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
+                                  const newRest = Math.min(300, currentRest + 15);
+                                  handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                                }}
+                                disabled={updateExerciseMutation.isPending}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            </div>
-            
-            {/* Save Workout Button */}
-            <div className="flex justify-center pt-6">
-              <Button
-                onClick={handleSaveWorkout}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all duration-300 flex items-center space-x-2"
-              >
-                <Save className="w-5 h-5" />
-                <span>Salvar Treino</span>
-              </Button>
-            </div>
-          </>
+            ))}
+          </div>
         )}
 
+        {/* Save Button */}
+        {reorderedExercises.length > 0 && (
+          <div className="flex justify-center pt-6">
+            <Button
+              onClick={handleSaveWorkout}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-12 py-4 rounded-2xl shadow-lg transition-all duration-300 flex items-center space-x-3"
+            >
+              <Save className="w-5 h-5" />
+              <span>Salvar Treino</span>
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Exercise Selector Dialog - Simplified */}
+      {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
-        <DialogContent className="max-w-3xl max-h-[85vh] glass-card border-slate-700 flex flex-col">
+        <DialogContent className="max-w-3xl max-h-[85vh] bg-slate-900/95 border-slate-700/30 flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-xl font-bold">Escolher Exercícios</DialogTitle>
-            <p className="text-slate-400 text-sm">Clique nos exercícios para adicionar ao treino (mais rápido!)</p>
+            <p className="text-slate-400 text-sm">Clique nos exercícios para adicionar ao treino</p>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">
-            <QuickExerciseSelector
-              onExerciseAdd={(exerciseId) => {
-                const exerciseData = {
-                  exerciseId,
-                  sets: 3,
-                  reps: "8-12",
-                  weight: null,
-                  order: reorderedExercises.length + 1,
-                };
-                addExerciseMutation.mutate(exerciseData);
-              }}
-              excludeExercises={reorderedExercises.map(ex => ex.exerciseId)}
-            />
+            <div className="space-y-3">
+              {allExercises
+                .filter(exercise => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
+                .map((exercise: any) => (
+                  <Card 
+                    key={exercise.id} 
+                    className="bg-slate-800/40 border-slate-700/30 rounded-xl hover:bg-slate-800/60 transition-all duration-200 cursor-pointer group"
+                    onClick={() => {
+                      const exerciseData = {
+                        exerciseId: exercise.id,
+                        sets: 3,
+                        reps: "8-12",
+                        weight: null,
+                        order: reorderedExercises.length + 1,
+                      };
+                      addExerciseMutation.mutate(exerciseData);
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-white leading-tight group-hover:text-blue-300 transition-colors">
+                            {exercise.name}
+                          </h4>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span className="text-sm text-blue-300 font-medium">
+                              {exercise.muscleGroup}
+                            </span>
+                          </div>
+                        </div>
+                        <Plus className="w-5 h-5 text-slate-400 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              {allExercises.filter(exercise => !reorderedExercises.some(ex => ex.exerciseId === exercise.id)).length === 0 && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-slate-800/50 flex items-center justify-center">
+                    <Dumbbell className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <p className="text-slate-400">Todos os exercícios já foram adicionados</p>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex justify-center pt-4 border-t border-slate-700">
+          <div className="flex justify-center pt-4 border-t border-slate-700/30">
             <Button
               variant="outline"
               onClick={() => setShowExerciseSelector(false)}
-              className="border-slate-700 text-slate-300"
+              className="border-slate-600 text-slate-300 hover:bg-slate-800"
             >
               Fechar
             </Button>
@@ -1044,7 +806,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
       {/* Exercise Form Dialog - Mobile Optimized */}
       <Dialog open={isExerciseFormOpen} onOpenChange={setIsExerciseFormOpen}>
-        <DialogContent className="glass-card border-slate-700 max-w-sm mx-auto">
+        <DialogContent className="bg-slate-900/95 border-slate-700/30 max-w-sm mx-auto">
           <DialogHeader>
             <DialogTitle className="text-white text-lg leading-relaxed">
               Configurar: <span className="block mt-1 font-semibold exercise-name">{editingExercise?.name}</span>
@@ -1053,7 +815,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Séries com botões +/- */}
+              {/* Sets */}
               <FormField
                 control={form.control}
                 name="sets"
@@ -1095,7 +857,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                 )}
               />
               
-              {/* Repetições */}
+              {/* Reps */}
               <FormField
                 control={form.control}
                 name="reps"
@@ -1119,7 +881,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                 )}
               />
               
-              {/* Peso com sugestões rápidas */}
+              {/* Weight */}
               <FormField
                 control={form.control}
                 name="weight"
@@ -1160,7 +922,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 h-14 gradient-accent rounded-xl touch-manipulation"
+                  className="flex-1 h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl touch-manipulation"
                   disabled={addExerciseMutation.isPending}
                 >
                   Adicionar Exercício
@@ -1173,7 +935,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
 
       {/* Reorder Exercises Modal */}
       <Dialog open={showReorderModal} onOpenChange={setShowReorderModal}>
-        <DialogContent className="max-w-lg max-h-[85vh] glass-card border-slate-700 flex flex-col">
+        <DialogContent className="max-w-lg max-h-[85vh] bg-slate-900/95 border-slate-700/30 flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-xl font-bold">Reordenar Exercícios</DialogTitle>
             <p className="text-slate-400 text-sm">Use os botões para mover os exercícios para cima ou para baixo</p>
@@ -1182,7 +944,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-3">
               {tempReorderedExercises.map((exercise: any, index: number) => (
-                <Card key={exercise.id} className="glass-card rounded-xl border-slate-700/50 bg-slate-800/30">
+                <Card key={exercise.id} className="bg-slate-800/40 border-slate-700/30 rounded-xl">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -1242,7 +1004,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
             </div>
           </div>
           
-          <div className="flex justify-between pt-4 border-t border-slate-700 gap-3">
+          <div className="flex justify-between pt-4 border-t border-slate-700/30 gap-3">
             <Button
               variant="outline"
               onClick={handleReorderModalCancel}
@@ -1252,7 +1014,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
             </Button>
             <Button
               onClick={handleReorderModalSave}
-              className="flex-1 gradient-accent"
+              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
             >
               Aplicar Nova Ordem
             </Button>
