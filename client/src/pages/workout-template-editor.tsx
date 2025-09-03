@@ -440,7 +440,7 @@ export default function WorkoutTemplateEditor() {
         ) : (
           <div className="space-y-4">
             {reorderedExercises.map((exercise: any, index: number) => (
-              <Card key={exercise.id} className="bg-slate-800/70 border-slate-600/50 rounded-2xl hover:bg-slate-800/90 hover:border-slate-500/60 transition-all duration-300 group shadow-xl hover:shadow-2xl">
+              <Card key={exercise.id} className="bg-gradient-to-br from-slate-800/80 via-slate-800/70 to-blue-900/20 border-slate-600/40 rounded-2xl hover:from-slate-700/90 hover:via-slate-700/80 hover:to-blue-800/30 hover:border-slate-500/50 transition-all duration-300 group shadow-xl hover:shadow-2xl">
                 <CardContent className="p-6">
                   {/* Exercise Header - Clean and Spacious */}
                   <div className="flex items-start gap-4 mb-6">
@@ -481,7 +481,7 @@ export default function WorkoutTemplateEditor() {
                         {/* Cardio Parameters */}
                         <div className="grid md:grid-cols-3 gap-4">
                           {/* Duration */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <Timer className="w-4 h-4 text-green-400" />
                               <label className="text-sm font-semibold text-slate-200">Duração</label>
@@ -489,13 +489,13 @@ export default function WorkoutTemplateEditor() {
                             <Input
                               value={exercise.reps}
                               onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                              className="text-center bg-slate-600/70 border-slate-500/50 text-white text-lg font-bold h-12 rounded-xl shadow-sm"
+                              className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                               placeholder="30 min"
                             />
                           </div>
 
                           {/* Distance */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <Target className="w-4 h-4 text-yellow-400" />
                               <label className="text-sm font-semibold text-slate-200">Distância</label>
@@ -528,13 +528,13 @@ export default function WorkoutTemplateEditor() {
                                   }
                                 }
                               }}
-                              className="text-center bg-slate-600/70 border-slate-500/50 text-white text-lg font-bold h-12 rounded-xl shadow-sm"
+                              className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                               placeholder="5 km"
                             />
                           </div>
 
                           {/* Intensity */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <Dumbbell className="w-4 h-4 text-purple-400" />
                               <label className="text-sm font-semibold text-slate-200">Intensidade</label>
@@ -543,7 +543,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                 disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                               >
@@ -555,7 +555,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                 disabled={updateExerciseMutation.isPending}
                               >
@@ -570,7 +570,7 @@ export default function WorkoutTemplateEditor() {
                         {/* Regular Exercise Parameters */}
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                           {/* Sets */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-3 h-3 rounded-full bg-green-400"></div>
                               <label className="text-sm font-semibold text-slate-200">Séries</label>
@@ -579,7 +579,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                 disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                               >
@@ -591,7 +591,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                 disabled={updateExerciseMutation.isPending}
                               >
@@ -601,7 +601,7 @@ export default function WorkoutTemplateEditor() {
                           </div>
 
                           {/* Reps */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                               <label className="text-sm font-semibold text-slate-200">Repetições</label>
@@ -609,13 +609,13 @@ export default function WorkoutTemplateEditor() {
                             <Input
                               value={exercise.reps}
                               onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
-                              className="text-center bg-slate-600/70 border-slate-500/50 text-white text-lg font-bold h-12 rounded-xl shadow-sm"
+                              className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                               placeholder="8-12"
                             />
                           </div>
 
                           {/* Weight */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-3 h-3 rounded-full bg-purple-400"></div>
                               <label className="text-sm font-semibold text-slate-200">Peso (kg)</label>
@@ -624,7 +624,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => {
                                   const currentWeight = exercise.weight || 0;
                                   const newWeight = Math.max(0, currentWeight - 2.5);
@@ -663,14 +663,14 @@ export default function WorkoutTemplateEditor() {
                                       }
                                     }
                                   }}
-                                  className="text-center bg-slate-600/70 border-slate-500/50 text-white text-lg font-bold h-12 rounded-xl shadow-sm"
+                                  className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                                   placeholder="20"
                                 />
                               </div>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => {
                                   const currentWeight = exercise.weight || 0;
                                   const newWeight = currentWeight + 2.5;
@@ -684,7 +684,7 @@ export default function WorkoutTemplateEditor() {
                           </div>
 
                           {/* Rest Duration */}
-                          <div className="bg-slate-800/80 rounded-xl p-4 border border-slate-600/40 shadow-md">
+                          <div className="bg-gradient-to-br from-slate-700/90 to-slate-800/70 rounded-xl p-4 border border-slate-500/30 shadow-md backdrop-blur-sm">
                             <div className="flex items-center gap-2 mb-3">
                               <Timer className="w-4 h-4 text-orange-400" />
                               <label className="text-sm font-semibold text-slate-200">Descanso</label>
@@ -693,7 +693,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => {
                                   const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
                                   const newRest = Math.max(30, currentRest - 15);
@@ -711,7 +711,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/70 border-slate-500/50 hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
                                 onClick={() => {
                                   const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
                                   const newRest = Math.min(300, currentRest + 15);
