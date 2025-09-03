@@ -565,6 +565,8 @@ export class SupabaseStorage implements IStorage {
 
   // Workout Template Exercises
   async getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
+    console.log('🔍 Fetching exercises for template:', templateId);
+    
     const { data, error } = await supabase
       .from('workoutTemplateExercises')
       .select(`
@@ -577,10 +579,17 @@ export class SupabaseStorage implements IStorage {
       console.error('Error fetching template exercises:', error);
       throw error;
     }
-    return data.map(item => ({
+    
+    console.log('📊 Raw data from Supabase:', JSON.stringify(data, null, 2));
+    
+    const mappedData = data.map(item => ({
       ...item,
       exercise: item.exercises
     })) as (WorkoutTemplateExercise & { exercise: Exercise })[];
+    
+    console.log('🔄 Mapped data with exercise IDs:', mappedData.map(ex => ({ id: ex.id, exerciseId: ex.exerciseId, name: ex.exercise?.name })));
+    
+    return mappedData;
   }
 
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
@@ -595,6 +604,9 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
+    console.log('🔍 Attempting to update exercise with ID:', id);
+    console.log('📝 Updates:', updates);
+    
     const { data, error } = await supabase
       .from('workoutTemplateExercises')
       .update(updates)
@@ -602,7 +614,13 @@ export class SupabaseStorage implements IStorage {
       .select()
       .single();
 
-    if (error) return undefined;
+    if (error) {
+      console.error('❌ Error updating workout template exercise:', error);
+      console.error('💡 Hint:', error.hint);
+      return undefined;
+    }
+    
+    console.log('✅ Successfully updated exercise:', data);
     return data as WorkoutTemplateExercise;
   }
 
