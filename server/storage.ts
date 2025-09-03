@@ -64,8 +64,8 @@ export interface IStorage {
   // Workout Template Exercises
   getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]>;
   addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise>;
-  updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined>;
-  deleteWorkoutTemplateExercise(id: string): Promise<boolean>;
+  updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>, userId?: string): Promise<WorkoutTemplateExercise | undefined>;
+  deleteWorkoutTemplateExercise(id: string, userId?: string): Promise<boolean>;
   removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean>;
   
   // Workout Logs

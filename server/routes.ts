@@ -655,7 +655,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.put("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
       const updates = insertWorkoutTemplateExerciseSchema.partial().parse(req.body);
-      const templateExercise = await db.updateWorkoutTemplateExercise(req.params.id, updates);
+      const templateExercise = await db.updateWorkoutTemplateExercise(req.params.id, updates, req.user!.id);
       if (!templateExercise) {
         return res.status(404).json({ message: "Exercício do treino não encontrado" });
       }
@@ -667,7 +667,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.delete("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const deleted = await db.deleteWorkoutTemplateExercise(req.params.id);
+      const deleted = await db.deleteWorkoutTemplateExercise(req.params.id, req.user!.id);
       if (!deleted) {
         return res.status(404).json({ message: "Exercício do treino não encontrado" });
       }

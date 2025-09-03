@@ -594,7 +594,30 @@ export class SupabaseStorage implements IStorage {
     return data as WorkoutTemplateExercise;
   }
 
-  async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
+  async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>, userId?: string): Promise<WorkoutTemplateExercise | undefined> {
+    // If userId is provided, first verify the template exercise belongs to the user
+    if (userId) {
+      // Get the template exercise with its template info
+      const { data: exerciseData, error: checkError } = await supabase
+        .from('workoutTemplateExercises')
+        .select(`
+          *,
+          workoutTemplate:workoutTemplates!inner(
+            id,
+            user_id
+          )
+        `)
+        .eq('id', id)
+        .eq('workoutTemplates.user_id', userId)
+        .single();
+      
+      if (checkError || !exerciseData) {
+        console.error('Template exercise not found or not owned by user:', checkError);
+        return undefined;
+      }
+    }
+    
+    // Now update the exercise
     const { data, error } = await supabase
       .from('workoutTemplateExercises')
       .update(updates)
@@ -602,11 +625,35 @@ export class SupabaseStorage implements IStorage {
       .select()
       .single();
 
-    if (error) return undefined;
+    if (error) {
+      console.error('Error updating template exercise:', error);
+      return undefined;
+    }
     return data as WorkoutTemplateExercise;
   }
 
-  async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {
+  async deleteWorkoutTemplateExercise(id: string, userId?: string): Promise<boolean> {
+    // If userId is provided, verify ownership before deleting
+    if (userId) {
+      const { data: exerciseData, error: checkError } = await supabase
+        .from('workoutTemplateExercises')
+        .select(`
+          id,
+          workoutTemplate:workoutTemplates!inner(
+            id,
+            user_id
+          )
+        `)
+        .eq('id', id)
+        .eq('workoutTemplates.user_id', userId)
+        .single();
+      
+      if (checkError || !exerciseData) {
+        console.error('Template exercise not found or not owned by user:', checkError);
+        return false;
+      }
+    }
+
     const { error } = await supabase
       .from('workoutTemplateExercises')
       .delete()

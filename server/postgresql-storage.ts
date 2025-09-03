@@ -250,12 +250,12 @@ export class PostgreSQLStorage implements IStorage {
     return result[0];
   }
 
-  async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>): Promise<WorkoutTemplateExercise | undefined> {
+  async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>, userId?: string): Promise<WorkoutTemplateExercise | undefined> {
     const result = await this.db.update(workoutTemplateExercises).set(updates).where(eq(workoutTemplateExercises.id, id)).returning();
     return result[0];
   }
 
-  async deleteWorkoutTemplateExercise(id: string): Promise<boolean> {
+  async deleteWorkoutTemplateExercise(id: string, userId?: string): Promise<boolean> {
     const result = await this.db.delete(workoutTemplateExercises).where(eq(workoutTemplateExercises.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
