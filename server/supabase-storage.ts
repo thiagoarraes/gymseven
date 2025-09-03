@@ -595,41 +595,78 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>, userId?: string): Promise<WorkoutTemplateExercise | undefined> {
-    // If userId is provided, first verify the template exercise belongs to the user
-    if (userId) {
-      // Get the template exercise with its template info
-      const { data: exerciseData, error: checkError } = await supabase
-        .from('workoutTemplateExercises')
-        .select(`
-          *,
-          workoutTemplate:workoutTemplates!inner(
-            id,
-            user_id
-          )
-        `)
-        .eq('id', id)
-        .eq('workoutTemplates.user_id', userId)
-        .single();
+    console.log(`🔧 Attempting to update template exercise: ${id} for user: ${userId}`);
+    console.log(`📝 Updates:`, updates);
+    
+    try {
+      // Use a single query with JOIN to update and verify ownership at the same time
+      let query;
       
-      if (checkError || !exerciseData) {
-        console.error('Template exercise not found or not owned by user:', checkError);
+      if (userId) {
+        // Build query with user verification using EXISTS
+        query = supabase
+          .from('workoutTemplateExercises')
+          .update(updates)
+          .eq('id', id)
+          .in('template_id', 
+            supabase
+              .from('workoutTemplates')
+              .select('id')
+              .eq('user_id', userId)
+          );
+      } else {
+        // No user verification, update directly
+        query = supabase
+          .from('workoutTemplateExercises')
+          .update(updates)
+          .eq('id', id);
+      }
+      
+      const { data, error } = await query
+        .select()
+        .maybeSingle(); // Use maybeSingle instead of single to handle 0 results gracefully
+
+      if (error) {
+        console.error(`❌ Supabase error updating template exercise ${id}:`, error);
         return undefined;
       }
-    }
-    
-    // Now update the exercise
-    const { data, error } = await supabase
-      .from('workoutTemplateExercises')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating template exercise:', error);
+      
+      if (!data) {
+        console.warn(`⚠️ Template exercise ${id} not found or user ${userId} doesn't have permission`);
+        
+        // Let's check if the exercise exists at all
+        const { data: checkData, error: checkError } = await supabase
+          .from('workoutTemplateExercises')
+          .select('id, template_id')
+          .eq('id', id)
+          .maybeSingle();
+          
+        if (checkError) {
+          console.error(`❌ Error checking exercise existence:`, checkError);
+        } else if (!checkData) {
+          console.warn(`🚫 Exercise ${id} does not exist in database`);
+        } else {
+          console.warn(`🔒 Exercise ${id} exists but user ${userId} doesn't own the template ${checkData.template_id}`);
+          
+          // Check which user owns this template
+          const { data: templateData } = await supabase
+            .from('workoutTemplates')
+            .select('user_id')
+            .eq('id', checkData.template_id)
+            .single();
+          console.warn(`👤 Template ${checkData.template_id} is owned by user: ${templateData?.user_id}`);
+        }
+        
+        return undefined;
+      }
+      
+      console.log(`✅ Successfully updated template exercise ${id}`);
+      return data as WorkoutTemplateExercise;
+      
+    } catch (error) {
+      console.error(`💥 Unexpected error updating template exercise ${id}:`, error);
       return undefined;
     }
-    return data as WorkoutTemplateExercise;
   }
 
   async deleteWorkoutTemplateExercise(id: string, userId?: string): Promise<boolean> {

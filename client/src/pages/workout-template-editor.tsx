@@ -152,16 +152,38 @@ export default function WorkoutTemplateEditor() {
       // Return a context object with the snapshotted value
       return { previousExercises };
     },
-    onError: (err, variables, context) => {
+    onError: (err: any, variables, context) => {
+      console.error('❌ Error updating exercise:', err);
+      
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousExercises) {
         queryClient.setQueryData(["/api/workout-templates", id, "exercises"], context.previousExercises);
       }
-      toast({
-        title: "Erro ao atualizar",
-        description: "Não foi possível atualizar o exercício.",
-        variant: "destructive",
-      });
+      
+      // Check if it's a 404 error (exercise not found or permission denied)
+      const is404Error = err?.status === 404 || 
+                        err?.message?.includes('não encontrado') ||
+                        err?.message?.includes('not found') ||
+                        (err?.response && err.response.status === 404);
+      
+      if (is404Error) {
+        console.warn('🔄 Exercise not found - likely deleted or cache stale, forcing refresh');
+        // Force refresh to sync with server state
+        queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+        queryClient.refetchQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+        
+        toast({
+          title: "Exercício não encontrado",
+          description: "O exercício pode ter sido removido. Atualizando a lista...",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao atualizar",
+          description: "Não foi possível atualizar o exercício. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     },
     onSettled: () => {
       // Always refetch after error or success to make sure we have the latest data

@@ -654,14 +654,36 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.put("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log(`🔄 PUT /api/workout-template-exercises/${req.params.id} by user ${req.user!.id}`);
+      console.log(`📥 Request body:`, req.body);
+      
       const updates = insertWorkoutTemplateExerciseSchema.partial().parse(req.body);
       const templateExercise = await db.updateWorkoutTemplateExercise(req.params.id, updates, req.user!.id);
+      
       if (!templateExercise) {
-        return res.status(404).json({ message: "Exercício do treino não encontrado" });
+        console.warn(`❌ Failed to update template exercise ${req.params.id} - returning 404`);
+        return res.status(404).json({ 
+          message: "Exercício do treino não encontrado ou você não tem permissão para editá-lo",
+          code: "EXERCISE_NOT_FOUND_OR_NO_PERMISSION"
+        });
       }
+      
+      console.log(`✅ Successfully updated template exercise ${req.params.id}`);
       res.json(templateExercise);
-    } catch (error) {
-      res.status(400).json({ message: "Dados inválidos para atualização do exercício" });
+    } catch (error: any) {
+      console.error(`💥 Error in PUT /api/workout-template-exercises/${req.params.id}:`, error);
+      
+      if (error.name === 'ZodError') {
+        res.status(400).json({ 
+          message: "Dados inválidos para atualização do exercício",
+          errors: error.errors
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Erro interno do servidor ao atualizar exercício",
+          code: "INTERNAL_ERROR"
+        });
+      }
     }
   });
 
