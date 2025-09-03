@@ -561,7 +561,7 @@ export default function WorkoutTemplateEditor() {
                         {/* Regular Exercise Parameters */}
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                           {/* Sets */}
-                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                          <div className="bg-slate-700/60 rounded-xl p-4 border border-slate-500/40 shadow-md">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-3 h-3 rounded-full bg-green-400"></div>
                               <label className="text-sm font-semibold text-slate-200">Séries</label>
@@ -592,7 +592,7 @@ export default function WorkoutTemplateEditor() {
                           </div>
 
                           {/* Reps */}
-                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                          <div className="bg-slate-700/60 rounded-xl p-4 border border-slate-500/40 shadow-md">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                               <label className="text-sm font-semibold text-slate-200">Repetições</label>
@@ -606,7 +606,7 @@ export default function WorkoutTemplateEditor() {
                           </div>
 
                           {/* Weight */}
-                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                          <div className="bg-slate-700/60 rounded-xl p-4 border border-slate-500/40 shadow-md">
                             <div className="flex items-center gap-2 mb-3">
                               <div className="w-3 h-3 rounded-full bg-purple-400"></div>
                               <label className="text-sm font-semibold text-slate-200">Peso (kg)</label>
@@ -675,7 +675,7 @@ export default function WorkoutTemplateEditor() {
                           </div>
 
                           {/* Rest Duration */}
-                          <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                          <div className="bg-slate-700/60 rounded-xl p-4 border border-slate-500/40 shadow-md">
                             <div className="flex items-center gap-2 mb-3">
                               <Timer className="w-4 h-4 text-orange-400" />
                               <label className="text-sm font-semibold text-slate-200">Descanso</label>
