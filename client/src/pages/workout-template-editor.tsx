@@ -120,7 +120,7 @@ export default function WorkoutTemplateEditor() {
   const updateExerciseMutation = useMutation({
     mutationFn: async ({ exerciseId, updates }: { exerciseId: string; updates: any }) => {
       const response = await fetch(`/api/workout-template-exercises/${exerciseId}`, {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
