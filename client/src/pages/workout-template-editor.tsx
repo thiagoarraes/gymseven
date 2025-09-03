@@ -638,7 +638,7 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                               </div>
                               
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-xl font-bold text-white leading-relaxed exercise-name mb-2">
+                                <h3 className="text-xl font-bold text-white leading-relaxed exercise-name mb-1">
                                   {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
                                 </h3>
                                 
