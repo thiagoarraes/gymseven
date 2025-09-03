@@ -599,68 +599,72 @@ export class SupabaseStorage implements IStorage {
     console.log(`📝 Updates:`, updates);
     
     try {
-      // Use a single query with JOIN to update and verify ownership at the same time
-      let query;
-      
+      // First verify ownership if userId provided
       if (userId) {
-        // Build query with user verification using EXISTS
-        query = supabase
+        // Check if the exercise belongs to a template owned by the user
+        const { data: ownership, error: ownershipError } = await supabase
           .from('workoutTemplateExercises')
-          .update(updates)
+          .select(`
+            id,
+            template_id,
+            workoutTemplates!inner(
+              id,
+              user_id
+            )
+          `)
           .eq('id', id)
-          .in('template_id', 
-            supabase
+          .eq('workoutTemplates.user_id', userId)
+          .maybeSingle();
+
+        if (ownershipError) {
+          console.error(`❌ Error checking ownership:`, ownershipError);
+          return undefined;
+        }
+
+        if (!ownership) {
+          console.warn(`🔒 Exercise ${id} not found or user ${userId} doesn't have permission`);
+          
+          // Check if exercise exists at all
+          const { data: existsCheck } = await supabase
+            .from('workoutTemplateExercises')
+            .select('id, template_id')
+            .eq('id', id)
+            .maybeSingle();
+            
+          if (existsCheck) {
+            const { data: templateOwner } = await supabase
               .from('workoutTemplates')
-              .select('id')
-              .eq('user_id', userId)
-          );
-      } else {
-        // No user verification, update directly
-        query = supabase
-          .from('workoutTemplateExercises')
-          .update(updates)
-          .eq('id', id);
+              .select('user_id')
+              .eq('id', existsCheck.template_id)
+              .single();
+            console.warn(`👤 Exercise exists but belongs to user: ${templateOwner?.user_id}, not ${userId}`);
+          } else {
+            console.warn(`🚫 Exercise ${id} does not exist`);
+          }
+          
+          return undefined;
+        }
       }
       
-      const { data, error } = await query
+      // Now update the exercise
+      const { data, error } = await supabase
+        .from('workoutTemplateExercises')
+        .update(updates)
+        .eq('id', id)
         .select()
-        .maybeSingle(); // Use maybeSingle instead of single to handle 0 results gracefully
+        .maybeSingle();
 
       if (error) {
-        console.error(`❌ Supabase error updating template exercise ${id}:`, error);
+        console.error(`❌ Supabase error updating template exercise:`, error);
         return undefined;
       }
       
       if (!data) {
-        console.warn(`⚠️ Template exercise ${id} not found or user ${userId} doesn't have permission`);
-        
-        // Let's check if the exercise exists at all
-        const { data: checkData, error: checkError } = await supabase
-          .from('workoutTemplateExercises')
-          .select('id, template_id')
-          .eq('id', id)
-          .maybeSingle();
-          
-        if (checkError) {
-          console.error(`❌ Error checking exercise existence:`, checkError);
-        } else if (!checkData) {
-          console.warn(`🚫 Exercise ${id} does not exist in database`);
-        } else {
-          console.warn(`🔒 Exercise ${id} exists but user ${userId} doesn't own the template ${checkData.template_id}`);
-          
-          // Check which user owns this template
-          const { data: templateData } = await supabase
-            .from('workoutTemplates')
-            .select('user_id')
-            .eq('id', checkData.template_id)
-            .single();
-          console.warn(`👤 Template ${checkData.template_id} is owned by user: ${templateData?.user_id}`);
-        }
-        
+        console.warn(`⚠️ Update succeeded but no data returned for exercise ${id}`);
         return undefined;
       }
       
-      console.log(`✅ Successfully updated template exercise ${id}`);
+      console.log(`✅ Successfully updated template exercise ${id}:`, data);
       return data as WorkoutTemplateExercise;
       
     } catch (error) {

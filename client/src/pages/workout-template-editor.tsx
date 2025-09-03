@@ -747,9 +747,9 @@ export default function WorkoutTemplateEditor() {
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
-                                  const currentRest = exercise.restDuration || 90;
+                                  const currentRest = exercise.restDurationSeconds || 90;
                                   const newRest = Math.max(30, currentRest - 15);
-                                  handleQuickUpdate(exercise.id, 'restDuration', newRest);
+                                  handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
@@ -757,7 +757,7 @@ export default function WorkoutTemplateEditor() {
                               </Button>
                               <div className="text-center flex-1">
                                 <div className="text-lg font-bold text-orange-400">
-                                  {Math.floor((exercise.restDuration || 90) / 60)}:{((exercise.restDuration || 90) % 60).toString().padStart(2, '0')}
+                                  {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
                                 </div>
                               </div>
                               <Button
@@ -765,9 +765,9 @@ export default function WorkoutTemplateEditor() {
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
-                                  const currentRest = exercise.restDuration || 90;
+                                  const currentRest = exercise.restDurationSeconds || 90;
                                   const newRest = Math.min(300, currentRest + 15);
-                                  handleQuickUpdate(exercise.id, 'restDuration', newRest);
+                                  handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
