@@ -629,41 +629,37 @@ export default function WorkoutTemplateEditor({ templateId }: WorkoutTemplateEdi
                     }`}>
                       <CardContent className="mobile-card-padding">
                         <div className="space-y-3">
-                          {/* Exercise Header - Nome em linha separada */}
-                          <div className="space-y-4">
-                            {/* Exercise Number and Remove Button */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
-                                  <span className="font-bold text-blue-400 text-lg">{index + 1}</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-3 h-3 rounded-full bg-blue-400 flex-shrink-0"></div>
-                                  <span className="text-blue-300 font-medium text-sm">
+                          {/* Exercise Header - Layout otimizado */}
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-4">
+                              {/* Exercise Number */}
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0 mt-1">
+                                <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
+                              </div>
+                              
+                              {/* Exercise Content */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-lg font-bold text-white leading-tight exercise-name mb-2">
+                                  {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
+                                </h4>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></div>
+                                  <span className="text-blue-300 font-medium text-xs">
                                     {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Action Controls - Apenas remover */}
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-10 h-10 p-0 hover:bg-red-500/20 rounded-xl transition-colors"
-                                  onClick={() => handleRemoveExercise(exercise.id)}
-                                  title="Remover exercício"
-                                >
-                                  <Trash2 className="text-red-400 w-5 h-5" />
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            {/* Exercise Name - Full width on its own line */}
-                            <div className="w-full">
-                              <h4 className="text-xl font-bold text-white leading-relaxed exercise-name w-full">
-                                {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
-                              </h4>
+                              {/* Remove Button */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-8 h-8 p-0 hover:bg-red-500/20 rounded-lg transition-colors flex-shrink-0"
+                                onClick={() => handleRemoveExercise(exercise.id)}
+                                title="Remover exercício"
+                              >
+                                <Trash2 className="text-red-400 w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
 
