@@ -127,8 +127,27 @@ export default function WorkoutTemplateEditor() {
       if (!response.ok) throw new Error("Erro ao atualizar exercício");
       return response.json();
     },
+    onMutate: async ({ exerciseId, updates }) => {
+      // Optimistic update
+      setReorderedExercises(prev => 
+        prev.map(ex => 
+          ex.id === exerciseId 
+            ? { ...ex, ...updates }
+            : ex
+        )
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+    },
+    onError: (error, { exerciseId }) => {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o exercício.",
+        variant: "destructive",
+      });
     },
   });
 
