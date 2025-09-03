@@ -124,7 +124,23 @@ export default function WorkoutTemplateEditor() {
       return await workoutTemplateApi.updateExercise(exerciseId, updates);
     },
     onMutate: async ({ exerciseId, updates }) => {
-      // Optimistic update
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      
+      // Snapshot the previous value
+      const previousExercises = queryClient.getQueryData(["/api/workout-templates", id, "exercises"]);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
+        if (!old) return old;
+        return old.map((ex: any) => 
+          ex.id === exerciseId 
+            ? { ...ex, ...updates }
+            : ex
+        );
+      });
+      
+      // Update local state as well
       setReorderedExercises(prev => 
         prev.map(ex => 
           ex.id === exerciseId 
@@ -132,18 +148,24 @@ export default function WorkoutTemplateEditor() {
             : ex
         )
       );
+
+      // Return a context object with the snapshotted value
+      return { previousExercises };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-    },
-    onError: (error, { exerciseId }) => {
-      // Revert optimistic update on error
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousExercises) {
+        queryClient.setQueryData(["/api/workout-templates", id, "exercises"], context.previousExercises);
+      }
       toast({
         title: "Erro ao atualizar",
         description: "Não foi possível atualizar o exercício.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to make sure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
     },
   });
 
