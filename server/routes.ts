@@ -182,6 +182,33 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
+  // Delete account endpoint
+  app.delete('/api/auth/account', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Delete user avatar file if exists
+      if (req.user!.profileImageUrl && req.user!.profileImageUrl.startsWith('/uploads/avatars/')) {
+        const avatarPath = path.join(process.cwd(), req.user!.profileImageUrl);
+        if (fs.existsSync(avatarPath)) {
+          fs.unlinkSync(avatarPath);
+        }
+      }
+      
+      // Delete user from database (cascading deletes will handle related data)
+      const deleted = await db.deleteUser(userId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      res.status(200).json({ message: "Conta excluída com sucesso" });
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Upload avatar endpoint
   app.post('/api/auth/upload-avatar', authenticateToken, uploadAvatar.single('avatar'), async (req: AuthRequest, res) => {
     try {

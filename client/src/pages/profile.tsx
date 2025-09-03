@@ -3,10 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload } from 'lucide-react';
+import { User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -23,7 +24,9 @@ export default function Profile() {
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [selectedFileName, setSelectedFileName] = useState<string>('');
-  const { user, updateProfile } = useAuth();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { user, updateProfile, deleteAccount } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,6 +96,25 @@ export default function Profile() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      toast({
+        title: "Conta excluída",
+        description: "Sua conta foi excluída com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir conta",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+      setDeleting(false);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -571,6 +593,80 @@ export default function Profile() {
                   </Button>
                 </form>
               </Form>
+            </CardContent>
+          </Card>
+          
+          {/* Zona de Perigo */}
+          <Card className="bg-red-900/20 border-red-500/30 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-red-400 flex items-center">
+                <AlertTriangle className="w-5 h-5 mr-2" />
+                Zona de Perigo
+              </CardTitle>
+              <CardDescription className="text-red-300/80">
+                Ações irreversíveis da conta
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    data-testid="button-delete-account"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir Conta
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900/95 border-red-500/50">
+                  <DialogHeader>
+                    <DialogTitle className="text-red-400 flex items-center">
+                      <AlertTriangle className="w-5 h-5 mr-2" />
+                      Excluir Conta Permanentemente
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-300">
+                      Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente excluídos:
+                      <br /><br />
+                      • Todos os exercícios criados<br />
+                      • Todos os treinos e modelos<br />
+                      • Todo o histórico de progresso<br />
+                      • Todas as conquistas<br />
+                      • Foto de perfil e preferências
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setDeleteDialogOpen(false)}
+                      disabled={deleting}
+                      className="bg-slate-700/50 border-slate-600 hover:bg-slate-600/60"
+                      data-testid="button-cancel-delete"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                      className="bg-red-600 hover:bg-red-700"
+                      data-testid="button-confirm-delete"
+                    >
+                      {deleting ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Excluindo...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <Trash2 className="w-4 h-4" />
+                          <span>Sim, Excluir Conta</span>
+                        </div>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>

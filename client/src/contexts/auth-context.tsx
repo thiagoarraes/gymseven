@@ -10,6 +10,7 @@ interface AuthContextType {
   register: (data: { email: string; username: string; password: string; firstName?: string; lastName?: string }) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -163,6 +164,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const deleteAccount = async () => {
+    if (!token) throw new Error('Não autenticado');
+
+    try {
+      const response = await fetch('/api/auth/account', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao excluir conta');
+      }
+
+      // Clear all auth data after successful deletion
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('auth-token');
+      window.location.reload();
+    } catch (error) {
+      console.error('Delete account error:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     token,
@@ -171,6 +199,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     register,
     logout,
     updateProfile,
+    deleteAccount,
     isAuthenticated: !!user && !!token,
   };
 
