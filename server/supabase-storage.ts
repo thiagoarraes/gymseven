@@ -241,34 +241,104 @@ export class SupabaseStorage implements IStorage {
   async deleteUser(id: string): Promise<boolean> {
     console.log(`🗑️ Attempting to delete user with ID: ${id}`);
     
-    // First check if user exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('id', id)
-      .single();
+    try {
+      // First check if user exists
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', id)
+        .single();
 
-    if (checkError || !existingUser) {
-      console.log(`❌ User not found for deletion: ${id}`);
+      if (checkError || !existingUser) {
+        console.log(`❌ User not found for deletion: ${id}`);
+        return false;
+      }
+
+      console.log(`✅ User found, proceeding with cascading deletion: ${id}`);
+      
+      // Delete in correct order to handle foreign key constraints
+      console.log(`🧹 Starting cascading deletion for user: ${id}`);
+      
+      // 1. Get all user's workout logs to delete sets and exercises
+      const { data: workoutLogs } = await supabase
+        .from('workout_logs')
+        .select('id')
+        .eq('user_id', id);
+
+      if (workoutLogs && workoutLogs.length > 0) {
+        const logIds = workoutLogs.map(log => log.id);
+        
+        // Get workout log exercises
+        const { data: logExercises } = await supabase
+          .from('workout_log_exercises')
+          .select('id')
+          .in('log_id', logIds);
+
+        if (logExercises && logExercises.length > 0) {
+          const logExerciseIds = logExercises.map(ex => ex.id);
+          
+          // Delete workout log sets
+          await supabase.from('workout_log_sets')
+            .delete()
+            .in('log_exercise_id', logExerciseIds);
+            
+          // Delete workout log exercises
+          await supabase.from('workout_log_exercises')
+            .delete()
+            .in('id', logExerciseIds);
+        }
+
+        // Delete workout logs
+        await supabase.from('workout_logs')
+          .delete()
+          .in('id', logIds);
+      }
+
+      // 2. Delete workout template exercises and templates
+      const { data: templates } = await supabase
+        .from('workout_templates')
+        .select('id')
+        .eq('user_id', id);
+
+      if (templates && templates.length > 0) {
+        const templateIds = templates.map(t => t.id);
+        
+        // Delete workout template exercises
+        await supabase.from('workout_template_exercises')
+          .delete()
+          .in('template_id', templateIds);
+          
+        // Delete workout templates
+        await supabase.from('workout_templates')
+          .delete()
+          .in('id', templateIds);
+      }
+
+      // 3. Delete other user data
+      await supabase.from('exercises').delete().eq('user_id', id);
+      await supabase.from('weight_history').delete().eq('user_id', id);
+      await supabase.from('user_goals').delete().eq('user_id', id);
+      await supabase.from('user_achievements').delete().eq('user_id', id);
+      await supabase.from('user_preferences').delete().eq('user_id', id);
+
+      // 4. Finally delete the user
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error(`❌ Error deleting user ${id}:`, error);
+        return false;
+      }
+
+      console.log(`✅ User and all related data successfully deleted: ${id}`);
+      return true;
+
+    } catch (error) {
+      console.error(`❌ Unexpected error deleting user ${id}:`, error);
       return false;
     }
-
-    console.log(`✅ User found, proceeding with deletion: ${id}`);
-    
-    const { error, count } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error(`❌ Error deleting user ${id}:`, error);
-      return false;
-    }
-
-    console.log(`✅ User successfully deleted: ${id}`);
-    return true;
   }
 
   async updateLastLogin(id: string): Promise<void> {
