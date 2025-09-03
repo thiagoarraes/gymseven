@@ -239,12 +239,36 @@ export class SupabaseStorage implements IStorage {
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    const { error } = await supabase
+    console.log(`🗑️ Attempting to delete user with ID: ${id}`);
+    
+    // First check if user exists
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', id)
+      .single();
+
+    if (checkError || !existingUser) {
+      console.log(`❌ User not found for deletion: ${id}`);
+      return false;
+    }
+
+    console.log(`✅ User found, proceeding with deletion: ${id}`);
+    
+    const { error, count } = await supabase
       .from('users')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select()
+      .single();
 
-    return !error;
+    if (error) {
+      console.error(`❌ Error deleting user ${id}:`, error);
+      return false;
+    }
+
+    console.log(`✅ User successfully deleted: ${id}`);
+    return true;
   }
 
   async updateLastLogin(id: string): Promise<void> {
