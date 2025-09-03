@@ -543,11 +543,11 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                 disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                               <div className="text-center flex-1">
                                 <div className="text-2xl font-bold text-purple-400">{exercise.sets}</div>
@@ -555,11 +555,11 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                 disabled={updateExerciseMutation.isPending}
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                             </div>
                           </div>
@@ -579,11 +579,11 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                 disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                               <div className="text-center flex-1">
                                 <div className="text-2xl font-bold text-green-400">{exercise.sets}</div>
@@ -591,11 +591,11 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                 disabled={updateExerciseMutation.isPending}
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                             </div>
                           </div>
@@ -624,7 +624,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
                                   const currentWeight = exercise.weight || 0;
                                   const newWeight = Math.max(0, currentWeight - 2.5);
@@ -632,7 +632,7 @@ export default function WorkoutTemplateEditor() {
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                               <div className="flex-1">
                                 <Input
@@ -670,7 +670,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
                                   const currentWeight = exercise.weight || 0;
                                   const newWeight = currentWeight + 2.5;
@@ -678,7 +678,7 @@ export default function WorkoutTemplateEditor() {
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                             </div>
                           </div>
@@ -693,7 +693,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
                                   const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
                                   const newRest = Math.max(30, currentRest - 15);
@@ -701,7 +701,7 @@ export default function WorkoutTemplateEditor() {
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                               <div className="text-center flex-1">
                                 <div className="text-lg font-bold text-orange-400">
@@ -711,7 +711,7 @@ export default function WorkoutTemplateEditor() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-10 h-10 p-0 bg-slate-600/80 border-slate-400/40 backdrop-blur-sm hover:bg-slate-500/70 rounded-xl shadow-sm"
+                                className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
                                   const currentRest = exercise.restDurationSeconds || exercise.restDuration || 90;
                                   const newRest = Math.min(300, currentRest + 15);
@@ -719,7 +719,7 @@ export default function WorkoutTemplateEditor() {
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
                               </Button>
                             </div>
                           </div>
