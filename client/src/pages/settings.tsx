@@ -23,7 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/supabase-auth-context';
 import { useTheme } from '@/contexts/theme-context';
 import { useNotifications } from '@/hooks/use-notifications';
 import { changePasswordSchema, type ChangePassword } from '@shared/schema';

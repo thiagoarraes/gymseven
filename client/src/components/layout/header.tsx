@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/logo";
-import { useAuth } from "@/contexts/auth-context-new";
+import { useAuth } from "@/contexts/supabase-auth-context";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
@@ -26,9 +26,10 @@ export function Header() {
 
   const getUserInitials = () => {
     if (!user) return "U";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.username?.charAt(0).toUpperCase() || "U";
+    const firstName = user.user_metadata?.first_name || "";
+    const lastName = user.user_metadata?.last_name || "";
+    const username = user.user_metadata?.username || user.email || "";
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || username.charAt(0).toUpperCase() || "U";
   };
 
   return (
@@ -42,7 +43,7 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <div className="glass-card rounded-full p-1 hover-lift cursor-pointer touch-feedback mobile-touch-target" data-testid="user-menu-trigger">
                   <Avatar className="w-8 h-8 sm:w-9 sm:h-9">
-                    <AvatarImage src={user?.profileImageUrl || ""} alt={user?.username || ""} />
+                    <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.user_metadata?.username || user?.email || ""} />
                     <AvatarFallback className="bg-blue-600 text-white text-sm font-semibold">
                       {getUserInitials()}
                     </AvatarFallback>
@@ -52,9 +53,9 @@ export function Header() {
               <DropdownMenuContent align="end" className="w-60 sm:w-56 bg-slate-900/98 border-slate-700 backdrop-blur-lg mr-2 shadow-2xl shadow-black/40" sideOffset={8}>
                 <div className="px-3 pb-2 pt-1">
                   <p className="mobile-body font-semibold text-foreground truncate">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}` 
-                      : user?.username}
+                    {user?.user_metadata?.first_name && user?.user_metadata?.last_name 
+                      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}` 
+                      : user?.user_metadata?.username || user?.email}
                   </p>
                   <p className="mobile-caption text-muted-foreground truncate">{user?.email}</p>
                 </div>

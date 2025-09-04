@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/auth-context-new';
+import { useAuth } from '@/contexts/supabase-auth-context';
 import { updateUserSchema, type UpdateUser } from '@shared/schema';
 import ImageCropModal from '@/components/ImageCropModal';
 

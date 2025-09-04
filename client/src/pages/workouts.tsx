@@ -13,7 +13,7 @@ import { z } from "zod";
 import { workoutTemplateApi, workoutLogApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/auth-context-new";
+import { useAuth } from "@/contexts/supabase-auth-context";
 
 const workoutFormSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
