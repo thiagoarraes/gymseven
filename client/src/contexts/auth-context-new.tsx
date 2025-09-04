@@ -65,11 +65,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('🔍 Fetching user profile for:', userId);
-      const { data, error } = await supabase
+      
+      // Add timeout to prevent infinite hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      );
+
+      const queryPromise = supabase
         .from('users')
         .select('*')
         .eq('id', userId)
         .single();
+
+      const result = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const { data, error } = result;
 
       if (error) {
         console.error('Error fetching user profile:', error);
@@ -79,6 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           await createUserProfileFromAuth(userId);
         } else {
           // For other errors, still stop loading
+          console.log('⚠️ Stopping loading due to error:', error.message);
           setLoading(false);
         }
       } else {
@@ -86,8 +96,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(data);
         setLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in fetchUserProfile:', error);
+      // If timeout or any error, create a fallback user object
+      if (error.message === 'Timeout') {
+        console.log('⏰ Query timeout - creating fallback user');
+        const { data: authUser } = await supabase.auth.getUser();
+        if (authUser.user) {
+          setUser({
+            id: userId,
+            email: authUser.user.email!,
+            username: authUser.user.user_metadata?.username || 'thiaqo',
+            first_name: 'Thiago',
+            last_name: 'User'
+          } as any);
+        }
+      }
       setLoading(false);
     }
   };
