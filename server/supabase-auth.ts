@@ -1,4 +1,5 @@
 import { supabase } from './supabase-client';
+import { getStorage } from './storage';
 import { type Request, type Response, type NextFunction } from 'express';
 
 export interface AuthRequest extends Request {
@@ -9,7 +10,7 @@ export interface AuthRequest extends Request {
   };
 }
 
-// Middleware to verify Supabase Auth JWT
+// Middleware to verify Supabase Auth JWT and ensure user exists in users table
 export async function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
@@ -24,6 +25,40 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
 
     if (error || !user) {
       return res.status(403).json({ message: 'Token inválido ou expirado - faça login novamente' });
+    }
+
+    // Ensure user exists in local users table
+    const db = await getStorage();
+    let dbUser = await db.getUser(user.id);
+
+    if (!dbUser) {
+      // Create user in local users table with data from Supabase
+      console.log('🔄 Creating user in database:', user.id, user.email);
+      try {
+        const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
+        const firstName = user.user_metadata?.first_name || user.user_metadata?.firstName || '';
+        const lastName = user.user_metadata?.last_name || user.user_metadata?.lastName || '';
+
+        // Check if username already exists and make it unique
+        const existingUser = await db.getUserByUsername(username);
+        const finalUsername = existingUser ? `${username}_${user.id.slice(-6)}` : username;
+
+        dbUser = await db.createUser({
+          id: user.id,
+          email: user.email!,
+          username: finalUsername,
+          password: 'supabase_managed', // Placeholder since auth is managed by Supabase
+          firstName: firstName,
+          lastName: lastName,
+          isActive: true,
+          emailVerified: true
+        });
+        console.log('✅ User created in database:', dbUser.id);
+      } catch (createError: any) {
+        console.error('❌ Failed to create user in database:', createError);
+        // If user creation fails, continue with Supabase user data
+        // This prevents blocking authentication due to DB issues
+      }
     }
 
     req.user = user;
