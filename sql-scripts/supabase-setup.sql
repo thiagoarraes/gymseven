@@ -244,7 +244,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Create a system user for sample data
 INSERT INTO users (id, email, username, password, first_name, last_name) VALUES
-    ('00000000-0000-0000-0000-000000000000', 'system@gymseven.com', 'system', 'system', 'System', 'User')
+    ('00000000-0000-0000-0000-000000000000', 'system@gymseven.com.br', 'system', 'system', 'System', 'User')
 ON CONFLICT (id) DO NOTHING;
 
 NOTIFY pgsql, 'GymSeven database schema setup completed successfully!';

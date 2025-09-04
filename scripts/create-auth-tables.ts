@@ -115,7 +115,7 @@ async function createAuthTables() {
       // Criar usuário de teste diretamente
       const testUser = {
         id: 'test-user-id',
-        email: 'teste@gymseven.com',
+        email: 'teste@gymseven.com.br',
         username: 'teste',
         password: '$2a$12$LQv3c1yqBWVHxkd0LQ4YCOdZRtoNOaoZ92s4KJz2z2Zd8.4Jz8vKu', // senha: 123456
         firstName: 'Usuário',
@@ -139,7 +139,7 @@ async function createAuthTables() {
       
       // Criar usuário de teste
       const testUser = {
-        email: 'teste@gymseven.com',
+        email: 'teste@gymseven.com.br',
         username: 'teste',
         password: '$2a$12$LQv3c1yqBWVHxkd0LQ4YCOdZRtoNOaoZ92s4KJz2z2Zd8.4Jz8vKu', // senha: 123456
         first_name: 'Usuário',
@@ -154,7 +154,7 @@ async function createAuthTables() {
       if (insertError) {
         console.error('❌ Erro ao inserir usuário teste:', insertError);
       } else {
-        console.log('✅ Usuário teste criado: teste@gymseven.com / 123456');
+        console.log('✅ Usuário teste criado: teste@gymseven.com.br / 123456');
       }
     }
 
