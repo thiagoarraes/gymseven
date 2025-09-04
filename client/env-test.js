@@ -1,0 +1,1 @@
+console.log('ALL VITE ENV:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_'))); console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL); console.log('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'EXISTS' : 'MISSING');
