@@ -119,5 +119,63 @@ export function registerSupabaseAuthRoutes(app: Express) {
     }
   });
 
+  // Delete account and all user data
+  app.delete("/api/auth/delete-account", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const userId = req.user.id;
+      
+      console.log(`🗑️ Iniciando exclusão completa da conta para usuário: ${userId}`);
+
+      // Get storage instance
+      const { storage } = await import("./storage");
+
+      // Delete all user data in sequence
+      try {
+        // Delete user logs and related data
+        console.log('🗑️ Deletando workout logs...');
+        const workoutLogs = await storage.getWorkoutLogsByUser(userId);
+        for (const log of workoutLogs) {
+          await storage.deleteWorkoutLog(userId, log.id);
+        }
+
+        // Delete user templates
+        console.log('🗑️ Deletando workout templates...');
+        const templates = await storage.getWorkoutTemplatesByUser(userId);
+        for (const template of templates) {
+          await storage.deleteWorkoutTemplate(userId, template.id);
+        }
+
+        // Delete user exercises
+        console.log('🗑️ Deletando exercícios personalizados...');
+        const exercises = await storage.getExercisesByUser(userId);
+        for (const exercise of exercises) {
+          await storage.deleteExercise(userId, exercise.id);
+        }
+
+        // Delete user record from database
+        console.log('🗑️ Deletando registro do usuário...');
+        await storage.deleteUser(userId);
+
+        console.log('✅ Todos os dados do usuário foram excluídos com sucesso');
+
+        res.json({ 
+          message: "Conta e todos os dados foram excluídos permanentemente" 
+        });
+      } catch (deleteError: any) {
+        console.error('❌ Erro ao deletar dados do usuário:', deleteError);
+        throw new Error(`Erro ao deletar dados: ${deleteError.message}`);
+      }
+    } catch (error: any) {
+      console.error('❌ Delete account error:', error);
+      res.status(500).json({ 
+        message: error.message || "Erro interno do servidor ao excluir conta" 
+      });
+    }
+  });
+
   console.log('✅ Supabase Auth routes registered');
 }

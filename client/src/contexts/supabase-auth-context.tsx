@@ -10,6 +10,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
+  updateProfile?: (data: any) => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -158,6 +160,44 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const deleteAccount = async () => {
+    setLoading(true);
+    try {
+      // Delete all user data from our backend (this will also delete the user from Supabase)
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao deletar dados do usuário');
+      }
+
+      // Sign out the user
+      await supabase.auth.signOut();
+      
+      console.log('✅ Conta excluída com sucesso');
+      
+      // Redirect to home page after successful deletion
+      window.location.href = '/login';
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Erro ao excluir conta';
+      console.error('❌ Erro ao excluir conta:', errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (data: any) => {
+    // Implementation for updating profile if not already present
+    console.log('Update profile called with:', data);
+  };
+
   const value: AuthContextType = {
     user,
     session,
@@ -166,6 +206,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signOut,
     resetPassword,
+    deleteAccount,
+    updateProfile,
     isAuthenticated: !!user
   };
 
