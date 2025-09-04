@@ -582,6 +582,36 @@ export class SupabaseStorage implements IStorage {
   }
 
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
+    console.log(`🗑️ Attempting to delete template: ${id} for user: ${userId}`);
+    
+    // First, check if the template exists and verify ownership
+    if (userId) {
+      const { data: templateCheck, error: checkError } = await supabase
+        .from('workoutTemplates')
+        .select('id, user_id, name')
+        .eq('id', id)
+        .single();
+        
+      if (checkError) {
+        console.log(`❌ Error checking template existence:`, checkError);
+        return false;
+      }
+      
+      if (!templateCheck) {
+        console.log(`❌ Template ${id} not found`);
+        return false;
+      }
+      
+      console.log(`🔍 Found template: ${templateCheck.name}, owner: ${templateCheck.user_id}, requesting user: ${userId}`);
+      
+      if (templateCheck.user_id !== userId) {
+        console.log(`❌ Template belongs to different user. Owner: ${templateCheck.user_id}, Requester: ${userId}`);
+        return false;
+      }
+      
+      console.log(`✅ Template ownership verified, proceeding with deletion`);
+    }
+
     let query = supabase
       .from('workoutTemplates')
       .delete()
@@ -594,8 +624,13 @@ export class SupabaseStorage implements IStorage {
 
     const { error, count } = await query;
     
+    console.log(`🔄 Delete operation result - Error: ${error?.message || 'none'}, Count: ${count}`);
+    
     // Return false if error occurred or no rows were affected (template not found or not owned by user)
-    return !error && count !== 0;
+    const success = !error && count !== 0;
+    console.log(`${success ? '✅' : '❌'} Template deletion ${success ? 'successful' : 'failed'}`);
+    
+    return success;
   }
 
   // Workout Template Exercises
