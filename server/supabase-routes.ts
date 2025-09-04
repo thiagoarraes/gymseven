@@ -136,107 +136,71 @@ export function registerSupabaseAuthRoutes(app: Express) {
 
       // Delete all user data in sequence
       try {
-        // Delete all user data using Supabase cascade delete
+        // Delete all user data using direct Supabase queries
         console.log('🗑️ Deletando todos os dados do usuário via Supabase...');
         
-        // Delete workout log sets (will cascade delete from workoutLogs)
-        const { error: setsError } = await storage.supabase
-          .from('workoutLogSets')
-          .delete()
-          .in('workoutLogId', 
-            storage.supabase
-              .from('workoutLogs')
-              .select('id')
-              .eq('user_id', userId)
-          );
-          
-        if (setsError) {
-          console.error('❌ Erro ao deletar workout sets:', setsError);
-        }
-
-        // Delete workout logs
-        const { error: logsError } = await storage.supabase
+        // First get workout log IDs to delete sets
+        const { data: workoutLogIds } = await storage.supabase
           .from('workoutLogs')
-          .delete()
+          .select('id')
           .eq('user_id', userId);
+
+        if (workoutLogIds && workoutLogIds.length > 0) {
+          const logIds = workoutLogIds.map(log => log.id);
           
-        if (logsError) {
-          console.error('❌ Erro ao deletar workout logs:', logsError);
+          // Delete workout log sets
+          const { error: setsError } = await storage.supabase
+            .from('workoutLogSets')
+            .delete()
+            .in('workoutLogId', logIds);
+            
+          if (setsError) {
+            console.error('❌ Erro ao deletar workout sets:', setsError);
+          }
         }
 
-        // Delete workout template exercises
-        const { error: templateExError } = await storage.supabase
-          .from('workoutTemplateExercises')
-          .delete()
-          .in('templateId', 
-            storage.supabase
-              .from('workoutTemplates')
-              .select('id')
-              .eq('user_id', userId)
-          );
-          
-        if (templateExError) {
-          console.error('❌ Erro ao deletar template exercises:', templateExError);
-        }
-
-        // Delete workout templates
-        const { error: templatesError } = await storage.supabase
+        // Get template IDs to delete template exercises
+        const { data: templateIds } = await storage.supabase
           .from('workoutTemplates')
-          .delete()
+          .select('id')
           .eq('user_id', userId);
+
+        if (templateIds && templateIds.length > 0) {
+          const tempIds = templateIds.map(template => template.id);
           
-        if (templatesError) {
-          console.error('❌ Erro ao deletar templates:', templatesError);
+          // Delete workout template exercises
+          const { error: templateExError } = await storage.supabase
+            .from('workoutTemplateExercises')
+            .delete()
+            .in('templateId', tempIds);
+            
+          if (templateExError) {
+            console.error('❌ Erro ao deletar template exercises:', templateExError);
+          }
         }
 
-        // Delete user exercises
-        const { error: exercisesError } = await storage.supabase
-          .from('exercises')
-          .delete()
-          .eq('user_id', userId);
-          
-        if (exercisesError) {
-          console.error('❌ Erro ao deletar exercises:', exercisesError);
-        }
+        // Delete all user data directly by user_id
+        const deletions = [
+          { table: 'workoutLogs', name: 'workout logs' },
+          { table: 'workoutTemplates', name: 'templates' },
+          { table: 'exercises', name: 'exercises' },
+          { table: 'weightHistory', name: 'weight history' },
+          { table: 'userGoals', name: 'goals' },
+          { table: 'userAchievements', name: 'achievements' },
+          { table: 'userPreferences', name: 'preferences' }
+        ];
 
-        // Delete weight history
-        const { error: weightError } = await storage.supabase
-          .from('weightHistory')
-          .delete()
-          .eq('user_id', userId);
-          
-        if (weightError) {
-          console.error('❌ Erro ao deletar weight history:', weightError);
-        }
-
-        // Delete user goals
-        const { error: goalsError } = await storage.supabase
-          .from('userGoals')
-          .delete()
-          .eq('user_id', userId);
-          
-        if (goalsError) {
-          console.error('❌ Erro ao deletar goals:', goalsError);
-        }
-
-        // Delete user achievements
-        const { error: achievementsError } = await storage.supabase
-          .from('userAchievements')
-          .delete()
-          .eq('user_id', userId);
-          
-        if (achievementsError) {
-          console.error('❌ Erro ao deletar achievements:', achievementsError);
-        }
-
-        // Delete user preferences
-        const { error: prefsError } = await storage.supabase
-          .from('userPreferences')
-          .delete()
-          .eq('user_id', userId);
-          
-        if (prefsError) {
-          console.error('❌ Erro ao deletar preferences:', prefsError);
+        for (const deletion of deletions) {
+          const { error } = await storage.supabase
+            .from(deletion.table)
+            .delete()
+            .eq('user_id', userId);
+            
+          if (error) {
+            console.error(`❌ Erro ao deletar ${deletion.name}:`, error);
+          } else {
+            console.log(`✅ ${deletion.name} deletados com sucesso`);
+          }
         }
 
         // Delete user record from database
