@@ -102,7 +102,7 @@ export async function loginUser(credentials: LoginUser): Promise<{ user: Omit<Us
   const db = await getStorage();
   const user = await db.getUserByEmail(validatedCredentials.email);
   if (!user) {
-    throw new Error('Email ou senha incorretos');
+    throw new Error('Este email não está cadastrado. Verifique o email ou crie uma nova conta.');
   }
   
   // Verify password

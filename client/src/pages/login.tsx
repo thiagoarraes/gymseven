@@ -49,7 +49,7 @@ export default function Login() {
       showSuccess("Login realizado com sucesso!", "Bem-vindo de volta ao GymSeven");
       setLocation('/');
     } catch (error: any) {
-      // Set custom error instead of toast
+      // Check for specific email not found error
       const errorMessage = error.message || "Email ou senha incorretos";
       setLoginError(errorMessage);
     } finally {
@@ -211,14 +211,23 @@ export default function Login() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-medium text-red-300 mb-1">
-                            Falha no Login
+                            {loginError.includes('não está cadastrado') ? 'Email Não Encontrado' : 'Falha no Login'}
                           </h3>
                           <p className="text-sm text-red-200/80 leading-relaxed">
                             {loginError}
                           </p>
-                          <p className="text-xs text-red-200/60 mt-2">
-                            Verifique se o email e senha estão corretos e tente novamente.
-                          </p>
+                          {loginError.includes('não está cadastrado') ? (
+                            <div className="mt-3 pt-3 border-t border-red-400/20">
+                              <p className="text-xs text-red-200/70 mb-2">Deseja criar uma conta nova?</p>
+                              <Link to="/register" className="text-xs text-blue-300 hover:text-blue-200 underline transition-colors">
+                                Criar conta gratuita →
+                              </Link>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-red-200/60 mt-2">
+                              Verifique se o email e senha estão corretos e tente novamente.
+                            </p>
+                          )}
                         </div>
                         <button
                           onClick={() => setLoginError('')}
