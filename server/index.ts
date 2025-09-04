@@ -7,6 +7,10 @@ import { setupVite, serveStatic, log } from "./vite";
 // Load environment variables from .env file first
 loadEnv();
 
+// Set frontend environment variables for Vite
+process.env.VITE_SUPABASE_URL = process.env.SUPABASE_URL;
+process.env.VITE_SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
 const app = express();
 
 // Enhanced CORS configuration for Replit

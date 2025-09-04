@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useAuth } from '@/contexts/auth-context-new';
 import { z } from 'zod';
 
 const forgotPasswordSchema = z.object({
@@ -20,6 +21,7 @@ export default function ForgotPassword() {
   const [isVisible, setIsVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string>('');
+  const { resetPassword } = useAuth();
 
   const form = useForm<ForgotPasswordData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -47,19 +49,7 @@ export default function ForgotPassword() {
     setError('');
     
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao enviar email de recuperação');
-      }
-
+      await resetPassword(data.email);
       setSubmitted(true);
     } catch (error: any) {
       setError(error.message || 'Erro ao enviar email de recuperação');
