@@ -582,8 +582,6 @@ export class SupabaseStorage implements IStorage {
   }
 
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
-    console.log(`🗑️ Attempting to delete template: ${id} for user: ${userId}`);
-    
     // First, check if the template exists and verify ownership
     if (userId) {
       const { data: templateCheck, error: checkError } = await supabase
@@ -592,38 +590,23 @@ export class SupabaseStorage implements IStorage {
         .eq('id', id)
         .single();
         
-      if (checkError) {
-        console.log(`❌ Error checking template existence:`, checkError);
+      if (checkError || !templateCheck) {
         return false;
       }
-      
-      if (!templateCheck) {
-        console.log(`❌ Template ${id} not found`);
-        return false;
-      }
-      
-      console.log(`🔍 Found template: ${templateCheck.name}, owner: ${templateCheck.user_id}, requesting user: ${userId}`);
       
       if (templateCheck.user_id !== userId) {
-        console.log(`❌ Template belongs to different user. Owner: ${templateCheck.user_id}, Requester: ${userId}`);
         return false;
       }
-      
-      console.log(`✅ Template ownership verified, proceeding with deletion`);
     }
 
     // Before deleting the template, remove references from workout logs to avoid foreign key constraint
-    console.log(`🔗 Removing template references from workout logs...`);
     const { error: updateError } = await supabase
       .from('workoutLogs')
       .update({ templateId: null })
       .eq('templateId', id);
 
     if (updateError) {
-      console.log(`❌ Error updating workout logs:`, updateError);
-      // Continue with deletion attempt anyway, the original constraint error will show
-    } else {
-      console.log(`✅ Template references removed from workout logs`);
+      return false;
     }
 
     let query = supabase
@@ -638,13 +621,8 @@ export class SupabaseStorage implements IStorage {
 
     const { error, count } = await query;
     
-    console.log(`🔄 Delete operation result - Error: ${error?.message || 'none'}, Count: ${count}`);
-    
     // Return false if error occurred or no rows were affected (template not found or not owned by user)
-    const success = !error && count !== 0;
-    console.log(`${success ? '✅' : '❌'} Template deletion ${success ? 'successful' : 'failed'}`);
-    
-    return success;
+    return !error && count !== 0;
   }
 
   // Workout Template Exercises

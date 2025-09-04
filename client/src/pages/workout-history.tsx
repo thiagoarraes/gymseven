@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Play, Clock, Dumbbell, Calendar, TrendingUp, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { DayPicker } from "react-day-picker";
@@ -92,31 +92,6 @@ export default function WorkoutHistory() {
     enabled: !!selectedWorkout && showSummaryModal,
   });
 
-  // Delete workout mutation
-  const deleteWorkoutMutation = useMutation({
-    mutationFn: async (workoutId: string) => {
-      const response = await fetch(`/api/workout-logs/${workoutId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Erro ao excluir treino');
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/workout-logs'] });
-      toast({
-        title: "Treino excluído",
-        description: "O treino foi removido do seu histórico.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir o treino. Tente novamente.",
-        variant: "destructive",
-      });
-    },
-  });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -150,9 +125,6 @@ export default function WorkoutHistory() {
     setShowSummaryModal(true);
   };
 
-  const handleDeleteWorkout = (workoutId: string) => {
-    deleteWorkoutMutation.mutate(workoutId);
-  };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -269,7 +241,7 @@ export default function WorkoutHistory() {
                   <p className="text-slate-400 text-sm">
                     {selectedDate
                       ? selectedDateWorkouts.length > 0
-                        ? `${selectedDateWorkouts.length} treino${selectedDateWorkouts.length > 1 ? 's' : ''} neste dia`
+                        ? `${selectedDateWorkouts.length} treino${selectedDateWorkouts.length > 1 ? 's' : ''} neste dia • Clique para ver detalhes`
                         : "Nenhum treino neste dia"
                       : "Clique em um dia no calendário"
                     }
@@ -305,17 +277,10 @@ export default function WorkoutHistory() {
                               </div>
                             </div>
                             
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteWorkout(workout.id);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center text-slate-400 text-xs opacity-0 group-hover:opacity-100 transition-all duration-200">
+                              <span className="mr-1">Ver detalhes</span>
+                              <ChevronRight className="w-3 h-3" />
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
