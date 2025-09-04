@@ -8,14 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { showSuccess, showError } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/auth-context-new';
 import { registerSchema, type RegisterUser } from '@shared/schema';
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const { register } = useAuth();
+  const { signUp } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -36,7 +36,11 @@ export default function Register() {
   const onSubmit = async (data: RegisterUser) => {
     setLoading(true);
     try {
-      await register(data);
+      await signUp(data.email, data.password, {
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName
+      });
       showSuccess("Conta criada com sucesso!", "Bem-vindo ao GymSeven! Sua jornada fitness começa agora.");
       setLocation('/');
     } catch (error: any) {

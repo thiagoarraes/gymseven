@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { showSuccess } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/auth-context-new';
 import { loginSchema, type LoginUser } from '@shared/schema';
 
 export default function Login() {
@@ -16,7 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [loginError, setLoginError] = useState<string>('');
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const [, setLocation] = useLocation();
 
   const form = useForm<LoginUser>({
@@ -45,7 +45,7 @@ export default function Login() {
     setLoading(true);
     setLoginError(''); // Clear any previous errors
     try {
-      await login(data.email, data.password);
+      await signIn(data.email, data.password);
       showSuccess("Login realizado com sucesso!", "Bem-vindo de volta ao GymSeven");
       setLocation('/');
     } catch (error: any) {
