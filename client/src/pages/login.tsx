@@ -261,9 +261,13 @@ export default function Login() {
                 <Link href="/forgot-password">
                   <Button 
                     variant="ghost" 
-                    className="text-slate-400 hover:text-blue-400 font-medium text-sm px-0 h-auto transition-all duration-300 hover:scale-105"
+                    className="group relative text-slate-400 hover:text-blue-400 font-medium text-sm px-4 py-2 h-auto transition-all duration-300 hover:scale-105 hover:bg-blue-500/10 rounded-lg border border-transparent hover:border-blue-500/20 backdrop-blur-sm"
                   >
-                    Esqueci minha senha
+                    <span className="relative z-10 transition-all duration-300 group-hover:text-blue-300">
+                      Esqueci minha senha
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg"></div>
+                    <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-lg blur-sm"></div>
                   </Button>
                 </Link>
               </div>
