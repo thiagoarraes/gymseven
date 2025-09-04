@@ -33,6 +33,7 @@ async function syncUserFromAuthToDatabase(
       userData.username;
 
     // Create user in database with service role (bypasses RLS)
+    // Let database handle created_at and updated_at with their default values
     const { data, error } = await supabase
       .from('users')
       .insert({
@@ -43,9 +44,8 @@ async function syncUserFromAuthToDatabase(
         first_name: userData.firstName || '',
         last_name: userData.lastName || '',
         is_active: true,
-        email_verified: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        email_verified: true
+        // created_at and updated_at will use database defaults
       })
       .select()
       .single();
