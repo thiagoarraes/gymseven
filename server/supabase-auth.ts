@@ -44,7 +44,6 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
         const finalUsername = existingUser ? `${username}_${user.id.slice(-6)}` : username;
 
         dbUser = await db.createUser({
-          id: user.id,
           email: user.email!,
           username: finalUsername,
           password: 'supabase_managed', // Placeholder since auth is managed by Supabase
@@ -52,7 +51,7 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
           lastName: lastName,
           isActive: true,
           emailVerified: true
-        });
+        } as any);
         console.log('✅ User created in database:', dbUser.id);
       } catch (createError: any) {
         console.error('❌ Failed to create user in database:', createError);
