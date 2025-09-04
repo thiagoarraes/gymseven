@@ -155,6 +155,15 @@ export async function logoutUser(token: string) {
 // Reset password
 export async function resetPassword(email: string) {
   try {
+    // First verify if the user exists in Supabase Auth
+    const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(email);
+    
+    if (userError || !userData.user) {
+      // User doesn't exist - throw error instead of silently failing
+      throw new Error('Nenhuma conta encontrada com este email');
+    }
+
+    // User exists, proceed with password reset
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password`
     });
