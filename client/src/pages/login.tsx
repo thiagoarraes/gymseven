@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { showSuccess } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/auth-context-new';
+import { useAuth } from '@/contexts/supabase-auth-context';
 import { loginSchema, type LoginUser } from '@shared/schema';
 
 export default function Login() {

@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layout/header";
 import { BottomNavigation } from "@/components/layout/bottom-nav";
-import { AuthProvider, useAuth } from "@/contexts/auth-context-new";
+import { AuthProvider, useAuth } from "@/contexts/supabase-auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { WorkoutProvider } from "@/contexts/workout-context";
 import Dashboard from "@/pages/dashboard";

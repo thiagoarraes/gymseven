@@ -21,6 +21,7 @@ import {
   updateUserPreferencesSchema
 } from "@shared/schema";
 import { registerUser, loginUser, changeUserPassword, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
+import { registerSupabaseAuthRoutes } from "./supabase-routes";
 
 // Configure multer for avatar uploads
 const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
@@ -56,67 +57,11 @@ const uploadAvatar = multer({
 export async function registerRoutes(app: Express, createServerInstance = true): Promise<Server | null> {
   // Initialize storage once for all routes
   const db = await getStorage();
-  // Auth routes
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const result = await registerUser(req.body);
-      res.status(201).json(result);
-    } catch (error: any) {
-      console.error('Register error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        requestBody: req.body
-      });
-      
-      if (error.message.includes('já está em uso')) {
-        res.status(409).json({ message: error.message });
-      } else if (error.name === 'ZodError') {
-        res.status(400).json({ 
-          message: "Dados inválidos",
-          errors: error.errors
-        });
-      } else {
-        res.status(500).json({ message: "Erro interno do servidor" });
-      }
-    }
-  });
-
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      console.log('🔐 Login attempt:', { email: req.body.email });
-      const result = await loginUser(req.body);
-      console.log('✅ Login successful for user:', result.user.id);
-      res.json(result);
-    } catch (error: any) {
-      console.error('❌ Login error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        requestBody: { email: req.body.email }
-      });
-      
-      if (error.message.includes('incorretos')) {
-        res.status(401).json({ message: error.message });
-      } else if (error.name === 'ZodError') {
-        res.status(400).json({ 
-          message: "Dados inválidos",
-          errors: error.errors
-        });
-      } else {
-        res.status(500).json({ message: "Erro interno do servidor" });
-      }
-    }
-  });
-
-  app.get("/api/auth/me", authenticateToken, async (req: AuthRequest, res) => {
-    try {
-      const { password, ...userWithoutPassword } = req.user!;
-      res.json({ user: userWithoutPassword });
-    } catch (error) {
-      res.status(500).json({ message: "Erro interno do servidor" });
-    }
-  });
+  
+  // Register Supabase Auth routes
+  registerSupabaseAuthRoutes(app);
+  
+  // Auth routes now handled by Supabase Auth (see supabase-routes.ts)
 
   // Update user profile
   app.put('/api/auth/profile', authenticateToken, async (req: AuthRequest, res) => {
