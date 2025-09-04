@@ -155,21 +155,31 @@ export async function logoutUser(token: string) {
 // Reset password
 export async function resetPassword(email: string) {
   try {
+    console.log('🔍 Starting password reset process for:', email);
+    
     // Check if user exists in our users table first
     const db = await getStorage();
+    console.log('🗄️ Got storage instance');
+    
     const userExists = await db.getUserByEmail(email);
+    console.log('👤 Database user query result:', userExists ? 'User found' : 'User not found');
+    console.log('📊 Full user data:', JSON.stringify(userExists, null, 2));
     
     if (!userExists) {
       // User doesn't exist in our database - account was deleted
+      console.log('❌ User not found in database, throwing error');
       throw new Error('Nenhuma conta encontrada com este email');
     }
 
+    console.log('✅ User found in database, proceeding with Supabase reset');
+    
     // User exists in our database, proceed with password reset
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password`
     });
 
     if (error) {
+      console.log('❌ Supabase reset password error:', error.message);
       // If Supabase also says user doesn't exist, it was deleted
       if (error.message.includes('User not found') || error.message.includes('not found')) {
         throw new Error('Nenhuma conta encontrada com este email');
