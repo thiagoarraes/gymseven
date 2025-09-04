@@ -10,6 +10,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updateProfile: (updates: any) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -146,6 +148,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const updateProfile = async (updates: any) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          username: updates.username,
+          first_name: updates.firstName,
+          last_name: updates.lastName,
+          date_of_birth: updates.dateOfBirth,
+          height: updates.height,
+          weight: updates.weight,
+          activity_level: updates.activityLevel,
+          ...updates
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      console.log('✅ Perfil atualizado com sucesso');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar perfil:', error);
+      throw new Error(error.message || 'Erro ao atualizar perfil');
+    }
+  };
+
+  const deleteAccount = async () => {
+    try {
+      // Note: Supabase doesn't have direct account deletion from client
+      // This would typically be handled via an admin endpoint
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao deletar conta');
+      }
+
+      await signOut();
+      console.log('✅ Conta deletada com sucesso');
+    } catch (error: any) {
+      console.error('❌ Erro ao deletar conta:', error);
+      throw new Error(error.message || 'Erro ao deletar conta');
+    }
+  };
+
   const value: AuthContextType = {
     user,
     session,
@@ -154,6 +207,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signOut,
     resetPassword,
+    updateProfile,
+    deleteAccount,
     isAuthenticated: !!user
   };
 

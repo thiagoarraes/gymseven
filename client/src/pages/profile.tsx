@@ -64,13 +64,13 @@ export default function Profile() {
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       email: user?.email || '',
-      username: user?.username || '',
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      dateOfBirth: user?.dateOfBirth ? formatDateForInput(user.dateOfBirth) : undefined,
-      height: user?.height || undefined,
-      weight: user?.weight || undefined,
-      activityLevel: user?.activityLevel || 'moderado',
+      username: user?.user_metadata?.username || '',
+      firstName: user?.user_metadata?.first_name || '',
+      lastName: user?.user_metadata?.last_name || '',
+      dateOfBirth: user?.user_metadata?.date_of_birth ? formatDateForInput(user.user_metadata.date_of_birth) : undefined,
+      height: user?.user_metadata?.height || undefined,
+      weight: user?.user_metadata?.weight || undefined,
+      activityLevel: user?.user_metadata?.activity_level || 'moderado',
     },
   });
 
@@ -156,9 +156,10 @@ export default function Profile() {
 
   const getUserInitials = () => {
     if (!user) return "U";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.username?.charAt(0).toUpperCase() || "U";
+    const firstName = user.user_metadata?.first_name || "";
+    const lastName = user.user_metadata?.last_name || "";
+    const username = user.user_metadata?.username || user.email || "";
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || username.charAt(0).toUpperCase() || "U";
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,7 +260,7 @@ export default function Profile() {
           <div className="text-center space-y-4">
             <div className="relative inline-block">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={user?.profileImageUrl || ""} alt={user?.username || ""} />
+                <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.user_metadata?.username || user?.email || ""} />
                 <AvatarFallback className="bg-blue-600 text-white text-2xl">
                   {getUserInitials()}
                 </AvatarFallback>
@@ -289,9 +290,9 @@ export default function Profile() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {user?.firstName && user?.lastName 
-                  ? `${user.firstName} ${user.lastName}` 
-                  : user?.username}
+                {user?.user_metadata?.first_name && user?.user_metadata?.last_name 
+                  ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}` 
+                  : user?.user_metadata?.username || user?.email}
               </h1>
               <p className="text-muted-foreground">{user?.email}</p>
             </div>
@@ -571,10 +572,10 @@ export default function Profile() {
                           </PopoverContent>
                         </Popover>
                         <FormMessage />
-                        {user?.dateOfBirth && (
+                        {user?.user_metadata?.date_of_birth && (
                           <p className="text-xs text-blue-400 mt-1 flex items-center gap-1">
                             {(() => {
-                              const birthDate = new Date(user.dateOfBirth);
+                              const birthDate = new Date(user.user_metadata.date_of_birth);
                               const month = birthDate.getMonth() + 1;
                               const day = birthDate.getDate();
                               
