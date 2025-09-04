@@ -20,11 +20,17 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
     }
 
     // Verify JWT with Supabase
+    console.log('🔍 Verifying token:', { token: token.substring(0, 20) + '...' });
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      console.log('❌ Token verification failed:', error?.message);
-      return res.status(403).json({ message: 'Token inválido' });
+      console.log('❌ Token verification failed:', { 
+        error: error?.message, 
+        errorCode: error?.code,
+        hasUser: !!user,
+        token: token.substring(0, 20) + '...'
+      });
+      return res.status(403).json({ message: 'Token inválido ou expirado - faça login novamente' });
     }
 
     req.user = user;
