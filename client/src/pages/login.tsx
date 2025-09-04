@@ -47,10 +47,10 @@ export default function Login() {
     try {
       await signIn(data.email, data.password);
       showSuccess("Login realizado com sucesso!", "Bem-vindo de volta ao GymSeven");
-      setLocation('/');
+      // Don't redirect manually, let the auth context handle it via onAuthStateChange
     } catch (error: any) {
-      // Check for specific email not found error
-      const errorMessage = error.message || "Email ou senha incorretos";
+      console.error('Login error in component:', error);
+      const errorMessage = error?.message || "Email ou senha incorretos";
       setLoginError(errorMessage);
     } finally {
       setLoading(false);

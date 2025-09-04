@@ -95,19 +95,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('❌ Supabase signin error:', error);
         throw new Error(error.message);
       }
 
+      if (!data.user || !data.session) {
+        throw new Error('Falha no login - dados não retornados');
+      }
+
       console.log('✅ Login realizado com sucesso:', email);
+      // Auth state will be updated automatically by onAuthStateChange
     } catch (error: any) {
-      console.error('❌ Erro no login:', error);
-      throw new Error(error.message || 'Credenciais inválidas');
+      const errorMessage = error?.message || 'Erro desconhecido no login';
+      console.error('❌ Erro no login:', errorMessage, error);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -138,13 +145,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (error) {
+        console.error('❌ Supabase reset password error:', error);
         throw new Error(error.message);
       }
 
       console.log('✅ Email de redefinição enviado para:', email);
     } catch (error: any) {
-      console.error('❌ Erro ao redefinir senha:', error);
-      throw new Error(error.message || 'Erro ao enviar email de redefinição');
+      const errorMessage = error?.message || 'Erro ao enviar email de redefinição';
+      console.error('❌ Erro ao redefinir senha:', errorMessage, error);
+      throw new Error(errorMessage);
     }
   };
 
