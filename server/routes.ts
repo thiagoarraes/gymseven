@@ -127,19 +127,11 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  // Clear user data endpoint (keep account, remove all data)
+  // Clear user data endpoint (keep account, remove all data) - NOT IMPLEMENTED FOR SUPABASE
   app.delete('/api/auth/clear-data', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const userId = req.user!.id;
-      
-      // Clear all user data but keep the account
-      const cleared = await db.clearUserData(userId);
-      
-      if (!cleared) {
-        return res.status(500).json({ message: "Erro ao limpar dados do usuário" });
-      }
-      
-      res.status(200).json({ message: "Dados limpos com sucesso" });
+      // For now, return not implemented as this requires complex Supabase table operations
+      res.status(501).json({ message: "Funcionalidade não implementada com Supabase" });
     } catch (error: any) {
       console.error('Error clearing user data:', error);
       res.status(500).json({ message: "Erro interno do servidor" });
@@ -1014,9 +1006,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       console.log('🔍 [API] Buscando exercises-weight-summary (versão simplificada)...');
       
       // No fallback data - return empty when no real data exists
-      const knownExercisesWithData = [];
+      const knownExercisesWithData: string[] = [];
       
-      const exerciseSummaries = [];
+      const exerciseSummaries: any[] = [];
       
       for (const exerciseName of knownExercisesWithData) {
         console.log(`🔍 [SIMPLES] Processando: ${exerciseName}`);

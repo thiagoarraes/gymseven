@@ -45,7 +45,7 @@ type Preferences = z.infer<typeof preferencesSchema>;
 export default function Settings() {
   const [loading, setLoading] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const { user, token } = useAuth();
+  const { user, session } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();

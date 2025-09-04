@@ -928,7 +928,7 @@ export default function AchievementsPage() {
         </div>
 
         {/* Level System */}
-        <LevelSystem achievements={achievementsWithProgress} username={user?.username || 'Usuário'} />
+        <LevelSystem achievements={achievementsWithProgress} username={user?.user_metadata?.username || user?.email || 'Usuário'} />
 
         {/* Stats Overview */}
         <StatsOverview achievements={achievementsWithProgress} workoutLogs={workoutLogs} />

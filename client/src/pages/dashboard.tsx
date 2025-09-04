@@ -436,7 +436,7 @@ export default function Dashboard() {
           {/* Header Section */}
           <div className="relative z-10 text-center">
             <h2 className="text-2xl sm:text-3xl font-black text-foreground bg-gradient-to-r from-foreground via-primary/80 to-foreground bg-clip-text mb-2">
-              Olá, {user?.username || 'Usuário'}!🔥
+              Olá, {user?.user_metadata?.username || user?.email || 'Usuário'}!🔥
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg font-medium">
               Pronto para progredir carga hoje?
