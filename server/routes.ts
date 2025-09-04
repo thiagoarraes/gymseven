@@ -20,7 +20,8 @@ import {
   insertUserGoalSchema,
   updateUserPreferencesSchema
 } from "@shared/schema";
-import { registerUser, loginUser, changeUserPassword, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
+import { registerUser, loginUser, changeUserPassword, optionalAuth } from "./auth";
+import { authenticateToken, type AuthRequest } from "./supabase-auth";
 import { registerSupabaseAuthRoutes } from "./supabase-routes";
 
 // Configure multer for avatar uploads
