@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle } from 'lucide-react';
+import { User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +26,8 @@ export default function Profile() {
   const [selectedFileName, setSelectedFileName] = useState<string>('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
+  const [clearingData, setClearingData] = useState(false);
   const { user, updateProfile, deleteAccount } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +98,40 @@ export default function Profile() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClearData = async () => {
+    setClearingData(true);
+    try {
+      const response = await fetch('/api/auth/clear-data', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao limpar dados');
+      }
+
+      toast({
+        title: "Dados limpos com sucesso!",
+        description: "Todos os seus dados foram removidos. Sua conta foi zerada.",
+      });
+      
+      setClearDataDialogOpen(false);
+      // Refresh page to reset UI state
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao limpar dados",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+    } finally {
+      setClearingData(false);
     }
   };
 
@@ -607,7 +643,68 @@ export default function Profile() {
                 Ações irreversíveis da conta
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              <Dialog open={clearDataDialogOpen} onOpenChange={setClearDataDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-orange-900/20 border-orange-500/50 text-orange-400 hover:bg-orange-800/30 hover:border-orange-400"
+                    data-testid="button-clear-data"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Limpar Todos os Dados
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900/95 border-orange-500/50">
+                  <DialogHeader>
+                    <DialogTitle className="text-orange-400 flex items-center">
+                      <RotateCcw className="w-5 h-5 mr-2" />
+                      Limpar Todos os Dados da Conta
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-300">
+                      Esta ação vai apagar todos os seus dados, deixando sua conta como se tivesse acabado de ser criada:
+                      <br /><br />
+                      • Todos os exercícios criados<br />
+                      • Todos os treinos e modelos<br />
+                      • Todo o histórico de progresso<br />
+                      • Todas as conquistas<br />
+                      <br />
+                      <strong className="text-orange-400">Sua conta e perfil serão mantidos.</strong>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setClearDataDialogOpen(false)}
+                      disabled={clearingData}
+                      className="bg-slate-700/50 border-slate-600 hover:bg-slate-600/60"
+                      data-testid="button-cancel-clear"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleClearData}
+                      disabled={clearingData}
+                      className="bg-orange-600 hover:bg-orange-700"
+                      data-testid="button-confirm-clear"
+                    >
+                      {clearingData ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Limpando...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <RotateCcw className="w-4 h-4" />
+                          <span>Sim, Limpar Dados</span>
+                        </div>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              
               <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <DialogTrigger asChild>
                   <Button

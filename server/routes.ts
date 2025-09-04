@@ -182,6 +182,25 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
+  // Clear user data endpoint (keep account, remove all data)
+  app.delete('/api/auth/clear-data', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Clear all user data but keep the account
+      const cleared = await db.clearUserData(userId);
+      
+      if (!cleared) {
+        return res.status(500).json({ message: "Erro ao limpar dados do usuário" });
+      }
+      
+      res.status(200).json({ message: "Dados limpos com sucesso" });
+    } catch (error: any) {
+      console.error('Error clearing user data:', error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Delete account endpoint
   app.delete('/api/auth/account', authenticateToken, async (req: AuthRequest, res) => {
     try {

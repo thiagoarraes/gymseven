@@ -945,4 +945,88 @@ export class SupabaseStorage implements IStorage {
 
     return !error;
   }
+
+  // Clear all user data but keep the account
+  async clearUserData(userId: string): Promise<boolean> {
+    try {
+      // Delete user-specific data in correct order to avoid foreign key constraints
+      
+      // 1. Get user's workout logs first
+      const { data: workoutLogs } = await supabase
+        .from('workoutLogs')
+        .select('id')
+        .eq('user_id', userId);
+      
+      const workoutLogIds = workoutLogs?.map(log => log.id) || [];
+
+      // 2. Get workout log exercises
+      const { data: workoutLogExercises } = await supabase
+        .from('workoutLogExercises')
+        .select('id')
+        .in('workoutLogId', workoutLogIds);
+      
+      const workoutLogExerciseIds = workoutLogExercises?.map(ex => ex.id) || [];
+
+      // 3. Delete workout log sets first
+      if (workoutLogExerciseIds.length > 0) {
+        await supabase
+          .from('workoutLogSets')
+          .delete()
+          .in('workoutLogExerciseId', workoutLogExerciseIds);
+      }
+
+      // 4. Delete workout log exercises
+      if (workoutLogIds.length > 0) {
+        await supabase
+          .from('workoutLogExercises')
+          .delete()
+          .in('workoutLogId', workoutLogIds);
+      }
+
+      // 5. Delete workout logs
+      await supabase
+        .from('workoutLogs')
+        .delete()
+        .eq('user_id', userId);
+
+      // 6. Get user's workout templates
+      const { data: workoutTemplates } = await supabase
+        .from('workoutTemplates')
+        .select('id')
+        .eq('user_id', userId);
+      
+      const templateIds = workoutTemplates?.map(template => template.id) || [];
+
+      // 7. Delete workout template exercises
+      if (templateIds.length > 0) {
+        await supabase
+          .from('workoutTemplateExercises')
+          .delete()
+          .in('templateId', templateIds);
+      }
+
+      // 8. Delete workout templates
+      await supabase
+        .from('workoutTemplates')
+        .delete()
+        .eq('user_id', userId);
+
+      // 9. Delete user exercises
+      await supabase
+        .from('exercises')
+        .delete()
+        .eq('user_id', userId);
+
+      // 10. Delete user achievements
+      await supabase
+        .from('user_achievements')
+        .delete()
+        .eq('user_id', userId);
+
+      return true;
+    } catch (error) {
+      console.error('Error clearing user data:', error);
+      return false;
+    }
+  }
 }
