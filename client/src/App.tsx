@@ -20,6 +20,7 @@ import Settings from "@/pages/settings";
 import TimerTest from "@/pages/timer-test";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
 import NotFound from "@/pages/not-found";
 
 // Route wrapper components to handle params
@@ -67,6 +68,7 @@ function UnauthenticatedRouter() {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/" component={Login} />
         <Route component={Login} />
       </Switch>

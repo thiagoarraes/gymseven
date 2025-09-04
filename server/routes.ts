@@ -263,6 +263,40 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
+  // Forgot password endpoint
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: 'Email é obrigatório' });
+      }
+
+      // Check if user exists
+      const user = await db.getUserByEmail(email);
+      
+      // For security, we always return success even if user doesn't exist
+      // This prevents email enumeration attacks
+      if (!user) {
+        console.log(`Password reset requested for non-existent email: ${email}`);
+        return res.json({ message: 'Se o email existir, você receberá as instruções de recuperação' });
+      }
+
+      // TODO: Here you would normally:
+      // 1. Generate a secure reset token
+      // 2. Store it in the database with expiration
+      // 3. Send email with reset link
+      
+      console.log(`Password reset requested for user: ${user.id} (${user.email})`);
+      
+      // For now, just log and return success
+      res.json({ message: 'Se o email existir, você receberá as instruções de recuperação' });
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   // Serve static files for uploads
   app.use('/uploads', (req, res, next) => {
     res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year cache

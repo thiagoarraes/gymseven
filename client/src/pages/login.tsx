@@ -254,8 +254,22 @@ export default function Login() {
                 </form>
               </Form>
 
+              {/* Forgot Password Link */}
+              <div className={`text-center transition-all duration-700 ease-out ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`} style={{transitionDelay: '900ms'}}>
+                <Link href="/forgot-password">
+                  <Button 
+                    variant="ghost" 
+                    className="text-slate-400 hover:text-blue-400 font-medium text-sm px-0 h-auto transition-all duration-300 hover:scale-105"
+                  >
+                    Esqueci minha senha
+                  </Button>
+                </Link>
+              </div>
+
               {/* Simple section divider with more spacing */}
-              <div className="mt-16 mb-12 text-center">
+              <div className="mt-12 mb-12 text-center">
                 <p className="text-slate-400 text-sm font-medium mb-2">
                   Não tem uma conta ainda?
                 </p>
