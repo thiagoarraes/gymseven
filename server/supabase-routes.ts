@@ -179,15 +179,11 @@ export function registerSupabaseAuthRoutes(app: Express) {
           }
         }
 
-        // Delete all user data directly by user_id
+        // Delete all user data directly by user_id (only existing tables)
         const deletions = [
           { table: 'workoutLogs', name: 'workout logs' },
           { table: 'workoutTemplates', name: 'templates' },
-          { table: 'exercises', name: 'exercises' },
-          { table: 'weightHistory', name: 'weight history' },
-          { table: 'userGoals', name: 'goals' },
-          { table: 'userAchievements', name: 'achievements' },
-          { table: 'userPreferences', name: 'preferences' }
+          { table: 'exercises', name: 'exercises' }
         ];
 
         for (const deletion of deletions) {
@@ -203,9 +199,18 @@ export function registerSupabaseAuthRoutes(app: Express) {
           }
         }
 
-        // Delete user record from database
-        console.log('🗑️ Deletando registro do usuário...');
-        await storage.deleteUser(userId);
+        // Delete user record directly from users table
+        console.log('🗑️ Deletando registro do usuário da tabela users...');
+        const { error: userDeleteError } = await storage.supabase
+          .from('users')
+          .delete()
+          .eq('id', userId);
+          
+        if (userDeleteError) {
+          console.error('❌ Erro ao deletar usuário da tabela users:', userDeleteError);
+        } else {
+          console.log('✅ Usuário deletado da tabela users com sucesso');
+        }
 
         // Delete the user from Supabase Auth using admin API
         console.log('🗑️ Deletando conta do Supabase Auth...');
