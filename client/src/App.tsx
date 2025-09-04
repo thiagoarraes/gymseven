@@ -20,6 +20,7 @@ import Settings from "@/pages/settings";
 import TimerTest from "@/pages/timer-test";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import VerifyOTP from "@/pages/verify-otp";
 import ForgotPassword from "@/pages/forgot-password";
 import NotFound from "@/pages/not-found";
 
@@ -68,6 +69,7 @@ function UnauthenticatedRouter() {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/verify-otp" component={VerifyOTP} />
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/" component={Login} />
         <Route component={Login} />

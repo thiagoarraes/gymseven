@@ -36,15 +36,39 @@ export default function Register() {
   const onSubmit = async (data: RegisterUser) => {
     setLoading(true);
     try {
-      await signUp(data.email, data.password, {
-        username: data.username,
-        firstName: data.firstName,
-        lastName: data.lastName
+      // Use direct API call instead of signUp from auth context
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          username: data.username,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        }),
       });
-      showSuccess("Conta criada com sucesso!", "Bem-vindo ao GymSeven! Sua jornada fitness começa agora.");
-      setLocation('/');
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Store registration data for OTP verification
+        localStorage.setItem('otpVerificationState', JSON.stringify({
+          email: data.email,
+          username: data.username,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: data.password // Store temporarily for OTP verification
+        }));
+
+        showSuccess("Código enviado!", result.message);
+        setLocation('/verify-otp');
+      } else {
+        showError("Erro ao criar conta", result.message || "Tente novamente");
+      }
     } catch (error: any) {
-      showError("Erro ao criar conta", error.message || "Tente novamente");
+      showError("Erro ao criar conta", error.message || "Erro de conexão. Tente novamente.");
     } finally {
       setLoading(false);
     }

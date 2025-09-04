@@ -1,32 +1,66 @@
 import type { Express } from "express";
-import { registerUser, loginUser, logoutUser, resetPassword, getUserProfile, authenticateToken, type AuthRequest } from "./supabase-auth";
+import { registerUser, registerUserWithOTP, verifyOTPAndRegister, loginUser, logoutUser, resetPassword, getUserProfile, authenticateToken, type AuthRequest } from "./supabase-auth";
 
 export function registerSupabaseAuthRoutes(app: Express) {
-  // Register with Supabase Auth
+  // Register with OTP
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { email, password, username, firstName, lastName } = req.body;
+      const { email, username, firstName, lastName } = req.body;
 
-      if (!email || !password || !username) {
-        return res.status(400).json({ message: "Email, senha e nome de usuário são obrigatórios" });
+      if (!email || !username) {
+        return res.status(400).json({ message: "Email e nome de usuário são obrigatórios" });
       }
 
-      const result = await registerUser(email, password, { username, firstName, lastName });
+      const result = await registerUserWithOTP(email, { username, firstName, lastName });
       
       res.status(201).json({
-        message: "Conta criada com sucesso! Verifique seu email para ativar a conta.",
-        user: result.user,
-        session: result.session
+        message: "Código de verificação enviado! Verifique seu email e digite o código de 6 dígitos.",
+        success: result.success,
+        email: email
       });
     } catch (error: any) {
       console.error('❌ Register error details:', error);
       
       if (error.message.includes('User already registered')) {
         res.status(409).json({ message: 'Este email já está cadastrado' });
-      } else if (error.message.includes('Password should be at least')) {
-        res.status(400).json({ message: 'A senha deve ter pelo menos 6 caracteres' });
       } else if (error.message.includes('Invalid email')) {
         res.status(400).json({ message: 'Email inválido' });
+      } else {
+        res.status(500).json({ message: "Erro interno do servidor" });
+      }
+    }
+  });
+
+  // Verify OTP and complete registration
+  app.post("/api/auth/verify-otp", async (req, res) => {
+    try {
+      const { email, token, password, username, firstName, lastName } = req.body;
+
+      if (!email || !token || !password) {
+        return res.status(400).json({ message: "Email, código e senha são obrigatórios" });
+      }
+
+      if (token.length !== 6) {
+        return res.status(400).json({ message: "O código deve ter 6 dígitos" });
+      }
+
+      const result = await verifyOTPAndRegister(email, token, password, { username, firstName, lastName });
+      
+      res.status(201).json({
+        message: "Conta criada e verificada com sucesso!",
+        user: result.user,
+        session: result.session,
+        access_token: result.session?.access_token
+      });
+    } catch (error: any) {
+      console.error('❌ OTP verification error:', error);
+      
+      if (error.message.includes('Token has expired')) {
+        res.status(400).json({ message: 'Código expirado. Solicite um novo código.' });
+      } else if (error.message.includes('Invalid token')) {
+        res.status(400).json({ message: 'Código inválido. Verifique os 6 dígitos.' });
+      } else if (error.message.includes('Password should be at least')) {
+        res.status(400).json({ message: 'A senha deve ter pelo menos 6 caracteres' });
       } else {
         res.status(500).json({ message: "Erro interno do servidor" });
       }

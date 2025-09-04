@@ -7,6 +7,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, userData: { username: string; firstName?: string; lastName?: string }) => Promise<void>;
+  signUpWithOTP: (email: string, userData: { username: string; firstName?: string; lastName?: string }) => Promise<void>;
+  verifyOTP: (email: string, token: string, password: string, userData: { username: string; firstName?: string; lastName?: string }) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -69,28 +71,71 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const signUp = async (email: string, password: string, userData: { username: string; firstName?: string; lastName?: string }) => {
+    // Redirect to OTP registration for backward compatibility
+    await signUpWithOTP(email, userData);
+  };
+
+  const signUpWithOTP = async (email: string, userData: { username: string; firstName?: string; lastName?: string }) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: userData.username,
-            first_name: userData.firstName,
-            last_name: userData.lastName
-          }
-        }
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          username: userData.username,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+        }),
       });
 
-      if (error) {
-        throw new Error(error.message);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Erro ao enviar código OTP');
       }
 
-      console.log('✅ Registro realizado com sucesso para:', email);
+      console.log('✅ OTP enviado com sucesso para:', email);
     } catch (error: any) {
-      console.error('❌ Erro no registro:', error.message);
-      throw new Error(error.message || 'Erro ao criar conta');
+      console.error('❌ Erro no envio do OTP:', error.message);
+      throw new Error(error.message || 'Erro ao enviar código de verificação');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async (email: string, token: string, password: string, userData: { username: string; firstName?: string; lastName?: string }) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          token,
+          password,
+          username: userData.username,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Erro na verificação do código');
+      }
+
+      console.log('✅ OTP verificado e conta criada para:', email);
+
+      // The session will be updated automatically via onAuthStateChange
+    } catch (error: any) {
+      console.error('❌ Erro na verificação do OTP:', error.message);
+      throw new Error(error.message || 'Erro ao verificar código');
     } finally {
       setLoading(false);
     }
@@ -203,6 +248,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     session,
     loading,
     signUp,
+    signUpWithOTP,
+    verifyOTP,
     signIn,
     signOut,
     resetPassword,

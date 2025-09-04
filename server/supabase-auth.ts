@@ -68,22 +68,22 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   }
 }
 
-// Register user with Supabase Auth
-export async function registerUser(email: string, password: string, userData: {
+// Register user with OTP
+export async function registerUserWithOTP(email: string, userData: {
   username: string;
   firstName?: string;
   lastName?: string;
 }) {
   try {
-    // Create user with Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
+    // Send OTP to email using Supabase Auth
+    const { data, error } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
         data: {
           username: userData.username,
           first_name: userData.firstName,
-          last_name: userData.lastName
+          last_name: userData.lastName,
+          is_registration: true // Custom flag to identify registration
         }
       }
     });
@@ -92,19 +92,64 @@ export async function registerUser(email: string, password: string, userData: {
       throw new Error(error.message);
     }
 
-    if (!data.user) {
-      throw new Error('Falha ao criar usuário');
+    console.log('✅ OTP sent successfully to:', email);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ OTP registration error:', error);
+    throw error;
+  }
+}
+
+// Verify OTP and complete registration
+export async function verifyOTPAndRegister(email: string, token: string, password: string, userData: {
+  username: string;
+  firstName?: string;
+  lastName?: string;
+}) {
+  try {
+    // Verify OTP
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email'
+    });
+
+    if (error) {
+      throw new Error(error.message);
     }
 
-    console.log('✅ User registered successfully:', email);
+    if (!data.user) {
+      throw new Error('Falha na verificação do código');
+    }
+
+    // Set password after OTP verification
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: password
+    });
+
+    if (updateError) {
+      console.warn('Password update failed:', updateError.message);
+    }
+
+    console.log('✅ OTP verified and user registered:', email);
     return {
       user: data.user,
       session: data.session
     };
   } catch (error) {
-    console.error('❌ Registration error:', error);
+    console.error('❌ OTP verification error:', error);
     throw error;
   }
+}
+
+// Keep original function for backward compatibility but redirect to OTP
+export async function registerUser(email: string, password: string, userData: {
+  username: string;
+  firstName?: string;
+  lastName?: string;
+}) {
+  // Redirect to OTP registration
+  return registerUserWithOTP(email, userData);
 }
 
 // Login user with Supabase Auth
