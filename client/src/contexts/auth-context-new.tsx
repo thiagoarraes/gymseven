@@ -64,6 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('🔍 Fetching user profile for:', userId);
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -76,30 +77,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (error.code === 'PGRST116') {
           console.log('User profile not found, creating from auth data');
           await createUserProfileFromAuth(userId);
+        } else {
+          // For other errors, still stop loading
+          setLoading(false);
         }
       } else {
+        console.log('✅ User profile found:', data.email);
         setUser(data);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-    } finally {
       setLoading(false);
     }
   };
 
   const createUserProfileFromAuth = async (userId: string) => {
     try {
+      console.log('🆕 Creating user profile for:', userId);
       // Get the current auth user data
       const { data: authUser } = await supabase.auth.getUser();
       
-      if (!authUser.user) return;
+      if (!authUser.user) {
+        console.log('❌ No auth user found');
+        setLoading(false);
+        return;
+      }
 
       const userData = {
         id: userId,
         email: authUser.user.email!,
         username: authUser.user.user_metadata?.username || authUser.user.email!.split('@')[0],
         first_name: authUser.user.user_metadata?.first_name || '',
-        last_name: authUser.user.user_metadata?.last_name || ''
+        last_name: authUser.user.user_metadata?.last_name || '',
+        password: '$2a$10$dummy.hash.for.supabase.auth.user' // Add required password field
       };
 
       const { data, error } = await supabase
@@ -110,12 +121,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error) {
         console.error('Error creating user profile:', error);
+        setLoading(false);
       } else {
-        console.log('User profile created successfully:', data);
+        console.log('✅ User profile created successfully:', data.email);
         setUser(data);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error in createUserProfileFromAuth:', error);
+      setLoading(false);
     }
   };
 
