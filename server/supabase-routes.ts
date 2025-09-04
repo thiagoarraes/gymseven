@@ -130,30 +130,31 @@ export function registerSupabaseAuthRoutes(app: Express) {
       
       console.log(`🗑️ Iniciando exclusão completa da conta para usuário: ${userId}`);
 
-      // Get storage instance
-      const { storage } = await import("./storage");
+      // Get storage instance directly from supabase-storage
+      const { SupabaseStorage } = await import("./supabase-storage");
+      const storage = new SupabaseStorage();
 
       // Delete all user data in sequence
       try {
         // Delete user logs and related data
         console.log('🗑️ Deletando workout logs...');
-        const workoutLogs = await storage.getWorkoutLogsByUser(userId);
+        const workoutLogs = await storage.getWorkoutLogs(userId);
         for (const log of workoutLogs) {
-          await storage.deleteWorkoutLog(userId, log.id);
+          await storage.deleteWorkoutLog(log.id);
         }
 
         // Delete user templates
         console.log('🗑️ Deletando workout templates...');
-        const templates = await storage.getWorkoutTemplatesByUser(userId);
+        const templates = await storage.getWorkoutTemplates(userId);
         for (const template of templates) {
-          await storage.deleteWorkoutTemplate(userId, template.id);
+          await storage.deleteWorkoutTemplate(template.id);
         }
 
         // Delete user exercises
         console.log('🗑️ Deletando exercícios personalizados...');
-        const exercises = await storage.getExercisesByUser(userId);
+        const exercises = await storage.getExercises(userId);
         for (const exercise of exercises) {
-          await storage.deleteExercise(userId, exercise.id);
+          await storage.deleteExercise(exercise.id);
         }
 
         // Delete user record from database
