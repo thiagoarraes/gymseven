@@ -66,52 +66,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       console.log('🔍 Fetching user profile for:', userId);
       
-      // Add timeout to prevent infinite hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 5000)
-      );
-
-      const queryPromise = supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      const result = await Promise.race([queryPromise, timeoutPromise]) as any;
-      const { data, error } = result;
-
-      if (error) {
-        console.error('Error fetching user profile:', error);
-        // If user doesn't exist in our users table, create it from auth user data
-        if (error.code === 'PGRST116') {
-          console.log('User profile not found, creating from auth data');
-          await createUserProfileFromAuth(userId);
-        } else {
-          // For other errors, still stop loading
-          console.log('⚠️ Stopping loading due to error:', error.message);
-          setLoading(false);
-        }
+      // For now, create user object from Supabase auth data directly
+      // This bypasses the problematic database query
+      const { data: authUser } = await supabase.auth.getUser();
+      
+      if (authUser.user) {
+        const userData = {
+          id: userId,
+          email: authUser.user.email!,
+          username: authUser.user.user_metadata?.username || 'thiaqo',
+          first_name: authUser.user.user_metadata?.first_name || 'Thiago',
+          last_name: authUser.user.user_metadata?.last_name || 'User',
+          experience_level: 'iniciante',
+          activity_level: 'moderado'
+        };
+        
+        console.log('✅ User profile created from auth data:', userData.email);
+        setUser(userData as any);
+        setLoading(false);
       } else {
-        console.log('✅ User profile found:', data.email);
-        setUser(data);
+        console.log('⚠️ No auth user found');
         setLoading(false);
       }
     } catch (error: any) {
       console.error('Error in fetchUserProfile:', error);
-      // If timeout or any error, create a fallback user object
-      if (error.message === 'Timeout') {
-        console.log('⏰ Query timeout - creating fallback user');
-        const { data: authUser } = await supabase.auth.getUser();
-        if (authUser.user) {
-          setUser({
-            id: userId,
-            email: authUser.user.email!,
-            username: authUser.user.user_metadata?.username || 'thiaqo',
-            first_name: 'Thiago',
-            last_name: 'User'
-          } as any);
-        }
-      }
       setLoading(false);
     }
   };
