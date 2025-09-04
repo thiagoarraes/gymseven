@@ -98,8 +98,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         id: userId,
         email: authUser.user.email!,
         username: authUser.user.user_metadata?.username || authUser.user.email!.split('@')[0],
-        firstName: authUser.user.user_metadata?.first_name || '',
-        lastName: authUser.user.user_metadata?.last_name || ''
+        first_name: authUser.user.user_metadata?.first_name || '',
+        last_name: authUser.user.user_metadata?.last_name || ''
       };
 
       const { data, error } = await supabase

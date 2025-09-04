@@ -29,7 +29,7 @@ function ExercisesRoute() {
 }
 
 function WorkoutTemplateEditorRoute({ params }: { params: { id: string } }) {
-  return <WorkoutTemplateEditor templateId={params.id} />;
+  return <WorkoutTemplateEditor />;
 }
 
 function AuthenticatedRouter() {
