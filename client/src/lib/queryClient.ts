@@ -16,6 +16,15 @@ export async function apiRequest(
   // Get token from Supabase session instead of localStorage
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
+  
+  if (token) {
+    console.log('🔑 Frontend sending token:', { 
+      hasToken: !!token, 
+      tokenStart: token.substring(0, 20) + '...',
+      sessionValid: !!session,
+      userEmail: session?.user?.email 
+    });
+  }
   const headers: Record<string, string> = data ? { "Content-Type": "application/json" } : {};
   
   if (token) {
@@ -42,6 +51,15 @@ export const getQueryFn: <T>(options: {
     // Get token from Supabase session instead of localStorage
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
+  
+  if (token) {
+    console.log('🔑 Frontend sending token:', { 
+      hasToken: !!token, 
+      tokenStart: token.substring(0, 20) + '...',
+      sessionValid: !!session,
+      userEmail: session?.user?.email 
+    });
+  }
     const headers: Record<string, string> = {};
     
     if (token) {
