@@ -2,6 +2,67 @@ import { supabase } from './supabase-client';
 import { getStorage } from './storage';
 import { type Request, type Response, type NextFunction } from 'express';
 
+// Helper function to sync user from Supabase Auth to users table using service role
+async function syncUserFromAuthToDatabase(
+  userId: string, 
+  email: string, 
+  userData: { username: string; firstName?: string; lastName?: string }
+) {
+  try {
+    // Use service role client to bypass RLS policies
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single();
+
+    if (existingUser) {
+      console.log('✅ User already exists in database');
+      return;
+    }
+
+    // Check if username is already taken and make it unique
+    const { data: usernameExists } = await supabase
+      .from('users')
+      .select('username')
+      .eq('username', userData.username)
+      .single();
+
+    const finalUsername = usernameExists ? 
+      `${userData.username}_${userId.slice(-6)}` : 
+      userData.username;
+
+    // Create user in database with service role (bypasses RLS)
+    const { data, error } = await supabase
+      .from('users')
+      .insert({
+        id: userId, // Use the same ID from Supabase Auth
+        email: email,
+        username: finalUsername,
+        password: 'supabase_managed', // Placeholder
+        first_name: userData.firstName || '',
+        last_name: userData.lastName || '',
+        is_active: true,
+        email_verified: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Service role user creation error:', error);
+      throw new Error(`Database sync error: ${error.message}`);
+    }
+
+    console.log('✅ User synced to database using service role:', data.id);
+    return data;
+  } catch (error: any) {
+    console.error('❌ syncUserFromAuthToDatabase error:', error);
+    throw error;
+  }
+}
+
 export interface AuthRequest extends Request {
   user?: {
     id: string;
@@ -27,36 +88,33 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
       return res.status(403).json({ message: 'Token inválido ou expirado - faça login novamente' });
     }
 
-    // Ensure user exists in local users table
+    // Check if user exists in local users table
     const db = await getStorage();
     let dbUser = await db.getUser(user.id);
 
     if (!dbUser) {
-      // Create user in local users table with data from Supabase
-      console.log('🔄 Creating user in database:', user.id, user.email);
+      // User exists in Supabase Auth but not in local users table
+      // This might happen after manual cleanup or desynchronization
+      console.log('⚠️ User exists in Auth but not in users table:', user.id, user.email);
+      console.log('🔄 Attempting to sync user data from Auth to users table...');
+      
       try {
-        const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
-        const firstName = user.user_metadata?.first_name || user.user_metadata?.firstName || '';
-        const lastName = user.user_metadata?.last_name || user.user_metadata?.lastName || '';
-
-        // Check if username already exists and make it unique
-        const existingUser = await db.getUserByUsername(username);
-        const finalUsername = existingUser ? `${username}_${user.id.slice(-6)}` : username;
-
-        dbUser = await db.createUser({
-          email: user.email!,
-          username: finalUsername,
-          password: 'supabase_managed', // Placeholder since auth is managed by Supabase
-          firstName: firstName,
-          lastName: lastName,
-          isActive: true,
-          emailVerified: true
-        } as any);
-        console.log('✅ User created in database:', dbUser.id);
-      } catch (createError: any) {
-        console.error('❌ Failed to create user in database:', createError);
-        // If user creation fails, continue with Supabase user data
-        // This prevents blocking authentication due to DB issues
+        // Use service role to bypass RLS and create the user
+        await syncUserFromAuthToDatabase(user.id, user.email!, {
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'user',
+          firstName: user.user_metadata?.first_name || user.user_metadata?.firstName || '',
+          lastName: user.user_metadata?.last_name || user.user_metadata?.lastName || ''
+        });
+        
+        // Try to get the user again after sync
+        dbUser = await db.getUser(user.id);
+        if (dbUser) {
+          console.log('✅ User successfully synced to database:', dbUser.id);
+        }
+      } catch (syncError: any) {
+        console.error('❌ Failed to sync user to database:', syncError.message);
+        // Continue with authentication even if sync fails
+        // This prevents blocking user access due to DB sync issues
       }
     }
 
@@ -129,6 +187,21 @@ export async function verifyOTPAndRegister(email: string, token: string, passwor
 
     if (updateError) {
       console.warn('Password update failed:', updateError.message);
+    }
+
+    // Sync user to database table (this is crucial for proper data consistency)
+    console.log('🔄 Syncing user to database after OTP verification...');
+    try {
+      await syncUserFromAuthToDatabase(data.user.id, email, {
+        username: userData.username,
+        firstName: userData.firstName,
+        lastName: userData.lastName
+      });
+      console.log('✅ User synchronized to database successfully');
+    } catch (syncError: any) {
+      console.error('❌ Failed to sync user to database:', syncError.message);
+      // Don't throw error here - user is registered in Auth, sync can be done later
+      console.log('⚠️ User registered in Auth but not synced to database - will sync on first login');
     }
 
     console.log('✅ OTP verified and user registered:', email);

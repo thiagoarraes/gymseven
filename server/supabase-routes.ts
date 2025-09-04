@@ -233,28 +233,29 @@ export function registerSupabaseAuthRoutes(app: Express) {
           }
         }
 
-        // Delete user record directly from users table
-        console.log('🗑️ Deletando registro do usuário da tabela users...');
+        // Step 1: Delete from Supabase Auth first (this is the source of truth)
+        console.log('🗑️ Deletando conta do Supabase Auth...');
+        const { error: authDeleteError } = await storage.supabase.auth.admin.deleteUser(userId);
+        
+        if (authDeleteError) {
+          console.error('❌ Erro ao deletar do Supabase Auth:', authDeleteError.message);
+          throw new Error(`Falha ao deletar conta do Supabase Auth: ${authDeleteError.message}`);
+        }
+        console.log('✅ Conta do Supabase Auth deletada com sucesso');
+
+        // Step 2: Delete user record from users table (synchronize with Auth deletion)
+        console.log('🗑️ Sincronizando: deletando registro da tabela users...');
         const { error: userDeleteError } = await storage.supabase
           .from('users')
           .delete()
           .eq('id', userId);
           
         if (userDeleteError) {
-          console.error('❌ Erro ao deletar usuário da tabela users:', userDeleteError);
+          console.error('❌ Erro ao sincronizar exclusão na tabela users:', userDeleteError);
+          // This is more serious now - we have a desync between Auth and database
+          console.error('⚠️ ATENÇÃO: Desincronização detectada - usuário removido do Auth mas permanece na tabela users');
         } else {
-          console.log('✅ Usuário deletado da tabela users com sucesso');
-        }
-
-        // Delete the user from Supabase Auth using admin API
-        console.log('🗑️ Deletando conta do Supabase Auth...');
-        const { error: authDeleteError } = await storage.supabase.auth.admin.deleteUser(userId);
-        
-        if (authDeleteError) {
-          console.error('❌ Erro ao deletar do Supabase Auth:', authDeleteError.message);
-          // Continue anyway - data was already deleted from our database
-        } else {
-          console.log('✅ Conta do Supabase Auth deletada com sucesso');
+          console.log('✅ Sincronização completa: usuário removido da tabela users');
         }
 
         console.log('✅ Todos os dados do usuário foram excluídos com sucesso');
