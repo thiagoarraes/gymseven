@@ -598,7 +598,7 @@ export class SupabaseStorage implements IStorage {
         *,
         exercises (*)
       `)
-      .eq('template_id', templateId);
+      .eq('templateId', templateId);
 
     if (error) {
       console.error('Error fetching template exercises:', error);
@@ -633,14 +633,14 @@ export class SupabaseStorage implements IStorage {
           .from('workoutTemplateExercises')
           .select(`
             id,
-            template_id,
-            workout_templates!inner(
+            templateId,
+            workoutTemplates!inner(
               id,
               user_id
             )
           `)
           .eq('id', id)
-          .eq('workout_templates.user_id', userId)
+          .eq('workoutTemplates.user_id', userId)
           .maybeSingle();
 
         if (ownershipError) {
@@ -654,15 +654,15 @@ export class SupabaseStorage implements IStorage {
           // Check if exercise exists at all
           const { data: existsCheck } = await supabase
             .from('workoutTemplateExercises')
-            .select('id, template_id')
+            .select('id, templateId')
             .eq('id', id)
             .maybeSingle();
             
           if (existsCheck) {
             const { data: templateOwner } = await supabase
-              .from('workout_templates')
+              .from('workoutTemplates')
               .select('user_id')
-              .eq('id', existsCheck.template_id)
+              .eq('id', existsCheck.templateId)
               .single();
             console.warn(`👤 Exercise exists but belongs to user: ${templateOwner?.user_id}, not ${userId}`);
           } else {
@@ -734,8 +734,8 @@ export class SupabaseStorage implements IStorage {
     const { error } = await supabase
       .from('workoutTemplateExercises')
       .delete()
-      .eq('template_id', templateId)
-      .eq('exercise_id', exerciseId);
+      .eq('templateId', templateId)
+      .eq('exerciseId', exerciseId);
 
     return !error;
   }
@@ -827,10 +827,10 @@ export class SupabaseStorage implements IStorage {
       .select(`
         *,
         workoutLogExercises!inner (
-          log_id
+          logId
         )
       `)
-      .eq('workoutLogExercises.log_id', logId);
+      .eq('workoutLogExercises.logId', logId);
 
     if (error) throw error;
     return data as WorkoutLogSet[];
