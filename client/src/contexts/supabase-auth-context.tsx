@@ -10,8 +10,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updateProfile: (updates: any) => Promise<void>;
-  deleteAccount: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -37,16 +35,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting initial session:', error);
-      } else {
-        setSession(session);
-        setUser(session?.user ?? null);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Failed to get initial session:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     getInitialSession();
@@ -54,7 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('Auth state changed:', event, session?.user?.email ?? 'no user');
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -83,9 +85,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error(error.message);
       }
 
-      console.log('✅ Registro realizado com sucesso:', email);
+      console.log('✅ Registro realizado com sucesso para:', email);
     } catch (error: any) {
-      console.error('❌ Erro no registro:', error);
+      console.error('❌ Erro no registro:', error.message);
       throw new Error(error.message || 'Erro ao criar conta');
     } finally {
       setLoading(false);
@@ -101,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (error) {
-        console.error('❌ Supabase signin error:', error);
+        console.error('❌ Supabase signin error:', error.message);
         throw new Error(error.message);
       }
 
@@ -109,11 +111,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error('Falha no login - dados não retornados');
       }
 
-      console.log('✅ Login realizado com sucesso:', email);
-      // Auth state will be updated automatically by onAuthStateChange
+      console.log('✅ Login realizado com sucesso para:', email);
     } catch (error: any) {
       const errorMessage = error?.message || 'Erro desconhecido no login';
-      console.error('❌ Erro no login:', errorMessage, error);
+      console.error('❌ Erro no login:', errorMessage);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
@@ -131,7 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       console.log('✅ Logout realizado com sucesso');
     } catch (error: any) {
-      console.error('❌ Erro no logout:', error);
+      console.error('❌ Erro no logout:', error.message);
       throw new Error(error.message || 'Erro ao fazer logout');
     } finally {
       setLoading(false);
@@ -145,66 +146,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (error) {
-        console.error('❌ Supabase reset password error:', error);
+        console.error('❌ Supabase reset password error:', error.message);
         throw new Error(error.message);
       }
 
       console.log('✅ Email de redefinição enviado para:', email);
     } catch (error: any) {
       const errorMessage = error?.message || 'Erro ao enviar email de redefinição';
-      console.error('❌ Erro ao redefinir senha:', errorMessage, error);
+      console.error('❌ Erro ao redefinir senha:', errorMessage);
       throw new Error(errorMessage);
-    }
-  };
-
-  const updateProfile = async (updates: any) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          username: updates.username,
-          first_name: updates.firstName,
-          last_name: updates.lastName,
-          date_of_birth: updates.dateOfBirth,
-          height: updates.height,
-          weight: updates.weight,
-          activity_level: updates.activityLevel,
-          ...updates
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      console.log('✅ Perfil atualizado com sucesso');
-    } catch (error: any) {
-      console.error('❌ Erro ao atualizar perfil:', error);
-      throw new Error(error.message || 'Erro ao atualizar perfil');
-    }
-  };
-
-  const deleteAccount = async () => {
-    try {
-      // Note: Supabase doesn't have direct account deletion from client
-      // This would typically be handled via an admin endpoint
-      const response = await fetch('/api/auth/delete-account', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao deletar conta');
-      }
-
-      await signOut();
-      console.log('✅ Conta deletada com sucesso');
-    } catch (error: any) {
-      console.error('❌ Erro ao deletar conta:', error);
-      throw new Error(error.message || 'Erro ao deletar conta');
     }
   };
 
@@ -216,8 +166,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signOut,
     resetPassword,
-    updateProfile,
-    deleteAccount,
     isAuthenticated: !!user
   };
 
