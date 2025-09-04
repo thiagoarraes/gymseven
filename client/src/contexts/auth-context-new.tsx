@@ -153,15 +153,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      console.log('🔄 Solicitando reset de senha para:', email);
+      
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `https://seven.org.br/reset-password`
       });
 
-      if (error) throw error;
+      console.log('📧 Resposta do Supabase:', { data, error });
+
+      if (error) {
+        console.error('❌ Erro do Supabase:', error);
+        throw error;
+      }
       
-      console.log('Password reset email sent to:', email);
+      console.log('✅ Password reset email sent to:', email);
     } catch (error: any) {
-      console.error('Reset password error:', error);
+      console.error('❌ Reset password error:', error);
       throw new Error(error.message || 'Erro ao enviar email de recuperação');
     }
   };
