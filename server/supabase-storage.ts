@@ -612,6 +612,20 @@ export class SupabaseStorage implements IStorage {
       console.log(`✅ Template ownership verified, proceeding with deletion`);
     }
 
+    // Before deleting the template, remove references from workout logs to avoid foreign key constraint
+    console.log(`🔗 Removing template references from workout logs...`);
+    const { error: updateError } = await supabase
+      .from('workoutLogs')
+      .update({ templateId: null })
+      .eq('templateId', id);
+
+    if (updateError) {
+      console.log(`❌ Error updating workout logs:`, updateError);
+      // Continue with deletion attempt anyway, the original constraint error will show
+    } else {
+      console.log(`✅ Template references removed from workout logs`);
+    }
+
     let query = supabase
       .from('workoutTemplates')
       .delete()
