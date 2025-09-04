@@ -581,13 +581,21 @@ export class SupabaseStorage implements IStorage {
     return data as WorkoutTemplate;
   }
 
-  async deleteWorkoutTemplate(id: string): Promise<boolean> {
-    const { error } = await supabase
+  async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
+    let query = supabase
       .from('workoutTemplates')
       .delete()
       .eq('id', id);
 
-    return !error;
+    // If userId is provided, ensure user owns the template
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error, count } = await query;
+    
+    // Return false if error occurred or no rows were affected (template not found or not owned by user)
+    return !error && count !== 0;
   }
 
   // Workout Template Exercises
