@@ -227,8 +227,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       console.log('✅ Conta excluída com sucesso');
       
-      // Redirect to home page after successful deletion
-      window.location.href = '/login';
+      // Don't redirect immediately - let the UI component handle it after showing success message
     } catch (error: any) {
       const errorMessage = error?.message || 'Erro ao excluir conta';
       console.error('❌ Erro ao excluir conta:', errorMessage);
