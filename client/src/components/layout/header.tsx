@@ -9,15 +9,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/logo";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/contexts/auth-context-new";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
 
   const handleLogout = () => {
-    logout();
+    signOut();
     toast({
       title: "Logout realizado",
       description: "Até logo! Volte sempre ao GymSeven.",

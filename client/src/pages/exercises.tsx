@@ -15,7 +15,7 @@ import { z } from "zod";
 import { exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { MUSCLE_GROUPS } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/contexts/auth-context-new";
 
 const exerciseFormSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),

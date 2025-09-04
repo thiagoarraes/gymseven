@@ -72,9 +72,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error) {
         console.error('Error fetching user profile:', error);
-        // If user doesn't exist in our users table, we might need to create it
+        // If user doesn't exist in our users table, create it from auth user data
         if (error.code === 'PGRST116') {
-          console.log('User profile not found, may need to be created');
+          console.log('User profile not found, creating from auth data');
+          await createUserProfileFromAuth(userId);
         }
       } else {
         setUser(data);
@@ -83,6 +84,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('Error in fetchUserProfile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createUserProfileFromAuth = async (userId: string) => {
+    try {
+      // Get the current auth user data
+      const { data: authUser } = await supabase.auth.getUser();
+      
+      if (!authUser.user) return;
+
+      const userData = {
+        id: userId,
+        email: authUser.user.email!,
+        username: authUser.user.user_metadata?.username || authUser.user.email!.split('@')[0],
+        firstName: authUser.user.user_metadata?.first_name || '',
+        lastName: authUser.user.user_metadata?.last_name || ''
+      };
+
+      const { data, error } = await supabase
+        .from('users')
+        .insert([userData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating user profile:', error);
+      } else {
+        console.log('User profile created successfully:', data);
+        setUser(data);
+      }
+    } catch (error) {
+      console.error('Error in createUserProfileFromAuth:', error);
     }
   };
 
