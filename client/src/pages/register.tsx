@@ -40,6 +40,23 @@ export default function Register() {
     }
   }, [otp, showOtpStep, otpLoading]);
 
+  // Auto-scroll to OTP section when it appears
+  useEffect(() => {
+    if (showOtpStep) {
+      const timer = setTimeout(() => {
+        const otpSection = document.querySelector('[data-otp-section]');
+        if (otpSection) {
+          otpSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showOtpStep]);
+
   const form = useForm<RegisterUser>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -369,7 +386,10 @@ export default function Register() {
 
               {/* OTP Verification Section - Shows after registration */}
               {showOtpStep && (
-                <div className="mt-8 space-y-6 p-6 border border-emerald-500/20 rounded-xl bg-gradient-to-br from-emerald-900/20 to-blue-900/20 backdrop-blur-sm">
+                <div 
+                  data-otp-section
+                  className="mt-8 space-y-6 p-6 border border-emerald-500/20 rounded-xl bg-gradient-to-br from-emerald-900/20 to-blue-900/20 backdrop-blur-sm"
+                >
                   <div className="text-center space-y-2">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center">
                       <CheckCircle className="w-8 h-8 text-white" />
