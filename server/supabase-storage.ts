@@ -714,6 +714,7 @@ export class SupabaseStorage implements IStorage {
         switch (key) {
           case 'restDurationSeconds':
             dbUpdate.rest_duration_seconds = updates[key];
+            console.log(`✅ Mapped restDurationSeconds -> rest_duration_seconds: ${updates[key]}`);
             break;
           case 'exerciseId':
             dbUpdate.exercise_id = updates[key];
@@ -725,6 +726,8 @@ export class SupabaseStorage implements IStorage {
             dbUpdate[key] = updates[key];
         }
       });
+      
+      console.log(`🔧 Final dbUpdate object:`, dbUpdate);
 
       // Now update the exercise
       const { data, error } = await supabase
