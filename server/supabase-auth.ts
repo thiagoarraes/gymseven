@@ -10,15 +10,38 @@ async function syncUserFromAuthToDatabase(
 ) {
   try {
     // Use service role client to bypass RLS policies
-    const { data: existingUser } = await supabase
+    // First check by ID
+    const { data: existingUserById } = await supabase
       .from('users')
-      .select('id')
+      .select('id, email')
       .eq('id', userId)
       .single();
 
-    if (existingUser) {
-      console.log('✅ User already exists in database');
+    if (existingUserById) {
+      console.log('✅ User already exists in database with matching ID');
       return;
+    }
+
+    // Then check by email to handle orphaned records
+    const { data: existingUserByEmail } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', email)
+      .single();
+
+    if (existingUserByEmail) {
+      // Delete the orphaned record and recreate with correct ID
+      console.log('🧹 Found orphaned user record with same email, cleaning up...');
+      const { error: deleteError } = await supabase
+        .from('users')
+        .delete()
+        .eq('email', email);
+        
+      if (deleteError) {
+        console.error('❌ Failed to clean orphaned record:', deleteError);
+        throw new Error(`Cleanup error: ${deleteError.message}`);
+      }
+      console.log('✅ Orphaned record cleaned');
     }
 
     // Check if username is already taken and make it unique
