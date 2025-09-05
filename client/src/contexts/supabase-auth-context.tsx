@@ -323,8 +323,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const updateProfile = async (data: any) => {
-    // Implementation for updating profile if not already present
     console.log('Update profile called with:', data);
+    
+    // Update the user_metadata in Supabase Auth with the new avatar URL
+    if (data.profileImageUrl) {
+      try {
+        const supabaseClient = supabase || await supabasePromise;
+        const { error } = await supabaseClient.auth.updateUser({
+          data: { 
+            // Keep existing metadata and update avatar
+            ...user?.user_metadata,
+            avatar_url: data.profileImageUrl
+          }
+        });
+        
+        if (error) {
+          console.error('Error updating Supabase user metadata:', error);
+        } else {
+          console.log('✅ Supabase user metadata updated with new avatar');
+        }
+      } catch (error) {
+        console.error('Error updating user metadata:', error);
+      }
+    }
   };
 
   const value: AuthContextType = {

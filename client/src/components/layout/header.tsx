@@ -43,7 +43,11 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <div className="glass-card rounded-full p-1 hover-lift cursor-pointer touch-feedback mobile-touch-target" data-testid="user-menu-trigger">
                   <Avatar className="w-8 h-8 sm:w-9 sm:h-9">
-                    <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.user_metadata?.username || user?.email || ""} />
+                    <AvatarImage 
+                      src={user?.user_metadata?.avatar_url || ""} 
+                      alt={user?.user_metadata?.username || user?.email || ""} 
+                      key={user?.user_metadata?.avatar_url} // Force re-render when avatar changes
+                    />
                     <AvatarFallback className="bg-blue-600 text-white text-sm font-semibold">
                       {getUserInitials()}
                     </AvatarFallback>
