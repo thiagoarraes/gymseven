@@ -57,6 +57,11 @@ export default function Profile() {
   const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Preferences form setup
+  React.useEffect(() => {
+    preferencesForm.setValue('theme', theme);
+  }, [theme, preferencesForm]);
+
   // Format date helpers
   const formatDateForInput = (date: string | Date | undefined): string => {
     if (!date) return '';
@@ -140,6 +145,54 @@ export default function Profile() {
     } catch (error: any) {
       toast({
         title: "Erro ao atualizar perfil",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmitPreferences = async (data: Preferences) => {
+    setLoading(true);
+    try {
+      // Update theme if changed
+      if (data.theme !== theme) {
+        setTheme(data.theme);
+      }
+      
+      // Store preferences in localStorage
+      localStorage.setItem('userPreferences', JSON.stringify(data));
+      
+      toast({
+        title: "Preferências salvas!",
+        description: "Suas configurações foram atualizadas.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar preferências",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmitPassword = async (data: ChangePassword) => {
+    setLoading(true);
+    try {
+      toast({
+        title: "Funcionalidade em desenvolvimento",
+        description: "A alteração de senha estará disponível em breve.",
+        variant: "default",
+      });
+      
+      passwordForm.reset();
+      setShowPasswordForm(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao alterar senha",
         description: error.message || "Tente novamente",
         variant: "destructive",
       });
