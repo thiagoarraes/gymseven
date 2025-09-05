@@ -87,7 +87,7 @@ export interface IStorage {
 export async function initializeStorage(): Promise<IStorage> {
   try {
     // Use Supabase SDK if configured (preferred for this project)
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)) {
       console.log('🚀 Using Supabase SDK configuration');
       console.log('✅ Supabase credentials detected');
       const { SupabaseStorage } = await import('./supabase-storage');
