@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import { supabase } from "./supabase-client";
 import { registerUser, registerUserWithOTP, verifyOTPAndRegister, loginUser, logoutUser, resetPassword, getUserProfile, authenticateToken, type AuthRequest } from "./supabase-auth";
 
 export function registerSupabaseAuthRoutes(app: Express) {

@@ -52,7 +52,7 @@ export default function Profile() {
   const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
   const [clearingData, setClearingData] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const { user, updateProfile, deleteAccount } = useAuth();
+  const { user, updateProfile, deleteAccount, changePassword } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
@@ -185,10 +185,11 @@ export default function Profile() {
   const onSubmitPassword = async (data: ChangePassword) => {
     setLoading(true);
     try {
+      await changePassword(data.currentPassword, data.newPassword);
+      
       toast({
-        title: "Funcionalidade em desenvolvimento",
-        description: "A alteração de senha estará disponível em breve.",
-        variant: "default",
+        title: "Senha alterada com sucesso!",
+        description: "Sua senha foi atualizada.",
       });
       
       passwordForm.reset();
