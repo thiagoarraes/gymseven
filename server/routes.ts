@@ -26,7 +26,7 @@ import { authenticateToken as supabaseAuthToken, type AuthRequest as SupabaseAut
 import { registerSupabaseAuthRoutes } from "./supabase-routes";
 
 // Use appropriate auth middleware based on configuration
-const authenticateToken = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY 
+const authenticateToken = process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)
   ? supabaseAuthToken 
   : localAuthToken;
 

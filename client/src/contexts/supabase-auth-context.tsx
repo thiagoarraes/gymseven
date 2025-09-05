@@ -72,6 +72,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.log('Auth state changed:', event, session?.user?.email ?? 'no user');
             setSession(session);
             setUser(session?.user ?? null);
+            
+            // Store access token in localStorage for API calls
+            if (session?.access_token) {
+              localStorage.setItem('auth-token', session.access_token);
+            } else {
+              localStorage.removeItem('auth-token');
+            }
+            
             setLoading(false);
           }
         );
