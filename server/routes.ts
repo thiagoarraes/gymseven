@@ -62,6 +62,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Register Supabase Auth routes
   registerSupabaseAuthRoutes(app);
   
+  // Endpoint para fornecer configurações do Supabase para o frontend
+  app.get('/api/config', (req, res) => {
+    res.json({
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY
+    });
+  });
+  
   // Auth routes now handled by Supabase Auth (see supabase-routes.ts)
 
   // Update user profile

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabasePromise } from '@/lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -41,7 +41,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Wait for Supabase to be initialized
+        const supabaseClient = supabase || await supabasePromise;
+        
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
@@ -58,17 +61,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     getInitialSession();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email ?? 'no user');
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    // Setup auth listener after initialization
+    const setupListener = async () => {
+      try {
+        const supabaseClient = supabase || await supabasePromise;
+        
+        // Listen for auth changes
+        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log('Auth state changed:', event, session?.user?.email ?? 'no user');
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
+          }
+        );
 
-    return () => subscription.unsubscribe();
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error('Failed to setup auth listener:', error);
+      }
+    };
+
+    const cleanup = setupListener();
+    
+    return () => {
+      cleanup.then(unsubscribe => unsubscribe?.());
+    };
   }, []);
 
   const signUp = async (email: string, password: string, userData: { username: string; firstName?: string; lastName?: string }) => {
@@ -145,7 +163,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const supabaseClient = supabase || await supabasePromise;
+      
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
       });
@@ -177,7 +197,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(null);
       
       // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      const supabaseClient = supabase || await supabasePromise;
+      const { error } = await supabaseClient.auth.signOut();
       
       // Don't throw on session missing errors - just log them
       if (error) {
@@ -274,7 +295,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Refresh the session after password change to prevent auth errors
       try {
-        const { data, error } = await supabase.auth.refreshSession();
+        const supabaseClient = supabase || await supabasePromise;
+        const { data, error } = await supabaseClient.auth.refreshSession();
         if (error) {
           console.warn('⚠️ Session refresh failed, but password was changed:', error.message);
         } else if (data.session) {
