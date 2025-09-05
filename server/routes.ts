@@ -20,8 +20,19 @@ import {
   insertUserGoalSchema,
   updateUserPreferencesSchema
 } from "@shared/schema";
-import { registerUser, loginUser, changeUserPassword, optionalAuth, authenticateToken, type AuthRequest } from "./auth";
+import { registerUser, loginUser, changeUserPassword, optionalAuth } from "./auth";
+import { authenticateToken as localAuthToken, type AuthRequest as LocalAuthRequest } from "./auth";
+import { authenticateToken as supabaseAuthToken, type AuthRequest as SupabaseAuthRequest } from "./supabase-auth";
 import { registerSupabaseAuthRoutes } from "./supabase-routes";
+
+// Use appropriate auth middleware based on configuration
+const authenticateToken = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY 
+  ? supabaseAuthToken 
+  : localAuthToken;
+
+type AuthRequest = typeof authenticateToken extends typeof supabaseAuthToken 
+  ? SupabaseAuthRequest 
+  : LocalAuthRequest;
 
 // Configure multer for avatar uploads
 const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
