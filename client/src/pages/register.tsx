@@ -390,6 +390,35 @@ export default function Register() {
                               }
                             }
                           }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text');
+                            const digits = pastedData.replace(/[^0-9]/g, '').slice(0, 6);
+                            
+                            if (digits.length === 6) {
+                              setOtp(digits);
+                              // Focus the last input after pasting
+                              const lastInput = document.querySelector(`[data-otp-index="5"]`) as HTMLInputElement;
+                              lastInput?.focus();
+                              
+                              toast({
+                                title: "Código colado!",
+                                description: "O código foi preenchido automaticamente.",
+                              });
+                            } else if (digits.length > 0) {
+                              // If partial digits, fill from current position
+                              const newOtp = otp.split('');
+                              for (let i = 0; i < digits.length && (index + i) < 6; i++) {
+                                newOtp[index + i] = digits[i];
+                              }
+                              setOtp(newOtp.join(''));
+                              
+                              // Focus appropriate next input
+                              const nextIndex = Math.min(index + digits.length, 5);
+                              const nextInput = document.querySelector(`[data-otp-index="${nextIndex}"]`) as HTMLInputElement;
+                              nextInput?.focus();
+                            }
+                          }}
                           onKeyDown={(e) => {
                             // Handle backspace to focus previous input
                             if (e.key === 'Backspace' && !otp[index] && index > 0) {
