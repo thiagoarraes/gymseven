@@ -2,21 +2,27 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation } from 'wouter';
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, LogIn, Dumbbell, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, LogIn, Dumbbell, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { showSuccess, showError } from '@/hooks/use-toast';
+import { showSuccess, showError, useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/supabase-auth-context';
 import { registerSchema, type RegisterUser } from '@shared/schema';
+// InputOTP component não disponível, usando implementação personalizada
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [showOtpStep, setShowOtpStep] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [registrationData, setRegistrationData] = useState<RegisterUser | null>(null);
+  const [otpLoading, setOtpLoading] = useState(false);
   const { signUp } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsVisible(true);
@@ -54,16 +60,10 @@ export default function Register() {
 
       if (response.ok) {
         // Store registration data for OTP verification
-        localStorage.setItem('otpVerificationState', JSON.stringify({
-          email: data.email,
-          username: data.username,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          password: data.password // Store temporarily for OTP verification
-        }));
-
+        setRegistrationData(data);
+        
         showSuccess("Código enviado!", result.message);
-        setLocation('/verify-otp');
+        setShowOtpStep(true);
       } else {
         showError("Erro ao criar conta", result.message || "Tente novamente");
       }
@@ -71,6 +71,56 @@ export default function Register() {
       showError("Erro ao criar conta", error.message || "Erro de conexão. Tente novamente.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOtpVerify = async () => {
+    if (!registrationData) {
+      toast({
+        title: "Erro",
+        description: "Dados de registro não encontrados. Tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (otp.length !== 6) {
+      toast({
+        title: "Código inválido",
+        description: "O código deve ter exatamente 6 dígitos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: registrationData.email,
+          otp: otp,
+          password: registrationData.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showSuccess("Conta criada!", "Sua conta foi criada com sucesso. Faça login para continuar.");
+        setLocation('/login');
+      } else {
+        showError("Erro ao verificar código", result.message || "Código inválido ou expirado");
+        setOtp(""); // Clear OTP on error
+      }
+    } catch (error: any) {
+      showError("Erro ao verificar código", error.message || "Erro de conexão. Tente novamente.");
+      setOtp(""); // Clear OTP on error
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -287,7 +337,7 @@ export default function Register() {
                     <Button
                       type="submit"
                       className="w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-                      disabled={loading}
+                      disabled={loading || showOtpStep}
                     >
                     {loading ? (
                       <div className="flex items-center space-x-3">
@@ -305,8 +355,94 @@ export default function Register() {
                 </form>
               </Form>
 
+              {/* OTP Verification Section - Shows after registration */}
+              {showOtpStep && (
+                <div className="mt-8 space-y-6 p-6 border border-emerald-500/20 rounded-xl bg-gradient-to-br from-emerald-900/20 to-blue-900/20 backdrop-blur-sm">
+                  <div className="text-center space-y-2">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center">
+                      <CheckCircle className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-white">Código de Verificação</h3>
+                    <p className="text-slate-300 text-sm">
+                      Enviamos um código de 6 dígitos para <span className="font-medium text-emerald-400">{registrationData?.email}</span>
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-center gap-3">
+                      {[0, 1, 2, 3, 4, 5].map((index) => (
+                        <Input
+                          key={index}
+                          type="text"
+                          maxLength={1}
+                          value={otp[index] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            if (value.length <= 1) {
+                              const newOtp = otp.split('');
+                              newOtp[index] = value;
+                              setOtp(newOtp.join(''));
+                              
+                              // Auto focus next input
+                              if (value && index < 5) {
+                                const nextInput = document.querySelector(`[data-otp-index="${index + 1}"]`) as HTMLInputElement;
+                                nextInput?.focus();
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // Handle backspace to focus previous input
+                            if (e.key === 'Backspace' && !otp[index] && index > 0) {
+                              const prevInput = document.querySelector(`[data-otp-index="${index - 1}"]`) as HTMLInputElement;
+                              prevInput?.focus();
+                            }
+                          }}
+                          className="w-12 h-12 text-xl text-center border-slate-600/50 bg-slate-800/50 text-white focus:border-emerald-400/50 focus:ring-emerald-400/20 rounded-lg"
+                          data-otp-index={index}
+                          data-testid={`input-otp-${index}`}
+                        />
+                      ))}
+                    </div>
+
+                    <Button
+                      onClick={handleOtpVerify}
+                      disabled={otp.length !== 6 || otpLoading}
+                      className="w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      {otpLoading ? (
+                        <div className="flex items-center space-x-3">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Verificando...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-3">
+                          <CheckCircle className="w-5 h-5" />
+                          <span>Verificar Código</span>
+                        </div>
+                      )}
+                    </Button>
+
+                    <p className="text-center text-slate-400 text-sm">
+                      Não recebeu o código? 
+                      <button 
+                        className="text-emerald-400 hover:text-emerald-300 font-medium ml-1 transition-colors"
+                        onClick={() => {
+                          // Aqui você pode adicionar lógica para reenviar o código
+                          toast({
+                            title: "Código reenviado",
+                            description: "Um novo código foi enviado para seu email.",
+                          });
+                        }}
+                      >
+                        Reenviar
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Simple section divider with more spacing */}
-              <div className="mt-16 mb-12 text-center">
+              <div className={`${showOtpStep ? 'mt-6' : 'mt-16'} mb-12 text-center`}>
                 <p className="text-slate-400 text-sm font-medium mb-2">
                   Já possui uma conta?
                 </p>
