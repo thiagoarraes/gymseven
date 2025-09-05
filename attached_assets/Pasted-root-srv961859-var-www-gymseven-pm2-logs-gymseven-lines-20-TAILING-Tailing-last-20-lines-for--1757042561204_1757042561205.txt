@@ -1,0 +1,45 @@
+root@srv961859:/var/www/gymseven# pm2 logs gymseven --lines 20
+[TAILING] Tailing last 20 lines for [gymseven] process (change the value with --lines option)
+/root/.pm2/logs/gymseven-error.log last 20 lines:
+0|gymseven |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|gymseven |     at async file:///var/www/gymseven/dist/index.js:1780:24
+0|gymseven | Workout template creation error: {
+0|gymseven |   error: 'new row violates row-level security policy for table "workoutTemplates"',
+0|gymseven |   zodErrors: undefined,
+0|gymseven |   requestBody: {
+0|gymseven |     name: 'Teste',
+0|gymseven |     description: '',
+0|gymseven |     user_id: '439ddf53-5a86-432c-8d10-3458c6e3cb1e'
+0|gymseven |   }
+0|gymseven | }
+0|gymseven | Workout template creation error: {
+0|gymseven |   error: 'new row violates row-level security policy for table "workoutTemplates"',
+0|gymseven |   zodErrors: undefined,
+0|gymseven |   requestBody: {
+0|gymseven |     name: 'Teste',
+0|gymseven |     description: '',
+0|gymseven |     user_id: '439ddf53-5a86-432c-8d10-3458c6e3cb1e'
+0|gymseven |   }
+0|gymseven | }
+
+/root/.pm2/logs/gymseven-out.log last 20 lines:
+0|gymseven | Workout template creation request: {
+0|gymseven |   body: {
+0|gymseven |     name: 'Teste',
+0|gymseven |     description: '',
+0|gymseven |     user_id: '439ddf53-5a86-432c-8d10-3458c6e3cb1e'
+0|gymseven |   },
+0|gymseven |   userId: '439ddf53-5a86-432c-8d10-3458c6e3cb1e'
+0|gymseven | }
+0|gymseven | 3:20:31 AM [express] POST /api/workout-templates 400 in 114ms :: {"message":"Dados inválidos para cr…
+0|gymseven | 3:20:42 AM [express] GET /api/config 304 in 2ms :: {"supabaseUrl":"https://vlqzjrwxqeyroqsglqwr.supa…
+0|gymseven | 3:20:43 AM [express] GET /api/workout-templates 304 in 103ms :: []
+0|gymseven | Workout template creation request: {
+0|gymseven |   body: {
+0|gymseven |     name: 'Teste',
+0|gymseven |     description: '',
+0|gymseven |     user_id: '439ddf53-5a86-432c-8d10-3458c6e3cb1e'
+0|gymseven |   },
+0|gymseven |   userId: '439ddf53-5a86-432c-8d10-3458c6e3cb1e'
+0|gymseven | }
+0|gymseven | 3:20:58 AM [express] POST /api/workout-templates 400 in 130ms :: {"message":"Dados inválidos para cr…
