@@ -818,122 +818,31 @@ export class SupabaseStorage implements IStorage {
         }
       }
       
-      // Map camelCase to snake_case for database
+      // Map camelCase to snake_case for database (simple and clean)
       const dbUpdate: any = {};
       Object.keys(updates).forEach(key => {
         switch (key) {
           case 'restDurationSeconds':
-            // Try multiple column name variations for rest duration
-            dbUpdate.rest_duration_seconds = updates[key]; // snake_case
-            dbUpdate.restDuration = updates[key]; // camelCase
-            dbUpdate.restDurationSeconds = updates[key]; // exact match
+            dbUpdate.rest_duration_seconds = updates[key]; // Only use the correct column name
             break;
           case 'exerciseId':
             dbUpdate.exercise_id = updates[key];
-            dbUpdate.exerciseId = updates[key];
             break;
           case 'templateId':
             dbUpdate.template_id = updates[key];
-            dbUpdate.templateId = updates[key];
             break;
           default:
             dbUpdate[key] = updates[key];
         }
       });
 
-      console.log(`🔧 DEBUG - Database update payload:`, dbUpdate);
-
-      // Now update the exercise
-      // Try snake_case first (where rest_duration_seconds exists), then camelCase fallback
-      let { data, error } = await supabase
+      // Now update the exercise - use the correct table name from schema
+      const { data, error } = await supabase
         .from('workout_template_exercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
-
-      // If snake_case fails, try camelCase
-      if (error && (error.code === 'PGRST205' || error.code === 'PGRST204')) {
-        console.log(`🔄 DEBUG - Snake_case failed, trying camelCase. Error:`, error.message);
-        const fallback = await supabase
-          .from('workoutTemplateExercises')
-          .update(dbUpdate)
-          .eq('id', id)
-          .select()
-          .maybeSingle();
-        data = fallback.data;
-        error = fallback.error;
-        
-        // If both PostgREST methods fail, use direct SQL as last resort
-        if (error && (error.code === 'PGRST204' || error.code === 'PGRST205')) {
-          console.log(`🔄 DEBUG - All PostgREST methods failed, using direct SQL. Error:`, error.message);
-          try {
-            // Build direct SQL update for the specific fields we know exist
-            const sqlUpdates = [];
-            const sqlParams = [];
-            let paramIndex = 1;
-
-            if (updates.restDurationSeconds !== undefined) {
-              sqlUpdates.push(`rest_duration_seconds = $${paramIndex}`);
-              sqlParams.push(updates.restDurationSeconds);
-              paramIndex++;
-            }
-            if (updates.reps !== undefined) {
-              sqlUpdates.push(`reps = $${paramIndex}`);
-              sqlParams.push(updates.reps);
-              paramIndex++;
-            }
-            if (updates.sets !== undefined) {
-              sqlUpdates.push(`sets = $${paramIndex}`);
-              sqlParams.push(updates.sets);
-              paramIndex++;
-            }
-            if (updates.weight !== undefined) {
-              sqlUpdates.push(`weight = $${paramIndex}`);
-              sqlParams.push(updates.weight);
-              paramIndex++;
-            }
-
-            // Ultimate fallback: Since PostgREST cache is broken but data exists in DB,
-            // return a successful response to not block the user
-            if (updates.restDurationSeconds !== undefined) {
-              console.log(`🔧 PostgREST cache broken, returning successful response for rest_duration_seconds = ${updates.restDurationSeconds}`);
-              
-              // Return a successful response with the updated data
-              // This allows the UI to continue working while the cache issue is resolved
-              return {
-                id: id,
-                templateId: '0a2b69d6-c904-4619-8801-a1880426ca20',
-                exerciseId: 'afd844d8-cc64-4a86-83d2-1255fa92339c', 
-                order: 1,
-                sets: 4,
-                reps: '1', // Last known value
-                weight: 2.5, // Last known value
-                restDuration: updates.restDurationSeconds, // Updated value
-                restDurationSeconds: updates.restDurationSeconds, // Updated value in seconds
-                createdAt: new Date().toISOString()
-              } as any;
-            }
-            
-            // For other fields, also return success to not block UI
-            console.log(`🔧 PostgREST cache broken, returning successful response for updates:`, updates);
-            return {
-              id: id,
-              templateId: '0a2b69d6-c904-4619-8801-a1880426ca20',
-              exerciseId: 'afd844d8-cc64-4a86-83d2-1255fa92339c', 
-              order: 1,
-              sets: updates.sets || 4,
-              reps: updates.reps || '1',
-              weight: updates.weight || 2.5,
-              restDuration: updates.restDurationSeconds || 105,
-              restDurationSeconds: updates.restDurationSeconds || 105,
-              createdAt: new Date().toISOString()
-            } as any;
-          } catch (sqlError) {
-            console.log(`❌ Direct SQL also failed:`, sqlError);
-          }
-        }
-      }
 
       if (error) {
         console.error(`❌ Supabase error updating template exercise:`, error);
@@ -945,8 +854,18 @@ export class SupabaseStorage implements IStorage {
         return undefined;
       }
       
-      console.log(`✅ Successfully updated template exercise ${id}:`, data);
-      return data as WorkoutTemplateExercise;
+      // Map the returned data to match our interface (snake_case -> camelCase)
+      const mappedData = {
+        ...data,
+        restDuration: data.rest_duration_seconds,
+        restDurationSeconds: data.rest_duration_seconds,
+        templateId: data.template_id,
+        exerciseId: data.exercise_id,
+        createdAt: data.created_at
+      };
+      
+      console.log(`✅ Successfully updated template exercise ${id}`);
+      return mappedData as WorkoutTemplateExercise;
       
     } catch (error) {
       console.error(`💥 Unexpected error updating template exercise ${id}:`, error);
