@@ -74,7 +74,7 @@ export default function WorkoutTemplateEditor() {
   });
 
   const { data: allExercises = [] } = useQuery({
-    queryKey: ["/api/exercises"],
+    queryKey: ["/api/exercicios"],
   });
 
   // Mutations
