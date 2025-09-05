@@ -60,7 +60,7 @@ export default function Login() {
     setLoginError(''); // Clear any previous errors
     try {
       await signIn(data.email, data.password);
-      showSuccess("Login realizado com sucesso!", "Bem-vindo de volta ao GymSeven");
+      showSuccess("Login realizado com sucesso!", "Bem-vindo ao GymSeven!");
       // Don't redirect manually, let the auth context handle it via onAuthStateChange
     } catch (error: any) {
       console.error('Login error in component:', error);
