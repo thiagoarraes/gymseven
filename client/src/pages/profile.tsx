@@ -961,7 +961,7 @@ export default function Profile() {
                               <Calendar className="mr-2 h-4 w-4" />
                               Semana Inicia Em
                             </FormLabel>
-                            <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString() || "1"}>
+                            <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString() ?? "1"}>
                               <FormControl>
                                 <SelectTrigger className="bg-card border-border text-foreground">
                                   <SelectValue placeholder="Primeiro dia da semana" />

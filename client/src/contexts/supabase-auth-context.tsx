@@ -260,6 +260,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       console.log('✅ Password changed successfully');
+      
+      // Refresh the session after password change to prevent auth errors
+      try {
+        const { data, error } = await supabase.auth.refreshSession();
+        if (error) {
+          console.warn('⚠️ Session refresh failed, but password was changed:', error.message);
+        } else if (data.session) {
+          console.log('✅ Session refreshed after password change');
+        }
+      } catch (refreshError) {
+        console.warn('⚠️ Session refresh error:', refreshError);
+        // Don't throw - the password was successfully changed
+      }
     } catch (error: any) {
       console.error('❌ Change password error:', error.message);
       throw new Error(error.message || 'Erro ao alterar senha');
