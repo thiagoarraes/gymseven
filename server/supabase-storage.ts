@@ -782,13 +782,18 @@ export class SupabaseStorage implements IStorage {
       Object.keys(updates).forEach(key => {
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.rest_duration_seconds = updates[key];
+            // Try multiple column name variations for rest duration
+            dbUpdate.rest_duration_seconds = updates[key]; // snake_case
+            dbUpdate.restDuration = updates[key]; // camelCase
+            dbUpdate.restDurationSeconds = updates[key]; // exact match
             break;
           case 'exerciseId':
             dbUpdate.exercise_id = updates[key];
+            dbUpdate.exerciseId = updates[key];
             break;
           case 'templateId':
             dbUpdate.template_id = updates[key];
+            dbUpdate.templateId = updates[key];
             break;
           default:
             dbUpdate[key] = updates[key];
