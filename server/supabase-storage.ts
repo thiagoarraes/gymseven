@@ -795,19 +795,22 @@ export class SupabaseStorage implements IStorage {
         }
       });
 
+      console.log(`🔧 DEBUG - Database update payload:`, dbUpdate);
+
       // Now update the exercise
-      // Try camelCase first (what PostgREST expects), then snake_case fallback
+      // Try snake_case first (where rest_duration_seconds exists), then camelCase fallback
       let { data, error } = await supabase
-        .from('workoutTemplateExercises')
+        .from('workout_template_exercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
 
-      // If camelCase fails, try snake_case
-      if (error && error.code === 'PGRST205') {
+      // If snake_case fails, try camelCase
+      if (error && (error.code === 'PGRST205' || error.code === 'PGRST204')) {
+        console.log(`🔄 DEBUG - Snake_case failed, trying camelCase. Error:`, error.message);
         const fallback = await supabase
-          .from('workout_template_exercises')
+          .from('workoutTemplateExercises')
           .update(dbUpdate)
           .eq('id', id)
           .select()
