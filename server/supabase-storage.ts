@@ -719,17 +719,17 @@ export class SupabaseStorage implements IStorage {
           .select(`
             id,
             templateId,
-            workout_templates!inner(
+            workoutTemplates!inner(
               id,
               user_id
             )
           `)
           .eq('id', id)
-          .eq('workout_templates.user_id', userId)
+          .eq('workoutTemplates.user_id', userId)
           .maybeSingle();
 
         // If camelCase fails, try snake_case
-        if (ownershipError && ownershipError.code === 'PGRST205') {
+        if (ownershipError && (ownershipError.code === 'PGRST205' || ownershipError.code === 'PGRST200')) {
           const fallback = await supabase
             .from('workout_template_exercises')
             .select(`
