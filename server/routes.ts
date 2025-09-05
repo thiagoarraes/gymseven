@@ -59,14 +59,17 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Initialize storage once for all routes
   const db = await getStorage();
   
-  // Register Supabase Auth routes
-  registerSupabaseAuthRoutes(app);
+  // Register Supabase Auth routes only if Supabase is configured
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    registerSupabaseAuthRoutes(app);
+  }
   
   // Endpoint para fornecer configurações do Supabase para o frontend
   app.get('/api/config', (req, res) => {
     res.json({
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY
+      supabaseUrl: process.env.SUPABASE_URL || null,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || null,
+      usesPostgreSQL: !!process.env.DATABASE_URL && !process.env.SUPABASE_URL
     });
   });
   
