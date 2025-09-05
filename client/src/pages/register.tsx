@@ -131,7 +131,7 @@ export default function Register() {
         },
         body: JSON.stringify({
           email: registrationData.email,
-          otp: otp,
+          token: otp,
           password: registrationData.password,
         }),
       });
