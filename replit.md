@@ -6,7 +6,7 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 
 Preferred communication style: Simple, everyday language.
 Display preferences: Use username (nickname) instead of firstName for user greetings and display.
-Database priority: Supabase is mandatory as the primary database.
+Database priority: Supabase is mandatory as the primary database. The project requires SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and SUPABASE_ANON_KEY to be configured before startup.
 
 # System Architecture
 
