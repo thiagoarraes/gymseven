@@ -80,12 +80,7 @@ export default function WorkoutTemplateEditor() {
   // Mutations
   const updateTemplateNameMutation = useMutation({
     mutationFn: async (name: string) => {
-      const response = await fetch(`/api/workout-templates/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      if (!response.ok) throw new Error("Erro ao atualizar nome");
+      const response = await apiRequest("PATCH", `/api/workout-templates/${id}`, { name });
       return response.json();
     },
     onSuccess: () => {
@@ -100,12 +95,7 @@ export default function WorkoutTemplateEditor() {
 
   const addExerciseMutation = useMutation({
     mutationFn: async (exerciseData: any) => {
-      const response = await fetch(`/api/workout-templates/${id}/exercises`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...exerciseData, workoutTemplateId: id }),
-      });
-      if (!response.ok) throw new Error("Erro ao adicionar exercício");
+      const response = await apiRequest("POST", `/api/workout-templates/${id}/exercises`, { ...exerciseData, workoutTemplateId: id });
       return response.json();
     },
     onSuccess: () => {
