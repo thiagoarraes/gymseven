@@ -20,8 +20,7 @@ import {
   insertUserGoalSchema,
   updateUserPreferencesSchema
 } from "@shared/schema";
-import { registerUser, loginUser, changeUserPassword, optionalAuth } from "./auth";
-import { authenticateToken, type AuthRequest } from "./supabase-auth";
+import { registerUser, loginUser, changeUserPassword, optionalAuth, authenticateToken, type AuthRequest } from "./auth";
 import { registerSupabaseAuthRoutes } from "./supabase-routes";
 
 // Configure multer for avatar uploads
@@ -59,9 +58,40 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Initialize storage once for all routes
   const db = await getStorage();
   
-  // Register Supabase Auth routes only if Supabase is configured
+  // Register authentication routes based on storage type
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     registerSupabaseAuthRoutes(app);
+  } else {
+    // Use PostgreSQL-based authentication
+    app.post('/api/auth/register', async (req, res) => {
+      try {
+        const { user, token } = await registerUser(req.body);
+        res.status(201).json({ user, token });
+      } catch (error: any) {
+        if (error.name === 'ZodError') {
+          res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
+        } else {
+          res.status(400).json({ message: error.message });
+        }
+      }
+    });
+
+    app.post('/api/auth/login', async (req, res) => {
+      try {
+        const { user, token } = await loginUser(req.body);
+        res.json({ user, token });
+      } catch (error: any) {
+        if (error.name === 'ZodError') {
+          res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
+        } else {
+          res.status(401).json({ message: error.message });
+        }
+      }
+    });
+
+    app.post('/api/auth/logout', (req, res) => {
+      res.json({ message: 'Logout realizado com sucesso' });
+    });
   }
   
   // Endpoint para fornecer configurações do Supabase para o frontend

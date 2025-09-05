@@ -6,6 +6,7 @@ let supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // If environment variables are not available, try to fetch from API (production)
 let supabaseClient: any = null;
+let isSupabaseAvailable = false;
 
 async function initializeSupabase() {
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -16,19 +17,21 @@ async function initializeSupabase() {
         const config = await response.json();
         supabaseUrl = config.supabaseUrl;
         supabaseAnonKey = config.supabaseAnonKey;
-        console.log('✅ Supabase config loaded from API');
+        isSupabaseAvailable = !config.usesPostgreSQL && !!(supabaseUrl && supabaseAnonKey);
+        console.log(`✅ Config loaded from API - Supabase available: ${isSupabaseAvailable}`);
       } else {
         throw new Error('Failed to fetch config from API');
       }
     } catch (error) {
       console.error('❌ Failed to fetch Supabase config:', error);
-      throw new Error('Supabase configuration not available');
+      isSupabaseAvailable = false;
+      return null;
     }
   }
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('❌ Supabase environment variables missing');
-    throw new Error('Supabase URL and Anon Key are required');
+  if (!supabaseUrl || !supabaseAnonKey || !isSupabaseAvailable) {
+    console.log('⚠️ Supabase not available, using PostgreSQL authentication');
+    return null;
   }
 
   // Create Supabase client
@@ -61,6 +64,7 @@ if (supabaseUrl && supabaseAnonKey) {
       storage: localStorage
     }
   });
+  isSupabaseAvailable = true;
   console.log('✅ Supabase client initialized with direct config');
 } else {
   // For production, initialize async and update the export
@@ -68,3 +72,6 @@ if (supabaseUrl && supabaseAnonKey) {
     supabase = client;
   });
 }
+
+// Export function to check if Supabase is available
+export const getSupabaseAvailability = () => isSupabaseAvailable;
