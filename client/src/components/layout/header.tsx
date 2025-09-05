@@ -66,12 +66,6 @@ export function Header() {
                     <span>Perfil</span>
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/settings">
-                  <DropdownMenuItem className="mobile-button text-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer mobile-focus" data-testid="menu-settings">
-                    <Settings className="mr-3 h-4 w-4" />
-                    <span>Configurações</span>
-                  </DropdownMenuItem>
-                </Link>
                 <DropdownMenuSeparator className="bg-border" />
                 <DropdownMenuItem 
                   className="mobile-button text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer mobile-focus"
