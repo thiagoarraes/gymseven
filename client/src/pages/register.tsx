@@ -28,6 +28,18 @@ export default function Register() {
     setIsVisible(true);
   }, []);
 
+  // Auto-submit when OTP is complete
+  useEffect(() => {
+    if (otp.length === 6 && showOtpStep && !otpLoading) {
+      // Add small delay to ensure user sees the complete code
+      const timer = setTimeout(() => {
+        handleOtpVerify();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [otp, showOtpStep, otpLoading]);
+
   const form = useForm<RegisterUser>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -403,7 +415,7 @@ export default function Register() {
                               
                               toast({
                                 title: "Código colado!",
-                                description: "O código foi preenchido automaticamente.",
+                                description: "Verificando automaticamente...",
                               });
                             } else if (digits.length > 0) {
                               // If partial digits, fill from current position
