@@ -822,6 +822,59 @@ export class SupabaseStorage implements IStorage {
           .maybeSingle();
         data = fallback.data;
         error = fallback.error;
+        
+        // If both PostgREST methods fail, use direct SQL as last resort
+        if (error && (error.code === 'PGRST204' || error.code === 'PGRST205')) {
+          console.log(`🔄 DEBUG - All PostgREST methods failed, using direct SQL. Error:`, error.message);
+          try {
+            // Build direct SQL update for the specific fields we know exist
+            const sqlUpdates = [];
+            const sqlParams = [];
+            let paramIndex = 1;
+
+            if (updates.restDurationSeconds !== undefined) {
+              sqlUpdates.push(`rest_duration_seconds = $${paramIndex}`);
+              sqlParams.push(updates.restDurationSeconds);
+              paramIndex++;
+            }
+            if (updates.reps !== undefined) {
+              sqlUpdates.push(`reps = $${paramIndex}`);
+              sqlParams.push(updates.reps);
+              paramIndex++;
+            }
+            if (updates.sets !== undefined) {
+              sqlUpdates.push(`sets = $${paramIndex}`);
+              sqlParams.push(updates.sets);
+              paramIndex++;
+            }
+            if (updates.weight !== undefined) {
+              sqlUpdates.push(`weight = $${paramIndex}`);
+              sqlParams.push(updates.weight);
+              paramIndex++;
+            }
+
+            if (sqlUpdates.length > 0) {
+              const { data: sqlData, error: sqlError } = await supabase.rpc('direct_update_workout_template_exercise', {
+                exercise_id: id,
+                updates_sql: sqlUpdates.join(', '),
+                param_values: sqlParams
+              });
+
+              if (!sqlError) {
+                console.log(`✅ Direct SQL update succeeded for exercise ${id}`);
+                // Return the updated record by querying it again
+                const { data: refreshedData } = await supabase
+                  .from('workout_template_exercises')
+                  .select('*')
+                  .eq('id', id)
+                  .single();
+                return refreshedData as WorkoutTemplateExercise;
+              }
+            }
+          } catch (sqlError) {
+            console.log(`❌ Direct SQL also failed:`, sqlError);
+          }
+        }
       }
 
       if (error) {
