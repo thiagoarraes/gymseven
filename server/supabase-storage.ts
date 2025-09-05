@@ -535,10 +535,21 @@ export class SupabaseStorage implements IStorage {
   async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
     if (!userId) return [];
 
-    const { data, error } = await supabase
-      .from('workout_templates')
+    // Try camelCase first (what PostgREST expects), then snake_case fallback
+    let { data, error } = await supabase
+      .from('workoutTemplates')
       .select('*')
       .eq('user_id', userId);
+
+    // If camelCase fails, try snake_case
+    if (error && error.code === 'PGRST205') {
+      const fallback = await supabase
+        .from('workout_templates')
+        .select('*')
+        .eq('user_id', userId);
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('Error fetching workout templates:', error);
@@ -559,11 +570,23 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
-    const { data, error } = await supabase
-      .from('workout_templates')
+    // Try camelCase first (what PostgREST expects), then snake_case fallback
+    let { data, error } = await supabase
+      .from('workoutTemplates')
       .insert(template)
       .select()
       .single();
+
+    // If camelCase fails, try snake_case
+    if (error && error.code === 'PGRST205') {
+      const fallback = await supabase
+        .from('workout_templates')
+        .insert(template)
+        .select()
+        .single();
+      data = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) throw error;
     return data as WorkoutTemplate;
