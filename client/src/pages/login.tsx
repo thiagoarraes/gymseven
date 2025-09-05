@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { showSuccess } from '@/hooks/use-toast';
+import { showSuccess, useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/supabase-auth-context';
 import { loginSchema, type LoginUser } from '@shared/schema';
 
@@ -18,6 +18,7 @@ export default function Login() {
   const [loginError, setLoginError] = useState<string>('');
   const { signIn } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const form = useForm<LoginUser>({
     resolver: zodResolver(loginSchema),
@@ -29,7 +30,20 @@ export default function Login() {
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+    
+    // Check if account was deleted and show success message
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('accountDeleted') === 'true') {
+      toast({
+        title: "Conta excluída",
+        description: "Sua conta foi excluída com sucesso.",
+      });
+      
+      // Remove the parameter from URL without reloading
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, [toast]);
 
   // Clear error when user starts typing
   useEffect(() => {

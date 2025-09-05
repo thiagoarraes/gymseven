@@ -139,15 +139,8 @@ export default function Profile() {
     setDeleting(true);
     try {
       await deleteAccount();
-      toast({
-        title: "Conta excluída",
-        description: "Sua conta foi excluída com sucesso.",
-      });
-      
-      // Wait 2 seconds to let user see the success message, then redirect
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
+      // Redirect immediately to login with success parameter
+      window.location.href = '/login?accountDeleted=true';
     } catch (error: any) {
       toast({
         title: "Erro ao excluir conta",
