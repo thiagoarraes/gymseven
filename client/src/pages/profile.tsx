@@ -575,7 +575,7 @@ export default function Profile() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-foreground">Nível de Atividade</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                               <FormControl>
                                 <SelectTrigger className="bg-card border-border text-foreground">
                                   <SelectValue placeholder="Selecione seu nível de atividade" />

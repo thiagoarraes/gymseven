@@ -172,16 +172,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async () => {
     setLoading(true);
     try {
+      // Clear local state first to prevent UI issues
+      setUser(null);
+      setSession(null);
+      
+      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
+      // Don't throw on session missing errors - just log them
       if (error) {
-        throw new Error(error.message);
+        if (error.message.includes('session missing') || error.message.includes('Auth session missing')) {
+          console.log('⚠️ Sessão já estava inválida, logout local realizado');
+        } else {
+          console.error('❌ Erro no logout:', error.message);
+          // Still don't throw - we've already cleared local state
+        }
+      } else {
+        console.log('✅ Logout realizado com sucesso');
       }
-
-      console.log('✅ Logout realizado com sucesso');
     } catch (error: any) {
       console.error('❌ Erro no logout:', error.message);
-      throw new Error(error.message || 'Erro ao fazer logout');
+      // Don't throw - we've already cleared the local state
     } finally {
       setLoading(false);
     }
