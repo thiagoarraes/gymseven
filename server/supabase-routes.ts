@@ -153,6 +153,52 @@ export function registerSupabaseAuthRoutes(app: Express) {
     }
   });
 
+  // Change password
+  app.post("/api/auth/change-password", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Senha atual e nova senha são obrigatórias" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "A nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      // First verify current password by attempting to sign in with it
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: req.user.email!,
+        password: currentPassword
+      });
+
+      if (verifyError) {
+        return res.status(400).json({ message: "Senha atual incorreta" });
+      }
+
+      // Update password using admin privileges
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        req.user.id,
+        { password: newPassword }
+      );
+
+      if (updateError) {
+        console.error('❌ Password update error:', updateError);
+        return res.status(500).json({ message: "Erro ao atualizar senha" });
+      }
+
+      console.log('✅ Password changed successfully for user:', req.user.email);
+      res.json({ message: "Senha alterada com sucesso!" });
+    } catch (error: any) {
+      console.error('❌ Change password error:', error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Delete account and all user data
   app.delete("/api/auth/delete-account", authenticateToken, async (req: AuthRequest, res) => {
     try {

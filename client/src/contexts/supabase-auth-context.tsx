@@ -12,6 +12,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   updateProfile?: (data: any) => Promise<void>;
   isAuthenticated: boolean;
@@ -237,6 +238,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Erro ao alterar senha');
+      }
+
+      console.log('✅ Password changed successfully');
+    } catch (error: any) {
+      console.error('❌ Change password error:', error.message);
+      throw new Error(error.message || 'Erro ao alterar senha');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateProfile = async (data: any) => {
     // Implementation for updating profile if not already present
     console.log('Update profile called with:', data);
@@ -252,6 +283,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signOut,
     resetPassword,
+    changePassword,
     deleteAccount,
     updateProfile,
     isAuthenticated: !!user
