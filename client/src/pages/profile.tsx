@@ -3,19 +3,41 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { 
+  User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle, RotateCcw,
+  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, Shield, Key, VolumeX
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/supabase-auth-context';
-import { updateUserSchema, type UpdateUser } from '@shared/schema';
+import { useTheme } from '@/contexts/theme-context';
+import { useNotifications } from '@/hooks/use-notifications';
+import { updateUserSchema, type UpdateUser, changePasswordSchema, type ChangePassword } from '@shared/schema';
 import ImageCropModal from '@/components/ImageCropModal';
+import { z } from 'zod';
+
+// Simple preferences schema
+const preferencesSchema = z.object({
+  theme: z.enum(['light', 'dark']).default('dark'),
+  language: z.string().default('pt-BR'),
+  notifications: z.boolean().default(true),
+  soundEffects: z.boolean().default(true),
+  restTimerAutoStart: z.boolean().default(true),
+  defaultRestTime: z.number().default(90),
+  weekStartsOn: z.number().default(1),
+});
+
+type Preferences = z.infer<typeof preferencesSchema>;
 
 export default function Profile() {
   const [loading, setLoading] = useState(false);
@@ -28,8 +50,11 @@ export default function Profile() {
   const [deleting, setDeleting] = useState(false);
   const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
   const [clearingData, setClearingData] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const { user, updateProfile, deleteAccount } = useAuth();
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Format date helpers
@@ -71,6 +96,28 @@ export default function Profile() {
       height: user?.user_metadata?.height || undefined,
       weight: user?.user_metadata?.weight || undefined,
       activityLevel: user?.user_metadata?.activity_level || 'moderado',
+    },
+  });
+
+  const preferencesForm = useForm<Preferences>({
+    resolver: zodResolver(preferencesSchema),
+    defaultValues: {
+      theme: theme,
+      language: 'pt-BR',
+      notifications: true,
+      soundEffects: true,
+      restTimerAutoStart: true,
+      defaultRestTime: 90,
+      weekStartsOn: 1,
+    },
+  });
+
+  const passwordForm = useForm<ChangePassword>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
