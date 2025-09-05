@@ -99,7 +99,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     res.json({
       supabaseUrl: process.env.SUPABASE_URL || null,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || null,
-      usesPostgreSQL: !!process.env.DATABASE_URL && !process.env.SUPABASE_URL
+      usesSupabase: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
     });
   });
   

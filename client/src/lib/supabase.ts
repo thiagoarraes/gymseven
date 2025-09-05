@@ -17,7 +17,7 @@ async function initializeSupabase() {
         const config = await response.json();
         supabaseUrl = config.supabaseUrl;
         supabaseAnonKey = config.supabaseAnonKey;
-        isSupabaseAvailable = !config.usesPostgreSQL && !!(supabaseUrl && supabaseAnonKey);
+        isSupabaseAvailable = !!(supabaseUrl && supabaseAnonKey);
         console.log(`✅ Config loaded from API - Supabase available: ${isSupabaseAvailable}`);
       } else {
         throw new Error('Failed to fetch config from API');
@@ -29,7 +29,7 @@ async function initializeSupabase() {
     }
   }
 
-  if (!supabaseUrl || !supabaseAnonKey || !isSupabaseAvailable) {
+  if (!supabaseUrl || !supabaseAnonKey) {
     console.log('⚠️ Supabase not available, using PostgreSQL authentication');
     return null;
   }
