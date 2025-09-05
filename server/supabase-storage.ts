@@ -853,22 +853,41 @@ export class SupabaseStorage implements IStorage {
               paramIndex++;
             }
 
-            if (sqlUpdates.length > 0) {
-              const { data: sqlData, error: sqlError } = await supabase.rpc('direct_update_workout_template_exercise', {
-                exercise_id: id,
-                updates_sql: sqlUpdates.join(', '),
-                param_values: sqlParams
+            // Simplified direct SQL update specifically for rest_duration_seconds
+            if (updates.restDurationSeconds !== undefined) {
+              console.log(`🔧 Trying direct SQL update for rest_duration_seconds = ${updates.restDurationSeconds}`);
+              
+              const { data: sqlData, error: sqlError } = await supabase.rpc('sql', {
+                query: `UPDATE workout_template_exercises SET rest_duration_seconds = ${updates.restDurationSeconds} WHERE id = '${id}' RETURNING *;`
               });
 
-              if (!sqlError) {
-                console.log(`✅ Direct SQL update succeeded for exercise ${id}`);
-                // Return the updated record by querying it again
-                const { data: refreshedData } = await supabase
-                  .from('workout_template_exercises')
-                  .select('*')
-                  .eq('id', id)
-                  .single();
-                return refreshedData as WorkoutTemplateExercise;
+              if (!sqlError && sqlData) {
+                console.log(`✅ Direct SQL update succeeded for exercise ${id}:`, sqlData);
+                return sqlData[0] as WorkoutTemplateExercise;
+              } else {
+                console.log(`❌ Direct SQL failed:`, sqlError);
+                
+                // Ultimate fallback: simple exec
+                try {
+                  const { error: execError } = await supabase.rpc('exec', {
+                    sql: `UPDATE workout_template_exercises SET rest_duration_seconds = ${updates.restDurationSeconds} WHERE id = '${id}';`
+                  });
+                  
+                  if (!execError) {
+                    console.log(`✅ SQL exec succeeded for exercise ${id}`);
+                    // Query the updated record
+                    const { data: refreshedData } = await supabase
+                      .from('workout_template_exercises')
+                      .select('*')
+                      .eq('id', id)
+                      .single();
+                    if (refreshedData) {
+                      return refreshedData as WorkoutTemplateExercise;
+                    }
+                  }
+                } catch (execError) {
+                  console.log(`❌ SQL exec also failed:`, execError);
+                }
               }
             }
           } catch (sqlError) {
