@@ -708,10 +708,28 @@ export class SupabaseStorage implements IStorage {
         }
       }
       
+      // Map camelCase to snake_case for database
+      const dbUpdate: any = {};
+      Object.keys(updates).forEach(key => {
+        switch (key) {
+          case 'restDurationSeconds':
+            dbUpdate.rest_duration_seconds = updates[key];
+            break;
+          case 'exerciseId':
+            dbUpdate.exercise_id = updates[key];
+            break;
+          case 'templateId':
+            dbUpdate.template_id = updates[key];
+            break;
+          default:
+            dbUpdate[key] = updates[key];
+        }
+      });
+
       // Now update the exercise
       const { data, error } = await supabase
         .from('workoutTemplateExercises')
-        .update(updates)
+        .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
