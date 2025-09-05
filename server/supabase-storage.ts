@@ -609,11 +609,23 @@ export class SupabaseStorage implements IStorage {
     
     // First, check if the template exists and verify ownership
     if (userId) {
-      const { data: templateCheck, error: checkError } = await supabase
-        .from('workout_templates')
+      // Try camelCase first (what PostgREST expects), then snake_case fallback
+      let { data: templateCheck, error: checkError } = await supabase
+        .from('workoutTemplates')
         .select('id, user_id, name')
         .eq('id', id)
         .single();
+
+      // If camelCase fails, try snake_case
+      if (checkError && checkError.code === 'PGRST205') {
+        const fallback = await supabase
+          .from('workout_templates')
+          .select('id, user_id, name')
+          .eq('id', id)
+          .single();
+        templateCheck = fallback.data;
+        checkError = fallback.error;
+      }
         
       console.log('Template check result:', { templateCheck, checkError });
         
@@ -631,26 +643,56 @@ export class SupabaseStorage implements IStorage {
     }
 
     // Before deleting the template, remove references from workout logs to avoid foreign key constraint
-    const { error: updateError } = await supabase
-      .from('workout_logs')
+    // Try camelCase first (what PostgREST expects), then snake_case fallback
+    let { error: updateError } = await supabase
+      .from('workoutLogs')
       .update({ templateId: null })
       .eq('templateId', id);
 
+    // If camelCase fails, try snake_case
+    if (updateError && updateError.code === 'PGRST205') {
+      const fallback = await supabase
+        .from('workout_logs')
+        .update({ templateId: null })
+        .eq('templateId', id);
+      updateError = fallback.error;
+    }
+
     if (updateError) {
+      console.log('❌ Error updating workout logs:', updateError);
       return false;
     }
 
+    // Try camelCase first (what PostgREST expects), then snake_case fallback
     let query = supabase
-      .from('workout_templates')
+      .from('workoutTemplates')
       .delete()
       .eq('id', id);
+
+    let shouldTrySnakeCase = false;
 
     // If userId is provided, ensure user owns the template
     if (userId) {
       query = query.eq('user_id', userId);
     }
 
-    const { error, count } = await query;
+    let { error, count } = await query;
+
+    // If camelCase fails, try snake_case
+    if (error && error.code === 'PGRST205') {
+      query = supabase
+        .from('workout_templates')
+        .delete()
+        .eq('id', id);
+        
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+      
+      const fallback = await query;
+      error = fallback.error;
+      count = fallback.count;
+    }
     
     console.log('Delete result:', { error, count });
     
