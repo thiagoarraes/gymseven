@@ -713,8 +713,9 @@ export class SupabaseStorage implements IStorage {
       // First verify ownership if userId provided
       if (userId) {
         // Check if the exercise belongs to a template owned by the user
-        const { data: ownership, error: ownershipError } = await supabase
-          .from('workout_template_exercises')
+        // Try camelCase first (what PostgREST expects), then snake_case fallback
+        let { data: ownership, error: ownershipError } = await supabase
+          .from('workoutTemplateExercises')
           .select(`
             id,
             templateId,
@@ -726,6 +727,25 @@ export class SupabaseStorage implements IStorage {
           .eq('id', id)
           .eq('workout_templates.user_id', userId)
           .maybeSingle();
+
+        // If camelCase fails, try snake_case
+        if (ownershipError && ownershipError.code === 'PGRST205') {
+          const fallback = await supabase
+            .from('workout_template_exercises')
+            .select(`
+              id,
+              templateId,
+              workout_templates!inner(
+                id,
+                user_id
+              )
+            `)
+            .eq('id', id)
+            .eq('workout_templates.user_id', userId)
+            .maybeSingle();
+          ownership = fallback.data;
+          ownershipError = fallback.error;
+        }
 
         if (ownershipError) {
           console.error(`❌ Error checking ownership:`, ownershipError);
@@ -776,12 +796,25 @@ export class SupabaseStorage implements IStorage {
       });
 
       // Now update the exercise
-      const { data, error } = await supabase
-        .from('workout_template_exercises')
+      // Try camelCase first (what PostgREST expects), then snake_case fallback
+      let { data, error } = await supabase
+        .from('workoutTemplateExercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
+
+      // If camelCase fails, try snake_case
+      if (error && error.code === 'PGRST205') {
+        const fallback = await supabase
+          .from('workout_template_exercises')
+          .update(dbUpdate)
+          .eq('id', id)
+          .select()
+          .maybeSingle();
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) {
         console.error(`❌ Supabase error updating template exercise:`, error);
