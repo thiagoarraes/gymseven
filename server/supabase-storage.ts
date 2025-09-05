@@ -605,6 +605,8 @@ export class SupabaseStorage implements IStorage {
   }
 
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
+    console.log(`🗑️ Attempting to delete workout template: ${id} for user: ${userId}`);
+    
     // First, check if the template exists and verify ownership
     if (userId) {
       const { data: templateCheck, error: checkError } = await supabase
@@ -613,13 +615,19 @@ export class SupabaseStorage implements IStorage {
         .eq('id', id)
         .single();
         
+      console.log('Template check result:', { templateCheck, checkError });
+        
       if (checkError || !templateCheck) {
+        console.log('❌ Template not found or error in check');
         return false;
       }
       
       if (templateCheck.user_id !== userId) {
+        console.log('❌ User does not own this template');
         return false;
       }
+      
+      console.log('✅ Template ownership verified');
     }
 
     // Before deleting the template, remove references from workout logs to avoid foreign key constraint
@@ -644,8 +652,12 @@ export class SupabaseStorage implements IStorage {
 
     const { error, count } = await query;
     
+    console.log('Delete result:', { error, count });
+    
     // Return false if error occurred or no rows were affected (template not found or not owned by user)
-    return !error && count !== 0;
+    const success = !error && count !== 0;
+    console.log(`🗑️ Delete ${success ? 'successful' : 'failed'} for template: ${id}`);
+    return success;
   }
 
   // Workout Template Exercises
