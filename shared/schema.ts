@@ -8,120 +8,120 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
-  dateOfBirth: timestamp("date_of_birth"),
+  firstName: text("firstName"),
+  lastName: text("lastName"),
+  dateOfBirth: timestamp("dateOfBirth"),
   height: real("height"), // em cm
   weight: real("weight"), // em kg
-  activityLevel: text("activity_level").default("moderado"), // sedentário, leve, moderado, intenso, atleta
-  fitnessGoals: text("fitness_goals").array().default(sql`ARRAY[]::text[]`), // ganhar massa, perder peso, manter forma, etc.
-  profileImageUrl: text("profile_image_url"),
-  experienceLevel: text("experience_level").default("iniciante"), // iniciante, intermediário, avançado
-  preferredWorkoutDuration: integer("preferred_workout_duration").default(60), // em minutos
-  isActive: boolean("is_active").default(true),
-  emailVerified: boolean("email_verified").default(false),
-  lastLoginAt: timestamp("last_login_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  activityLevel: text("activityLevel").default("moderado"), // sedentário, leve, moderado, intenso, atleta
+  fitnessGoals: text("fitnessGoals").array().default(sql`ARRAY[]::text[]`), // ganhar massa, perder peso, manter forma, etc.
+  profileImageUrl: text("profileImageUrl"),
+  experienceLevel: text("experienceLevel").default("iniciante"), // iniciante, intermediário, avançado
+  preferredWorkoutDuration: integer("preferredWorkoutDuration").default(60), // em minutos
+  isActive: boolean("isActive").default(true),
+  emailVerified: boolean("emailVerified").default(false),
+  lastLoginAt: timestamp("lastLoginAt"),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 // Tabela para histórico de peso
-export const weightHistory = pgTable("weight_history", {
+export const weightHistory = pgTable("weightHistory", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   weight: real("weight").notNull(),
   date: timestamp("date").defaultNow(),
   notes: text("notes"),
 });
 
 // Tabela para objetivos pessoais
-export const userGoals = pgTable("user_goals", {
+export const userGoals = pgTable("userGoals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   type: text("type").notNull(), // weight_loss, muscle_gain, strength, endurance
-  targetValue: real("target_value"),
-  currentValue: real("current_value"),
+  targetValue: real("targetValue"),
+  currentValue: real("currentValue"),
   unit: text("unit"), // kg, lbs, reps, etc.
-  targetDate: timestamp("target_date"),
-  isCompleted: boolean("is_completed").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  targetDate: timestamp("targetDate"),
+  isCompleted: boolean("isCompleted").default(false),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
 // Tabela para preferências do usuário
-export const userPreferences = pgTable("user_preferences", {
+export const userPreferences = pgTable("userPreferences", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   theme: text("theme").default("dark"), // dark, light, auto
   units: text("units").default("metric"), // metric, imperial
   language: text("language").default("pt-BR"),
   notifications: boolean("notifications").default(true),
-  soundEffects: boolean("sound_effects").default(true),
-  restTimerAutoStart: boolean("rest_timer_auto_start").default(true),
-  defaultRestTime: integer("default_rest_time").default(90), // em segundos
-  weekStartsOn: integer("week_starts_on").default(1), // 0=domingo, 1=segunda
-  trackingData: text("tracking_data").default("all"), // all, weight_only, none
+  soundEffects: boolean("soundEffects").default(true),
+  restTimerAutoStart: boolean("restTimerAutoStart").default(true),
+  defaultRestTime: integer("defaultRestTime").default(90), // em segundos
+  weekStartsOn: integer("weekStartsOn").default(1), // 0=domingo, 1=segunda
+  trackingData: text("trackingData").default("all"), // all, weight_only, none
 });
 
 // Tabela para conquistas do usuário (sistema gamificado isolado por usuário)
-export const userAchievements = pgTable("user_achievements", {
+export const userAchievements = pgTable("userAchievements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  achievementId: text("achievement_id").notNull(), // ID da conquista (exemplo: "first_workout", "strength_milestone_100kg")
-  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: text("achievementId").notNull(), // ID da conquista (exemplo: "first_workout", "strength_milestone_100kg")
+  unlockedAt: timestamp("unlockedAt").defaultNow(),
   progress: integer("progress").default(0), // Progresso atual para conquistas progressivas
-  isCompleted: boolean("is_completed").default(true),
+  isCompleted: boolean("isCompleted").default(true),
 });
 
 export const exercises = pgTable("exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  muscleGroup: text("muscle_group").notNull(),
+  muscleGroup: text("muscleGroup").notNull(),
   description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export const workoutTemplates = pgTable("workout_templates", {
+export const workoutTemplates = pgTable("workoutTemplates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export const workoutTemplateExercises = pgTable("workout_template_exercises", {
+export const workoutTemplateExercises = pgTable("workoutTemplateExercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  templateId: varchar("template_id").notNull().references(() => workoutTemplates.id, { onDelete: "cascade" }),
-  exerciseId: varchar("exercise_id").notNull().references(() => exercises.id, { onDelete: "cascade" }),
+  templateId: varchar("templateId").notNull().references(() => workoutTemplates.id, { onDelete: "cascade" }),
+  exerciseId: varchar("exerciseId").notNull().references(() => exercises.id, { onDelete: "cascade" }),
   sets: integer("sets").notNull(),
   reps: text("reps").notNull(),
   weight: real("weight"),
-  restDurationSeconds: integer("rest_duration_seconds").default(90),
+  restDurationSeconds: integer("restDurationSeconds").default(90),
   order: integer("order").notNull(),
 });
 
-export const workoutLogs = pgTable("workout_logs", {
+export const workoutLogs = pgTable("workoutLogs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  templateId: varchar("template_id").references(() => workoutTemplates.id),
+  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  templateId: varchar("templateId").references(() => workoutTemplates.id),
   name: text("name").notNull(),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time"),
+  startTime: timestamp("startTime").notNull(),
+  endTime: timestamp("endTime"),
 });
 
-export const workoutLogExercises = pgTable("workout_log_exercises", {
+export const workoutLogExercises = pgTable("workoutLogExercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  logId: varchar("log_id").notNull().references(() => workoutLogs.id, { onDelete: "cascade" }),
-  exerciseId: varchar("exercise_id").notNull().references(() => exercises.id),
-  exerciseName: text("exercise_name").notNull(),
+  logId: varchar("logId").notNull().references(() => workoutLogs.id, { onDelete: "cascade" }),
+  exerciseId: varchar("exerciseId").notNull().references(() => exercises.id),
+  exerciseName: text("exerciseName").notNull(),
   order: integer("order").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export const workoutLogSets = pgTable("workout_log_sets", {
+export const workoutLogSets = pgTable("workoutLogSets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  logExerciseId: varchar("log_exercise_id").notNull().references(() => workoutLogExercises.id, { onDelete: "cascade" }),
-  setNumber: integer("set_number").notNull(),
+  logExerciseId: varchar("logExerciseId").notNull().references(() => workoutLogExercises.id, { onDelete: "cascade" }),
+  setNumber: integer("setNumber").notNull(),
   reps: integer("reps"),
   weight: real("weight"),
   completed: boolean("completed").default(false),
@@ -130,7 +130,7 @@ export const workoutLogSets = pgTable("workout_log_sets", {
 // Insert schemas
 export const insertExerciseSchema = createInsertSchema(exercises).omit({
   id: true,
-  user_id: true, // Server will add this automatically
+  userId: true, // Server will add this automatically
   createdAt: true,
 }).extend({
   // Make optional fields truly optional
@@ -279,7 +279,7 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
   unlockedAt: true,
 });
 
-export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ user_id: true });
+export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ userId: true });
 
 // Types
 export type User = typeof users.$inferSelect;
