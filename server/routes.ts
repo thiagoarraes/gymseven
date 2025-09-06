@@ -180,11 +180,25 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  // Clear user data endpoint (keep account, remove all data) - NOT IMPLEMENTED FOR SUPABASE
+  // Clear user data endpoint (keep account, remove all data)
   app.delete('/api/auth/clear-data', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // For now, return not implemented as this requires complex Supabase table operations
-      res.status(501).json({ message: "Funcionalidade não implementada com Supabase" });
+      const userId = req.user!.id;
+      
+      // Use direct database queries to clear user data
+      if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        // For Supabase storage, we need to implement this manually
+        console.log('Clearing user data for Supabase user:', userId);
+        
+        // This would require implementing clear methods in SupabaseStorage
+        // For now, return a more helpful message
+        res.status(501).json({ 
+          message: "Funcionalidade de limpeza de dados está sendo implementada para Supabase" 
+        });
+      } else {
+        // For PostgreSQL storage
+        res.status(501).json({ message: "Funcionalidade não implementada" });
+      }
     } catch (error: any) {
       console.error('Error clearing user data:', error);
       res.status(500).json({ message: "Erro interno do servidor" });

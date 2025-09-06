@@ -40,4 +40,4 @@ export function getSupabaseClient() {
 }
 
 // Export for backward compatibility - only initialize when needed
-export const supabase = null; // Will be initialized later through getSupabaseClient()
+export const supabase = getSupabaseClient(); // Initialize immediately

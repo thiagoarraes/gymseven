@@ -172,6 +172,10 @@ export function registerSupabaseAuthRoutes(app: Express) {
       }
 
       // First verify current password by attempting to sign in with it
+      if (!supabase) {
+        return res.status(500).json({ message: "Supabase não configurado" });
+      }
+      
       const { error: verifyError } = await supabase.auth.signInWithPassword({
         email: req.user.email!,
         password: currentPassword
@@ -182,6 +186,10 @@ export function registerSupabaseAuthRoutes(app: Express) {
       }
 
       // Update password using admin privileges
+      if (!supabase) {
+        return res.status(500).json({ message: "Supabase não configurado" });
+      }
+      
       const { error: updateError } = await supabase.auth.admin.updateUserById(
         req.user.id,
         { password: newPassword }
@@ -227,7 +235,7 @@ export function registerSupabaseAuthRoutes(app: Express) {
           .eq('user_id', userId);
 
         if (workoutLogIds && workoutLogIds.length > 0) {
-          const logIds = workoutLogIds.map(log => log.id);
+          const logIds = workoutLogIds.map((log: any) => log.id);
           
           // Delete workout log sets
           const { error: setsError } = await storage.supabase
@@ -247,7 +255,7 @@ export function registerSupabaseAuthRoutes(app: Express) {
           .eq('user_id', userId);
 
         if (templateIds && templateIds.length > 0) {
-          const tempIds = templateIds.map(template => template.id);
+          const tempIds = templateIds.map((template: any) => template.id);
           
           // Delete workout template exercises
           const { error: templateExError } = await storage.supabase
