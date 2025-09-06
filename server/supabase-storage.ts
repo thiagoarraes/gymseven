@@ -473,14 +473,14 @@ export class SupabaseStorage implements IStorage {
     
     console.log('🏋️ [SUPABASE] Creating exercise with simplified fields...');
     
-    // Only use fields that definitely exist in the database - using snake_case
+    // Only use fields that definitely exist in the database
+    // Based on schema check, Supabase may use camelCase in some operations
     const dbExercise = {
       name: exercise.name,
       muscle_group: exercise.muscleGroup, // Convert camelCase to snake_case for DB
       user_id: userId,
-      description: exercise.description || null,
-      image_url: exercise.imageUrl || null, // Convert camelCase to snake_case for DB
-      video_url: exercise.videoUrl || null  // Convert camelCase to snake_case for DB
+      description: exercise.description || null
+      // Temporarily removing image_url and video_url to test core functionality
     };
 
     console.log('🎯 [DEBUG] Final data to insert:', JSON.stringify(dbExercise, null, 2));
@@ -490,7 +490,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await this.supabase
       .from('exercises')
       .insert(dbExercise)
-      .select('id, user_id, name, muscle_group, description, image_url, video_url, created_at')
+      .select('id, user_id, name, muscle_group, description, created_at')
       .single();
 
     console.log('📤 [DEBUG] Supabase response - data:', JSON.stringify(data, null, 2));
