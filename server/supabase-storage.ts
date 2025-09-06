@@ -66,10 +66,10 @@ export class SupabaseStorage implements IStorage {
     return {
       id: dbLog.id,
       user_id: dbLog.user_id,
-      templateId: dbLog.templateId,
+      templateId: dbLog.template_id || dbLog.templateId,
       name: dbLog.name,
-      startTime: dbLog.startTime,
-      endTime: dbLog.endTime
+      startTime: dbLog.start_time || dbLog.startTime,
+      endTime: dbLog.end_time || dbLog.endTime
     } as WorkoutLog;
   }
 
@@ -543,21 +543,10 @@ export class SupabaseStorage implements IStorage {
   async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
     if (!userId) return [];
 
-    // Try camelCase first (what PostgREST expects), then snake_case fallback
     let { data, error } = await this.supabase
-      .from('workout_templates')
+      .from('workoutTemplates')
       .select('*')
       .eq('user_id', userId);
-
-    // If camelCase fails, try snake_case
-    if (error && error.code === 'PGRST205') {
-      const fallback = await this.supabase
-        .from('workout_templates')
-        .select('*')
-        .eq('user_id', userId);
-      data = fallback.data;
-      error = fallback.error;
-    }
 
     if (error) {
       console.error('Error fetching workout templates:', error);
@@ -578,23 +567,11 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
-    // Try camelCase first (what PostgREST expects), then snake_case fallback
     let { data, error } = await this.supabase
-      .from('workout_templates')
+      .from('workoutTemplates')
       .insert(template)
       .select()
       .single();
-
-    // If camelCase fails, try snake_case
-    if (error && error.code === 'PGRST205') {
-      const fallback = await this.supabase
-        .from('workout_templates')
-        .insert(template)
-        .select()
-        .single();
-      data = fallback.data;
-      error = fallback.error;
-    }
 
     if (error) throw error;
     return data as WorkoutTemplate;
@@ -602,7 +579,7 @@ export class SupabaseStorage implements IStorage {
 
   async updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined> {
     const { data, error } = await this.supabase
-      .from('workout_templates')
+      .from('workoutTemplates')
       .update(template)
       .eq('id', id)
       .select()
@@ -615,23 +592,11 @@ export class SupabaseStorage implements IStorage {
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
     // First, check if the template exists and verify ownership
     if (userId) {
-      // Try camelCase first (what PostgREST expects), then snake_case fallback
       let { data: templateCheck, error: checkError } = await this.supabase
-        .from('workout_templates')
+        .from('workoutTemplates')
         .select('id, user_id, name')
         .eq('id', id)
         .single();
-
-      // If camelCase fails, try snake_case
-      if (checkError && checkError.code === 'PGRST205') {
-        const fallback = await this.supabase
-          .from('workout_templates')
-          .select('id, user_id, name')
-          .eq('id', id)
-          .single();
-        templateCheck = fallback.data;
-        checkError = fallback.error;
-      }
         
       if (checkError || !templateCheck) {
         return false;
@@ -643,28 +608,17 @@ export class SupabaseStorage implements IStorage {
     }
 
     // Before deleting the template, remove references from workout logs to avoid foreign key constraint
-    // Try camelCase first (what PostgREST expects), then snake_case fallback
     let { error: updateError } = await this.supabase
-      .from('workout_logs')
+      .from('workoutLogs')
       .update({ template_id: null })
       .eq('template_id', id);
-
-    // If camelCase fails, try snake_case
-    if (updateError && updateError.code === 'PGRST205') {
-      const fallback = await this.supabase
-        .from('workout_logs')
-        .update({ template_id: null })
-        .eq('template_id', id);
-      updateError = fallback.error;
-    }
 
     if (updateError) {
       return false;
     }
 
-    // Try camelCase first (what PostgREST expects), then snake_case fallback
     let query = this.supabase
-      .from('workout_templates')
+      .from('workoutTemplates')
       .delete()
       .eq('id', id);
 
@@ -930,7 +884,7 @@ export class SupabaseStorage implements IStorage {
 
   async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
     const { data, error } = await this.supabase
-      .from('workout_logs')
+      .from('workoutLogs')
       .select('*')
       .eq('id', id)
       .single();
@@ -941,7 +895,7 @@ export class SupabaseStorage implements IStorage {
 
   async createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog> {
     const { data, error } = await this.supabase
-      .from('workout_logs')
+      .from('workoutLogs')
       .insert(log)
       .select()
       .single();
@@ -952,7 +906,7 @@ export class SupabaseStorage implements IStorage {
 
   async updateWorkoutLog(id: string, log: Partial<InsertWorkoutLog>): Promise<WorkoutLog | undefined> {
     const { data, error } = await this.supabase
-      .from('workout_logs')
+      .from('workoutLogs')
       .update(log)
       .eq('id', id)
       .select()
@@ -964,7 +918,7 @@ export class SupabaseStorage implements IStorage {
 
   async deleteWorkoutLog(id: string): Promise<boolean> {
     const { error } = await this.supabase
-      .from('workout_logs')
+      .from('workoutLogs')
       .delete()
       .eq('id', id);
 
@@ -975,7 +929,7 @@ export class SupabaseStorage implements IStorage {
     if (!userId) return [];
 
     const { data, error } = await this.supabase
-      .from('workout_logs')
+      .from('workoutLogs')
       .select('*')
       .eq('user_id', userId)
       .order('start_time', { ascending: false });
