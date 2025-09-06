@@ -757,37 +757,97 @@ export class SupabaseStorage implements IStorage {
       if (userId) {
         // Check if the exercise belongs to a template owned by the user
         // Try camelCase first (what PostgREST expects), then snake_case fallback
+        console.log('🔍 DEBUG - Starting ownership check...');
+        console.log('🔍 DEBUG - Exercise ID:', id);
+        console.log('🔍 DEBUG - User ID:', userId);
+        
+        // First, let's check what tables exist and their relationships
+        console.log('🔍 DEBUG - Checking available tables and columns...');
+        
         let { data: ownership, error: ownershipError } = await this.supabase
           .from('workoutTemplateExercises')
           .select(`
             id,
             templateId,
-            workout_templates!inner(
+            workoutTemplates!inner(
               id,
               user_id
             )
           `)
           .eq('id', id)
-          .eq('workout_templates.user_id', userId)
+          .eq('workoutTemplates.user_id', userId)
           .maybeSingle();
 
-        // If camelCase fails, try snake_case
+        console.log('🔍 DEBUG - First ownership check result:');
+        console.log('   - Data:', JSON.stringify(ownership, null, 2));
+        console.log('   - Error:', JSON.stringify(ownershipError, null, 2));
+
+        // If relationship fails, try different approaches
         if (ownershipError && (ownershipError.code === 'PGRST205' || ownershipError.code === 'PGRST200')) {
-          const fallback = await this.supabase
+          console.log('🔍 DEBUG - First attempt failed, trying alternative approaches...');
+          
+          // Try with different table name reference
+          const fallback1 = await this.supabase
             .from('workoutTemplateExercises')
             .select(`
               id,
               templateId,
-              workout_templates!inner(
+              workoutTemplates!inner(
                 id,
-                user_id
+                userId
               )
             `)
             .eq('id', id)
-            .eq('workout_templates.user_id', userId)
+            .eq('workoutTemplates.userId', userId)
             .maybeSingle();
-          ownership = fallback.data;
-          ownershipError = fallback.error;
+            
+          console.log('🔍 DEBUG - Fallback 1 (workoutTemplates.userId):');
+          console.log('   - Data:', JSON.stringify(fallback1.data, null, 2));
+          console.log('   - Error:', JSON.stringify(fallback1.error, null, 2));
+
+          if (fallback1.error) {
+            // Try with manual join approach
+            console.log('🔍 DEBUG - Trying manual join approach...');
+            const exerciseData = await this.supabase
+              .from('workoutTemplateExercises')
+              .select('id, templateId')
+              .eq('id', id)
+              .maybeSingle();
+              
+            console.log('🔍 DEBUG - Exercise data:', JSON.stringify(exerciseData, null, 2));
+            
+            if (exerciseData.data?.templateId) {
+              const templateData = await this.supabase
+                .from('workoutTemplates')
+                .select('id, userId')
+                .eq('id', exerciseData.data.templateId)
+                .eq('userId', userId)
+                .maybeSingle();
+                
+              console.log('🔍 DEBUG - Template data:', JSON.stringify(templateData, null, 2));
+              
+              if (templateData.data) {
+                ownership = {
+                  id: exerciseData.data.id,
+                  templateId: exerciseData.data.templateId,
+                  workoutTemplates: templateData.data
+                };
+                ownershipError = null;
+                console.log('✅ DEBUG - Manual join successful');
+              } else {
+                ownershipError = templateData.error;
+                console.log('❌ DEBUG - Manual join failed at template level');
+              }
+            } else {
+              console.log('❌ DEBUG - Manual join failed - no exercise found or no templateId');
+            }
+          } else {
+            ownership = fallback1.data;
+            ownershipError = fallback1.error;
+            console.log('✅ DEBUG - Fallback 1 successful');
+          }
+        } else if (!ownershipError) {
+          console.log('✅ DEBUG - First ownership check successful');
         }
 
         if (ownershipError) {
@@ -820,32 +880,68 @@ export class SupabaseStorage implements IStorage {
         }
       }
       
-      // Map camelCase to snake_case for database (simple and clean)
+      // Map updates for database
+      console.log('🔍 DEBUG - Processing updates...');
+      console.log('🔍 DEBUG - Raw updates received:', JSON.stringify(updates, null, 2));
+      
       const dbUpdate: any = {};
       Object.keys(updates).forEach(key => {
         const value = (updates as any)[key];
+        console.log(`🔍 DEBUG - Processing field: ${key} = ${value}`);
+        
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.restDurationSeconds = value; // Use camelCase for Supabase
+            dbUpdate.restDurationSeconds = value;
+            console.log(`   ✅ Mapped restDurationSeconds: ${value}`);
             break;
           case 'exerciseId':
             dbUpdate.exerciseId = value;
+            console.log(`   ✅ Mapped exerciseId: ${value}`);
             break;
           case 'templateId':
             dbUpdate.templateId = value;
+            console.log(`   ✅ Mapped templateId: ${value}`);
+            break;
+          case 'sets':
+            dbUpdate.sets = value;
+            console.log(`   ✅ Mapped sets: ${value}`);
+            break;
+          case 'reps':
+            dbUpdate.reps = value;
+            console.log(`   ✅ Mapped reps: ${value}`);
+            break;
+          case 'weight':
+            dbUpdate.weight = value;
+            console.log(`   ✅ Mapped weight: ${value}`);
+            break;
+          case 'order':
+            dbUpdate.order = value;
+            console.log(`   ✅ Mapped order: ${value}`);
             break;
           default:
             dbUpdate[key] = value;
+            console.log(`   ✅ Direct mapping: ${key} = ${value}`);
         }
       });
 
-      // Now update the exercise - use the correct table name from schema
+      console.log('🔍 DEBUG - Final dbUpdate object:', JSON.stringify(dbUpdate, null, 2));
+
+      // Now update the exercise
+      console.log('🔍 DEBUG - Executing Supabase update...');
+      console.log('🔍 DEBUG - Table: workoutTemplateExercises');
+      console.log('🔍 DEBUG - Where: id =', id);
+      console.log('🔍 DEBUG - Update data:', JSON.stringify(dbUpdate, null, 2));
+      
       const { data, error } = await this.supabase
         .from('workoutTemplateExercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
+
+      console.log('🔍 DEBUG - Supabase update result:');
+      console.log('   - Data:', JSON.stringify(data, null, 2));
+      console.log('   - Error:', JSON.stringify(error, null, 2));
 
       if (error) {
         console.error(`❌ Supabase error updating template exercise:`, error);
