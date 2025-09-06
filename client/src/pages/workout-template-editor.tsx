@@ -130,8 +130,13 @@ export default function WorkoutTemplateEditor() {
         if (!old) return old;
         return old.map((ex: any) => {
           if (ex.id === exerciseId) {
-            // Update with the new values directly
-            return { ...ex, ...updates };
+            // Preserve exercise info and update only the changed fields
+            return { 
+              ...ex, 
+              ...updates,
+              // Ensure exercise object is preserved (contains name, etc.)
+              exercise: ex.exercise 
+            };
           }
           return ex;
         });
@@ -141,7 +146,12 @@ export default function WorkoutTemplateEditor() {
       setReorderedExercises(prev => 
         prev.map(ex => 
           ex.id === exerciseId 
-            ? { ...ex, ...updates }
+            ? { 
+                ...ex, 
+                ...updates,
+                // Preserve exercise object (contains name, etc.)
+                exercise: ex.exercise 
+              }
             : ex
         )
       );
@@ -155,8 +165,13 @@ export default function WorkoutTemplateEditor() {
         if (!old) return old;
         return old.map((ex: any) => {
           if (ex.id === exerciseId) {
-            // Use server response data if available, otherwise merge updates
-            return data || { ...ex, ...updates };
+            // Use server response data if available, otherwise merge updates preserving exercise info
+            return data || { 
+              ...ex, 
+              ...updates,
+              // Preserve exercise object
+              exercise: ex.exercise 
+            };
           }
           return ex;
         });
@@ -166,7 +181,12 @@ export default function WorkoutTemplateEditor() {
       setReorderedExercises(prev => 
         prev.map(ex => 
           ex.id === exerciseId 
-            ? (data || { ...ex, ...updates })
+            ? (data || { 
+                ...ex, 
+                ...updates,
+                // Preserve exercise object
+                exercise: ex.exercise 
+              })
             : ex
         )
       );
