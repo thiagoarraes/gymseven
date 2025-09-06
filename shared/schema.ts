@@ -26,7 +26,7 @@ export const users = pgTable("users", {
 });
 
 // Tabela para histórico de peso
-export const weightHistory = pgTable("weightHistory", {
+export const weightHistory = pgTable("weight_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   weight: real("weight").notNull(),
@@ -35,7 +35,7 @@ export const weightHistory = pgTable("weightHistory", {
 });
 
 // Tabela para objetivos pessoais
-export const userGoals = pgTable("userGoals", {
+export const userGoals = pgTable("user_goals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   type: text("type").notNull(), // weight_loss, muscle_gain, strength, endurance
@@ -48,7 +48,7 @@ export const userGoals = pgTable("userGoals", {
 });
 
 // Tabela para preferências do usuário
-export const userPreferences = pgTable("userPreferences", {
+export const userPreferences = pgTable("user_preferences", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   theme: text("theme").default("dark"), // dark, light, auto
@@ -63,7 +63,7 @@ export const userPreferences = pgTable("userPreferences", {
 });
 
 // Tabela para conquistas do usuário (sistema gamificado isolado por usuário)
-export const userAchievements = pgTable("userAchievements", {
+export const userAchievements = pgTable("user_achievements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   achievementId: text("achievement_id").notNull(), // ID da conquista (exemplo: "first_workout", "strength_milestone_100kg")
@@ -81,7 +81,7 @@ export const exercises = pgTable("exercises", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const workoutTemplates = pgTable("workoutTemplates", {
+export const workoutTemplates = pgTable("workout_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
@@ -89,7 +89,7 @@ export const workoutTemplates = pgTable("workoutTemplates", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const workoutTemplateExercises = pgTable("workoutTemplateExercises", {
+export const workoutTemplateExercises = pgTable("workout_template_exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   templateId: varchar("template_id").notNull().references(() => workoutTemplates.id, { onDelete: "cascade" }),
   exerciseId: varchar("exercise_id").notNull().references(() => exercises.id, { onDelete: "cascade" }),
@@ -100,7 +100,7 @@ export const workoutTemplateExercises = pgTable("workoutTemplateExercises", {
   order: integer("order").notNull(),
 });
 
-export const workoutLogs = pgTable("workoutLogs", {
+export const workoutLogs = pgTable("workout_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   user_id: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   templateId: varchar("template_id").references(() => workoutTemplates.id),
@@ -109,7 +109,7 @@ export const workoutLogs = pgTable("workoutLogs", {
   endTime: timestamp("end_time"),
 });
 
-export const workoutLogExercises = pgTable("workoutLogExercises", {
+export const workoutLogExercises = pgTable("workout_log_exercises", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   logId: varchar("log_id").notNull().references(() => workoutLogs.id, { onDelete: "cascade" }),
   exerciseId: varchar("exercise_id").notNull().references(() => exercises.id),
@@ -118,7 +118,7 @@ export const workoutLogExercises = pgTable("workoutLogExercises", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const workoutLogSets = pgTable("workoutLogSets", {
+export const workoutLogSets = pgTable("workout_log_sets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   logExerciseId: varchar("log_exercise_id").notNull().references(() => workoutLogExercises.id, { onDelete: "cascade" }),
   setNumber: integer("set_number").notNull(),
