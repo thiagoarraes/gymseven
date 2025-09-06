@@ -78,8 +78,6 @@ export const exercises = pgTable("exercises", {
   name: text("name").notNull(),
   muscleGroup: text("muscle_group").notNull(),
   description: text("description"),
-  imageUrl: text("image_url"),
-  videoUrl: text("video_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -137,8 +135,6 @@ export const insertExerciseSchema = createInsertSchema(exercises).omit({
 }).extend({
   // Make optional fields truly optional
   description: z.string().optional().nullable(),
-  imageUrl: z.string().optional().nullable(),
-  videoUrl: z.string().optional().nullable(),
 });
 
 export const insertWorkoutTemplateSchema = createInsertSchema(workoutTemplates).omit({
