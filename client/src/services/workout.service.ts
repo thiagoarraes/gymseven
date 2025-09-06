@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabasePromise } from '@/lib/supabase';
 import type { WorkoutTemplate, WorkoutTemplateExercise, Exercise } from '@shared/schema';
 
 interface WorkoutTemplateWithExercises extends WorkoutTemplate {
@@ -11,6 +11,7 @@ export class WorkoutService {
    * Busca todos os templates de treino do usuário
    */
   async getWorkoutTemplates(userId: string): Promise<WorkoutTemplate[]> {
+    const supabase = await supabasePromise;
     if (!supabase) {
       throw new Error('Supabase não está disponível');
     }
@@ -32,6 +33,7 @@ export class WorkoutService {
    * Busca um template específico com seus exercícios
    */
   async getWorkoutTemplateWithExercises(templateId: string, userId: string): Promise<WorkoutTemplateWithExercises | null> {
+    const supabase = await supabasePromise;
     if (!supabase) {
       throw new Error('Supabase não está disponível');
     }
@@ -92,6 +94,7 @@ export class WorkoutService {
    * Cria um novo template de treino
    */
   async createWorkoutTemplate(template: { name: string; description?: string }, userId: string): Promise<WorkoutTemplate> {
+    const supabase = await supabasePromise;
     if (!supabase) {
       throw new Error('Supabase não está disponível');
     }
@@ -116,6 +119,7 @@ export class WorkoutService {
    * Atualiza um template de treino
    */
   async updateWorkoutTemplate(templateId: string, updates: { name?: string; description?: string }, userId: string): Promise<WorkoutTemplate> {
+    const supabase = await supabasePromise;
     if (!supabase) {
       throw new Error('Supabase não está disponível');
     }
@@ -139,6 +143,7 @@ export class WorkoutService {
    * Exclui um template de treino
    */
   async deleteWorkoutTemplate(templateId: string, userId: string): Promise<void> {
+    const supabase = await supabasePromise;
     if (!supabase) {
       throw new Error('Supabase não está disponível');
     }
@@ -158,6 +163,7 @@ export class WorkoutService {
    * Cria um log de treino
    */
   async createWorkoutLog(data: { templateId: string; name: string; userId: string }): Promise<any> {
+    const supabase = await supabasePromise;
     if (!supabase) {
       throw new Error('Supabase não está disponível');
     }
