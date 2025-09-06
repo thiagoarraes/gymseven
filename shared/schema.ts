@@ -3,7 +3,7 @@ import { pgTable, text, varchar, integer, timestamp, boolean, real } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
+export const usuarios = pgTable("usuarios", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
@@ -26,18 +26,18 @@ export const users = pgTable("users", {
 });
 
 // Tabela para histórico de peso
-export const weightHistory = pgTable("weightHistory", {
+export const historicoPeso = pgTable("historicoPeso", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  weight: real("weight").notNull(),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
+  peso: real("peso").notNull(),
   date: timestamp("date").defaultNow(),
-  notes: text("notes"),
+  observacoes: text("observacoes"),
 });
 
 // Tabela para objetivos pessoais
-export const userGoals = pgTable("userGoals", {
+export const objetivosUsuario = pgTable("objetivosUsuario", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
   type: text("type").notNull(), // weight_loss, muscle_gain, strength, endurance
   targetValue: real("targetValue"),
   currentValue: real("currentValue"),
@@ -48,9 +48,9 @@ export const userGoals = pgTable("userGoals", {
 });
 
 // Tabela para preferências do usuário
-export const userPreferences = pgTable("userPreferences", {
+export const preferenciasUsuario = pgTable("preferenciasUsuario", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
   theme: text("theme").default("dark"), // dark, light, auto
   units: text("units").default("metric"), // metric, imperial
   language: text("language").default("pt-BR"),
@@ -63,64 +63,64 @@ export const userPreferences = pgTable("userPreferences", {
 });
 
 // Tabela para conquistas do usuário (sistema gamificado isolado por usuário)
-export const userAchievements = pgTable("userAchievements", {
+export const conquistasUsuario = pgTable("conquistasUsuario", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
   achievementId: text("achievementId").notNull(), // ID da conquista (exemplo: "first_workout", "strength_milestone_100kg")
   unlockedAt: timestamp("unlockedAt").defaultNow(),
   progress: integer("progress").default(0), // Progresso atual para conquistas progressivas
   isCompleted: boolean("isCompleted").default(true),
 });
 
-export const exercises = pgTable("exercises", {
+export const exercicios = pgTable("exercicios", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  muscleGroup: text("muscleGroup").notNull(),
-  description: text("description"),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
+  nome: text("nome").notNull(),
+  grupoMuscular: text("grupoMuscular").notNull(),
+  descricao: text("descricao"),
   createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export const workoutTemplates = pgTable("workoutTemplates", {
+export const modelosTreino = pgTable("modelosTreino", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  description: text("description"),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
+  nome: text("nome").notNull(),
+  descricao: text("descricao"),
   createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export const workoutTemplateExercises = pgTable("workoutTemplateExercises", {
+export const exerciciosModeloTreino = pgTable("exerciciosModeloTreino", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  templateId: varchar("templateId").notNull().references(() => workoutTemplates.id, { onDelete: "cascade" }),
-  exerciseId: varchar("exerciseId").notNull().references(() => exercises.id, { onDelete: "cascade" }),
-  sets: integer("sets").notNull(),
-  reps: text("reps").notNull(),
+  modeloId: varchar("modeloId").notNull().references(() => modelosTreino.id, { onDelete: "cascade" }),
+  exercicioId: varchar("exercicioId").notNull().references(() => exercicios.id, { onDelete: "cascade" }),
+  series: integer("series").notNull(),
+  repeticoes: text("repeticoes").notNull(),
   weight: real("weight"),
   restDurationSeconds: integer("restDurationSeconds").default(90),
   order: integer("order").notNull(),
 });
 
-export const workoutLogs = pgTable("workoutLogs", {
+export const registrosTreino = pgTable("registrosTreino", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  templateId: varchar("templateId").references(() => workoutTemplates.id),
-  name: text("name").notNull(),
+  usuarioId: varchar("usuarioId").notNull().references(() => usuarios.id, { onDelete: "cascade" }),
+  modeloId: varchar("modeloId").references(() => modelosTreino.id),
+  nome: text("nome").notNull(),
   startTime: timestamp("startTime").notNull(),
   endTime: timestamp("endTime"),
 });
 
-export const workoutLogExercises = pgTable("workoutLogExercises", {
+export const exerciciosRegistroTreino = pgTable("exerciciosRegistroTreino", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  logId: varchar("logId").notNull().references(() => workoutLogs.id, { onDelete: "cascade" }),
-  exerciseId: varchar("exerciseId").notNull().references(() => exercises.id),
-  exerciseName: text("exerciseName").notNull(),
+  registroId: varchar("registroId").notNull().references(() => registrosTreino.id, { onDelete: "cascade" }),
+  exercicioId: varchar("exercicioId").notNull().references(() => exercicios.id),
+  nomeExercicio: text("nomeExercicio").notNull(),
   order: integer("order").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export const workoutLogSets = pgTable("workoutLogSets", {
+export const seriesRegistroTreino = pgTable("seriesRegistroTreino", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  logExerciseId: varchar("logExerciseId").notNull().references(() => workoutLogExercises.id, { onDelete: "cascade" }),
+  exercicioRegistroId: varchar("exercicioRegistroId").notNull().references(() => exerciciosRegistroTreino.id, { onDelete: "cascade" }),
   setNumber: integer("setNumber").notNull(),
   reps: integer("reps"),
   weight: real("weight"),
@@ -128,66 +128,66 @@ export const workoutLogSets = pgTable("workoutLogSets", {
 });
 
 // Insert schemas
-export const insertExerciseSchema = createInsertSchema(exercises).omit({
+export const insertExerciseSchema = createInsertSchema(exercicios).omit({
   id: true,
-  userId: true, // Server will add this automatically
+  usuarioId: true, // Server will add this automatically
   createdAt: true,
 }).extend({
   // Make optional fields truly optional
   description: z.string().optional().nullable(),
 });
 
-export const insertWorkoutTemplateSchema = createInsertSchema(workoutTemplates).omit({
+export const insertWorkoutTemplateSchema = createInsertSchema(modelosTreino).omit({
   id: true,
   createdAt: true,
 }).extend({
   description: z.string().optional().nullable(),
 });
 
-export const insertWorkoutTemplateExerciseSchema = createInsertSchema(workoutTemplateExercises).omit({
+export const insertWorkoutTemplateExerciseSchema = createInsertSchema(exerciciosModeloTreino).omit({
   id: true,
 }).extend({
   // Allow numbers for reps, but convert to string for storage
   reps: z.union([z.string(), z.number()]).transform((val) => String(val)),
 });
 
-export const insertWorkoutLogSchema = createInsertSchema(workoutLogs).omit({
+export const insertWorkoutLogSchema = createInsertSchema(registrosTreino).omit({
   id: true,
 }).extend({
   startTime: z.union([z.date(), z.string()]).transform((val) => new Date(val)),
   endTime: z.union([z.date(), z.string()]).transform((val) => new Date(val)).optional(),
 });
 
-export const insertWorkoutLogExerciseSchema = createInsertSchema(workoutLogExercises).omit({
+export const insertWorkoutLogExerciseSchema = createInsertSchema(exerciciosRegistroTreino).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertWorkoutLogSetSchema = createInsertSchema(workoutLogSets).omit({
+export const insertWorkoutLogSetSchema = createInsertSchema(seriesRegistroTreino).omit({
   id: true,
 });
 
 // Types
 export type InsertExercise = z.infer<typeof insertExerciseSchema>;
-export type Exercise = typeof exercises.$inferSelect;
+export type Exercise = typeof exercicios.$inferSelect;
 
 export type InsertWorkoutTemplate = z.infer<typeof insertWorkoutTemplateSchema>;
-export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
+export type WorkoutTemplate = typeof modelosTreino.$inferSelect;
 
 export type InsertWorkoutTemplateExercise = z.infer<typeof insertWorkoutTemplateExerciseSchema>;
-export type WorkoutTemplateExercise = typeof workoutTemplateExercises.$inferSelect;
+export type WorkoutTemplateExercise = typeof exerciciosModeloTreino.$inferSelect;
 
 export type InsertWorkoutLog = z.infer<typeof insertWorkoutLogSchema>;
-export type WorkoutLog = typeof workoutLogs.$inferSelect;
+export type WorkoutLog = typeof registrosTreino.$inferSelect;
 
 export type InsertWorkoutLogExercise = z.infer<typeof insertWorkoutLogExerciseSchema>;
-export type WorkoutLogExercise = typeof workoutLogExercises.$inferSelect;
+export type WorkoutLogExercise = typeof exerciciosRegistroTreino.$inferSelect;
 
 export type InsertWorkoutLogSet = z.infer<typeof insertWorkoutLogSetSchema>;
-export type WorkoutLogSet = typeof workoutLogSets.$inferSelect;
+export type WorkoutLogSet = typeof seriesRegistroTreino.$inferSelect;
 
 // User schemas
-export const insertUserSchema = createInsertSchema(users).omit({
+export const insertUserSchema = createInsertSchema(usuarios).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -249,7 +249,7 @@ export const changePasswordSchema = z.object({
 });
 
 // Weight History schemas
-export const insertWeightHistorySchema = createInsertSchema(weightHistory).omit({
+export const insertWeightHistorySchema = createInsertSchema(historicoPeso).omit({
   id: true,
 }).extend({
   weight: z.number().min(30).max(300),
@@ -257,7 +257,7 @@ export const insertWeightHistorySchema = createInsertSchema(weightHistory).omit(
 });
 
 // User Goals schemas  
-export const insertUserGoalSchema = createInsertSchema(userGoals).omit({
+export const insertUserGoalSchema = createInsertSchema(objetivosUsuario).omit({
   id: true,
   createdAt: true,
 }).extend({
@@ -267,39 +267,39 @@ export const insertUserGoalSchema = createInsertSchema(userGoals).omit({
 });
 
 // User Preferences schemas
-export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
+export const insertUserPreferencesSchema = createInsertSchema(preferenciasUsuario).omit({
   id: true,
 });
 
-export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ userId: true });
+export const updateUserPreferencesSchema = insertUserPreferencesSchema.partial().omit({ usuarioId: true });
 
 // User Achievements schemas
-export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+export const insertUserAchievementSchema = createInsertSchema(conquistasUsuario).omit({
   id: true,
   unlockedAt: true,
 });
 
-export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ userId: true });
+export const updateUserAchievementSchema = insertUserAchievementSchema.partial().omit({ usuarioId: true });
 
 // Types
-export type User = typeof users.$inferSelect;
+export type User = typeof usuarios.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
 export type LoginUser = z.infer<typeof loginSchema>;
 export type RegisterUser = z.infer<typeof registerSchema>;
 export type ChangePassword = z.infer<typeof changePasswordSchema>;
 
-export type WeightHistory = typeof weightHistory.$inferSelect;
+export type WeightHistory = typeof historicoPeso.$inferSelect;
 export type InsertWeightHistory = z.infer<typeof insertWeightHistorySchema>;
 
-export type UserGoal = typeof userGoals.$inferSelect;
+export type UserGoal = typeof objetivosUsuario.$inferSelect;
 export type InsertUserGoal = z.infer<typeof insertUserGoalSchema>;
 
-export type UserPreferences = typeof userPreferences.$inferSelect;
+export type UserPreferences = typeof preferenciasUsuario.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UpdateUserPreferences = z.infer<typeof updateUserPreferencesSchema>;
 
-export type UserAchievement = typeof userAchievements.$inferSelect;
+export type UserAchievement = typeof conquistasUsuario.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type UpdateUserAchievement = z.infer<typeof updateUserAchievementSchema>;
 
