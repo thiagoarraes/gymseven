@@ -9,9 +9,9 @@ import {
   type UserGoal, type InsertUserGoal,
   type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences,
   type UserAchievement, type InsertUserAchievement, type UpdateUserAchievement,
-  users, exercises, workoutTemplates, workoutTemplateExercises,
-  workoutLogs, workoutLogExercises, workoutLogSets,
-  weightHistory, userGoals, userPreferences, userAchievements
+  usuarios, exercicios, modelosTreino, exerciciosModeloTreino,
+  registrosTreino, exerciciosRegistroTreino, seriesRegistroTreino,
+  historicoPeso, objetivosUsuario, preferenciasUsuario, conquistasUsuario
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -40,42 +40,42 @@ export class PostgreSQLStorage implements IStorage {
 
   // Auth & Users
   async getUser(id: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.id, id));
+    const result = await this.db.select().from(usuarios).where(eq(usuarios.id, id));
     return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.username, username));
+    const result = await this.db.select().from(usuarios).where(eq(usuarios.username, username));
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.email, email));
+    const result = await this.db.select().from(usuarios).where(eq(usuarios.email, email));
     return result[0];
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const result = await this.db.insert(users).values(user).returning();
+    const result = await this.db.insert(usuarios).values(user).returning();
     return result[0];
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    const result = await this.db.update(users).set(updates).where(eq(users.id, id)).returning();
+    const result = await this.db.update(usuarios).set(updates).where(eq(usuarios.id, id)).returning();
     return result[0];
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    const result = await this.db.delete(users).where(eq(users.id, id));
+    const result = await this.db.delete(usuarios).where(eq(usuarios.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   async updateLastLogin(id: string): Promise<void> {
-    await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, id));
+    await this.db.update(usuarios).set({ lastLoginAt: new Date() }).where(eq(usuarios.id, id));
   }
 
   // Weight History
   async getWeightHistory(userId: string, limit?: number): Promise<WeightHistory[]> {
-    let query = this.db.select().from(weightHistory).where(eq(weightHistory.userId, userId)).orderBy(desc(weightHistory.date));
+    let query = this.db.select().from(historicoPeso).where(eq(historicoPeso.usuarioId, userId)).orderBy(desc(historicoPeso.date));
     if (limit) {
       query = query.limit(limit) as any;
     }
@@ -83,223 +83,223 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async addWeightEntry(entry: InsertWeightHistory): Promise<WeightHistory> {
-    const result = await this.db.insert(weightHistory).values(entry).returning();
+    const result = await this.db.insert(historicoPeso).values(entry).returning();
     return result[0];
   }
 
   async updateWeightEntry(id: string, updates: Partial<InsertWeightHistory>): Promise<WeightHistory | undefined> {
-    const result = await this.db.update(weightHistory).set(updates).where(eq(weightHistory.id, id)).returning();
+    const result = await this.db.update(historicoPeso).set(updates).where(eq(historicoPeso.id, id)).returning();
     return result[0];
   }
 
   async deleteWeightEntry(id: string): Promise<boolean> {
-    const result = await this.db.delete(weightHistory).where(eq(weightHistory.id, id));
+    const result = await this.db.delete(historicoPeso).where(eq(historicoPeso.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   // User Goals
   async getUserGoals(userId: string): Promise<UserGoal[]> {
-    return await this.db.select().from(userGoals).where(eq(userGoals.userId, userId));
+    return await this.db.select().from(objetivosUsuario).where(eq(objetivosUsuario.usuarioId, userId));
   }
 
   async createUserGoal(goal: InsertUserGoal): Promise<UserGoal> {
-    const result = await this.db.insert(userGoals).values(goal).returning();
+    const result = await this.db.insert(objetivosUsuario).values(goal).returning();
     return result[0];
   }
 
   async updateUserGoal(id: string, updates: Partial<InsertUserGoal>): Promise<UserGoal | undefined> {
-    const result = await this.db.update(userGoals).set(updates).where(eq(userGoals.id, id)).returning();
+    const result = await this.db.update(objetivosUsuario).set(updates).where(eq(objetivosUsuario.id, id)).returning();
     return result[0];
   }
 
   async deleteUserGoal(id: string): Promise<boolean> {
-    const result = await this.db.delete(userGoals).where(eq(userGoals.id, id));
+    const result = await this.db.delete(objetivosUsuario).where(eq(objetivosUsuario.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   // User Preferences
   async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
-    const result = await this.db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
+    const result = await this.db.select().from(preferenciasUsuario).where(eq(preferenciasUsuario.usuarioId, userId));
     return result[0];
   }
 
   async createUserPreferences(prefs: InsertUserPreferences): Promise<UserPreferences> {
-    const result = await this.db.insert(userPreferences).values(prefs).returning();
+    const result = await this.db.insert(preferenciasUsuario).values(prefs).returning();
     return result[0];
   }
 
   async updateUserPreferences(userId: string, updates: UpdateUserPreferences): Promise<UserPreferences | undefined> {
-    const result = await this.db.update(userPreferences).set(updates).where(eq(userPreferences.userId, userId)).returning();
+    const result = await this.db.update(preferenciasUsuario).set(updates).where(eq(preferenciasUsuario.usuarioId, userId)).returning();
     return result[0];
   }
 
   // User Achievements
   async getUserAchievements(userId: string): Promise<UserAchievement[]> {
-    return await this.db.select().from(userAchievements).where(eq(userAchievements.user_id, userId));
+    return await this.db.select().from(conquistasUsuario).where(eq(conquistasUsuario.usuarioId, userId));
   }
 
   async createUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement> {
-    const result = await this.db.insert(userAchievements).values(achievement).returning();
+    const result = await this.db.insert(conquistasUsuario).values(achievement).returning();
     return result[0];
   }
 
   async updateUserAchievement(id: string, updates: UpdateUserAchievement): Promise<UserAchievement | undefined> {
-    const result = await this.db.update(userAchievements).set(updates).where(eq(userAchievements.id, id)).returning();
+    const result = await this.db.update(conquistasUsuario).set(updates).where(eq(conquistasUsuario.id, id)).returning();
     return result[0];
   }
 
   async deleteUserAchievement(id: string): Promise<boolean> {
-    const result = await this.db.delete(userAchievements).where(eq(userAchievements.id, id));
+    const result = await this.db.delete(conquistasUsuario).where(eq(conquistasUsuario.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Exercises
   async getAllExercises(): Promise<Exercise[]> {
-    return await this.db.select().from(exercises);
+    return await this.db.select().from(exercicios);
   }
 
   async getExercises(userId?: string): Promise<Exercise[]> {
     if (userId) {
-      return await this.db.select().from(exercises).where(eq(exercises.user_id, userId));
+      return await this.db.select().from(exercicios).where(eq(exercicios.usuarioId, userId));
     }
-    return await this.db.select().from(exercises);
+    return await this.db.select().from(exercicios);
   }
 
   async getExercise(id: string): Promise<Exercise | undefined> {
-    const result = await this.db.select().from(exercises).where(eq(exercises.id, id));
+    const result = await this.db.select().from(exercicios).where(eq(exercicios.id, id));
     return result[0];
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
-    const result = await this.db.insert(exercises).values({
+    const result = await this.db.insert(exercicios).values({
       ...exercise,
-      user_id: userId
+      usuarioId: userId
     }).returning();
     return result[0];
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
-    let whereCondition = eq(exercises.id, id);
+    let whereCondition = eq(exercicios.id, id);
     if (userId) {
-      whereCondition = and(whereCondition, eq(exercises.user_id, userId)) as any;
+      whereCondition = and(whereCondition, eq(exercicios.usuarioId, userId)) as any;
     }
-    const result = await this.db.update(exercises).set(exercise).where(whereCondition).returning();
+    const result = await this.db.update(exercicios).set(exercise).where(whereCondition).returning();
     return result[0];
   }
 
   async deleteExercise(id: string): Promise<boolean> {
-    const result = await this.db.delete(exercises).where(eq(exercises.id, id));
+    const result = await this.db.delete(exercicios).where(eq(exercicios.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   async getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]> {
-    let whereCondition = eq(exercises.muscleGroup, muscleGroup);
+    let whereCondition = eq(exercicios.grupoMuscular, muscleGroup);
     if (userId) {
-      whereCondition = and(whereCondition, eq(exercises.user_id, userId)) as any;
+      whereCondition = and(whereCondition, eq(exercicios.usuarioId, userId)) as any;
     }
-    return await this.db.select().from(exercises).where(whereCondition);
+    return await this.db.select().from(exercicios).where(whereCondition);
   }
 
   // Workout Templates
   async getAllWorkoutTemplates(): Promise<WorkoutTemplate[]> {
-    return await this.db.select().from(workoutTemplates);
+    return await this.db.select().from(modelosTreino);
   }
 
   async getWorkoutTemplates(userId?: string): Promise<WorkoutTemplate[]> {
     if (userId) {
-      return await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.user_id, userId));
+      return await this.db.select().from(modelosTreino).where(eq(modelosTreino.usuarioId, userId));
     }
-    return await this.db.select().from(workoutTemplates);
+    return await this.db.select().from(modelosTreino);
   }
 
   async getWorkoutTemplate(id: string): Promise<WorkoutTemplate | undefined> {
-    const result = await this.db.select().from(workoutTemplates).where(eq(workoutTemplates.id, id));
+    const result = await this.db.select().from(modelosTreino).where(eq(modelosTreino.id, id));
     return result[0];
   }
 
   async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
-    const result = await this.db.insert(workoutTemplates).values(template).returning();
+    const result = await this.db.insert(modelosTreino).values(template).returning();
     return result[0];
   }
 
   async updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined> {
-    const result = await this.db.update(workoutTemplates).set(template).where(eq(workoutTemplates.id, id)).returning();
+    const result = await this.db.update(modelosTreino).set(template).where(eq(modelosTreino.id, id)).returning();
     return result[0];
   }
 
   async deleteWorkoutTemplate(id: string, userId?: string): Promise<boolean> {
-    let whereCondition = eq(workoutTemplates.id, id);
+    let whereCondition = eq(modelosTreino.id, id);
     if (userId) {
-      whereCondition = and(whereCondition, eq(workoutTemplates.user_id, userId)) as any;
+      whereCondition = and(whereCondition, eq(modelosTreino.usuarioId, userId)) as any;
     }
-    const result = await this.db.delete(workoutTemplates).where(whereCondition);
+    const result = await this.db.delete(modelosTreino).where(whereCondition);
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Workout Template Exercises
-  async getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
+  async getWorkoutTemplateExercises(modeloId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
     return await this.db
       .select()
-      .from(workoutTemplateExercises)
-      .leftJoin(exercises, eq(workoutTemplateExercises.exerciseId, exercises.id))
-      .where(eq(workoutTemplateExercises.templateId, templateId)) as any;
+      .from(exerciciosModeloTreino)
+      .leftJoin(exercicios, eq(exerciciosModeloTreino.exercicioId, exercicios.id))
+      .where(eq(exerciciosModeloTreino.modeloId, modeloId)) as any;
   }
 
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
-    const result = await this.db.insert(workoutTemplateExercises).values(exercise).returning();
+    const result = await this.db.insert(exerciciosModeloTreino).values(exercise).returning();
     return result[0];
   }
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>, userId?: string): Promise<WorkoutTemplateExercise | undefined> {
-    const result = await this.db.update(workoutTemplateExercises).set(updates).where(eq(workoutTemplateExercises.id, id)).returning();
+    const result = await this.db.update(exerciciosModeloTreino).set(updates).where(eq(exerciciosModeloTreino.id, id)).returning();
     return result[0];
   }
 
   async deleteWorkoutTemplateExercise(id: string, userId?: string): Promise<boolean> {
-    const result = await this.db.delete(workoutTemplateExercises).where(eq(workoutTemplateExercises.id, id));
+    const result = await this.db.delete(exerciciosModeloTreino).where(eq(exerciciosModeloTreino.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
-  async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {
-    const result = await this.db.delete(workoutTemplateExercises)
-      .where(and(eq(workoutTemplateExercises.templateId, templateId), eq(workoutTemplateExercises.exerciseId, exerciseId)));
+  async removeExerciseFromTemplate(modeloId: string, exercicioId: string): Promise<boolean> {
+    const result = await this.db.delete(exerciciosModeloTreino)
+      .where(and(eq(exerciciosModeloTreino.modeloId, modeloId), eq(exerciciosModeloTreino.exercicioId, exercicioId)));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Workout Logs
   async getAllWorkoutLogs(): Promise<WorkoutLog[]> {
-    return await this.db.select().from(workoutLogs);
+    return await this.db.select().from(registrosTreino);
   }
 
   async getWorkoutLogs(userId?: string): Promise<WorkoutLog[]> {
     if (userId) {
-      return await this.db.select().from(workoutLogs).where(eq(workoutLogs.user_id, userId));
+      return await this.db.select().from(registrosTreino).where(eq(registrosTreino.usuarioId, userId));
     }
-    return await this.db.select().from(workoutLogs);
+    return await this.db.select().from(registrosTreino);
   }
 
   async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
-    const result = await this.db.select().from(workoutLogs).where(eq(workoutLogs.id, id));
+    const result = await this.db.select().from(registrosTreino).where(eq(registrosTreino.id, id));
     return result[0];
   }
 
   async createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog> {
-    const result = await this.db.insert(workoutLogs).values(log).returning();
+    const result = await this.db.insert(registrosTreino).values(log).returning();
     return result[0];
   }
 
   async updateWorkoutLog(id: string, log: Partial<InsertWorkoutLog>): Promise<WorkoutLog | undefined> {
-    const result = await this.db.update(workoutLogs).set(log).where(eq(workoutLogs.id, id)).returning();
+    const result = await this.db.update(registrosTreino).set(log).where(eq(registrosTreino.id, id)).returning();
     return result[0];
   }
 
   async deleteWorkoutLog(id: string): Promise<boolean> {
-    const result = await this.db.delete(workoutLogs).where(eq(workoutLogs.id, id));
+    const result = await this.db.delete(registrosTreino).where(eq(registrosTreino.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   async getRecentWorkoutLogs(limit?: number): Promise<WorkoutLog[]> {
-    let query = this.db.select().from(workoutLogs).orderBy(desc(workoutLogs.startTime));
+    let query = this.db.select().from(registrosTreino).orderBy(desc(registrosTreino.startTime));
     if (limit) {
       query = query.limit(limit) as any;
     }
@@ -308,16 +308,16 @@ export class PostgreSQLStorage implements IStorage {
 
   // Workout Log Sets
   async getWorkoutLogSets(logId: string): Promise<WorkoutLogSet[]> {
-    return await this.db.select().from(workoutLogSets).where(eq(workoutLogSets.logExerciseId, logId));
+    return await this.db.select().from(seriesRegistroTreino).where(eq(seriesRegistroTreino.exercicioRegistroId, logId));
   }
 
   async createWorkoutLogSet(set: InsertWorkoutLogSet): Promise<WorkoutLogSet> {
-    const result = await this.db.insert(workoutLogSets).values(set).returning();
+    const result = await this.db.insert(seriesRegistroTreino).values(set).returning();
     return result[0];
   }
 
   async updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined> {
-    const result = await this.db.update(workoutLogSets).set(set).where(eq(workoutLogSets.id, id)).returning();
+    const result = await this.db.update(seriesRegistroTreino).set(set).where(eq(seriesRegistroTreino.id, id)).returning();
     return result[0];
   }
 }
