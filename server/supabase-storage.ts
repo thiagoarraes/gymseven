@@ -454,6 +454,23 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
+    console.log('🏋️ [DEBUG] === EXERCISE CREATION START ===');
+    console.log('🏋️ [DEBUG] Input exercise data:', JSON.stringify(exercise, null, 2));
+    console.log('🏋️ [DEBUG] User ID:', userId);
+    
+    // Check available columns in exercises table
+    try {
+      console.log('🔍 [DEBUG] Checking table schema...');
+      const { data: schemaData, error: schemaError } = await this.supabase
+        .from('exercises')
+        .select('*')
+        .limit(1);
+      
+      console.log('🔍 [DEBUG] Schema check result:', { data: schemaData, error: schemaError });
+    } catch (e) {
+      console.log('🔍 [DEBUG] Schema check failed:', e);
+    }
+    
     console.log('🏋️ [SUPABASE] Creating exercise with simplified fields...');
     
     // Only use fields that definitely exist in the database
@@ -464,7 +481,9 @@ export class SupabaseStorage implements IStorage {
       description: exercise.description || null
     };
 
-    console.log('🎯 [SUPABASE] Inserting exercise:', dbExercise);
+    console.log('🎯 [DEBUG] Final data to insert:', JSON.stringify(dbExercise, null, 2));
+    console.log('🎯 [DEBUG] Table: exercises');
+    console.log('🎯 [DEBUG] Operation: INSERT');
 
     const { data, error } = await this.supabase
       .from('exercises')
@@ -472,12 +491,21 @@ export class SupabaseStorage implements IStorage {
       .select('id, user_id, name, muscle_group, description, created_at')
       .single();
 
+    console.log('📤 [DEBUG] Supabase response - data:', JSON.stringify(data, null, 2));
+    console.log('📤 [DEBUG] Supabase response - error:', JSON.stringify(error, null, 2));
+
     if (error) {
       console.error('❌ [SUPABASE] Exercise creation failed:', error);
+      console.error('❌ [DEBUG] Error details:');
+      console.error('   - Code:', error.code);
+      console.error('   - Message:', error.message);
+      console.error('   - Details:', error.details);
+      console.error('   - Hint:', error.hint);
       throw new Error(`Database error: ${error.message}`);
     }
 
     console.log('✅ [SUPABASE] Exercise created successfully:', data.id);
+    console.log('🏋️ [DEBUG] === EXERCISE CREATION END ===');
     return this.mapDbExerciseToExercise(data);
   }
 
@@ -567,13 +595,47 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
+    console.log('💪 [DEBUG] === WORKOUT TEMPLATE CREATION START ===');
+    console.log('💪 [DEBUG] Input template data:', JSON.stringify(template, null, 2));
+    
+    // Check available columns in workout_templates table
+    try {
+      console.log('🔍 [DEBUG] Checking workout_templates schema...');
+      const { data: schemaData, error: schemaError } = await this.supabase
+        .from('workout_templates')
+        .select('*')
+        .limit(1);
+      
+      console.log('🔍 [DEBUG] Workout templates schema check result:', { data: schemaData, error: schemaError });
+    } catch (e) {
+      console.log('🔍 [DEBUG] Workout templates schema check failed:', e);
+    }
+
+    console.log('🎯 [DEBUG] Final template data to insert:', JSON.stringify(template, null, 2));
+    console.log('🎯 [DEBUG] Table: workout_templates');
+    console.log('🎯 [DEBUG] Operation: INSERT');
+
     let { data, error } = await this.supabase
       .from('workout_templates')
       .insert(template)
       .select()
       .single();
 
-    if (error) throw error;
+    console.log('📤 [DEBUG] Supabase template response - data:', JSON.stringify(data, null, 2));
+    console.log('📤 [DEBUG] Supabase template response - error:', JSON.stringify(error, null, 2));
+
+    if (error) {
+      console.error('❌ [DEBUG] Workout template creation failed:', error);
+      console.error('❌ [DEBUG] Template error details:');
+      console.error('   - Code:', error.code);
+      console.error('   - Message:', error.message);
+      console.error('   - Details:', error.details);
+      console.error('   - Hint:', error.hint);
+      throw error;
+    }
+    
+    console.log('✅ [DEBUG] Workout template created successfully:', data.id);
+    console.log('💪 [DEBUG] === WORKOUT TEMPLATE CREATION END ===');
     return data as WorkoutTemplate;
   }
 
@@ -894,13 +956,47 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog> {
+    console.log('📝 [DEBUG] === WORKOUT LOG CREATION START ===');
+    console.log('📝 [DEBUG] Input log data:', JSON.stringify(log, null, 2));
+    
+    // Check available columns in workout_logs table
+    try {
+      console.log('🔍 [DEBUG] Checking workout_logs schema...');
+      const { data: schemaData, error: schemaError } = await this.supabase
+        .from('workout_logs')
+        .select('*')
+        .limit(1);
+      
+      console.log('🔍 [DEBUG] Workout logs schema check result:', { data: schemaData, error: schemaError });
+    } catch (e) {
+      console.log('🔍 [DEBUG] Workout logs schema check failed:', e);
+    }
+
+    console.log('🎯 [DEBUG] Final log data to insert:', JSON.stringify(log, null, 2));
+    console.log('🎯 [DEBUG] Table: workout_logs');
+    console.log('🎯 [DEBUG] Operation: INSERT');
+
     const { data, error } = await this.supabase
       .from('workout_logs')
       .insert(log)
       .select()
       .single();
 
-    if (error) throw error;
+    console.log('📤 [DEBUG] Supabase log response - data:', JSON.stringify(data, null, 2));
+    console.log('📤 [DEBUG] Supabase log response - error:', JSON.stringify(error, null, 2));
+
+    if (error) {
+      console.error('❌ [DEBUG] Workout log creation failed:', error);
+      console.error('❌ [DEBUG] Log error details:');
+      console.error('   - Code:', error.code);
+      console.error('   - Message:', error.message);
+      console.error('   - Details:', error.details);
+      console.error('   - Hint:', error.hint);
+      throw error;
+    }
+    
+    console.log('✅ [DEBUG] Workout log created successfully:', data.id);
+    console.log('📝 [DEBUG] === WORKOUT LOG CREATION END ===');
     return data as WorkoutLog;
   }
 
