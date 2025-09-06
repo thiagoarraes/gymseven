@@ -144,6 +144,28 @@ export default function WorkoutTemplateEditor() {
       // Return a context object with the snapshotted value
       return { previousExercises };
     },
+    onSuccess: (data, { exerciseId, updates }) => {
+      // Update cache with actual server response
+      queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
+        if (!old) return old;
+        return old.map((ex: any) => {
+          if (ex.id === exerciseId) {
+            // Use server response data if available, otherwise merge updates
+            return data || { ...ex, ...updates };
+          }
+          return ex;
+        });
+      });
+      
+      // Also update local state
+      setReorderedExercises(prev => 
+        prev.map(ex => 
+          ex.id === exerciseId 
+            ? (data || { ...ex, ...updates })
+            : ex
+        )
+      );
+    },
     onError: (err: any, variables, context) => {
       console.error('❌ Error updating exercise:', err);
       
