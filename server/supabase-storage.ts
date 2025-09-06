@@ -771,11 +771,11 @@ export class SupabaseStorage implements IStorage {
             templateId,
             workoutTemplates!inner(
               id,
-              userId
+              user_id
             )
           `)
           .eq('id', id)
-          .eq('workoutTemplates.userId', userId)
+          .eq('workoutTemplates.user_id', userId)
           .maybeSingle();
 
         console.log('🔍 DEBUG - First ownership check result:');
@@ -799,9 +799,9 @@ export class SupabaseStorage implements IStorage {
           if (exerciseData.data?.templateId) {
             const templateData = await this.supabase
               .from('workoutTemplates')
-              .select('id, userId')
+              .select('id, user_id')
               .eq('id', exerciseData.data.templateId)
-              .eq('userId', userId)
+              .eq('user_id', userId)
               .maybeSingle();
               
             console.log('🔍 DEBUG - Template ownership check:', JSON.stringify(templateData, null, 2));
