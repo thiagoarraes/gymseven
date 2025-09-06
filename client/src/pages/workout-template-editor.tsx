@@ -120,17 +120,24 @@ export default function WorkoutTemplateEditor() {
       // Snapshot the previous value
       const previousExercises = queryClient.getQueryData(["/api/workout-templates", id, "exercises"]);
       
-      // Optimistically update to the new value
+      // Optimistically update to the new value with proper field mapping
       queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
         if (!old) return old;
-        return old.map((ex: any) => 
-          ex.id === exerciseId 
-            ? { ...ex, ...updates }
-            : ex
-        );
+        return old.map((ex: any) => {
+          if (ex.id === exerciseId) {
+            // Map frontend field names to backend field names
+            const mappedUpdates = { ...updates };
+            if (mappedUpdates.restDurationSeconds !== undefined) {
+              mappedUpdates.restDuration = mappedUpdates.restDurationSeconds;
+              delete mappedUpdates.restDurationSeconds;
+            }
+            return { ...ex, ...mappedUpdates };
+          }
+          return ex;
+        });
       });
       
-      // Update local state as well
+      // Update local state with original field names for frontend
       setReorderedExercises(prev => 
         prev.map(ex => 
           ex.id === exerciseId 
@@ -737,7 +744,7 @@ export default function WorkoutTemplateEditor() {
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
-                                  const currentRest = exercise.restDurationSeconds || 90;
+                                  const currentRest = exercise.restDuration || exercise.restDurationSeconds || 90;
                                   const newRest = Math.max(30, currentRest - 15);
                                   handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                                 }}
@@ -747,7 +754,7 @@ export default function WorkoutTemplateEditor() {
                               </Button>
                               <div className="text-center flex-1">
                                 <div className="text-lg font-bold text-orange-400">
-                                  {Math.floor((exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
+                                  {Math.floor((exercise.restDuration || exercise.restDurationSeconds || 90) / 60)}:{((exercise.restDuration || exercise.restDurationSeconds || 90) % 60).toString().padStart(2, '0')}
                                 </div>
                               </div>
                               <Button
@@ -755,7 +762,7 @@ export default function WorkoutTemplateEditor() {
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
                                 onClick={() => {
-                                  const currentRest = exercise.restDurationSeconds || 90;
+                                  const currentRest = exercise.restDuration || exercise.restDurationSeconds || 90;
                                   const newRest = Math.min(300, currentRest + 15);
                                   handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
                                 }}

@@ -749,28 +749,21 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateWorkoutTemplateExercise(id: string, updates: Partial<InsertWorkoutTemplateExercise>, userId?: string): Promise<WorkoutTemplateExercise | undefined> {
-    console.log(`🔧 Attempting to update template exercise: ${id} for user: ${userId}`);
+    console.log(`🔧 Updating template exercise: ${id}`);
     console.log(`📝 Updates:`, updates);
     
     try {
       // First verify ownership if userId provided
       if (userId) {
-        console.log('🔍 DEBUG - Starting ownership check...');
-        console.log('🔍 DEBUG - Exercise ID:', id);
-        console.log('🔍 DEBUG - User ID:', userId);
-        
-        // Use manual join approach directly to avoid foreign key issues
+        // Verify ownership using manual join approach
         let ownership: any = null;
         let ownershipError: any = null;
         
-        console.log('🔍 DEBUG - Using manual join approach...');
         const exerciseData = await this.supabase
           .from('workoutTemplateExercises')
           .select('id, templateId')
           .eq('id', id)
           .maybeSingle();
-          
-        console.log('🔍 DEBUG - Exercise data:', JSON.stringify(exerciseData, null, 2));
         
         if (exerciseData.data?.templateId) {
           const templateData = await this.supabase
@@ -780,21 +773,16 @@ export class SupabaseStorage implements IStorage {
             .eq('user_id', userId)
             .maybeSingle();
             
-          console.log('🔍 DEBUG - Template ownership check:', JSON.stringify(templateData, null, 2));
-          
           if (templateData.data) {
             ownership = {
               id: exerciseData.data.id,
               templateId: exerciseData.data.templateId
             };
-            console.log('✅ DEBUG - Manual ownership verification successful');
           } else {
             ownershipError = templateData.error || { message: 'Template not owned by user' };
-            console.log('❌ DEBUG - User does not own this template');
           }
         } else {
           ownershipError = exerciseData.error || { message: 'Exercise not found' };
-          console.log('❌ DEBUG - Exercise not found');
         }
 
         if (ownershipError) {
@@ -828,67 +816,44 @@ export class SupabaseStorage implements IStorage {
       }
       
       // Map updates for database
-      console.log('🔍 DEBUG - Processing updates...');
-      console.log('🔍 DEBUG - Raw updates received:', JSON.stringify(updates, null, 2));
-      
       const dbUpdate: any = {};
       Object.keys(updates).forEach(key => {
         const value = (updates as any)[key];
-        console.log(`🔍 DEBUG - Processing field: ${key} = ${value}`);
         
         switch (key) {
           case 'restDurationSeconds':
             dbUpdate.restDuration = value; // Map to the correct column name
-            console.log(`   ✅ Mapped restDurationSeconds → restDuration: ${value}`);
             break;
           case 'exerciseId':
             dbUpdate.exerciseId = value;
-            console.log(`   ✅ Mapped exerciseId: ${value}`);
             break;
           case 'templateId':
             dbUpdate.templateId = value;
-            console.log(`   ✅ Mapped templateId: ${value}`);
             break;
           case 'sets':
             dbUpdate.sets = value;
-            console.log(`   ✅ Mapped sets: ${value}`);
             break;
           case 'reps':
             dbUpdate.reps = value;
-            console.log(`   ✅ Mapped reps: ${value}`);
             break;
           case 'weight':
             dbUpdate.weight = value;
-            console.log(`   ✅ Mapped weight: ${value}`);
             break;
           case 'order':
             dbUpdate.order = value;
-            console.log(`   ✅ Mapped order: ${value}`);
             break;
           default:
             dbUpdate[key] = value;
-            console.log(`   ✅ Direct mapping: ${key} = ${value}`);
         }
       });
 
-      console.log('🔍 DEBUG - Final dbUpdate object:', JSON.stringify(dbUpdate, null, 2));
-
-      // Now update the exercise
-      console.log('🔍 DEBUG - Executing Supabase update...');
-      console.log('🔍 DEBUG - Table: workoutTemplateExercises');
-      console.log('🔍 DEBUG - Where: id =', id);
-      console.log('🔍 DEBUG - Update data:', JSON.stringify(dbUpdate, null, 2));
-      
+      // Update the exercise in database
       const { data, error } = await this.supabase
         .from('workoutTemplateExercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
-
-      console.log('🔍 DEBUG - Supabase update result:');
-      console.log('   - Data:', JSON.stringify(data, null, 2));
-      console.log('   - Error:', JSON.stringify(error, null, 2));
 
       if (error) {
         console.error(`❌ Supabase error updating template exercise:`, error);
