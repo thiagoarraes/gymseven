@@ -435,7 +435,7 @@ export class SupabaseStorage implements IStorage {
 
     if (error) {
       console.error('❌ [SUPABASE] Error getting exercises:', error);
-      throw error;
+      return []; // Return empty array instead of throwing
     }
 
     console.log(`🎯 [SUPABASE] Found ${data.length} exercises`);
@@ -544,7 +544,7 @@ export class SupabaseStorage implements IStorage {
     if (!userId) return [];
 
     let { data, error } = await this.supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .select('*')
       .eq('user_id', userId);
 
@@ -568,7 +568,7 @@ export class SupabaseStorage implements IStorage {
 
   async createWorkoutTemplate(template: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
     let { data, error } = await this.supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .insert(template)
       .select()
       .single();
@@ -579,7 +579,7 @@ export class SupabaseStorage implements IStorage {
 
   async updateWorkoutTemplate(id: string, template: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate | undefined> {
     const { data, error } = await this.supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .update(template)
       .eq('id', id)
       .select()
@@ -593,7 +593,7 @@ export class SupabaseStorage implements IStorage {
     // First, check if the template exists and verify ownership
     if (userId) {
       let { data: templateCheck, error: checkError } = await this.supabase
-        .from('workoutTemplates')
+        .from('workout_templates')
         .select('id, user_id, name')
         .eq('id', id)
         .single();
@@ -609,7 +609,7 @@ export class SupabaseStorage implements IStorage {
 
     // Before deleting the template, remove references from workout logs to avoid foreign key constraint
     let { error: updateError } = await this.supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .update({ template_id: null })
       .eq('template_id', id);
 
@@ -618,7 +618,7 @@ export class SupabaseStorage implements IStorage {
     }
 
     let query = this.supabase
-      .from('workoutTemplates')
+      .from('workout_templates')
       .delete()
       .eq('id', id);
 
@@ -884,7 +884,7 @@ export class SupabaseStorage implements IStorage {
 
   async getWorkoutLog(id: string): Promise<WorkoutLog | undefined> {
     const { data, error } = await this.supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .select('*')
       .eq('id', id)
       .single();
@@ -895,7 +895,7 @@ export class SupabaseStorage implements IStorage {
 
   async createWorkoutLog(log: InsertWorkoutLog): Promise<WorkoutLog> {
     const { data, error } = await this.supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .insert(log)
       .select()
       .single();
@@ -906,7 +906,7 @@ export class SupabaseStorage implements IStorage {
 
   async updateWorkoutLog(id: string, log: Partial<InsertWorkoutLog>): Promise<WorkoutLog | undefined> {
     const { data, error } = await this.supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .update(log)
       .eq('id', id)
       .select()
@@ -918,7 +918,7 @@ export class SupabaseStorage implements IStorage {
 
   async deleteWorkoutLog(id: string): Promise<boolean> {
     const { error } = await this.supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .delete()
       .eq('id', id);
 
@@ -929,7 +929,7 @@ export class SupabaseStorage implements IStorage {
     if (!userId) return [];
 
     const { data, error } = await this.supabase
-      .from('workoutLogs')
+      .from('workout_logs')
       .select('*')
       .eq('user_id', userId)
       .order('start_time', { ascending: false });
