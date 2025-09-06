@@ -56,7 +56,7 @@ export class SupabaseStorage implements IStorage {
       name: dbExercise.name,
       muscleGroup: dbExercise.muscleGroup, // Supabase uses camelCase
       description: dbExercise.description,
-      createdAt: dbExercise.created_at // created_at still uses snake_case
+      createdAt: dbExercise.createdAt // Supabase uses camelCase for all columns
     } as Exercise;
   }
 
@@ -443,7 +443,7 @@ export class SupabaseStorage implements IStorage {
   async getExercise(id: string): Promise<Exercise | undefined> {
     const { data, error } = await this.supabase
       .from('exercises')
-      .select('id, user_id, name, muscle_group, description, image_url, video_url, created_at')
+      .select('id, user_id, name, muscleGroup, description, createdAt')
       .eq('id', id)
       .single();
 
@@ -486,7 +486,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await this.supabase
       .from('exercises')
       .insert(dbExercise)
-      .select('id, user_id, name, muscleGroup, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, createdAt')
       .single();
 
     console.log('📤 [DEBUG] Supabase response - data:', JSON.stringify(data, null, 2));
