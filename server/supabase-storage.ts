@@ -697,12 +697,12 @@ export class SupabaseStorage implements IStorage {
     
     return data.map((item: any) => ({
       id: item.id,
-      templateId: item.template_id,
-      exerciseId: item.exercise_id,
+      templateId: item.templateId,
+      exerciseId: item.exerciseId,
       sets: item.sets,
       reps: item.reps,
       weight: item.weight,
-      restDurationSeconds: item.rest_duration_seconds,
+      restDurationSeconds: item.restDurationSeconds,
       order: item.order,
       exercise: item.exercises
     })) as (WorkoutTemplateExercise & { exercise: Exercise })[];
@@ -711,14 +711,14 @@ export class SupabaseStorage implements IStorage {
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
     console.log(`➕ Adding exercise to template:`, exercise);
     
-    // Use snake_case for database insertion
+    // Use camelCase for database insertion (matching schema definition)
     const dbExercise = {
-      template_id: exercise.templateId,
-      exercise_id: exercise.exerciseId,
+      templateId: exercise.templateId,
+      exerciseId: exercise.exerciseId,
       sets: exercise.sets,
       reps: exercise.reps,
       weight: exercise.weight,
-      rest_duration_seconds: exercise.restDurationSeconds,
+      restDurationSeconds: exercise.restDurationSeconds,
       order: exercise.order
     };
     
@@ -735,15 +735,15 @@ export class SupabaseStorage implements IStorage {
     
     console.log(`✅ Exercise added successfully:`, data);
     
-    // Data is already in camelCase from Supabase
+    // Map data from database response (camelCase)
     return {
       id: data.id,
-      templateId: data.template_id,
-      exerciseId: data.exercise_id,
+      templateId: data.templateId,
+      exerciseId: data.exerciseId,
       sets: data.sets,
       reps: data.reps,
       weight: data.weight,
-      restDurationSeconds: data.rest_duration_seconds,
+      restDurationSeconds: data.restDurationSeconds,
       order: data.order
     } as WorkoutTemplateExercise;
   }
