@@ -52,7 +52,7 @@ export class SupabaseStorage implements IStorage {
   private mapDbExerciseToExercise(dbExercise: any): Exercise {
     return {
       id: dbExercise.id,
-      user_id: dbExercise.user_id,
+      userId: dbExercise.user_id, // Convert snake_case to camelCase
       name: dbExercise.name,
       muscleGroup: dbExercise.muscleGroup, // Supabase uses camelCase
       description: dbExercise.description,
@@ -63,7 +63,7 @@ export class SupabaseStorage implements IStorage {
   private mapDbWorkoutLogToWorkoutLog(dbLog: any): WorkoutLog {
     return {
       id: dbLog.id,
-      user_id: dbLog.user_id,
+      userId: dbLog.user_id, // Convert snake_case to camelCase
       templateId: dbLog.template_id || dbLog.templateId,
       name: dbLog.name,
       startTime: dbLog.start_time || dbLog.startTime,
@@ -74,7 +74,7 @@ export class SupabaseStorage implements IStorage {
   private mapDbWorkoutTemplateToWorkoutTemplate(dbTemplate: any): WorkoutTemplate {
     return {
       id: dbTemplate.id,
-      user_id: dbTemplate.user_id,
+      userId: dbTemplate.user_id, // Convert snake_case to camelCase
       name: dbTemplate.name,
       description: dbTemplate.description,
       createdAt: dbTemplate.created_at

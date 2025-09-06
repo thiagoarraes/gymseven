@@ -1452,7 +1452,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
       
       // Check if the workout belongs to the current user
-      if (existingLog.user_id !== req.user.id) {
+      if (existingLog.userId !== req.user.id) {
         console.log(`Workout log ${req.params.id} does not belong to user ${req.user.id}`);
         return res.status(403).json({ message: "Acesso negado" });
       }
@@ -1478,7 +1478,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(404).json({ message: "Treino não encontrado" });
       }
       
-      if (existingLog.user_id !== req.user!.id) {
+      if (existingLog.userId !== req.user!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
       
