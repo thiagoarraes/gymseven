@@ -755,86 +755,46 @@ export class SupabaseStorage implements IStorage {
     try {
       // First verify ownership if userId provided
       if (userId) {
-        // Check if the exercise belongs to a template owned by the user
-        // Try camelCase first (what PostgREST expects), then snake_case fallback
         console.log('🔍 DEBUG - Starting ownership check...');
         console.log('🔍 DEBUG - Exercise ID:', id);
         console.log('🔍 DEBUG - User ID:', userId);
         
-        // First, let's check what tables exist and their relationships
-        console.log('🔍 DEBUG - Checking available tables and columns...');
+        // Use manual join approach directly to avoid foreign key issues
+        let ownership: any = null;
+        let ownershipError: any = null;
         
-        let { data: ownership, error: ownershipError } = await this.supabase
+        console.log('🔍 DEBUG - Using manual join approach...');
+        const exerciseData = await this.supabase
           .from('workoutTemplateExercises')
-          .select(`
-            id,
-            templateId,
-            workoutTemplates!inner(
-              id,
-              user_id
-            )
-          `)
+          .select('id, templateId')
           .eq('id', id)
-          .eq('workoutTemplates.user_id', userId)
           .maybeSingle();
-
-        console.log('🔍 DEBUG - First ownership check result:');
-        console.log('   - Data:', JSON.stringify(ownership, null, 2));
-        console.log('   - Error:', JSON.stringify(ownershipError, null, 2));
-
-        // If relationship fails, try different approaches
-        if (ownershipError && (ownershipError.code === 'PGRST205' || ownershipError.code === 'PGRST200')) {
-          console.log('🔍 DEBUG - First attempt failed, trying alternative approaches...');
           
-          // Try manual join approach directly since foreign key seems to be the issue
-          console.log('🔍 DEBUG - Trying manual join approach immediately...');
-          const exerciseData = await this.supabase
-            .from('workoutTemplateExercises')
-            .select('id, templateId')
-            .eq('id', id)
+        console.log('🔍 DEBUG - Exercise data:', JSON.stringify(exerciseData, null, 2));
+        
+        if (exerciseData.data?.templateId) {
+          const templateData = await this.supabase
+            .from('workoutTemplates')
+            .select('id, user_id')
+            .eq('id', exerciseData.data.templateId)
+            .eq('user_id', userId)
             .maybeSingle();
             
-          console.log('🔍 DEBUG - Exercise data:', JSON.stringify(exerciseData, null, 2));
+          console.log('🔍 DEBUG - Template ownership check:', JSON.stringify(templateData, null, 2));
           
-          if (exerciseData.data?.templateId) {
-            const templateData = await this.supabase
-              .from('workoutTemplates')
-              .select('id, user_id')
-              .eq('id', exerciseData.data.templateId)
-              .eq('user_id', userId)
-              .maybeSingle();
-              
-            console.log('🔍 DEBUG - Template ownership check:', JSON.stringify(templateData, null, 2));
-            
-            if (templateData.data) {
-              ownership = {
-                id: exerciseData.data.id,
-                templateId: exerciseData.data.templateId
-              };
-              ownershipError = null;
-              console.log('✅ DEBUG - Manual ownership verification successful');
-            } else {
-              ownershipError = templateData.error || { message: 'Template not owned by user' };
-              console.log('❌ DEBUG - User does not own this template');
-            }
+          if (templateData.data) {
+            ownership = {
+              id: exerciseData.data.id,
+              templateId: exerciseData.data.templateId
+            };
+            console.log('✅ DEBUG - Manual ownership verification successful');
           } else {
-            ownershipError = exerciseData.error || { message: 'Exercise not found' };
-            console.log('❌ DEBUG - Exercise not found');
+            ownershipError = templateData.error || { message: 'Template not owned by user' };
+            console.log('❌ DEBUG - User does not own this template');
           }
-          
-          const fallback1 = { data: ownership, error: ownershipError };
-            
-          console.log('🔍 DEBUG - Manual join result:');
-          console.log('   - Data:', JSON.stringify(fallback1.data, null, 2));
-          console.log('   - Error:', JSON.stringify(fallback1.error, null, 2));
-          
-          if (!fallback1.error) {
-            ownership = fallback1.data;
-            ownershipError = fallback1.error;
-            console.log('✅ DEBUG - Manual join successful');
-          }
-        } else if (!ownershipError) {
-          console.log('✅ DEBUG - First ownership check successful');
+        } else {
+          ownershipError = exerciseData.error || { message: 'Exercise not found' };
+          console.log('❌ DEBUG - Exercise not found');
         }
 
         if (ownershipError) {
@@ -854,7 +814,7 @@ export class SupabaseStorage implements IStorage {
             
           if (existsCheck) {
             const { data: templateOwner } = await this.supabase
-              .from('workout_templates')
+              .from('workoutTemplates')
               .select('user_id')
               .eq('id', existsCheck.templateId)
               .single();
