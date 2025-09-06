@@ -822,13 +822,13 @@ export class SupabaseStorage implements IStorage {
         
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.rest_duration_seconds = value; // Use snake_case for database
+            dbUpdate.restDurationSeconds = value; // Use camelCase matching schema
             break;
           case 'exerciseId':
-            dbUpdate.exercise_id = value; // Use snake_case for database
+            dbUpdate.exerciseId = value; // Use camelCase matching schema
             break;
           case 'templateId':
-            dbUpdate.template_id = value; // Use snake_case for database
+            dbUpdate.templateId = value; // Use camelCase matching schema
             break;
           case 'sets':
             dbUpdate.sets = value;
@@ -865,13 +865,13 @@ export class SupabaseStorage implements IStorage {
         return undefined;
       }
       
-      // Map snake_case from database to camelCase for application
+      // Map database response (camelCase from schema)
       const mappedData = {
         ...data,
-        restDurationSeconds: data.rest_duration_seconds,
-        templateId: data.template_id,
-        exerciseId: data.exercise_id,
-        createdAt: data.created_at
+        restDurationSeconds: data.restDurationSeconds,
+        templateId: data.templateId,
+        exerciseId: data.exerciseId,
+        createdAt: data.createdAt
       };
       
       console.log(`✅ Successfully updated template exercise ${id}`);
