@@ -1,0 +1,99 @@
+# Prompt para Análise Completa de Aplicação no Replit
+
+Por favor, analise completamente minha aplicação no Replit e identifique/corrija todos os erros encontrados. Realize uma auditoria detalhada dos seguintes componentes:
+
+## 1. ESTRUTURA E ARQUIVOS
+- [ ] Examine a estrutura de pastas e organização do projeto
+- [ ] Verifique arquivos de configuração (package.json, requirements.txt, etc.)
+- [ ] Analise imports/exports e dependências
+- [ ] Identifique arquivos desnecessários ou faltantes
+
+## 2. API E ENDPOINTS
+- [ ] **Rotas e Endpoints**: Verifique se todas as rotas estão funcionando
+- [ ] **Métodos HTTP**: Confirme GET, POST, PUT, DELETE estão implementados corretamente
+- [ ] **Validação de dados**: Analise validação de entrada e saída
+- [ ] **Tratamento de erros**: Verifique se há handling adequado de erros
+- [ ] **Middleware**: Examine autenticação, CORS, rate limiting
+- [ ] **Status codes**: Confirme códigos de resposta HTTP apropriados
+
+## 3. CONEXÃO COM SUPABASE
+- [ ] **Configuração**: Verifique URL, API Key e configurações de conexão
+- [ ] **Autenticação**: Teste login, logout, registro de usuários
+- [ ] **Políticas RLS**: Analise Row Level Security policies
+- [ ] **Conexão segura**: Verifique se as credenciais estão protegidas
+
+## 4. BANCO DE DADOS E TABELAS
+- [ ] **Estrutura das tabelas**: Analise esquema, tipos de dados, constraints
+- [ ] **Relacionamentos**: Verifique foreign keys e joins
+- [ ] **Índices**: Confirme se existem índices necessários para performance
+- [ ] **Triggers e Functions**: Teste funções do banco se existirem
+- [ ] **Migrations**: Verifique se estrutura está atualizada
+
+## 5. OPERAÇÕES CRUD
+- [ ] **CREATE**: Teste inserção de novos registros
+- [ ] **READ**: Verifique consultas e filtros
+- [ ] **UPDATE**: Teste atualizações de dados existentes
+- [ ] **DELETE**: Confirme remoção segura de registros
+- [ ] **Transações**: Analise integridade das operações
+
+## 6. FRONTEND (SE APLICÁVEL)
+- [ ] **Interface**: Teste todos os componentes da UI
+- [ ] **Formulários**: Verifique validação e submissão
+- [ ] **Estados**: Analise gerenciamento de estado da aplicação
+- [ ] **Navegação**: Teste rotas e navegação entre páginas
+
+## 7. SEGURANÇA
+- [ ] **Autenticação**: Verifique sistemas de login/logout
+- [ ] **Autorização**: Confirme controle de acesso por usuário/papel
+- [ ] **Sanitização**: Analise proteção contra SQL injection e XSS
+- [ ] **Variáveis de ambiente**: Verifique se dados sensíveis estão protegidos
+
+## 8. PERFORMANCE E OTIMIZAÇÃO
+- [ ] **Queries**: Analise eficiência das consultas ao banco
+- [ ] **Caching**: Verifique implementação de cache se existir
+- [ ] **Otimização**: Identifique gargalos de performance
+- [ ] **Logs**: Analise sistema de logging para debug
+
+## 9. TESTES E VALIDAÇÃO
+- [ ] **Teste funcional**: Execute todas as funcionalidades principais
+- [ ] **Casos extremos**: Teste com dados inválidos ou extremos
+- [ ] **Load testing**: Verifique comportamento sob carga (se relevante)
+- [ ] **Cross-browser**: Teste compatibilidade (se web app)
+
+## 10. DOCUMENTAÇÃO E MANUTENIBILIDADE
+- [ ] **README**: Verifique instruções de instalação e uso
+- [ ] **Comentários**: Analise documentação no código
+- [ ] **Versionamento**: Confirme estrutura para controle de versões
+
+## FORMATO DE RESPOSTA ESPERADO:
+
+Para cada item analisado, forneça:
+
+### ✅ FUNCIONANDO CORRETAMENTE
+- Liste o que está funcionando bem
+
+### ❌ PROBLEMAS ENCONTRADOS
+- **Problema**: Descrição detalhada
+- **Severidade**: Crítico/Alto/Médio/Baixo
+- **Local**: Arquivo e linha específica
+- **Impacto**: Como afeta a aplicação
+
+### 🔧 CORREÇÕES APLICADAS
+- **Antes**: Código/configuração original
+- **Depois**: Código/configuração corrigida
+- **Explicação**: Por que a mudança foi necessária
+
+### 📋 RECOMENDAÇÕES
+- Melhorias de segurança
+- Otimizações de performance
+- Boas práticas a implementar
+- Próximos passos sugeridos
+
+## PRIORIZAÇÃO
+Ordene os problemas por:
+1. **Críticos**: Quebram funcionalidade principal
+2. **Altos**: Afetam segurança ou experiência do usuário
+3. **Médios**: Impactam performance ou manutenibilidade
+4. **Baixos**: Melhorias cosméticas ou de organização
+
+Por favor, seja específico e detalhado em sua análise, fornecendo soluções práticas para cada problema identificado.
