@@ -44,7 +44,7 @@ export class SimplePostgreSQLStorage implements IStorage {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
-    const values = [user.id || require('crypto').randomUUID(), user.email, user.username, user.password, user.firstName || null, user.lastName || null];
+    const values = [require('crypto').randomUUID(), user.email, user.username, user.password, user.firstName || null, user.lastName || null];
     const result = await this.pool.query(query, values);
     return result.rows[0];
   }
@@ -73,22 +73,18 @@ export class SimplePostgreSQLStorage implements IStorage {
 
   async getExercises(userId?: string): Promise<Exercise[]> {
     if (!userId) return [];
-    console.log('🔍 [SIMPLE-PG] Getting exercises for user:', userId);
     
     const result = await this.pool.query(
       'SELECT id, user_id, name, muscle_group, description, created_at FROM exercises WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
     );
     
-    console.log(`🎯 [SIMPLE-PG] Found ${result.rows.length} exercises`);
     return result.rows.map(row => ({
       id: row.id.toString(),
       user_id: row.user_id,
       name: row.name,
       muscleGroup: row.muscle_group,
       description: row.description,
-      imageUrl: null, // Removed
-      videoUrl: null, // Removed
       createdAt: row.created_at
     }));
   }
@@ -108,14 +104,12 @@ export class SimplePostgreSQLStorage implements IStorage {
       name: row.name,
       muscleGroup: row.muscle_group,
       description: row.description,
-      imageUrl: null,
-      videoUrl: null,
+
       createdAt: row.created_at
     };
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
-    console.log('🏋️ [SIMPLE-PG] Creating exercise:', { name: exercise.name, muscleGroup: exercise.muscleGroup, userId });
     
     const query = `
       INSERT INTO exercises (user_id, name, muscle_group, description)
@@ -127,7 +121,6 @@ export class SimplePostgreSQLStorage implements IStorage {
     const result = await this.pool.query(query, values);
     
     const row = result.rows[0];
-    console.log('✅ [SIMPLE-PG] Exercise created with ID:', row.id);
     
     return {
       id: row.id.toString(),
@@ -135,8 +128,7 @@ export class SimplePostgreSQLStorage implements IStorage {
       name: row.name,
       muscleGroup: row.muscle_group,
       description: row.description,
-      imageUrl: null,
-      videoUrl: null,
+
       createdAt: row.created_at
     };
   }
@@ -181,8 +173,7 @@ export class SimplePostgreSQLStorage implements IStorage {
       name: row.name,
       muscleGroup: row.muscle_group,
       description: row.description,
-      imageUrl: null,
-      videoUrl: null,
+
       createdAt: row.created_at
     };
   }
@@ -204,8 +195,7 @@ export class SimplePostgreSQLStorage implements IStorage {
       name: row.name,
       muscleGroup: row.muscle_group,
       description: row.description,
-      imageUrl: null,
-      videoUrl: null,
+
       createdAt: row.created_at
     }));
   }

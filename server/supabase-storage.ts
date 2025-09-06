@@ -423,7 +423,6 @@ export class SupabaseStorage implements IStorage {
   async getExercises(userId?: string): Promise<Exercise[]> {
     if (!userId) return [];
 
-    console.log('🔍 [SUPABASE] Getting exercises for user:', userId);
 
     const { data, error } = await this.supabase
       .from('exercises')
@@ -436,7 +435,6 @@ export class SupabaseStorage implements IStorage {
       return []; // Return empty array instead of throwing
     }
 
-    console.log(`🎯 [SUPABASE] Found ${data.length} exercises`);
     return data.map((item: any) => this.mapDbExerciseToExercise(item));
   }
 
@@ -452,25 +450,6 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
-    console.log('🏋️ [DEBUG] === EXERCISE CREATION START ===');
-    console.log('🏋️ [DEBUG] Input exercise data:', JSON.stringify(exercise, null, 2));
-    console.log('🏋️ [DEBUG] User ID:', userId);
-    
-    // Check available columns in exercises table
-    try {
-      console.log('🔍 [DEBUG] Checking table schema...');
-      const { data: schemaData, error: schemaError } = await this.supabase
-        .from('exercises')
-        .select('*')
-        .limit(1);
-      
-      console.log('🔍 [DEBUG] Schema check result:', { data: schemaData, error: schemaError });
-    } catch (e) {
-      console.log('🔍 [DEBUG] Schema check failed:', e);
-    }
-    
-    console.log('🏋️ [SUPABASE] Creating exercise with simplified fields...');
-    
     // Based on schema check, Supabase uses camelCase for this table
     const dbExercise = {
       name: exercise.name,
@@ -479,31 +458,17 @@ export class SupabaseStorage implements IStorage {
       description: exercise.description || null
     };
 
-    console.log('🎯 [DEBUG] Final data to insert:', JSON.stringify(dbExercise, null, 2));
-    console.log('🎯 [DEBUG] Table: exercises');
-    console.log('🎯 [DEBUG] Operation: INSERT');
-
     const { data, error } = await this.supabase
       .from('exercises')
       .insert(dbExercise)
       .select('id, user_id, name, muscleGroup, description, createdAt')
       .single();
 
-    console.log('📤 [DEBUG] Supabase response - data:', JSON.stringify(data, null, 2));
-    console.log('📤 [DEBUG] Supabase response - error:', JSON.stringify(error, null, 2));
 
     if (error) {
-      console.error('❌ [SUPABASE] Exercise creation failed:', error);
-      console.error('❌ [DEBUG] Error details:');
-      console.error('   - Code:', error.code);
-      console.error('   - Message:', error.message);
-      console.error('   - Details:', error.details);
-      console.error('   - Hint:', error.hint);
+      console.error('Exercise creation failed:', error);
       throw new Error(`Database error: ${error.message}`);
     }
-
-    console.log('✅ [SUPABASE] Exercise created successfully:', data.id);
-    console.log('🏋️ [DEBUG] === EXERCISE CREATION END ===');
     return this.mapDbExerciseToExercise(data);
   }
 
@@ -513,8 +478,7 @@ export class SupabaseStorage implements IStorage {
     if (exercise.name !== undefined) dbUpdate.name = exercise.name;
     if (exercise.muscleGroup !== undefined) dbUpdate.muscleGroup = exercise.muscleGroup; // Use camelCase
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
-    if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl; // Map to snake_case
-    if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl; // Map to snake_case
+    // Note: imageUrl and videoUrl removed from schema
     if ((exercise as any).user_id !== undefined) dbUpdate.user_id = (exercise as any).user_id;
 
     let query = this.supabase

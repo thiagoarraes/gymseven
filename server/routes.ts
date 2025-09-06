@@ -1070,7 +1070,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       const supabaseStorage = db as any;
       
-      console.log('🔍 [API] Buscando exercises-weight-summary (versão simplificada)...');
       
       // No fallback data - return empty when no real data exists
       const knownExercisesWithData: string[] = [];
@@ -1078,7 +1077,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const exerciseSummaries: any[] = [];
       
       for (const exerciseName of knownExercisesWithData) {
-        console.log(`🔍 [SIMPLES] Processando: ${exerciseName}`);
         
         // Buscar o exercício
         const { data: exercises } = await supabaseStorage.supabase
@@ -1088,7 +1086,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           .limit(1);
         
         if (!exercises || exercises.length === 0) {
-          console.log(`❌ [SIMPLES] Exercício ${exerciseName} não encontrado`);
           continue;
         }
         
@@ -1103,11 +1100,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           .limit(5);
         
         if (!workout_logs || workout_logs.length === 0) {
-          console.log(`❌ [SIMPLES] Nenhum workout completo encontrado`);
           continue;
         }
         
-        console.log(`✅ [SIMPLES] ${workout_logs.length} workouts completos encontrados`);
         
         let lastWeight = null;
         let sessionCount = 0;
@@ -1135,7 +1130,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
               if (!lastWeight) {
                 lastWeight = Math.max(...sets.map((set: any) => set.weight || 0));
               }
-              console.log(`💪 [SIMPLES] ${exerciseName}: ${sets.length} sets, peso máximo: ${lastWeight}kg`);
             }
           }
         }
@@ -1149,14 +1143,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
             lastWeight,
             sessionCount
           });
-          console.log(`✅ [SIMPLES] ${exerciseName} adicionado: ${lastWeight}kg, ${sessionCount} sessões`);
         }
       }
       
-      console.log(`🎯 [SIMPLES] Retornando ${exerciseSummaries.length} exercícios com dados`);
       res.json(exerciseSummaries);
     } catch (error) {
-      console.error('❌ [SIMPLES] Error fetching exercises weight summary:', error);
+      console.error('Error fetching exercises weight summary:', error);
       res.status(500).json({ message: "Erro ao buscar resumo de pesos dos exercícios" });
     }
   });
