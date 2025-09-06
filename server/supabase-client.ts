@@ -1,14 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+// Create Supabase client factory function
+export function createSupabaseClient() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase credentials not configured');
+  }
 
-// Only create Supabase client if credentials are available
-export let supabase: any = null;
-
-if (supabaseUrl && supabaseKey) {
-  // Create Supabase client for backend (uses service role key)
-  supabase = createClient(supabaseUrl, supabaseKey, {
+  return createClient(supabaseUrl, supabaseKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
@@ -19,9 +20,24 @@ if (supabaseUrl && supabaseKey) {
       }
     }
   });
-
-  console.log('✅ Supabase backend client inicializado');
-  console.log(`🔗 URL: ${supabaseUrl}`);
-} else {
-  console.log('⚠️ Supabase credentials not configured, skipping Supabase client initialization');
 }
+
+// Lazy initialization - client will be created when first accessed
+let _supabase: any = null;
+
+export function getSupabaseClient() {
+  if (!_supabase) {
+    try {
+      _supabase = createSupabaseClient();
+      console.log('✅ Supabase backend client inicializado');
+      console.log(`🔗 URL: ${process.env.SUPABASE_URL}`);
+    } catch (error) {
+      console.log('⚠️ Supabase credentials not configured, skipping Supabase client initialization');
+      return null;
+    }
+  }
+  return _supabase;
+}
+
+// Export for backward compatibility - only initialize when needed
+export const supabase = null; // Will be initialized later through getSupabaseClient()

@@ -9,14 +9,18 @@ import {
   type UserGoal, type InsertUserGoal,
   type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences
 } from "@shared/schema";
-import { supabase } from './supabase-client';
+import { getSupabaseClient } from './supabase-client';
 import type { IStorage } from './storage';
 
 export class SupabaseStorage implements IStorage {
-  public supabase = supabase; // Expose supabase client for direct queries
+  public supabase: any; // Expose supabase client for direct queries
   
   constructor() {
     console.log('🚀 Initializing Supabase storage...');
+    this.supabase = getSupabaseClient();
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized. Please check your Supabase credentials.');
+    }
     this.initializeSupabase();
   }
 
@@ -81,8 +85,12 @@ export class SupabaseStorage implements IStorage {
 
   private async initializeSupabase() {
     try {
+      if (!this.supabase) {
+        throw new Error('Supabase client not available');
+      }
+      
       // Test connection first with a simple query
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('exercises')
         .select('id')
         .limit(1);
