@@ -4,6 +4,9 @@ import { loadEnv } from "./env";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Import new refactored API setup
+import { setupRoutes as setupV2Routes } from "../apps/api/src/routes/index";
+
 // Load environment variables from .env file first
 loadEnv();
 
@@ -118,6 +121,14 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app, true);
+  
+  // Setup new refactored API routes (v2) alongside legacy routes
+  try {
+    setupV2Routes(app);
+    console.log('✅ API v2 (refactored) routes initialized');
+  } catch (error) {
+    console.log('⚠️ API v2 routes failed to initialize:', error);
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
