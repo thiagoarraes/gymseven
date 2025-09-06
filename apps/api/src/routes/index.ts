@@ -1,6 +1,7 @@
 import { Router, Application } from 'express';
 import { authRoutes, authMiddleware } from '../features/auth/routes';
 import { exerciseRoutes } from '../features/exercises/routes';
+import { workoutRoutes } from '../features/workouts/routes';
 import { getFeatureFlags } from '../core/config/featureFlags';
 
 export const setupRoutes = (app: Application): void => {
@@ -20,6 +21,13 @@ export const setupRoutes = (app: Application): void => {
     apiRouter.use('/exercises', authMiddleware.authenticate, exerciseRoutes);
   } else {
     console.log('💪 Using legacy exercise module');
+  }
+
+  if (flags.useNewWorkoutModule) {
+    console.log('🔄 Using new workout module');
+    apiRouter.use('/workouts', authMiddleware.authenticate, workoutRoutes);
+  } else {
+    console.log('🏋️ Using legacy workout module');
   }
 
   // Mount API v2 routes
