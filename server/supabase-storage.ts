@@ -838,8 +838,8 @@ export class SupabaseStorage implements IStorage {
         
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.restDurationSeconds = value;
-            console.log(`   ✅ Mapped restDurationSeconds: ${value}`);
+            dbUpdate.restDuration = value; // Map to the correct column name
+            console.log(`   ✅ Mapped restDurationSeconds → restDuration: ${value}`);
             break;
           case 'exerciseId':
             dbUpdate.exerciseId = value;
