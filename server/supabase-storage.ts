@@ -697,12 +697,12 @@ export class SupabaseStorage implements IStorage {
     
     return data.map((item: any) => ({
       id: item.id,
-      templateId: item.templateId,
-      exerciseId: item.exerciseId,
+      templateId: item.template_id,
+      exerciseId: item.exercise_id,
       sets: item.sets,
       reps: item.reps,
       weight: item.weight,
-      restDurationSeconds: item.restDurationSeconds,
+      restDurationSeconds: item.rest_duration_seconds,
       order: item.order,
       exercise: item.exercises
     })) as (WorkoutTemplateExercise & { exercise: Exercise })[];
@@ -711,14 +711,14 @@ export class SupabaseStorage implements IStorage {
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
     console.log(`➕ Adding exercise to template:`, exercise);
     
-    // Use camelCase for Supabase (no conversion needed)
+    // Use snake_case for database insertion
     const dbExercise = {
-      templateId: exercise.templateId,
-      exerciseId: exercise.exerciseId,
+      template_id: exercise.templateId,
+      exercise_id: exercise.exerciseId,
       sets: exercise.sets,
       reps: exercise.reps,
       weight: exercise.weight,
-      restDurationSeconds: exercise.restDurationSeconds,
+      rest_duration_seconds: exercise.restDurationSeconds,
       order: exercise.order
     };
     
@@ -738,12 +738,12 @@ export class SupabaseStorage implements IStorage {
     // Data is already in camelCase from Supabase
     return {
       id: data.id,
-      templateId: data.templateId,
-      exerciseId: data.exerciseId,
+      templateId: data.template_id,
+      exerciseId: data.exercise_id,
       sets: data.sets,
       reps: data.reps,
       weight: data.weight,
-      restDurationSeconds: data.restDurationSeconds,
+      restDurationSeconds: data.rest_duration_seconds,
       order: data.order
     } as WorkoutTemplateExercise;
   }
@@ -822,13 +822,13 @@ export class SupabaseStorage implements IStorage {
         
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.restDurationSeconds = value; // Keep camelCase for Supabase
+            dbUpdate.rest_duration_seconds = value; // Use snake_case for database
             break;
           case 'exerciseId':
-            dbUpdate.exerciseId = value; // Keep camelCase for Supabase
+            dbUpdate.exercise_id = value; // Use snake_case for database
             break;
           case 'templateId':
-            dbUpdate.templateId = value; // Keep camelCase for Supabase
+            dbUpdate.template_id = value; // Use snake_case for database
             break;
           case 'sets':
             dbUpdate.sets = value;
@@ -865,13 +865,13 @@ export class SupabaseStorage implements IStorage {
         return undefined;
       }
       
-      // Data is already in camelCase from Supabase
+      // Map snake_case from database to camelCase for application
       const mappedData = {
         ...data,
-        restDurationSeconds: data.restDurationSeconds,
-        templateId: data.templateId,
-        exerciseId: data.exerciseId,
-        createdAt: data.createdAt
+        restDurationSeconds: data.rest_duration_seconds,
+        templateId: data.template_id,
+        exerciseId: data.exercise_id,
+        createdAt: data.created_at
       };
       
       console.log(`✅ Successfully updated template exercise ${id}`);
