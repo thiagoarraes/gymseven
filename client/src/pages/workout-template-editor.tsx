@@ -27,6 +27,7 @@ import {
 import { Reorder } from "framer-motion";
 import { workoutTemplateApi } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/supabase-auth-context";
 
 const schema = z.object({
   sets: z.number().min(1).max(50),
@@ -41,6 +42,7 @@ export default function WorkoutTemplateEditor() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const [isEditingTemplateName, setIsEditingTemplateName] = useState(false);
   const [tempTemplateName, setTempTemplateName] = useState("");
@@ -68,9 +70,12 @@ export default function WorkoutTemplateEditor() {
     enabled: !!id,
   });
 
-  const { data: templateExercises = [], isLoading: exercisesLoading } = useQuery({
+  const { data: templateExercises = [], isLoading: exercisesLoading, refetch: refetchExercises } = useQuery({
     queryKey: ["/api/workout-templates", id, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(id!),
     enabled: !!id,
+    staleTime: 0, // Sempre buscar dados frescos
+    gcTime: 0, // Não manter cache
   });
 
   const { data: allExercises = [] } = useQuery({
@@ -271,6 +276,20 @@ export default function WorkoutTemplateEditor() {
     removeExerciseMutation.mutate(exerciseId);
   };
 
+  const handleForceRefresh = () => {
+    // Limpar todos os caches relacionados
+    queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+    queryClient.removeQueries({ queryKey: ["/api/workout-templates", id] });
+    
+    // Forçar refetch dos dados
+    refetchExercises();
+    
+    toast({
+      title: "Dados atualizados",
+      description: "A lista de exercícios foi sincronizada com o servidor.",
+    });
+  };
+
   const handleReorder = (newOrder: any[]) => {
     setReorderedExercises(newOrder);
   };
@@ -377,6 +396,15 @@ export default function WorkoutTemplateEditor() {
                     {reorderedExercises.length} exercício{reorderedExercises.length !== 1 ? 's' : ''}
                   </span>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleForceRefresh}
+                  className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-xl px-3 py-2"
+                  title="Atualizar dados"
+                >
+                  🔄 Atualizar
+                </Button>
               </div>
             )}
           </div>
