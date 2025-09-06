@@ -50,9 +50,21 @@ export function generateToken(userId: string): string {
 // Verify JWT token
 export function verifyToken(token: string): { userId: string; type: string } | null {
   try {
+    // Try to decode the token first to check if it's a Supabase token
+    const parts = token.split('.');
+    if (parts.length === 3) {
+      const payload = JSON.parse(atob(parts[1]));
+      if (payload.iss && payload.iss.includes('supabase')) {
+        // This is a Supabase token - map the subject to userId
+        return { userId: payload.sub, type: 'supabase' };
+      }
+    }
+    
+    // Try local JWT verification for internal tokens
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     return decoded;
   } catch (error) {
+    console.error('Token verification error:', error);
     return null;
   }
 }
