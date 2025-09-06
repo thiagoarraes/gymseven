@@ -1,5 +1,6 @@
 import { Router, Application } from 'express';
-import { authRoutes } from '../features/auth/routes';
+import { authRoutes, authMiddleware } from '../features/auth/routes';
+import { exerciseRoutes } from '../features/exercises/routes';
 import { getFeatureFlags } from '../core/config/featureFlags';
 
 export const setupRoutes = (app: Application): void => {
@@ -12,6 +13,13 @@ export const setupRoutes = (app: Application): void => {
     apiRouter.use('/auth', authRoutes);
   } else {
     console.log('📱 Using legacy authentication module');
+  }
+
+  if (flags.useNewExerciseModule) {
+    console.log('🔄 Using new exercise module');
+    apiRouter.use('/exercises', authMiddleware.authenticate, exerciseRoutes);
+  } else {
+    console.log('💪 Using legacy exercise module');
   }
 
   // Mount API v2 routes
