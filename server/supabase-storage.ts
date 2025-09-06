@@ -832,7 +832,7 @@ export class SupabaseStorage implements IStorage {
             dbUpdate.exercise_id = value;
             break;
           case 'templateId':
-            dbUpdate.templateId = value;
+            dbUpdate.template_id = value;
             break;
           default:
             dbUpdate[key] = value;
@@ -862,7 +862,7 @@ export class SupabaseStorage implements IStorage {
         ...data,
         restDuration: data.rest_duration_seconds,
         restDurationSeconds: data.rest_duration_seconds,
-        templateId: data.templateId,
+        templateId: data.template_id,
         exerciseId: data.exercise_id,
         createdAt: data.created_at
       };
