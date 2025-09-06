@@ -1562,6 +1562,83 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
+  // 🐛 DEBUG: Temporary debug route for rest duration issue
+  app.get("/api/debug/rest-duration", authenticateToken, async (req: AuthRequest, res) => {
+    console.log('\n🐛 === DEBUG: Analisando problema do tempo de descanso ===');
+    
+    try {
+      const supabaseStorage = db as any;
+      
+      // 1. Verificar se a tabela workoutTemplateExercises existe
+      console.log('🔍 1. Verificando existência da tabela workoutTemplateExercises...');
+      const { data: tables, error: tablesError } = await supabaseStorage.supabase
+        .rpc('get_table_info', { table_name: 'workoutTemplateExercises' });
+      
+      console.log('📊 Resultado da consulta de tabela:', { tables, error: tablesError });
+      
+      // 2. Listar todas as colunas da tabela
+      console.log('\n🔍 2. Listando colunas da tabela workoutTemplateExercises...');
+      const { data: columns, error: columnsError } = await supabaseStorage.supabase
+        .from('workoutTemplateExercises')
+        .select('*')
+        .limit(1);
+      
+      console.log('📋 Estrutura da tabela (primeira linha):', { columns, error: columnsError });
+      
+      // 3. Buscar uma entrada de exemplo para verificar estrutura
+      console.log('\n🔍 3. Buscando exemplo de workoutTemplateExercise...');
+      const { data: examples, error: examplesError } = await supabaseStorage.supabase
+        .from('workoutTemplateExercises')
+        .select('*')
+        .limit(3);
+      
+      console.log('📄 Exemplos encontrados:', { count: examples?.length, examples, error: examplesError });
+      
+      // 4. Tentar uma query específica para rest_duration_seconds
+      console.log('\n🔍 4. Testando acesso direto à coluna rest_duration_seconds...');
+      try {
+        const { data: restTest, error: restError } = await supabaseStorage.supabase
+          .from('workoutTemplateExercises')
+          .select('rest_duration_seconds')
+          .limit(1);
+        
+        console.log('⚡ Teste direto rest_duration_seconds:', { restTest, restError });
+      } catch (directError) {
+        console.log('❌ Erro no acesso direto:', directError);
+      }
+      
+      // 5. Listar todas as colunas disponíveis usando information_schema
+      console.log('\n🔍 5. Consultando information_schema para colunas...');
+      try {
+        const { data: schemaColumns, error: schemaError } = await supabaseStorage.supabase
+          .rpc('get_table_columns', { table_name: 'workoutTemplateExercises' });
+        
+        console.log('📚 Colunas do schema:', { schemaColumns, schemaError });
+      } catch (schemaQueryError) {
+        console.log('❌ Erro na consulta do schema:', schemaQueryError);
+      }
+      
+      console.log('\n🐛 === FIM DEBUG ===\n');
+      
+      res.json({
+        message: "Debug concluído - verifique os logs do console",
+        timestamp: new Date().toISOString(),
+        tableExists: !tablesError,
+        sampleData: examples,
+        columnsError: columnsError,
+        hasData: examples && examples.length > 0
+      });
+      
+    } catch (error) {
+      console.error('💥 Erro durante debug:', error);
+      res.status(500).json({ 
+        error: 'Erro durante debug',
+        message: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
