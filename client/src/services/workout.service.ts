@@ -19,7 +19,7 @@ export class WorkoutService {
     const { data, error } = await supabase
       .from('workoutTemplates')
       .select('*')
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .order('createdAt', { ascending: false });
 
     if (error) {
@@ -43,7 +43,7 @@ export class WorkoutService {
       .from('workoutTemplates')
       .select('*')
       .eq('id', templateId)
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .single();
 
     if (templateError) {
@@ -103,7 +103,7 @@ export class WorkoutService {
       .from('workoutTemplates')
       .insert({
         ...template,
-        userId
+        user_id: userId
       })
       .select()
       .single();
@@ -128,7 +128,7 @@ export class WorkoutService {
       .from('workoutTemplates')
       .update(updates)
       .eq('id', templateId)
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -152,7 +152,7 @@ export class WorkoutService {
       .from('workoutTemplates')
       .delete()
       .eq('id', templateId)
-      .eq('userId', userId);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error(`Erro ao excluir template: ${error.message}`);
