@@ -22,7 +22,7 @@ const workoutFormSchema = z.object({
 
 type WorkoutFormValues = z.infer<typeof workoutFormSchema>;
 
-export default function Workouts() {
+export default function WorkoutsNew() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<any>(null);
   const { toast } = useToast();
@@ -248,6 +248,7 @@ export default function Workouts() {
                         <Input
                           placeholder="Ex: Push A, Pull B, Legs"
                           {...field}
+                          data-testid="input-workout-name"
                         />
                       </FormControl>
                       <FormMessage />
@@ -264,6 +265,7 @@ export default function Workouts() {
                         <Textarea
                           placeholder="Peito, Ombros e Tríceps..."
                           {...field}
+                          data-testid="input-workout-description"
                         />
                       </FormControl>
                       <FormMessage />
@@ -276,6 +278,7 @@ export default function Workouts() {
                     variant="outline"
                     className="flex-1"
                     onClick={() => setIsDialogOpen(false)}
+                    data-testid="button-cancel"
                   >
                     Cancelar
                   </Button>
@@ -297,7 +300,7 @@ export default function Workouts() {
         </Dialog>
       </div>
 
-      {/* Workout Templates Grid */}
+      {/* Grid de Templates de Treino */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[...Array(4)].map((_, i) => (
@@ -306,7 +309,6 @@ export default function Workouts() {
                 <div className="loading-skeleton h-6 rounded mb-2"></div>
                 <div className="loading-skeleton h-4 rounded mb-4 w-3/4"></div>
                 <div className="space-y-2 mb-4">
-                  <div className="loading-skeleton h-4 rounded"></div>
                   <div className="loading-skeleton h-4 rounded"></div>
                   <div className="loading-skeleton h-4 rounded"></div>
                 </div>
@@ -337,7 +339,7 @@ export default function Workouts() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {workoutTemplates.map((template: any) => (
+          {workoutTemplates.map((template) => (
             <Card key={template.id} className="glass-card rounded-2xl" data-testid={`card-workout-${template.id}`}>
               <CardContent className="p-6 pb-4 flex flex-col h-full">
                 <div className="flex items-start justify-between mb-4">
@@ -371,7 +373,7 @@ export default function Workouts() {
                   </div>
                 </div>
                 
-                {/* Exercise List */}
+                {/* Lista de Exercícios */}
                 <div className="space-y-3 flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-foreground">
@@ -393,7 +395,7 @@ export default function Workouts() {
                   
                   <div className="space-y-2">
                     {template.exercises && template.exercises.length > 0 ? (
-                      template.exercises.slice(0, 3).map((exercise: any, index: number) => (
+                      template.exercises.slice(0, 3).map((exercise, index) => (
                         <div key={exercise.id} className="flex items-center text-xs text-muted-foreground" data-testid={`exercise-${exercise.id}`}>
                           <span className="w-4 text-center">{index + 1}</span>
                           <span className="flex-1 ml-2">
