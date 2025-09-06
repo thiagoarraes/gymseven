@@ -829,18 +829,19 @@ export class SupabaseStorage implements IStorage {
       // Map camelCase to snake_case for database (simple and clean)
       const dbUpdate: any = {};
       Object.keys(updates).forEach(key => {
+        const value = (updates as any)[key];
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.rest_duration_seconds = updates[key]; // Only use the correct column name
+            dbUpdate.rest_duration_seconds = value; // Only use the correct column name
             break;
           case 'exerciseId':
-            dbUpdate.exercise_id = updates[key];
+            dbUpdate.exercise_id = value;
             break;
           case 'templateId':
-            dbUpdate.template_id = updates[key];
+            dbUpdate.template_id = value;
             break;
           default:
-            dbUpdate[key] = updates[key];
+            dbUpdate[key] = value;
         }
       });
 
