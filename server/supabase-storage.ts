@@ -680,7 +680,7 @@ export class SupabaseStorage implements IStorage {
     console.log(`🔍 Fetching exercises for template: ${templateId}`);
     
     const { data, error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .select(`
         *,
         exercises (*)
@@ -723,7 +723,7 @@ export class SupabaseStorage implements IStorage {
     };
     
     const { data, error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .insert(dbExercise)
       .select()
       .single();
@@ -760,14 +760,14 @@ export class SupabaseStorage implements IStorage {
         let ownershipError: any = null;
         
         const exerciseData = await this.supabase
-          .from('workout_template_exercises')
+          .from('workoutTemplateExercises')
           .select('id, template_id')
           .eq('id', id)
           .maybeSingle();
         
         if (exerciseData.data?.template_id) {
           const templateData = await this.supabase
-            .from('workout_templates')
+            .from('workoutTemplates')
             .select('id, user_id')
             .eq('id', exerciseData.data.template_id)
             .eq('user_id', userId)
@@ -795,14 +795,14 @@ export class SupabaseStorage implements IStorage {
           
           // Check if exercise exists at all
           const { data: existsCheck } = await this.supabase
-            .from('workout_template_exercises')
+            .from('workoutTemplateExercises')
             .select('id, template_id')
             .eq('id', id)
             .maybeSingle();
             
           if (existsCheck) {
             const { data: templateOwner } = await this.supabase
-              .from('workout_templates')
+              .from('workoutTemplates')
               .select('user_id')
               .eq('id', existsCheck.template_id)
               .single();
@@ -849,7 +849,7 @@ export class SupabaseStorage implements IStorage {
 
       // Update the exercise in database
       const { data, error } = await this.supabase
-        .from('workout_template_exercises')
+        .from('workoutTemplateExercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
@@ -887,16 +887,16 @@ export class SupabaseStorage implements IStorage {
     // If userId is provided, verify ownership before deleting
     if (userId) {
       const { data: exerciseData, error: checkError } = await this.supabase
-        .from('workout_template_exercises')
+        .from('workoutTemplateExercises')
         .select(`
           id,
-          workoutTemplate:workout_templates!inner(
+          workoutTemplate:workoutTemplates!inner(
             id,
             user_id
           )
         `)
         .eq('id', id)
-        .eq('workout_templates.user_id', userId)
+        .eq('workoutTemplates.user_id', userId)
         .single();
       
       if (checkError || !exerciseData) {
@@ -906,7 +906,7 @@ export class SupabaseStorage implements IStorage {
     }
 
     const { error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .delete()
       .eq('id', id);
 
@@ -915,7 +915,7 @@ export class SupabaseStorage implements IStorage {
 
   async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {
     const { error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .delete()
       .eq('template_id', templateId)
       .eq('exercise_id', exerciseId);
