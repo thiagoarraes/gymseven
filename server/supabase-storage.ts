@@ -848,14 +848,44 @@ export class SupabaseStorage implements IStorage {
       });
 
       // Update the exercise in database
-      const { data, error } = await this.supabase
+      let { data, error } = await this.supabase
         .from('workoutTemplateExercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
         .maybeSingle();
 
-      if (error) {
+      // If PostgREST cache issue, try simple update without select
+      if (error && error.code === 'PGRST204') {
+        console.log(`🔧 PostgREST cache issue detected, trying simple update for exercise ${id}`);
+        
+        // Try update without returning data first
+        const updateResult = await this.supabase
+          .from('workoutTemplateExercises')
+          .update(dbUpdate)
+          .eq('id', id);
+        
+        if (!updateResult.error) {
+          console.log(`✅ Simple update successful, fetching updated exercise ${id}`);
+          // Fetch the updated data separately
+          const fetchResult = await this.supabase
+            .from('workoutTemplateExercises')
+            .select()
+            .eq('id', id)
+            .maybeSingle();
+          
+          if (!fetchResult.error && fetchResult.data) {
+            data = fetchResult.data;
+            error = null;
+          } else {
+            console.error(`❌ Failed to fetch updated exercise:`, fetchResult.error);
+            return undefined;
+          }
+        } else {
+          console.error(`❌ Simple update also failed:`, updateResult.error);
+          return undefined;
+        }
+      } else if (error) {
         console.error(`❌ Supabase error updating template exercise:`, error);
         return undefined;
       }
