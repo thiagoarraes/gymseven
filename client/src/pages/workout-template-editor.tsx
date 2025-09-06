@@ -125,13 +125,8 @@ export default function WorkoutTemplateEditor() {
         if (!old) return old;
         return old.map((ex: any) => {
           if (ex.id === exerciseId) {
-            // Map frontend field names to backend field names
-            const mappedUpdates = { ...updates };
-            if (mappedUpdates.restDurationSeconds !== undefined) {
-              mappedUpdates.restDuration = mappedUpdates.restDurationSeconds;
-              delete mappedUpdates.restDurationSeconds;
-            }
-            return { ...ex, ...mappedUpdates };
+            // Update with the new values directly
+            return { ...ex, ...updates };
           }
           return ex;
         });

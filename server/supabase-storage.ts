@@ -822,7 +822,7 @@ export class SupabaseStorage implements IStorage {
         
         switch (key) {
           case 'restDurationSeconds':
-            dbUpdate.restDuration = value; // Map to the correct column name
+            dbUpdate.restDurationSeconds = value; // Keep the correct field name
             break;
           case 'exerciseId':
             dbUpdate.exerciseId = value;
@@ -868,7 +868,6 @@ export class SupabaseStorage implements IStorage {
       // Data is already in camelCase from Supabase
       const mappedData = {
         ...data,
-        restDuration: data.restDurationSeconds,
         restDurationSeconds: data.restDurationSeconds,
         templateId: data.templateId,
         exerciseId: data.exerciseId,
