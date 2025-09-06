@@ -679,7 +679,7 @@ export class SupabaseStorage implements IStorage {
   async getWorkoutTemplateExercises(templateId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
     // Try camelCase first (what PostgREST expects), then snake_case fallback
     let { data, error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .select(`
         *,
         exercises (*)
@@ -689,7 +689,7 @@ export class SupabaseStorage implements IStorage {
     // If camelCase fails, try snake_case
     if (error && error.code === 'PGRST205') {
       const fallback = await this.supabase
-        .from('workout_template_exercises')
+        .from('workoutTemplateExercises')
         .select(`
           *,
           exercises (*)
@@ -712,7 +712,7 @@ export class SupabaseStorage implements IStorage {
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
     // Try camelCase first (what PostgREST expects), then snake_case fallback
     let { data, error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .insert(exercise)
       .select()
       .single();
@@ -720,7 +720,7 @@ export class SupabaseStorage implements IStorage {
     // If camelCase fails, try snake_case
     if (error && error.code === 'PGRST205') {
       const fallback = await this.supabase
-        .from('workout_template_exercises')
+        .from('workoutTemplateExercises')
         .insert(exercise)
         .select()
         .single();
@@ -742,7 +742,7 @@ export class SupabaseStorage implements IStorage {
         // Check if the exercise belongs to a template owned by the user
         // Try camelCase first (what PostgREST expects), then snake_case fallback
         let { data: ownership, error: ownershipError } = await this.supabase
-          .from('workout_template_exercises')
+          .from('workoutTemplateExercises')
           .select(`
             id,
             templateId,
@@ -758,7 +758,7 @@ export class SupabaseStorage implements IStorage {
         // If camelCase fails, try snake_case
         if (ownershipError && (ownershipError.code === 'PGRST205' || ownershipError.code === 'PGRST200')) {
           const fallback = await this.supabase
-            .from('workout_template_exercises')
+            .from('workoutTemplateExercises')
             .select(`
               id,
               templateId,
@@ -784,7 +784,7 @@ export class SupabaseStorage implements IStorage {
           
           // Check if exercise exists at all
           const { data: existsCheck } = await this.supabase
-            .from('workout_template_exercises')
+            .from('workoutTemplateExercises')
             .select('id, templateId')
             .eq('id', id)
             .maybeSingle();
@@ -825,7 +825,7 @@ export class SupabaseStorage implements IStorage {
 
       // Now update the exercise - use the correct table name from schema
       const { data, error } = await this.supabase
-        .from('workout_template_exercises')
+        .from('workoutTemplateExercises')
         .update(dbUpdate)
         .eq('id', id)
         .select()
@@ -864,7 +864,7 @@ export class SupabaseStorage implements IStorage {
     // If userId is provided, verify ownership before deleting
     if (userId) {
       const { data: exerciseData, error: checkError } = await this.supabase
-        .from('workout_template_exercises')
+        .from('workoutTemplateExercises')
         .select(`
           id,
           workoutTemplate:workoutTemplates!inner(
@@ -883,7 +883,7 @@ export class SupabaseStorage implements IStorage {
     }
 
     const { error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .delete()
       .eq('id', id);
 
@@ -892,7 +892,7 @@ export class SupabaseStorage implements IStorage {
 
   async removeExerciseFromTemplate(templateId: string, exerciseId: string): Promise<boolean> {
     const { error } = await this.supabase
-      .from('workout_template_exercises')
+      .from('workoutTemplateExercises')
       .delete()
       .eq('template_id', templateId)
       .eq('exercise_id', exerciseId);
@@ -1159,7 +1159,7 @@ export class SupabaseStorage implements IStorage {
       // 7. Delete workout template exercises
       if (templateIds.length > 0) {
         await this.supabase
-          .from('workout_template_exercises')
+          .from('workoutTemplateExercises')
           .delete()
           .in('templateId', templateIds);
       }
