@@ -560,7 +560,7 @@ export class SupabaseStorage implements IStorage {
     console.log('💪 [DEBUG] === WORKOUT TEMPLATE CREATION START ===');
     console.log('💪 [DEBUG] Input template data:', JSON.stringify(template, null, 2));
     
-    // Check available columns in workout_templates table
+    // Check available columns in workoutTemplates table
     try {
       console.log('🔍 [DEBUG] Checking workoutTemplates schema...');
       const { data: schemaData, error: schemaError } = await this.supabase
@@ -776,7 +776,7 @@ export class SupabaseStorage implements IStorage {
           if (templateData.data) {
             ownership = {
               id: exerciseData.data.id,
-              templateId: exerciseData.data.templateId
+              templateId: exerciseData.data.template_id
             };
           } else {
             ownershipError = templateData.error || { message: 'Template not owned by user' };
