@@ -427,9 +427,9 @@ export class SupabaseStorage implements IStorage {
 
     const { data, error } = await this.supabase
       .from('exercises')
-      .select('id, user_id, name, muscle_group, description, created_at')
+      .select('id, user_id, name, muscleGroup, description, createdAt')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (error) {
       console.error('❌ [SUPABASE] Error getting exercises:', error);
@@ -511,7 +511,7 @@ export class SupabaseStorage implements IStorage {
     // Map properties correctly for Supabase - use snake_case for database
     const dbUpdate: any = {};
     if (exercise.name !== undefined) dbUpdate.name = exercise.name;
-    if (exercise.muscleGroup !== undefined) dbUpdate.muscle_group = exercise.muscleGroup; // Map to snake_case
+    if (exercise.muscleGroup !== undefined) dbUpdate.muscleGroup = exercise.muscleGroup; // Use camelCase
     if (exercise.description !== undefined) dbUpdate.description = exercise.description;
     if (exercise.imageUrl !== undefined) dbUpdate.image_url = exercise.imageUrl; // Map to snake_case
     if (exercise.videoUrl !== undefined) dbUpdate.video_url = exercise.videoUrl; // Map to snake_case
@@ -553,7 +553,7 @@ export class SupabaseStorage implements IStorage {
     const { data, error } = await this.supabase
       .from('exercises')
       .select('*')
-      .eq('muscle_group', muscleGroup)
+      .eq('muscleGroup', muscleGroup)
       .eq('user_id', userId);
 
     if (error) throw error;
