@@ -1,0 +1,40 @@
+// Application constants
+export const APP_CONFIG = {
+  API_VERSION: 'v2',
+  DEFAULT_PAGE_SIZE: 20,
+  MAX_PAGE_SIZE: 100,
+  CACHE_TTL: 5 * 60 * 1000, // 5 minutes
+} as const;
+
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+export const ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;
+
+// Re-export constants from original schema
+export {
+  MUSCLE_GROUPS,
+  ACTIVITY_LEVELS,
+  EXPERIENCE_LEVELS,
+  FITNESS_GOALS,
+  GOAL_TYPES,
+  THEMES,
+  UNITS,
+  LANGUAGES,
+} from '../../../shared/schema';
