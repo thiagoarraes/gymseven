@@ -768,9 +768,9 @@ export class SupabaseStorage implements IStorage {
         if (exerciseData.data?.templateId) {
           const templateData = await this.supabase
             .from('workoutTemplates')
-            .select('id, userId')
+            .select('id, user_id')
             .eq('id', exerciseData.data.templateId)
-            .eq('userId', userId)
+            .eq('user_id', userId)
             .maybeSingle();
             
           if (templateData.data) {
@@ -803,10 +803,10 @@ export class SupabaseStorage implements IStorage {
           if (existsCheck) {
             const { data: templateOwner } = await this.supabase
               .from('workoutTemplates')
-              .select('userId')
+              .select('user_id')
               .eq('id', existsCheck.templateId)
               .single();
-            console.warn(`👤 Exercise exists but belongs to user: ${templateOwner?.userId}, not ${userId}`);
+            console.warn(`👤 Exercise exists but belongs to user: ${templateOwner?.user_id}, not ${userId}`);
           } else {
             console.warn(`🚫 Exercise ${id} does not exist`);
           }
