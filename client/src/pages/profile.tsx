@@ -397,6 +397,9 @@ export default function Profile() {
                   : user?.user_metadata?.username || user?.email}
               </h1>
               <p className="text-muted-foreground">{user?.email}</p>
+              {user?.user_metadata?.username && (
+                <p className="text-sm text-muted-foreground/80">@{user.user_metadata.username}</p>
+              )}
             </div>
           </div>
 
