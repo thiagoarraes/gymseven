@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/logo";
-import { useAuth } from "@/contexts/supabase-auth-context";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {

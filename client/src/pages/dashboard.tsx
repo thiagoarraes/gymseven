@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { workoutLogApi, exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/supabase-auth-context";
 
 // Achievement types and data (copied from progress page)
 interface Achievement {

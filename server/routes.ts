@@ -21,18 +21,9 @@ import {
   updateUserPreferencesSchema
 } from "@shared/schema";
 import { registerUser, loginUser, changeUserPassword, optionalAuth } from "./auth";
-import { authenticateToken as localAuthToken, type AuthRequest as LocalAuthRequest } from "./auth";
-import { authenticateToken as supabaseAuthToken, type AuthRequest as SupabaseAuthRequest } from "./supabase-auth";
-import { registerSupabaseAuthRoutes } from "./supabase-routes";
+import { authenticateToken, type AuthRequest } from "./auth";
 
-// Use appropriate auth middleware based on configuration
-const authenticateToken = process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)
-  ? supabaseAuthToken 
-  : localAuthToken;
-
-type AuthRequest = typeof authenticateToken extends typeof supabaseAuthToken 
-  ? SupabaseAuthRequest 
-  : LocalAuthRequest;
+// Use local authentication only
 
 // Configure multer for avatar uploads
 const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
@@ -69,11 +60,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Initialize storage once for all routes
   const db = await getStorage();
   
-  // Register authentication routes based on storage type
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    registerSupabaseAuthRoutes(app);
-  } else {
-    // Use PostgreSQL-based authentication
+  // Use PostgreSQL-based authentication
     app.post('/api/auth/register', async (req, res) => {
       try {
         const { user, token } = await registerUser(req.body);
@@ -103,18 +90,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     app.post('/api/auth/logout', (req, res) => {
       res.json({ message: 'Logout realizado com sucesso' });
     });
-  }
   
-  // Endpoint para fornecer configurações do Supabase para o frontend
+  // Endpoint para fornecer configurações para o frontend
   app.get('/api/config', (req, res) => {
     res.json({
-      supabaseUrl: process.env.SUPABASE_URL || null,
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || null,
-      usesSupabase: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
     });
   });
   
-  // Auth routes now handled by Supabase Auth (see supabase-routes.ts)
 
   // Update user profile
   app.put('/api/auth/profile', authenticateToken, async (req: AuthRequest, res) => {
@@ -187,13 +169,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       // Use direct database queries to clear user data
       if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        // For Supabase storage, we need to implement this manually
-        console.log('Clearing user data for Supabase user:', userId);
         
-        // This would require implementing clear methods in SupabaseStorage
         // For now, return a more helpful message
         res.status(501).json({ 
-          message: "Funcionalidade de limpeza de dados está sendo implementada para Supabase" 
         });
       } else {
         // For PostgreSQL storage
@@ -573,7 +551,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.put("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const updates = insertExerciseSchema.partial().parse(req.body);
+      const updates = insertExerciseSchema.deepPartial().parse(req.body);
       const exercise = await db.updateExercise(req.params.id, updates, req.user!.id);
       if (!exercise) {
         return res.status(404).json({ message: "Exercício não encontrado ou você não tem permissão para editá-lo" });
@@ -700,7 +678,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         if (/^\d+$/.test(repsStr)) {
           processedBody.reps = parseInt(repsStr);
         } else {
-          // Para o Supabase, vamos usar apenas o primeiro número da faixa
           const match = repsStr.match(/^(\d+)/);
           if (match) {
             processedBody.reps = parseInt(match[1]);
@@ -786,12 +763,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get exercises that have been used in completed workouts with weight data
   app.get('/api/exercises-with-progress', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // Check if we have Supabase storage
-      if ('supabase' in db) {
-        const supabaseStorage = db as any;
         
         // Get exercises with actual weight data in completed workouts for authenticated user
-        const { data: exercisesWithWeights, error } = await supabaseStorage.supabase
           .from('workoutLogSets')
           .select(`
             weight,
@@ -871,7 +844,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         
         res.json(exercisesWithProgress);
       } else {
-        // Fallback for non-Supabase storage: return all exercises without weight data
         const exercises = await db.getAllExercises();
         res.json(exercises.map(exercise => ({
           ...exercise,
@@ -891,12 +863,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { exerciseId } = req.params;
       const { limit = 10 } = req.query;
       
-      // Check if we have Supabase storage
-      if ('supabase' in db) {
-        const supabaseStorage = db as any;
         
         // Get workout log exercises for this specific exercise for authenticated user
-        const { data: logExercises, error: logExercisesError } = await supabaseStorage.supabase
           .from('workoutLogExercises')
           .select(`
             *,
@@ -923,7 +891,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           // if (!logExercise.workoutLog?.endTime) continue;
           
           // Get sets for this exercise in this workout
-          const { data: sets } = await supabaseStorage.supabase
             .from('workoutLogSets')
             .select('*')
             .eq('logExerciseId', logExercise.id)
@@ -970,7 +937,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         
         res.json(limitedHistory);
       } else {
-        // Fallback for non-Supabase storage: return empty array
         res.json([]);
       }
     } catch (error) {
@@ -985,8 +951,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { logId, exerciseId, order } = req.body;
       
       // First, get the exercise name from the exercises table
-      const supabaseStorage = db as any;
-      const { data: exercise, error: exerciseError } = await supabaseStorage.supabase
         .from('exercises')
         .select('name')
         .eq('id', exerciseId)
@@ -1005,7 +969,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       const validatedData = insertWorkoutLogExerciseSchema.parse(logExerciseData);
       
-      const { data, error } = await supabaseStorage.supabase
         .from('workoutLogExercises')
         .insert(validatedData)
         .select()
@@ -1044,8 +1007,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { id } = req.params;
       const { weight, reps, completed } = req.body;
       
-      const supabaseStorage = db as any;
-      const { data, error } = await supabaseStorage.supabase
         .from('workoutLogSets')
         .update({ weight, reps, completed })
         .eq('id', id)
@@ -1068,7 +1029,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get all exercises with their recent weight progression - user-specific
   app.get('/api/exercises-weight-summary', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const supabaseStorage = db as any;
       
       
       // No fallback data - return empty when no real data exists
@@ -1079,7 +1039,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       for (const exerciseName of knownExercisesWithData) {
         
         // Buscar o exercício
-        const { data: exercises } = await supabaseStorage.supabase
           .from('exercises')
           .select('*')
           .eq('name', exerciseName)
@@ -1092,7 +1051,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         const exercise = exercises[0];
         
         // Buscar workout logs completos com este exercício
-        const { data: workout_logs } = await supabaseStorage.supabase
           .from('workout_logs')
           .select('*')
           .not('endTime', 'is', null)
@@ -1109,7 +1067,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         
         // Para cada workout, verificar se tem este exercício
         for (const workoutLog of workout_logs) {
-          const { data: logExercises } = await supabaseStorage.supabase
             .from('workoutLogExercises')
             .select('*')
             .eq('exerciseId', exercise.id)
@@ -1119,7 +1076,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
             const logExercise = logExercises[0];
             
             // Buscar sets com peso
-            const { data: sets } = await supabaseStorage.supabase
               .from('workoutLogSets')
               .select('*')
               .eq('logExerciseId', logExercise.id)
@@ -1156,9 +1112,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get daily volume data for progress charts (must be before parameterized routes)
   app.get('/api/workout-logs-daily-volume', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // Use supabase directly like in other endpoints - filter by authenticated user
-      const supabaseStorage = db as any;
-      const { data: logs, error } = await supabaseStorage.supabase
         .from('workout_logs')
         .select('*')
         .eq('user_id', req.user!.id)
@@ -1166,7 +1119,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         .order('startTime');
 
       if (error) {
-        console.error('Supabase error:', error);
         throw error;
       }
 
@@ -1254,9 +1206,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         ? calculateDuration(log.startTime, log.endTime)
         : "Em andamento";
 
-      // Get workout log exercises using Supabase directly to get correct structure
-      const supabaseStorage = db as any; // Cast to access supabase property
-      const { data: logExercises, error: exercisesError } = await supabaseStorage.supabase
         .from('workout_log_exercises')
         .select('*')
         .eq('logId', req.params.id);
@@ -1269,14 +1218,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if (logExercises && logExercises.length > 0) {
         for (const logExercise of logExercises) {
           // Get exercise details
-          const { data: exercise } = await supabaseStorage.supabase
             .from('exercises')
             .select('*')
             .eq('id', logExercise.exerciseId)
             .single();
 
           // Get sets for this exercise
-          const { data: sets, error: setsError } = await supabaseStorage.supabase
             .from('workout_log_sets')
             .select('*')
             .eq('logExerciseId', logExercise.id)
@@ -1334,7 +1281,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
       // If no log exercises found OR no actual sets were performed, use template data
       if ((exercises.length === 0 || !hasActualSets) && log.modeloId) {
-        const { data: templateExercises } = await supabaseStorage.supabase
           .from('workout_template_exercises')
           .select(`
             *,
@@ -1418,7 +1364,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
       
-      // Add userId from authenticated user (using snake_case for Supabase)
       const workoutData = {
         ...req.body,
         user_id: req.user.id

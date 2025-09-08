@@ -6,7 +6,6 @@ GymSeven is a mobile-first workout logging application designed to manage exerci
 
 Preferred communication style: Simple, everyday language.
 Display preferences: Use username (nickname) instead of firstName for user greetings and display.
-Database priority: Supabase is mandatory as the primary database. The project requires SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and SUPABASE_ANON_KEY to be configured before startup.
 
 # System Architecture
 
@@ -20,7 +19,6 @@ The server is built with Express.js and TypeScript, utilizing ESM modules. It pr
 
 ## Data Management
 
-The **MANDATORY database** is **Supabase** (PostgreSQL-based). Supabase is the ONLY supported database for this project, with all operations handled via the `@supabase/supabase-js` SDK. The application requires Supabase configuration: Supabase URL and Service Role Key. The SupabaseStorage class implements all CRUD operations using the Supabase SDK, providing real-time capabilities and cloud persistence. Supabase credentials are securely stored in Replit Secrets. Shared schema definitions are maintained in TypeScript. Data models include users, exercises, workout templates, workout logs, detailed set tracking, and user-specific achievements. Client-side storage uses LocalStorage for offline data persistence and TanStack Query for optimized data fetching.
 
 ## State Management
 
@@ -41,12 +39,10 @@ The project uses TypeScript for type safety, Vite for fast development with hot 
 - **recharts**: Charting library.
 
 ## Data and API
-- **PostgreSQL**: Primary database (Supabase implementation).
 - **drizzle-orm**: Type-safe ORM.
 - **drizzle-zod**: Zod integration for schema validation.
 - **@tanstack/react-query**: Server state management and caching.
 - **pg**: PostgreSQL client.
-- **@supabase/supabase-js**: Primary Supabase SDK for all database operations with real-time features.
 
 ## Forms and Validation
 - **react-hook-form**: Performant form library.

@@ -27,7 +27,6 @@ import {
 import { Reorder } from "framer-motion";
 import { workoutTemplateApi } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/contexts/supabase-auth-context";
 
 const schema = z.object({
   sets: z.number().min(1).max(50),

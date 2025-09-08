@@ -20,7 +20,6 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/supabase-auth-context';
 import { useTheme } from '@/contexts/theme-context';
 import { useNotifications } from '@/hooks/use-notifications';
 import { updateUserSchema, type UpdateUser, changePasswordSchema, type ChangePassword } from '@shared/schema';

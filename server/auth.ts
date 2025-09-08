@@ -47,23 +47,16 @@ export function generateToken(userId: string): string {
   );
 }
 
-// Verify JWT token (supports both local and Supabase tokens)
 export function verifyToken(token: string): { userId: string; type: string } | null {
   try {
-    // Try to decode the token first to check if it's a Supabase token
     const parts = token.split('.');
     if (parts.length === 3) {
       const payload = JSON.parse(atob(parts[1]));
       
-      if (payload.iss && payload.iss.includes('supabase')) {
-        // This is a Supabase token - validate it's not expired
         const now = Math.floor(Date.now() / 1000);
         if (payload.exp && payload.exp < now) {
-          console.log('Supabase token expired');
           return null;
         }
-        // Map the Supabase user ID to our system
-        return { userId: payload.sub, type: 'supabase' };
       }
     }
     
@@ -101,7 +94,6 @@ export async function registerUser(userData: RegisterUser): Promise<{ user: Omit
     password: hashedPassword,
   });
   
-  // Skip user preferences creation for now (table doesn't exist in current Supabase setup)
   console.log('Skipping user preferences creation - using basic user registration');
   
   // Generate token

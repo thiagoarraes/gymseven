@@ -11,13 +11,11 @@ Quando você importar este projeto do GitHub para o Replit:
 
 2. **Adicionar 3 credenciais obrigatórias:**
    ```
-   SUPABASE_URL                 = https://seu-projeto.supabase.co
    SUPABASE_SERVICE_ROLE_KEY    = eyJhbGci...sua-chave-service  
    SUPABASE_ANON_KEY           = eyJhbGci...sua-chave-publica
    ```
 
 3. **Como encontrar suas credenciais:**
-   - Acesse: https://app.supabase.com
    - Vá no seu projeto → `Settings` → `API`
    - Copie: `Project URL` e as duas chaves
 
@@ -57,9 +55,7 @@ node scripts/dev-with-check.js
 ## ⚠️ Troubleshooting
 
 **Erro de credenciais?**
-- Verifique se copiou corretamente do Supabase
 - Chaves devem começar com `eyJ`
-- URL deve ter `.supabase.co`
 
 **App não inicia?**
 - Execute `node scripts/check-secrets.js` primeiro

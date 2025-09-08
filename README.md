@@ -8,16 +8,11 @@ GymSeven é um aplicativo mobile-first moderno para registro de treinos, constru
 1. Fork este projeto ou importe para sua conta do Replit
 2. O Replit instalará automaticamente todas as dependências
 
-### Passo 2: Configurar Supabase (Obrigatório)
-Este aplicativo requer um banco de dados Supabase. Configure os seguintes secrets no Replit:
 
 1. Vá para **Secrets** (🔒) no painel lateral
 2. Adicione estas duas chaves:
-   - `SUPABASE_URL` - URL do seu projeto Supabase
-   - `SUPABASE_SERVICE_ROLE_KEY` - Service Role Key do Supabase
 
 **Como obter as credenciais:**
-1. Acesse [supabase.com](https://supabase.com)
 2. Crie um novo projeto (se não tiver)
 3. Vá em Settings > API
 4. Copie a "URL" e "service_role secret"
@@ -33,7 +28,6 @@ Clique em **Run** - o aplicativo iniciará automaticamente na porta 5000!
 - **Templates de Treino**: Crie templates personalizados com exercícios
 - **Registro de Treinos**: Log detalhado de sessões de treino
 - **Acompanhamento de Progresso**: Visualize sua evolução
-- **Banco de Dados Persistente**: Dados salvos permanentemente no Supabase
 
 ## 🛠 Tecnologias
 
@@ -47,7 +41,6 @@ Clique em **Run** - o aplicativo iniciará automaticamente na porta 5000!
 
 ### Backend
 - Express.js + TypeScript
-- Supabase (PostgreSQL)
 - Drizzle ORM
 - Zod (validação)
 
@@ -61,7 +54,6 @@ Se você ver esse erro, execute:
 
 ### Problemas de conexão com banco
 1. Verifique se `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` estão nos Secrets
-2. Teste a conexão no painel do Supabase
 3. Reinicie o aplicativo
 
 ### Dependências não instaladas
@@ -90,7 +82,6 @@ O Replit deve instalar automaticamente. Se não funcionar:
 ## 🌐 Deploy
 
 Para fazer deploy no Replit:
-1. Configure as credenciais do Supabase nos Secrets
 2. Clique em **Deploy**
 3. Escolha "Autoscale Deployment"
 4. Seu app estará disponível em uma URL `.replit.app`

@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { showSuccess, showError, useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/supabase-auth-context';
 import { registerSchema, type RegisterUser } from '@shared/schema';
 // InputOTP component não disponível, usando implementação personalizada
 
