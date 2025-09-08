@@ -879,6 +879,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       for (const exerciseName of knownExercisesWithData) {
         
         // TODO: Implement proper exercise lookup using storage interface
+        const exercises = await db.getExercises(req.user!.id);
         
         if (!exercises || exercises.length === 0) {
           continue;
@@ -887,6 +888,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         const exercise = exercises[0];
         
         // TODO: Implement proper workout logs lookup using storage interface
+        const workout_logs = await db.getWorkoutLogs(req.user!.id);
         
         if (!workout_logs || workout_logs.length === 0) {
           continue;
@@ -899,12 +901,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         // Para cada workout, verificar se tem este exercício
         for (const workoutLog of workout_logs) {
             // TODO: Implement proper workout log exercises lookup
+          const logExercises = await db.getWorkoutLogExercises(workoutLog.id);
           
           if (logExercises && logExercises.length > 0) {
             const logExercise = logExercises[0];
             
             // Buscar sets com peso
               // TODO: Implement proper sets lookup
+            const sets = await db.getWorkoutLogSets(logExercise.id);
             
             if (sets && sets.length > 0) {
               sessionCount++;

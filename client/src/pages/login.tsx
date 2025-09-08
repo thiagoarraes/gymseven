@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { showSuccess, useToast } from '@/hooks/use-toast';
 import { loginSchema, type LoginUser } from '@shared/schema';
+import { useAuth } from '@/contexts/auth-context-new';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);

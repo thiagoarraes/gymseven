@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { workoutService } from "@/services/workout.service";
+import { workoutService } from "../services/workout.service";
 import { useAuth } from "@/contexts/auth-context-new";
 
 const workoutFormSchema = z.object({
