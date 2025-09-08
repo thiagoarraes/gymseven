@@ -436,7 +436,7 @@ export default function Dashboard() {
           {/* Header Section */}
           <div className="relative z-10 text-center">
             <h2 className="text-2xl sm:text-3xl font-black text-foreground bg-gradient-to-r from-foreground via-primary/80 to-foreground bg-clip-text mb-2">
-              Olá, {user?.user_metadata?.username || user?.email || 'Usuário'}!🔥
+              Olá, {user?.username || user?.email || 'Usuário'}!🔥
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg font-medium">
               Pronto para progredir carga hoje?
@@ -486,7 +486,7 @@ export default function Dashboard() {
                 {/* Workout Name and Date */}
                 <div>
                   <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                    {(recentWorkouts[0] as any)?.templateName || recentWorkouts[0]?.name || "Treino personalizado"}
+                    {(recentWorkouts[0] as any)?.templateName || recentWorkouts[0]?.nome || "Treino personalizado"}
                   </h4>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Calendar className="w-4 h-4" />
@@ -836,7 +836,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div className="font-medium text-foreground">
-                        {(workout as any).templateName || workout.name || "Treino personalizado"}
+                        {(workout as any).templateName || workout.nome || "Treino personalizado"}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {formatDate(workout.startTime || workout.endTime)}
