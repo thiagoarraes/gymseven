@@ -809,7 +809,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const logExerciseData = {
         logId,
         exerciseId,
-        exerciseName: exercise.name,
+        exerciseName: exercise.nome,
         order: order || 1
       };
       
@@ -919,8 +919,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           exerciseSummaries.push({
             exerciseId: exercise.id,
             id: exercise.id,
-            name: exercise.name,
-            muscleGroup: exercise.muscleGroup,
+            name: exercise.nome,
+            muscleGroup: exercise.grupoMuscular,
             lastWeight,
             sessionCount
           });
@@ -1045,8 +1045,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
           const exerciseData = {
             id: logExercise.exerciseId,
-            name: exercise?.name || 'Exercício desconhecido',
-            muscleGroup: exercise?.muscleGroup || 'N/A',
+            name: exercise?.nome || 'Exercício desconhecido',
+            muscleGroup: exercise?.grupoMuscular || 'N/A',
             sets: sets || []
           };
 
@@ -1063,7 +1063,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
                 const weight = parseFloat(set.weight) || 0;
                 const reps = parseInt(set.reps) || 0;
                 
-                console.log(`Processing set: ${weight}kg × ${reps} reps for exercise ${exercise?.name}`);
+                console.log(`Processing set: ${weight}kg × ${reps} reps for exercise ${exercise?.nome}`);
                 
                 // Skip volume calculation for cardio exercises and exercises with no weight
                 if (weight > 0 && reps > 0) {
