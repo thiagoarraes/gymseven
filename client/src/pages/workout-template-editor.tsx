@@ -888,12 +888,12 @@ export default function WorkoutTemplateEditor() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-white leading-tight group-hover:text-blue-300 transition-colors">
-                            {exercise.name}
+                            {exercise.nome || exercise.name}
                           </h4>
                           <div className="flex items-center space-x-2 mt-1">
                             <div className="w-2 h-2 rounded-full bg-blue-400"></div>
                             <span className="text-sm text-blue-300 font-medium">
-                              {exercise.muscleGroup}
+                              {exercise.grupoMuscular || exercise.muscleGroup}
                             </span>
                           </div>
                         </div>
