@@ -12,7 +12,7 @@ async function syncUserFromAuthToDatabase(
     // Use service role client to bypass RLS policies
     // First check by ID
     const { data: existingUserById } = await supabase
-      .from('users')
+      .from('usuarios')
       .select('id, email')
       .eq('id', userId)
       .single();
@@ -24,7 +24,7 @@ async function syncUserFromAuthToDatabase(
 
     // Then check by email to handle orphaned records
     const { data: existingUserByEmail } = await supabase
-      .from('users')
+      .from('usuarios')
       .select('id, email')
       .eq('email', email)
       .single();
@@ -33,7 +33,7 @@ async function syncUserFromAuthToDatabase(
       // Delete the orphaned record and recreate with correct ID
       console.log('🧹 Found orphaned user record with same email, cleaning up...');
       const { error: deleteError } = await supabase
-        .from('users')
+        .from('usuarios')
         .delete()
         .eq('email', email);
         
@@ -46,7 +46,7 @@ async function syncUserFromAuthToDatabase(
 
     // Check if username is already taken and make it unique
     const { data: usernameExists } = await supabase
-      .from('users')
+      .from('usuarios')
       .select('username')
       .eq('username', userData.username)
       .single();
@@ -58,15 +58,15 @@ async function syncUserFromAuthToDatabase(
     // Create user in database with service role (bypasses RLS)
     // Only insert essential fields to avoid schema cache issues
     const { data, error } = await supabase
-      .from('users')
+      .from('usuarios')
       .insert({
         id: userId, // Use the same ID from Supabase Auth
         email: email,
         username: finalUsername,
-        password: 'supabase_managed', // Placeholder
-        first_name: userData.firstName || '',
-        last_name: userData.lastName || ''
+        firstName: userData.firstName || null,
+        lastName: userData.lastName || null
         // Let all other fields use their database defaults
+        // Note: password field doesn't exist - Supabase Auth manages authentication
       })
       .select()
       .single();
