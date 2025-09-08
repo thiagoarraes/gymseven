@@ -261,7 +261,7 @@ export default function WorkoutTemplateEditor() {
   }, [templateExercises]);
 
   useEffect(() => {
-    if (template && 'name' in template) {
+    if (template && typeof template === 'object' && template !== null && 'name' in template) {
       setTempTemplateName((template as any).name);
     }
   }, [template]);
