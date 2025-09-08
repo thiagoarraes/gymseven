@@ -551,7 +551,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.put("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const updates = insertExerciseSchema.partial().parse(req.body);
+      const validatedData = insertExerciseSchema.parse(req.body);
+      const updates = validatedData;
       const exercise = await db.updateExercise(req.params.id, updates, req.user!.id);
       if (!exercise) {
         return res.status(404).json({ message: "Exercício não encontrado ou você não tem permissão para editá-lo" });
@@ -901,7 +902,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         // Para cada workout, verificar se tem este exercício
         for (const workoutLog of workout_logs) {
             // TODO: Implement proper workout log exercises lookup
-          const logExercises = await db.getWorkoutLogExercises(workoutLog.id);
+          // TODO: Implement getWorkoutLogExercises method in storage interface
+          const logExercises: any[] = [];
           
           if (logExercises && logExercises.length > 0) {
             const logExercise = logExercises[0];
