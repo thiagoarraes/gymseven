@@ -1037,32 +1037,6 @@ export default function WorkoutTemplateEditor() {
                               </div>
                             </div>
                           </div>
-                          
-                          {/* Quick Add Button */}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className={`transition-all duration-200 ${
-                              isSelected 
-                                ? 'bg-blue-500/20 border-blue-400/60 text-blue-300 hover:bg-blue-500/30'
-                                : 'bg-slate-700/40 border-slate-600/50 hover:bg-blue-500/20 hover:border-blue-400/60 text-slate-400 hover:text-blue-300'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent card selection
-                              const exerciseData = {
-                                exerciseId: exercise.id,
-                                sets: 3,
-                                reps: "8-12",
-                                weight: null,
-                                order: reorderedExercises.length + 1,
-                              };
-                              addExerciseMutation.mutate(exerciseData);
-                            }}
-                            disabled={addExerciseMutation.isPending}
-                            title="Adicionar direto ao treino"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
                         </div>
                       </CardContent>
                     </Card>
