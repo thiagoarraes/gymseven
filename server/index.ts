@@ -91,12 +91,10 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app, true);
   
-  // Setup new refactored API routes (v2) alongside legacy routes - TEMPORARILY DISABLED
-  // The v2 API is causing validation conflicts with the main working API
-  // TODO: Re-enable after standardizing field names
+  // Setup new refactored API routes (v2) alongside legacy routes
   try {
-    // setupV2Routes(app);
-    console.log('⚠️ API v2 routes temporarily disabled to prevent conflicts');
+    setupV2Routes(app);
+    console.log('✅ API v2 routes enabled successfully');
   } catch (error) {
     console.log('⚠️ API v2 routes failed to initialize:', error);
   }

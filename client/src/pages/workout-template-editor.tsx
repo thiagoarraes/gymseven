@@ -136,7 +136,7 @@ export default function WorkoutTemplateEditor() {
   });
 
   const { data: templateExercises = [], isLoading: exercisesLoading, refetch: refetchExercises } = useQuery({
-    queryKey: ["/api/workout-templates", id, "exercises"],
+    queryKey: ["/api/v2/workouts/templates", id, "exercises"],
     queryFn: () => workoutTemplateApi.getExercises(id!),
     enabled: !!id,
     staleTime: 0, // Sempre buscar dados frescos
@@ -184,7 +184,7 @@ export default function WorkoutTemplateEditor() {
     },
     onSuccess: async () => {
       // Force cache invalidation and immediate refetch
-      queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.removeQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       await refetchExercises(); // Force immediate refetch
       setIsExerciseFormOpen(false);
       // Only show toast for single exercise additions here, not in the loop
@@ -1185,7 +1185,7 @@ export default function WorkoutTemplateEditor() {
                     setMuscleGroupFilter('all');
                     
                     // Force a final refetch
-                    await queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+                    await queryClient.removeQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
                     await refetchExercises();
                     
                     if (successCount > 0) {

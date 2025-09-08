@@ -51,7 +51,7 @@ export const workoutTemplateApi = {
   },
 
   getExercises: async (templateId: string) => {
-    const response = await apiRequest("GET", `/api/workout-templates/${templateId}/exercises`);
+    const response = await apiRequest("GET", `/api/v2/workouts/templates/${templateId}/exercises`);
     return response.json();
   },
 
