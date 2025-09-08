@@ -15,6 +15,7 @@ import { z } from "zod";
 import { exerciseApi, exerciseProgressApi } from "@/lib/api";
 import { MUSCLE_GROUPS } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context-new";
 
 const exerciseFormSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -25,8 +26,8 @@ type ExerciseFormValues = z.infer<typeof exerciseFormSchema>;
 
 interface Exercise {
   id: string;
-  name: string;
-  muscleGroup: string;
+  nome: string;
+  grupoMuscular: string;
 }
 
 // Função para obter ícone e cores do grupo muscular
@@ -202,11 +203,11 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     }
   };
 
-  const handleEdit = (exercise: Exercise) => {
+  const handleEdit = (exercise: any) => {
     setEditingExercise(exercise);
     form.reset({
-      name: exercise.name,
-      muscleGroup: exercise.muscleGroup,
+      name: exercise.nome,
+      muscleGroup: exercise.grupoMuscular,
     });
     setIsDialogOpen(true);
   };
@@ -238,8 +239,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   };
 
   const filteredExercises = enhancedExercises.filter((exercise) => {
-    const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.muscleGroup === selectedMuscleGroup;
+    const matchesSearch = exercise.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.grupoMuscular === selectedMuscleGroup;
     return matchesSearch && matchesMuscleGroup;
   });
 
@@ -523,16 +524,16 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-foreground text-lg leading-tight truncate">
-                          {exercise.name}
+                          {exercise.nome}
                         </h4>
                         {/* Improved Muscle Group Badge */}
                         <div className="mt-2">
                           {(() => {
-                            const groupInfo = getMuscleGroupInfo(exercise.muscleGroup);
+                            const groupInfo = getMuscleGroupInfo(exercise.grupoMuscular);
                             return (
                               <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
                                 <span className="text-xs font-semibold tracking-wide">
-                                  {exercise.muscleGroup}
+                                  {exercise.grupoMuscular}
                                 </span>
                               </div>
                             );
