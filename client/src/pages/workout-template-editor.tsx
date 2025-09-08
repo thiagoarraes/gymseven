@@ -141,6 +141,8 @@ export default function WorkoutTemplateEditor() {
     enabled: !!id,
     staleTime: 0, // Sempre buscar dados frescos
     gcTime: 0, // Não manter cache
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   const { data: allExercises = [] } = useQuery({
@@ -180,14 +182,12 @@ export default function WorkoutTemplateEditor() {
         return { success: true, exerciseId: exerciseData.exerciseId };
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-      refetchExercises(); // Force immediate refetch
+    onSuccess: async () => {
+      // Force cache invalidation and immediate refetch
+      queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      await refetchExercises(); // Force immediate refetch
       setIsExerciseFormOpen(false);
-      toast({
-        title: "Exercício adicionado!",
-        description: "O exercício foi adicionado ao treino.",
-      });
+      // Only show toast for single exercise additions here, not in the loop
     },
     onError: (error) => {
       console.error("Error adding single exercise:", error);
@@ -1169,7 +1169,7 @@ export default function WorkoutTemplateEditor() {
                               },
                               onError: (error) => {
                                 console.error('Error adding exercise:', error);
-                                reject(error);
+                                resolve(false); // Don't reject, just continue
                               }
                             });
                           });
@@ -1180,11 +1180,15 @@ export default function WorkoutTemplateEditor() {
                     }
                     
                     // Clean up and show result
+                    setSelectedExercises(new Set());
+                    setShowExerciseSelector(false);
+                    setMuscleGroupFilter('all');
+                    
+                    // Force a final refetch
+                    await queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+                    await refetchExercises();
+                    
                     if (successCount > 0) {
-                      setSelectedExercises(new Set());
-                      setShowExerciseSelector(false);
-                      setMuscleGroupFilter('all');
-                      
                       if (successCount === totalExercises) {
                         toast({
                           title: `${successCount} exercício${successCount > 1 ? 's' : ''} adicionado${successCount > 1 ? 's' : ''}!`,
