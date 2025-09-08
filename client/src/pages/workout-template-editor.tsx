@@ -27,6 +27,7 @@ import {
 import { Reorder } from "framer-motion";
 import { workoutTemplateApi } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/auth-context-new";
 
 const schema = z.object({
   sets: z.number().min(1).max(50),
@@ -79,7 +80,7 @@ export default function WorkoutTemplateEditor() {
 
   const { data: allExercises = [] } = useQuery({
     queryKey: ["/api/exercicios"],
-  });
+  }) as { data: any[] };
 
   // Mutations
   const updateTemplateNameMutation = useMutation({
@@ -260,19 +261,19 @@ export default function WorkoutTemplateEditor() {
   }, [templateExercises]);
 
   useEffect(() => {
-    if (template?.name) {
-      setTempTemplateName(template.name);
+    if (template && 'name' in template) {
+      setTempTemplateName((template as any).name);
     }
-  }, [template?.name]);
+  }, [template]);
 
   // Handlers
   const handleTemplateNameEdit = () => {
     setIsEditingTemplateName(true);
-    setTempTemplateName(template?.name || "");
+    setTempTemplateName((template as any)?.name || "");
   };
 
   const handleTemplateNameSave = () => {
-    if (tempTemplateName.trim() && tempTemplateName !== template?.name) {
+    if (tempTemplateName.trim() && tempTemplateName !== (template as any)?.name) {
       updateTemplateNameMutation.mutate(tempTemplateName.trim());
     } else {
       setIsEditingTemplateName(false);
@@ -280,7 +281,7 @@ export default function WorkoutTemplateEditor() {
   };
 
   const handleTemplateNameCancel = () => {
-    setTempTemplateName(template?.name || "");
+    setTempTemplateName((template as any)?.name || "");
     setIsEditingTemplateName(false);
   };
 
@@ -474,12 +475,12 @@ export default function WorkoutTemplateEditor() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors leading-tight">
-                        {template?.name || "Novo Treino"}
+                        {(template as any)?.name || "Novo Treino"}
                       </h1>
                       <Edit3 className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors opacity-60 group-hover:opacity-100" />
                     </div>
                     <p className="text-slate-400 text-lg leading-relaxed">
-                      {template?.description || "Toque para editar o nome e descrição do treino"}
+                      {(template as any)?.description || "Toque para editar o nome e descrição do treino"}
                     </p>
                   </div>
                 </div>
@@ -869,8 +870,8 @@ export default function WorkoutTemplateEditor() {
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-3">
-              {allExercises
-                .filter(exercise => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
+              {(allExercises as any[])
+                .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .map((exercise: any) => (
                   <Card 
                     key={exercise.id} 
@@ -904,7 +905,7 @@ export default function WorkoutTemplateEditor() {
                     </CardContent>
                   </Card>
                 ))}
-              {allExercises.filter(exercise => !reorderedExercises.some(ex => ex.exerciseId === exercise.id)).length === 0 && (
+              {(allExercises as any[]).filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id)).length === 0 && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-slate-800/50 flex items-center justify-center">
                     <Dumbbell className="w-8 h-8 text-slate-400" />
