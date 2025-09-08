@@ -173,11 +173,42 @@ export const insertExerciseSchema = z.object({
   path: ["grupoMuscular"]
 });
 
-export const insertWorkoutTemplateSchema = createInsertSchema(modelosTreino).omit({
-  id: true,
-  createdAt: true,
-}).extend({
+export const insertWorkoutTemplateSchema = z.object({
+  // Accept BOTH English and Portuguese field names
+  name: z.string().min(1).optional(),
+  nome: z.string().min(1).optional(),
   description: z.string().optional().nullable(),
+  descricao: z.string().optional().nullable(),
+  usuarioId: z.string().optional(),
+})
+.transform((data) => {
+  // Transform English to Portuguese
+  const result: any = {};
+  
+  // Handle name/nome
+  if (data.name) {
+    result.nome = data.name;
+  } else if (data.nome) {
+    result.nome = data.nome;
+  }
+  
+  // Handle description/descricao
+  if (data.description !== undefined) {
+    result.descricao = data.description;
+  } else if (data.descricao !== undefined) {
+    result.descricao = data.descricao;
+  }
+  
+  // Handle usuarioId
+  if (data.usuarioId) {
+    result.usuarioId = data.usuarioId;
+  }
+  
+  return result;
+})
+.refine((data) => data.nome, {
+  message: "Nome é obrigatório",
+  path: ["nome"]
 });
 
 export const insertWorkoutTemplateExerciseSchema = createInsertSchema(exerciciosModeloTreino).omit({
