@@ -423,6 +423,19 @@ export default function WorkoutTemplateEditor() {
                 </div>
               )}
               
+              {/* Reorder Button for multiple exercises */}
+              {reorderedExercises.length > 1 && (
+                <Button
+                  onClick={openReorderModal}
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-800 rounded-lg px-2 py-1.5 transition-all duration-300"
+                  title="Reordenar exercícios"
+                >
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              
               <Button
                 variant="ghost"
                 size="sm"
@@ -431,16 +444,6 @@ export default function WorkoutTemplateEditor() {
                 title="Atualizar dados"
               >
                 🔄
-              </Button>
-              
-              {/* Quick Add Button */}
-              <Button
-                onClick={() => setShowExerciseSelector(true)}
-                size="sm"
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" />
-                Adicionar
               </Button>
             </div>
           </div>
@@ -515,20 +518,6 @@ export default function WorkoutTemplateEditor() {
           </div>
         )}
         
-        {/* Reorder Button for multiple exercises */}
-        {reorderedExercises.length > 1 && (
-          <div className="flex justify-end">
-            <Button
-              onClick={openReorderModal}
-              variant="outline"
-              size="sm"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800 rounded-lg px-3 py-2 transition-all duration-300"
-            >
-              <ArrowUpDown className="w-4 h-4 mr-2" />
-              Reordenar
-            </Button>
-          </div>
-        )}
 
         {/* Exercise List */}
         {exercisesLoading ? (
