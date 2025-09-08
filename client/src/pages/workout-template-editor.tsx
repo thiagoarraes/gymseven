@@ -868,6 +868,7 @@ export default function WorkoutTemplateEditor() {
             <div className="space-y-3">
               {(allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
+                .sort((a: any, b: any) => (a.nome || a.name || '').localeCompare(b.nome || b.name || '', 'pt-BR'))
                 .map((exercise: any) => (
                   <Card 
                     key={exercise.id} 

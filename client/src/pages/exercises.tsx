@@ -238,11 +238,13 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     setDraggedExercise(exerciseId);
   };
 
-  const filteredExercises = enhancedExercises.filter((exercise) => {
-    const matchesSearch = exercise.nome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.grupoMuscular === selectedMuscleGroup;
-    return matchesSearch && matchesMuscleGroup;
-  });
+  const filteredExercises = enhancedExercises
+    .filter((exercise) => {
+      const matchesSearch = exercise.nome.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.grupoMuscular === selectedMuscleGroup;
+      return matchesSearch && matchesMuscleGroup;
+    })
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
   const resetForm = () => {
     setEditingExercise(null);
