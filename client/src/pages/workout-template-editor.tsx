@@ -166,16 +166,37 @@ export default function WorkoutTemplateEditor() {
   const addExerciseMutation = useMutation({
     mutationFn: async (exerciseData: any) => {
       const response = await apiRequest("POST", `/api/v2/workouts/templates/exercises`, { ...exerciseData, templateId: id });
-      return response.json();
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        return await response.json();
+      } else {
+        // If not JSON, just return success indicator
+        return { success: true, exerciseId: exerciseData.exerciseId };
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      refetchExercises(); // Force immediate refetch
       setIsExerciseFormOpen(false);
       toast({
         title: "Exercício adicionado!",
         description: "O exercício foi adicionado ao treino.",
       });
     },
+    onError: (error) => {
+      console.error("Error adding single exercise:", error);
+      toast({
+        title: "Erro ao adicionar exercício",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    }
   });
 
   // Mutation for adding multiple exercises at once
