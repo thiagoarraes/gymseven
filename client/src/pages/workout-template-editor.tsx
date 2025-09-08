@@ -975,7 +975,7 @@ export default function WorkoutTemplateEditor() {
             )}
           </DialogHeader>
           <div className="flex-1 overflow-y-auto py-4">
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
               {(allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
