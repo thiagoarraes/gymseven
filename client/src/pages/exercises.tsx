@@ -486,29 +486,31 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                 <CardContent className="p-0">
                   {/* Header Section */}
                   <div className="p-4 pb-3 relative">
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <div className="flex space-x-1">
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10">
+                      <div className="flex space-x-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg p-1.5 border border-blue-200/50 dark:border-slate-600/50 shadow-lg">
                         {!selectionMode && (
                           <>
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="w-8 h-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/20"
+                              className="w-8 h-8 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-100/80 dark:hover:bg-blue-500/20 rounded-md transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(exercise);
                               }}
+                              title="Editar exercício"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="w-8 h-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                              className="w-8 h-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-100/80 dark:hover:bg-red-500/20 rounded-md transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDelete(exercise.id);
                               }}
+                              title="Excluir exercício"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -518,7 +520,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                     </div>
 
                     {/* Exercise Icon and Title */}
-                    <div className="flex items-start space-x-3 mb-3">
+                    <div className="flex items-start space-x-3 mb-3 pr-20">
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30">
                         <Dumbbell className="w-6 h-6 text-blue-400" />
                       </div>
