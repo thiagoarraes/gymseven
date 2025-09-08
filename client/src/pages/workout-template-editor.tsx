@@ -435,16 +435,6 @@ export default function WorkoutTemplateEditor() {
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </Button>
               )}
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleForceRefresh}
-                className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg px-2 py-1.5"
-                title="Atualizar dados"
-              >
-                🔄
-              </Button>
             </div>
           </div>
           
