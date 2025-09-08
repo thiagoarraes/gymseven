@@ -53,10 +53,9 @@ export function verifyToken(token: string): { userId: string; type: string } | n
     if (parts.length === 3) {
       const payload = JSON.parse(atob(parts[1]));
       
-        const now = Math.floor(Date.now() / 1000);
-        if (payload.exp && payload.exp < now) {
-          return null;
-        }
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        return null;
       }
     }
     

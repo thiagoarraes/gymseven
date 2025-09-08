@@ -763,94 +763,16 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get exercises that have been used in completed workouts with weight data
   app.get('/api/exercises-with-progress', authenticateToken, async (req: AuthRequest, res) => {
     try {
-        
-        // Get exercises with actual weight data in completed workouts for authenticated user
-          .from('workoutLogSets')
-          .select(`
-            weight,
-            workoutLogExercise:workoutLogExercises!inner(
-              exerciseId,
-              exercise:exercises!inner(*),
-              workoutLog:workoutLogs!inner(startTime, endTime, name, user_id)
-            )
-          `)
-          .gt('weight', 0)
-          .eq('workoutLogExercises.workoutLogs.user_id', req.user!.id)
-          .not('workoutLogExercises.workoutLogs.endTime', 'is', null); // Only completed workouts
-        
-        if (error) {
-          console.error('Error fetching exercises with weights:', error);
-          throw error;
-        }
-        
-        // Group by exercise and calculate stats
-        const exerciseMap = new Map();
-        
-        for (const set of exercisesWithWeights || []) {
-          const exerciseId = set.workoutLogExercise.exerciseId;
-          const exercise = set.workoutLogExercise.exercise;
-          const workoutDate = set.workoutLogExercise.workoutLog.startTime;
-          const weight = set.weight;
-          
-          if (exercise && weight > 0) {
-            if (!exerciseMap.has(exerciseId)) {
-              exerciseMap.set(exerciseId, {
-                ...exercise,
-                weights: [],
-                lastUsed: workoutDate
-              });
-            }
-            
-            const exerciseData = exerciseMap.get(exerciseId);
-            exerciseData.weights.push({
-              weight,
-              date: workoutDate
-            });
-            
-            // Update last used date if this workout is more recent
-            if (new Date(workoutDate) > new Date(exerciseData.lastUsed)) {
-              exerciseData.lastUsed = workoutDate;
-            }
-          }
-        }
-        
-        // Calculate stats for each exercise
-        const exercisesWithProgress = Array.from(exerciseMap.values())
-          .map((exercise: any) => {
-            // Sort weights by date and get the latest and maximum
-            const sortedWeights = exercise.weights.sort((a: any, b: any) => 
-              new Date(b.date).getTime() - new Date(a.date).getTime()
-            );
-            
-            const maxWeight = Math.max(...exercise.weights.map((w: any) => w.weight));
-            const totalSessions = [...new Set(exercise.weights.map((w: any) => w.date.split('T')[0]))].length;
-            
-            return {
-              id: exercise.id,
-              name: exercise.name,
-              muscleGroup: exercise.muscleGroup,
-              description: exercise.description,
-              imageUrl: exercise.imageUrl,
-              videoUrl: exercise.videoUrl,
-              createdAt: exercise.createdAt,
-              lastWeight: sortedWeights[0].weight,
-              maxWeight: maxWeight,
-              lastUsed: exercise.lastUsed,
-              totalSessions: totalSessions
-            };
-          })
-          .filter((exercise: any) => exercise.lastWeight > 0) // Only exercises with actual weight data
-          .sort((a: any, b: any) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
-        
-        res.json(exercisesWithProgress);
-      } else {
-        const exercises = await db.getAllExercises();
-        res.json(exercises.map(exercise => ({
-          ...exercise,
-          lastWeight: 0,
-          lastUsed: exercise.createdAt || new Date().toISOString()
-        })));
-      }
+      // For now, return all exercises with basic data since we don't have the complex query implemented
+      // TODO: Implement proper progress tracking by joining workout logs, exercises, and sets
+      const exercises = await db.getAllExercises();
+      res.json(exercises.map(exercise => ({
+        ...exercise,
+        lastWeight: 0,
+        maxWeight: 0,
+        lastUsed: exercise.createdAt || new Date().toISOString(),
+        totalSessions: 0
+      })));
     } catch (error) {
       console.error('Error fetching exercises with progress:', error);
       res.status(500).json({ message: "Erro ao buscar exercícios com progresso" });
@@ -863,82 +785,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { exerciseId } = req.params;
       const { limit = 10 } = req.query;
       
-        
-        // Get workout log exercises for this specific exercise for authenticated user
-          .from('workoutLogExercises')
-          .select(`
-            *,
-            workoutLog:workoutLogs!inner(*, user_id)
-          `)
-          .eq('exerciseId', exerciseId)
-          .eq('workoutLogs.user_id', req.user!.id)
-          .order('order');
-
-        if (logExercisesError) {
-          console.error('Error fetching log exercises:', logExercisesError);
-          throw logExercisesError;
-        }
-
-        if (!logExercises || logExercises.length === 0) {
-          return res.json([]);
-        }
-
-        // Get weight history for each workout session
-        const weightHistory = [];
-        
-        for (const logExercise of logExercises) {
-          // Include all workouts (not just completed ones) to show progress
-          // if (!logExercise.workoutLog?.endTime) continue;
-          
-          // Get sets for this exercise in this workout
-            .from('workoutLogSets')
-            .select('*')
-            .eq('logExerciseId', logExercise.id)
-            .not('weight', 'is', null)
-            .order('setNumber');
-          
-          if (sets && sets.length > 0) {
-            // Find the maximum weight used in this workout
-            const maxWeight = Math.max(...sets.map((set: any) => set.weight || 0));
-            
-            if (maxWeight > 0) {
-              const workoutDate = new Date(logExercise.workoutLog.startTime);
-              // Clean workout name to remove date patterns (DD/MM/YYYY or YYYY-MM-DD)
-              const cleanWorkoutName = logExercise.workoutLog.name
-                .replace(/\s*-\s*\d{2}\/\d{2}\/\d{4}.*$/, '') // Remove " - DD/MM/YYYY" and everything after
-                .replace(/\s*-\s*\d{4}-\d{2}-\d{2}.*$/, '') // Remove " - YYYY-MM-DD" and everything after
-                .replace(/\d{2}\/\d{2}\/\d{4}.*$/, '') // Remove "DD/MM/YYYY" and everything after
-                .replace(/\d{4}-\d{2}-\d{2}.*$/, '') // Remove "YYYY-MM-DD" and everything after
-                .replace(/\d{2}\/\d{2}\d{8,}.*$/, '') // Remove concatenated date patterns
-                .trim();
-
-              const dataPoint = {
-                date: workoutDate.toLocaleDateString('pt-BR'),
-                workoutDate: workoutDate.toISOString(), // Add ISO date for proper parsing
-                maxWeight: maxWeight, // Change from 'weight' to 'maxWeight' for consistency
-                weight: maxWeight, // Keep for backwards compatibility
-                workoutName: cleanWorkoutName,
-                totalSets: sets.length,
-                allWeights: sets.map((set: any) => set.weight).filter((w: any) => w > 0)
-              };
-              
-              weightHistory.push(dataPoint);
-            }
-          }
-        }
-        
-        // Sort by date (newest first) so the most recent entry is always index 0
-        weightHistory.sort((a, b) => {
-          const dateA = a.date.split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
-          const dateB = b.date.split('/').reverse().join('-');
-          return new Date(dateB).getTime() - new Date(dateA).getTime(); // Reversed order for newest first
-        });
-        const limitedHistory = weightHistory.slice(0, parseInt(limit as string)); // Take the most recent N entries from the start
-        
-        res.json(limitedHistory);
-      } else {
-        res.json([]);
-      }
+      // For now, return empty array since we don't have the complex query implemented
+      // TODO: Implement proper weight history tracking by joining workout logs, exercises, and sets
+      res.json([]);
     } catch (error) {
       console.error('Error fetching exercise weight history:', error);
       res.status(500).json({ message: "Erro ao buscar histórico de peso do exercício" });
@@ -951,12 +800,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { logId, exerciseId, order } = req.body;
       
       // First, get the exercise name from the exercises table
-        .from('exercises')
-        .select('name')
-        .eq('id', exerciseId)
-        .single();
+      const exercise = await db.getExercise(exerciseId);
       
-      if (exerciseError || !exercise) {
+      if (!exercise) {
         return res.status(404).json({ message: "Exercício não encontrado" });
       }
       
@@ -969,13 +815,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       const validatedData = insertWorkoutLogExerciseSchema.parse(logExerciseData);
       
-        .from('workoutLogExercises')
-        .insert(validatedData)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      res.status(201).json(data);
+      // TODO: Implement createWorkoutLogExercise in storage interface
+      res.status(501).json({ message: "Método não implementado" });
     } catch (error) {
       console.error('Error creating workout log exercise:', error);
       res.status(400).json({ message: "Erro ao criar exercício do treino" });
@@ -1007,14 +848,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       const { id } = req.params;
       const { weight, reps, completed } = req.body;
       
-        .from('workoutLogSets')
-        .update({ weight, reps, completed })
-        .eq('id', id)
-        .select()
-        .single();
+      const result = await db.updateWorkoutLogSet(id, { weight, reps, completed });
       
-      if (error) throw error;
-      res.json(data);
+      if (!result) {
+        return res.status(404).json({ message: "Série não encontrada" });
+      }
+      
+      res.json(result);
     } catch (error) {
       console.error('Error updating workout log set:', error);
       res.status(500).json({ message: "Erro ao atualizar série do treino" });
@@ -1038,11 +878,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       for (const exerciseName of knownExercisesWithData) {
         
-        // Buscar o exercício
-          .from('exercises')
-          .select('*')
-          .eq('name', exerciseName)
-          .limit(1);
+        // TODO: Implement proper exercise lookup using storage interface
         
         if (!exercises || exercises.length === 0) {
           continue;
@@ -1050,12 +886,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         
         const exercise = exercises[0];
         
-        // Buscar workout logs completos com este exercício
-          .from('workout_logs')
-          .select('*')
-          .not('endTime', 'is', null)
-          .order('startTime', { ascending: false })
-          .limit(5);
+        // TODO: Implement proper workout logs lookup using storage interface
         
         if (!workout_logs || workout_logs.length === 0) {
           continue;
@@ -1067,19 +898,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         
         // Para cada workout, verificar se tem este exercício
         for (const workoutLog of workout_logs) {
-            .from('workoutLogExercises')
-            .select('*')
-            .eq('exerciseId', exercise.id)
-            .eq('workoutLogId', workoutLog.id);
+            // TODO: Implement proper workout log exercises lookup
           
           if (logExercises && logExercises.length > 0) {
             const logExercise = logExercises[0];
             
             // Buscar sets com peso
-              .from('workoutLogSets')
-              .select('*')
-              .eq('logExerciseId', logExercise.id)
-              .not('weight', 'is', null);
+              // TODO: Implement proper sets lookup
             
             if (sets && sets.length > 0) {
               sessionCount++;
@@ -1112,22 +937,16 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get daily volume data for progress charts (must be before parameterized routes)
   app.get('/api/workout-logs-daily-volume', authenticateToken, async (req: AuthRequest, res) => {
     try {
-        .from('workout_logs')
-        .select('*')
-        .eq('user_id', req.user!.id)
-        .not('endTime', 'is', null) // Only completed workouts
-        .order('startTime');
+      const logs = await db.getWorkoutLogs(req.user!.id);
+      
+      // Filter only completed workouts
+      const completedLogs = logs.filter(log => log.endTime);
 
-      if (error) {
-        throw error;
-      }
-
-      if (!logs || logs.length === 0) {
-        // Return empty array when no real data exists
+      if (completedLogs.length === 0) {
         return res.json([]);
       }
 
-      const dailyData = logs.map((log: any) => {
+      const dailyData = completedLogs.map((log: any) => {
         const date = new Date(log.startTime).toDateString();
         let totalVolume = 480; // Use consistent volume with dashboard
         
@@ -1206,9 +1025,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         ? calculateDuration(log.startTime, log.endTime)
         : "Em andamento";
 
-        .from('workout_log_exercises')
-        .select('*')
-        .eq('logId', req.params.id);
+      // TODO: Implement getWorkoutLogExercises in storage interface
+      const logExercises: any[] = [];
 
       let exercises: any[] = [];
       let totalSets = 0;
@@ -1218,22 +1036,12 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if (logExercises && logExercises.length > 0) {
         for (const logExercise of logExercises) {
           // Get exercise details
-            .from('exercises')
-            .select('*')
-            .eq('id', logExercise.exerciseId)
-            .single();
+          const exercise = await db.getExercise(logExercise.exerciseId);
 
           // Get sets for this exercise
-            .from('workout_log_sets')
-            .select('*')
-            .eq('logExerciseId', logExercise.id)
-            .order('setNumber');
+          const sets = await db.getWorkoutLogSets(logExercise.id);
           
-          if (setsError) {
-            console.error('Error fetching sets for exercise:', logExercise.id, setsError);
-          } else {
-            console.log(`Found ${sets?.length || 0} sets for exercise ${logExercise.id}:`, sets);
-          }
+          console.log(`Found ${sets?.length || 0} sets for exercise ${logExercise.id}:`, sets);
 
           const exerciseData = {
             id: logExercise.exerciseId,
@@ -1281,13 +1089,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
       // If no log exercises found OR no actual sets were performed, use template data
       if ((exercises.length === 0 || !hasActualSets) && log.modeloId) {
-          .from('workout_template_exercises')
-          .select(`
-            *,
-            exercise:exercises(*)
-          `)
-          .eq('templateId', log.modeloId)
-          .order('order');
+        // TODO: Implement getWorkoutTemplateExercises that includes exercise details
+        const templateExercises: any[] = [];
 
         if (templateExercises) {
           // If no exercises at all, populate from template
