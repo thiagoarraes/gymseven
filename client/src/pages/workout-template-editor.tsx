@@ -181,10 +181,27 @@ export default function WorkoutTemplateEditor() {
   // Mutation for adding multiple exercises at once
   const addMultipleExercisesMutation = useMutation({
     mutationFn: async (exercisesData: any[]) => {
-      const promises = exercisesData.map(exerciseData => 
-        apiRequest("POST", `/api/v2/workouts/templates/exercises`, { ...exerciseData, templateId: id })
-          .then(response => response.json())
-      );
+      const promises = exercisesData.map(async (exerciseData) => {
+        try {
+          const response = await apiRequest("POST", `/api/v2/workouts/templates/exercises`, { ...exerciseData, templateId: id });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          // Check if response is JSON
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+            return await response.json();
+          } else {
+            // If not JSON, just return success indicator
+            return { success: true, exerciseId: exerciseData.exerciseId };
+          }
+        } catch (error) {
+          console.error('Error adding exercise:', error);
+          throw error;
+        }
+      });
       return Promise.all(promises);
     },
     onSuccess: (results) => {
@@ -1105,29 +1122,74 @@ export default function WorkoutTemplateEditor() {
                 Cancelar
               </Button>
               <Button
-                onClick={() => {
+                onClick={async () => {
                   if (selectedExercises.size > 0) {
-                    // Prepare all exercise data
-                    const exercisesToAdd = Array.from(selectedExercises).map((exerciseId, index) => {
-                      const exercise = (allExercises as any[]).find((ex: any) => ex.id === exerciseId);
-                      return {
-                        exerciseId: exercise.id,
-                        sets: 3,
-                        reps: "8-12",
-                        weight: null,
-                        order: reorderedExercises.length + index + 1,
-                      };
-                    }).filter(Boolean); // Remove any undefined entries
+                    // Add exercises one by one to avoid API issues
+                    let successCount = 0;
+                    const totalExercises = selectedExercises.size;
                     
-                    // Add all exercises at once
-                    addMultipleExercisesMutation.mutate(exercisesToAdd);
+                    for (const [index, exerciseId] of Array.from(selectedExercises).entries()) {
+                      try {
+                        const exercise = (allExercises as any[]).find((ex: any) => ex.id === exerciseId);
+                        if (exercise) {
+                          const exerciseData = {
+                            exerciseId: exercise.id,
+                            sets: 3,
+                            reps: "8-12",
+                            weight: null,
+                            order: reorderedExercises.length + index + 1,
+                          };
+                          
+                          await new Promise((resolve, reject) => {
+                            addExerciseMutation.mutate(exerciseData, {
+                              onSuccess: () => {
+                                successCount++;
+                                resolve(true);
+                              },
+                              onError: (error) => {
+                                console.error('Error adding exercise:', error);
+                                reject(error);
+                              }
+                            });
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Failed to add exercise:', error);
+                      }
+                    }
+                    
+                    // Clean up and show result
+                    if (successCount > 0) {
+                      setSelectedExercises(new Set());
+                      setShowExerciseSelector(false);
+                      setMuscleGroupFilter('all');
+                      
+                      if (successCount === totalExercises) {
+                        toast({
+                          title: `${successCount} exercício${successCount > 1 ? 's' : ''} adicionado${successCount > 1 ? 's' : ''}!`,
+                          description: "Exercícios adicionados com sucesso.",
+                        });
+                      } else {
+                        toast({
+                          title: `${successCount} de ${totalExercises} exercícios adicionados`,
+                          description: "Alguns exercícios não puderam ser adicionados.",
+                          variant: "destructive",
+                        });
+                      }
+                    } else {
+                      toast({
+                        title: "Erro ao adicionar exercícios",
+                        description: "Nenhum exercício pôde ser adicionado. Tente novamente.",
+                        variant: "destructive",
+                      });
+                    }
                   } else {
                     // Just close modal
                     setShowExerciseSelector(false);
                     setMuscleGroupFilter('all');
                   }
                 }}
-                disabled={addMultipleExercisesMutation.isPending || addExerciseMutation.isPending}
+                disabled={addExerciseMutation.isPending}
                 className={`flex-[2] h-12 font-semibold transition-all duration-200 ${
                   selectedExercises.size > 0
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30'
