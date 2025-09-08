@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { showSuccess, showError, useToast } from '@/hooks/use-toast';
 import { registerSchema, type RegisterUser } from '@shared/schema';
+import { useAuth } from '@/contexts/auth-context-new';
 // InputOTP component não disponível, usando implementação personalizada
 
 export default function Register() {
