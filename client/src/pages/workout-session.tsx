@@ -50,9 +50,9 @@ export default function WorkoutSession() {
   });
 
   const { data: templateExercises = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/workout-templates", workoutLog?.templateId, "exercises"],
-    queryFn: () => workoutTemplateApi.getExercises(workoutLog!.templateId!),
-    enabled: !!workoutLog?.templateId,
+    queryKey: ["/api/workout-templates", workoutLog?.modeloId, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(workoutLog!.modeloId!),
+    enabled: !!workoutLog?.modeloId,
   });
 
   // Query for exercise weight history  
@@ -270,7 +270,7 @@ export default function WorkoutSession() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-white">{workoutLog.name}</h2>
+              <h2 className="text-xl font-bold text-white">{workoutLog.nome}</h2>
               <p className="text-sm text-slate-400">
                 Exercício {currentExerciseIndex + 1} de {templateExercises.length}
               </p>
