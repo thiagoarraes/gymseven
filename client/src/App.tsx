@@ -46,6 +46,7 @@ function AuthenticatedRouter() {
               <Route path="/exercicios" component={ExercisesRoute} />
               <Route path="/treinos" component={Workouts} />
               <Route path="/workout-template/:id" component={WorkoutTemplateEditorRoute} />
+              <Route path="/workout-template-editor/:id" component={WorkoutTemplateEditorRoute} />
               <Route path="/progresso" component={AchievementsPage} />
               <Route path="/workout-session/:id" component={WorkoutSession} />
               <Route path="/workout-history" component={WorkoutHistory} />
