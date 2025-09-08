@@ -128,27 +128,49 @@ export const seriesRegistroTreino = pgTable("seriesRegistroTreino", {
 });
 
 // Insert schemas
-export const insertExerciseSchema = createInsertSchema(exercicios).omit({
-  id: true,
-  usuarioId: true, // Server will add this automatically
-  createdAt: true,
-}).extend({
-  // Make optional fields truly optional
+export const insertExerciseSchema = z.object({
+  // Accept BOTH English and Portuguese field names
+  name: z.string().min(1).optional(),
+  nome: z.string().min(1).optional(),
+  muscleGroup: z.string().min(1).optional(),
+  grupoMuscular: z.string().min(1).optional(),
   description: z.string().optional().nullable(),
-  // Accept English fields from frontend and transform them to Portuguese
-  name: z.string().optional(),
-  muscleGroup: z.string().optional(),
-}).transform((data) => {
-  // Transform English fields to Portuguese fields
-  if (data.name && !data.nome) {
-    data.nome = data.name;
-    delete data.name;
+  descricao: z.string().optional().nullable(),
+})
+.transform((data) => {
+  // Transform English to Portuguese
+  const result: any = {};
+  
+  // Handle name/nome
+  if (data.name) {
+    result.nome = data.name;
+  } else if (data.nome) {
+    result.nome = data.nome;
   }
-  if (data.muscleGroup && !data.grupoMuscular) {
-    data.grupoMuscular = data.muscleGroup;
-    delete data.muscleGroup;
+  
+  // Handle muscleGroup/grupoMuscular
+  if (data.muscleGroup) {
+    result.grupoMuscular = data.muscleGroup;
+  } else if (data.grupoMuscular) {
+    result.grupoMuscular = data.grupoMuscular;
   }
-  return data;
+  
+  // Handle description/descricao
+  if (data.description !== undefined) {
+    result.descricao = data.description;
+  } else if (data.descricao !== undefined) {
+    result.descricao = data.descricao;
+  }
+  
+  return result;
+})
+.refine((data) => data.nome, {
+  message: "Nome é obrigatório",
+  path: ["nome"]
+})
+.refine((data) => data.grupoMuscular, {
+  message: "Grupo muscular é obrigatório", 
+  path: ["grupoMuscular"]
 });
 
 export const insertWorkoutTemplateSchema = createInsertSchema(modelosTreino).omit({
