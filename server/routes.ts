@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if (!preferences) {
         // Create default preferences if they don't exist
         const defaultPrefs = await db.createUserPreferences({
-          userId: req.user!.id,
+          usuarioId: req.user!.id,
           theme: 'dark',
           units: 'metric',
           language: 'pt-BR',
@@ -1247,7 +1247,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(404).json({ message: "Treino não encontrado" });
       }
       
-      console.log('✅ Found workout log:', log.name, 'ID:', log.id);
+      console.log('✅ Found workout log:', log.nome, 'ID:', log.id);
 
       // Calculate duration
       const duration = log.endTime 
@@ -1452,7 +1452,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
       
       // Check if the workout belongs to the current user
-      if (existingLog.userId !== req.user.id) {
+      if (existingLog.usuarioId !== req.user.id) {
         console.log(`Workout log ${req.params.id} does not belong to user ${req.user.id}`);
         return res.status(403).json({ message: "Acesso negado" });
       }
@@ -1478,7 +1478,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(404).json({ message: "Treino não encontrado" });
       }
       
-      if (existingLog.userId !== req.user!.id) {
+      if (existingLog.usuarioId !== req.user!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
       
