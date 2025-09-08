@@ -396,11 +396,11 @@ export default function WorkoutTemplateEditor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white">
-      {/* Modern Header Design */}
+      {/* Compact Header Design */}
       <div className="bg-slate-900/98 backdrop-blur-xl border-b border-blue-500/20 shadow-lg">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           {/* Top Navigation Bar */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
               size="sm"
@@ -408,66 +408,76 @@ export default function WorkoutTemplateEditor() {
               className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-xl px-3 py-2"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar aos Treinos
+              Voltar
             </Button>
             
-            {/* Quick Info Badge */}
-            {reorderedExercises.length > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/15 rounded-xl border border-blue-500/25">
-                  <Dumbbell className="w-4 h-4 text-blue-400" />
-                  <span className="text-blue-300 text-sm font-medium">
+            {/* Header Actions */}
+            <div className="flex items-center gap-3">
+              {/* Exercise Count Badge */}
+              {reorderedExercises.length > 0 && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/15 rounded-lg border border-blue-500/25">
+                  <Dumbbell className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-blue-300 text-xs font-medium">
                     {reorderedExercises.length} exercício{reorderedExercises.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleForceRefresh}
-                  className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-xl px-3 py-2"
-                  title="Atualizar dados"
-                >
-                  🔄 Atualizar
-                </Button>
-              </div>
-            )}
+              )}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleForceRefresh}
+                className="text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg px-2 py-1.5"
+                title="Atualizar dados"
+              >
+                🔄
+              </Button>
+              
+              {/* Quick Add Button */}
+              <Button
+                onClick={() => setShowExerciseSelector(true)}
+                size="sm"
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                Adicionar
+              </Button>
+            </div>
           </div>
           
-          {/* Template Title Section */}
-          <div className="space-y-4">
+          {/* Compact Template Title Section */}
+          <div className="space-y-2">
             {isEditingTemplateName ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Input
-                    value={tempTemplateName}
-                    onChange={(e) => setTempTemplateName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleTemplateNameSave();
-                      } else if (e.key === 'Escape') {
-                        handleTemplateNameCancel();
-                      }
-                    }}
-                    className="text-3xl font-bold bg-transparent border-b-2 border-blue-400 text-white px-0 h-auto py-3 rounded-none focus:border-blue-300 flex-1"
-                    placeholder="Nome do treino"
-                    autoFocus
-                  />
-                </div>
-                <div className="flex gap-3">
+              <div className="space-y-3">
+                <Input
+                  value={tempTemplateName}
+                  onChange={(e) => setTempTemplateName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleTemplateNameSave();
+                    } else if (e.key === 'Escape') {
+                      handleTemplateNameCancel();
+                    }
+                  }}
+                  className="text-2xl font-bold bg-transparent border-b-2 border-blue-400 text-white px-0 h-auto py-2 rounded-none focus:border-blue-300"
+                  placeholder="Nome do treino"
+                  autoFocus
+                />
+                <div className="flex gap-2">
                   <Button
                     size="sm"
                     onClick={handleTemplateNameSave}
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl px-4 py-2"
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-3 py-1.5 text-xs"
                     disabled={updateTemplateNameMutation.isPending}
                   >
-                    <Save className="w-4 h-4 mr-2" />
+                    <Save className="w-3 h-3 mr-1" />
                     Salvar
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={handleTemplateNameCancel}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-800 rounded-xl px-4 py-2"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-800 rounded-lg px-3 py-1.5 text-xs"
                   >
                     Cancelar
                   </Button>
@@ -475,19 +485,15 @@ export default function WorkoutTemplateEditor() {
               </div>
             ) : (
               <div className="group cursor-pointer" onClick={handleTemplateNameEdit}>
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors leading-tight">
-                        {(template as any)?.nome || (template as any)?.name || "Novo Treino"}
-                      </h1>
-                      <Edit3 className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors opacity-60 group-hover:opacity-100" />
-                    </div>
-                    <p className="text-slate-400 text-lg leading-relaxed">
-                      {(template as any)?.descricao || (template as any)?.description || "Toque para editar o nome e descrição do treino"}
-                    </p>
-                  </div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors leading-tight">
+                    {(template as any)?.nome || (template as any)?.name || "Novo Treino"}
+                  </h1>
+                  <Edit3 className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 transition-colors opacity-60 group-hover:opacity-100" />
                 </div>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  {(template as any)?.descricao || (template as any)?.description || "Toque para editar o nome e descrição"}
+                </p>
               </div>
             )}
           </div>
@@ -495,27 +501,34 @@ export default function WorkoutTemplateEditor() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Quick Actions */}
-        <div className="flex gap-3">
-          <Button
-            onClick={() => setShowExerciseSelector(true)}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-4 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Adicionar Exercícios
-          </Button>
-          
-          {reorderedExercises.length > 1 && (
+      <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+        {/* Inline Actions - Only show if no exercises */}
+        {reorderedExercises.length === 0 && (
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowExerciseSelector(true)}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-3 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Adicionar Exercícios
+            </Button>
+          </div>
+        )}
+        
+        {/* Reorder Button for multiple exercises */}
+        {reorderedExercises.length > 1 && (
+          <div className="flex justify-end">
             <Button
               onClick={openReorderModal}
               variant="outline"
-              className="px-4 py-4 border-slate-600 text-slate-300 hover:bg-slate-800 rounded-2xl transition-all duration-300"
+              size="sm"
+              className="border-slate-600 text-slate-300 hover:bg-slate-800 rounded-lg px-3 py-2 transition-all duration-300"
             >
-              <ArrowUpDown className="w-5 h-5" />
+              <ArrowUpDown className="w-4 h-4 mr-2" />
+              Reordenar
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Exercise List */}
         {exercisesLoading ? (
