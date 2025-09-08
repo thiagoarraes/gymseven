@@ -90,6 +90,22 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     app.post('/api/auth/logout', (req, res) => {
       res.json({ message: 'Logout realizado com sucesso' });
     });
+
+    // Get current user endpoint
+    app.get('/api/auth/me', authenticateToken, async (req: AuthRequest, res) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: 'Usuário não autenticado' });
+        }
+        
+        // Remove password from response
+        const { password, ...userWithoutPassword } = req.user;
+        res.json({ user: userWithoutPassword });
+      } catch (error: any) {
+        console.error('Error in /api/auth/me:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+      }
+    });
   
   // Endpoint para fornecer configurações para o frontend
   app.get('/api/config', (req, res) => {
