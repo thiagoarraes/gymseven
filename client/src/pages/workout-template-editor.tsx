@@ -261,19 +261,23 @@ export default function WorkoutTemplateEditor() {
   }, [templateExercises]);
 
   useEffect(() => {
-    if (template && typeof template === 'object' && template !== null && 'name' in template) {
-      setTempTemplateName((template as any).name);
+    if (template && typeof template === 'object' && template !== null) {
+      const templateName = (template as any).nome || (template as any).name;
+      if (templateName) {
+        setTempTemplateName(templateName);
+      }
     }
   }, [template]);
 
   // Handlers
   const handleTemplateNameEdit = () => {
     setIsEditingTemplateName(true);
-    setTempTemplateName((template as any)?.name || "");
+    setTempTemplateName((template as any)?.nome || (template as any)?.name || "");
   };
 
   const handleTemplateNameSave = () => {
-    if (tempTemplateName.trim() && tempTemplateName !== (template as any)?.name) {
+    const currentName = (template as any)?.nome || (template as any)?.name;
+    if (tempTemplateName.trim() && tempTemplateName !== currentName) {
       updateTemplateNameMutation.mutate(tempTemplateName.trim());
     } else {
       setIsEditingTemplateName(false);
@@ -281,7 +285,7 @@ export default function WorkoutTemplateEditor() {
   };
 
   const handleTemplateNameCancel = () => {
-    setTempTemplateName((template as any)?.name || "");
+    setTempTemplateName((template as any)?.nome || (template as any)?.name || "");
     setIsEditingTemplateName(false);
   };
 
@@ -475,12 +479,12 @@ export default function WorkoutTemplateEditor() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <h1 className="text-3xl font-bold text-white group-hover:text-blue-300 transition-colors leading-tight">
-                        {(template as any)?.name || "Novo Treino"}
+                        {(template as any)?.nome || (template as any)?.name || "Novo Treino"}
                       </h1>
                       <Edit3 className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors opacity-60 group-hover:opacity-100" />
                     </div>
                     <p className="text-slate-400 text-lg leading-relaxed">
-                      {(template as any)?.description || "Toque para editar o nome e descrição do treino"}
+                      {(template as any)?.descricao || (template as any)?.description || "Toque para editar o nome e descrição do treino"}
                     </p>
                   </div>
                 </div>
