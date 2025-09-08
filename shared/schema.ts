@@ -135,6 +135,20 @@ export const insertExerciseSchema = createInsertSchema(exercicios).omit({
 }).extend({
   // Make optional fields truly optional
   description: z.string().optional().nullable(),
+  // Accept English fields from frontend and transform them to Portuguese
+  name: z.string().optional(),
+  muscleGroup: z.string().optional(),
+}).transform((data) => {
+  // Transform English fields to Portuguese fields
+  if (data.name && !data.nome) {
+    data.nome = data.name;
+    delete data.name;
+  }
+  if (data.muscleGroup && !data.grupoMuscular) {
+    data.grupoMuscular = data.muscleGroup;
+    delete data.muscleGroup;
+  }
+  return data;
 });
 
 export const insertWorkoutTemplateSchema = createInsertSchema(modelosTreino).omit({

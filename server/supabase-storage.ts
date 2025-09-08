@@ -234,7 +234,7 @@ export class SupabaseStorage implements IStorage {
     // Let Supabase handle timestamps automatically
 
     const { data, error } = await this.supabase
-      .from('users')
+      .from('usuarios')
       .update(dbUpdates)
       .eq('id', id)
       .select()
@@ -250,7 +250,7 @@ export class SupabaseStorage implements IStorage {
     try {
       // Verify user exists
       const { data: user } = await this.supabase
-        .from('users')
+        .from('usuarios')
         .select('id')
         .eq('id', id)
         .single();
@@ -262,7 +262,7 @@ export class SupabaseStorage implements IStorage {
 
       // Simple deletion - cascade deletes are handled by DB constraints
       const { error } = await this.supabase
-        .from('users')
+        .from('usuarios')
         .delete()
         .eq('id', id);
 
@@ -282,7 +282,7 @@ export class SupabaseStorage implements IStorage {
 
   async updateLastLogin(id: string): Promise<void> {
     await this.supabase
-      .from('users')
+      .from('usuarios')
       .update({ last_login_at: new Date().toISOString() })
       .eq('id', id);
   }
