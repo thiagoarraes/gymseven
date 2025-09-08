@@ -127,14 +127,14 @@ export default function Workouts() {
       if (!user?.id) {
         throw new Error("Usuário não autenticado");
       }
-      const template = workoutTemplates.find(t => t.id === templateId);
+      const template = workoutTemplates.find((t: any) => t.id === templateId);
       return workoutService.createWorkoutLog({
         templateId,
         name: template?.name || "Treino",
         userId: user.id,
       });
     },
-    onSuccess: (workoutLog) => {
+    onSuccess: (workoutLog: any) => {
       navigate(`/workout-session/${workoutLog.id}`);
     },
     onError: (error: Error) => {

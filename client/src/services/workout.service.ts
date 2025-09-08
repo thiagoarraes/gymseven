@@ -94,37 +94,29 @@ export const workoutService = {
 
   // Create workout template
   async createWorkoutTemplate(data: { name: string; description?: string }, userId: string): Promise<WorkoutTemplate> {
-    return apiRequest('/api/workout-templates', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+    const response = await apiRequest('POST', '/api/workout-templates', data);
+    return response.json();
   },
 
   // Update workout template
   async updateWorkoutTemplate(id: string, data: { name: string; description?: string }, userId: string): Promise<WorkoutTemplate> {
-    return apiRequest(`/api/workout-templates/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data)
-    });
+    const response = await apiRequest('PUT', `/api/workout-templates/${id}`, data);
+    return response.json();
   },
 
   // Delete workout template
   async deleteWorkoutTemplate(id: string, userId: string): Promise<void> {
-    return apiRequest(`/api/workout-templates/${id}`, {
-      method: 'DELETE'
-    });
+    await apiRequest('DELETE', `/api/workout-templates/${id}`);
   },
 
   // Create workout log (start workout)
   async createWorkoutLog(data: CreateWorkoutLogRequest): Promise<WorkoutLog> {
-    return apiRequest('/api/workout-logs', {
-      method: 'POST',
-      body: JSON.stringify({
-        templateId: data.templateId,
-        name: data.name,
-        startTime: new Date().toISOString(),
-        completed: false
-      })
+    const response = await apiRequest('POST', '/api/workout-logs', {
+      templateId: data.templateId,
+      name: data.name,
+      startTime: new Date().toISOString(),
+      completed: false
     });
+    return response.json();
   }
 };
