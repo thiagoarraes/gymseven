@@ -22,7 +22,9 @@ import {
   ChevronUp,
   ChevronDown,
   Dumbbell,
-  Target
+  Target,
+  Filter,
+  Check
 } from "lucide-react";
 import { Reorder } from "framer-motion";
 import { workoutTemplateApi } from "@/lib/api";
@@ -54,6 +56,8 @@ export default function WorkoutTemplateEditor() {
   const [tempReorderedExercises, setTempReorderedExercises] = useState<any[]>([]);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
+  const [muscleGroupFilter, setMuscleGroupFilter] = useState<string>('all');
+  const [selectedExercises, setSelectedExercises] = useState<Set<string>>(new Set());
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -100,7 +104,7 @@ export default function WorkoutTemplateEditor() {
 
   const addExerciseMutation = useMutation({
     mutationFn: async (exerciseData: any) => {
-      const response = await apiRequest("POST", `/api/workout-templates/${id}/exercises`, { ...exerciseData, workoutTemplateId: id });
+      const response = await apiRequest("POST", `/api/v2/workouts/templates/exercises`, { ...exerciseData, templateId: id });
       return response.json();
     },
     onSuccess: () => {
@@ -862,52 +866,156 @@ export default function WorkoutTemplateEditor() {
         <DialogContent className="max-w-3xl max-h-[85vh] bg-slate-900/95 border-slate-700/30 flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white text-xl font-bold">Escolher Exercícios</DialogTitle>
-            <p className="text-slate-400 text-sm">Clique nos exercícios para adicionar ao treino</p>
+            <p className="text-slate-400 text-sm">Selecione exercícios para adicionar ao treino</p>
+            
+            {/* Muscle Group Filter */}
+            <div className="flex items-center space-x-2 mt-4">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <select 
+                value={muscleGroupFilter} 
+                onChange={(e) => setMuscleGroupFilter(e.target.value)}
+                className="bg-slate-800/70 border border-slate-600/50 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+              >
+                <option value="all">Todos os grupos</option>
+                {Array.from(new Set((allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup))).sort().map((group: any) => (
+                  <option key={group} value={group}>{group}</option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Selected Count and Actions */}
+            {selectedExercises.size > 0 && (
+              <div className="flex items-center justify-between bg-slate-800/50 rounded-lg px-4 py-2 mt-3">
+                <span className="text-blue-400 text-sm font-medium">
+                  {selectedExercises.size} exercício{selectedExercises.size > 1 ? 's' : ''} selecionado{selectedExercises.size > 1 ? 's' : ''}
+                </span>
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={() => setSelectedExercises(new Set())}
+                    variant="outline"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700 text-xs"
+                  >
+                    Limpar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      selectedExercises.forEach(exerciseId => {
+                        const exercise = (allExercises as any[]).find((ex: any) => ex.id === exerciseId);
+                        if (exercise) {
+                          const exerciseData = {
+                            exerciseId: exercise.id,
+                            sets: 3,
+                            reps: "8-12",
+                            weight: null,
+                            order: reorderedExercises.length + 1,
+                          };
+                          addExerciseMutation.mutate(exerciseData);
+                        }
+                      });
+                      setSelectedExercises(new Set());
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-xs"
+                    disabled={addExerciseMutation.isPending}
+                  >
+                    Adicionar Selecionados
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-3">
               {(allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
+                .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
                 .sort((a: any, b: any) => (a.nome || a.name || '').localeCompare(b.nome || b.name || '', 'pt-BR'))
-                .map((exercise: any) => (
-                  <Card 
-                    key={exercise.id} 
-                    className="bg-slate-800/40 border-slate-700/30 rounded-xl hover:bg-slate-800/60 transition-all duration-200 cursor-pointer group"
-                    onClick={() => {
-                      const exerciseData = {
-                        exerciseId: exercise.id,
-                        sets: 3,
-                        reps: "8-12",
-                        weight: null,
-                        order: reorderedExercises.length + 1,
-                      };
-                      addExerciseMutation.mutate(exerciseData);
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-white leading-tight group-hover:text-blue-300 transition-colors">
-                            {exercise.nome || exercise.name}
-                          </h4>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                            <span className="text-sm text-blue-300 font-medium">
-                              {exercise.grupoMuscular || exercise.muscleGroup}
-                            </span>
+                .map((exercise: any) => {
+                  const isSelected = selectedExercises.has(exercise.id);
+                  return (
+                    <Card 
+                      key={exercise.id} 
+                      className={`bg-slate-800/40 border-slate-700/30 rounded-xl hover:bg-slate-800/60 transition-all duration-200 cursor-pointer group ${
+                        isSelected ? 'border-blue-500 bg-blue-500/10' : ''
+                      }`}
+                      onClick={() => {
+                        const newSelected = new Set(selectedExercises);
+                        if (isSelected) {
+                          newSelected.delete(exercise.id);
+                        } else {
+                          newSelected.add(exercise.id);
+                        }
+                        setSelectedExercises(newSelected);
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            {/* Checkbox */}
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                              isSelected 
+                                ? 'bg-blue-500 border-blue-500' 
+                                : 'border-slate-500 hover:border-blue-400'
+                            }`}>
+                              {isSelected && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <h4 className={`font-semibold leading-tight transition-colors ${
+                                isSelected ? 'text-blue-300' : 'text-white group-hover:text-blue-300'
+                              }`}>
+                                {exercise.nome || exercise.name}
+                              </h4>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                                <span className="text-sm text-blue-300 font-medium">
+                                  {exercise.grupoMuscular || exercise.muscleGroup}
+                                </span>
+                              </div>
+                            </div>
                           </div>
+                          
+                          {/* Quick Add Button */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-slate-700/50 border-slate-600/50 hover:bg-blue-500/20 hover:border-blue-400/50 text-slate-300 hover:text-blue-300 ml-2"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent card selection
+                              const exerciseData = {
+                                exerciseId: exercise.id,
+                                sets: 3,
+                                reps: "8-12",
+                                weight: null,
+                                order: reorderedExercises.length + 1,
+                              };
+                              addExerciseMutation.mutate(exerciseData);
+                            }}
+                            disabled={addExerciseMutation.isPending}
+                            title="Adicionar agora"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Plus className="w-5 h-5 text-slate-400 group-hover:text-blue-400 transition-colors flex-shrink-0" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              {(allExercises as any[]).filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id)).length === 0 && (
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              {(allExercises as any[])
+                .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
+                .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
+                .length === 0 && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-slate-800/50 flex items-center justify-center">
                     <Dumbbell className="w-8 h-8 text-slate-400" />
                   </div>
-                  <p className="text-slate-400">Todos os exercícios já foram adicionados</p>
+                  <p className="text-slate-400">
+                    {muscleGroupFilter === 'all' 
+                      ? 'Todos os exercícios já foram adicionados' 
+                      : `Nenhum exercício disponível para ${muscleGroupFilter}`
+                    }
+                  </p>
                 </div>
               )}
             </div>
