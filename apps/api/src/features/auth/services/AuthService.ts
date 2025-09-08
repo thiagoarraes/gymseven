@@ -151,16 +151,24 @@ export class AuthService {
     }
   }
 
-  verifyToken(token: string): UserContextData {
+  async verifyToken(token: string): Promise<UserContextData> {
     try {
       const decoded = jwt.verify(token, this.jwtSecret) as any;
+      
+      // Get user data from database using the userId from token
+      const storage = await this.storage;
+      const user = await storage.getUser(decoded.userId);
+      if (!user) {
+        throw new Error('Usuário não encontrado');
+      }
+      
       return {
-        id: decoded.userId,
-        email: decoded.email,
-        username: decoded.username,
-        firstName: decoded.firstName,
-        lastName: decoded.lastName,
-        profileImageUrl: decoded.profileImageUrl,
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName || undefined,
+        lastName: user.lastName || undefined,
+        profileImageUrl: user.profileImageUrl || undefined,
       };
     } catch (error) {
       throw new Error('Token inválido');

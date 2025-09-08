@@ -6,7 +6,7 @@ import { ApiResponseHelper } from '../../../core/utils/response';
 export class AuthMiddleware {
   constructor(private authService: AuthService) {}
 
-  authenticate = (req: Request, res: Response, next: NextFunction): void => {
+  authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
       
@@ -16,7 +16,7 @@ export class AuthMiddleware {
       }
 
       const token = authHeader.substring(7);
-      const user = this.authService.verifyToken(token);
+      const user = await this.authService.verifyToken(token);
       
       (req as AuthenticatedRequest).user = user;
       next();
@@ -25,13 +25,13 @@ export class AuthMiddleware {
     }
   };
 
-  optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
+  optionalAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
       
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
-        const user = this.authService.verifyToken(token);
+        const user = await this.authService.verifyToken(token);
         (req as AuthenticatedRequest).user = user;
       }
       
