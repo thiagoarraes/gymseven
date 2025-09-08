@@ -1333,14 +1333,14 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
 
       // If no log exercises found OR no actual sets were performed, use template data
-      if ((exercises.length === 0 || !hasActualSets) && log.templateId) {
+      if ((exercises.length === 0 || !hasActualSets) && log.modeloId) {
         const { data: templateExercises } = await supabaseStorage.supabase
           .from('workout_template_exercises')
           .select(`
             *,
             exercise:exercises(*)
           `)
-          .eq('templateId', log.templateId)
+          .eq('templateId', log.modeloId)
           .order('order');
 
         if (templateExercises) {
@@ -1372,7 +1372,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
       const summary = {
         id: log.id,
-        name: log.name,
+        name: log.nome,
         startTime: log.startTime,
         endTime: log.endTime,
         completed: !!log.endTime,
