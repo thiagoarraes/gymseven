@@ -523,7 +523,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                         <Dumbbell className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-foreground text-lg leading-tight truncate">
+                        <h4 className="font-bold text-foreground text-lg leading-snug break-words hyphens-auto" style={{wordBreak: 'break-word', hyphens: 'auto'}}>
                           {exercise.nome}
                         </h4>
                         {/* Improved Muscle Group Badge */}
