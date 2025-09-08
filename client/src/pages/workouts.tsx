@@ -33,11 +33,13 @@ export default function Workouts() {
   // Query para buscar templates de treino com exercícios
   const { data: workoutTemplates = [], isLoading, error } = useQuery({
     queryKey: ["workout-templates", user?.id],
-    queryFn: () => {
+    queryFn: async () => {
       if (!user?.id) {
         throw new Error("Usuário não autenticado");
       }
-      return workoutService.getWorkoutTemplatesWithExercises(user.id);
+      const result = await workoutService.getWorkoutTemplatesWithExercises(user.id);
+      console.log("Templates retornados:", result);
+      return result;
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutos
