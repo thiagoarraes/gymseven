@@ -450,6 +450,10 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createExercise(exercise: InsertExercise, userId: string): Promise<Exercise> {
+    console.log('[SUPABASE DEBUG] Starting exercise creation...');
+    console.log('[SUPABASE DEBUG] Input exercise data:', exercise);
+    console.log('[SUPABASE DEBUG] User ID:', userId);
+    
     // Map to Portuguese column names used in Supabase
     const dbExercise = {
       nome: exercise.nome,
@@ -457,19 +461,50 @@ export class SupabaseStorage implements IStorage {
       usuarioId: userId,
       descricao: exercise.descricao || null
     };
+    console.log('[SUPABASE DEBUG] Mapped database exercise:', dbExercise);
 
+    // Test table accessibility first
+    try {
+      console.log('[SUPABASE DEBUG] Testing table access...');
+      const { data: testData, error: testError, count } = await this.supabase
+        .from('exercicios')
+        .select('*', { count: 'exact' })
+        .limit(1);
+        
+      console.log('[SUPABASE DEBUG] Table test result:', { 
+        canAccess: !testError, 
+        testError: testError?.message,
+        count: count 
+      });
+    } catch (testErr) {
+      console.error('[SUPABASE DEBUG] Table test failed with exception:', testErr);
+    }
+
+    console.log('[SUPABASE DEBUG] Attempting insert to exercicios table...');
     const { data, error } = await this.supabase
       .from('exercicios')
       .insert(dbExercise)
       .select('id, "usuarioId", nome, "grupoMuscular", descricao, "createdAt"')
       .single();
 
+    console.log('[SUPABASE DEBUG] Insert response:', { 
+      success: !error, 
+      data: data, 
+      errorCode: error?.code,
+      errorMessage: error?.message,
+      errorDetails: error?.details,
+      errorHint: error?.hint
+    });
 
     if (error) {
-      console.error('Exercise creation failed:', error);
+      console.error('[SUPABASE DEBUG] Exercise creation failed:', error);
       throw new Error(`Database error: ${error.message}`);
     }
-    return this.mapDbExerciseToExercise(data);
+    
+    console.log('[SUPABASE DEBUG] Exercise created successfully, mapping result...');
+    const result = this.mapDbExerciseToExercise(data);
+    console.log('[SUPABASE DEBUG] Final mapped result:', result);
+    return result;
   }
 
   async updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined> {
