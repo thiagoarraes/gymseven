@@ -132,7 +132,7 @@ export default function Workouts() {
       const template = workoutTemplates.find((t: any) => t.id === templateId);
       return workoutService.createWorkoutLog({
         templateId,
-        name: template?.name || "Treino",
+        name: template?.nome || template?.name || "Treino",
         userId: user.id,
       });
     },
@@ -167,8 +167,8 @@ export default function Workouts() {
   const handleEdit = (workout: any) => {
     setEditingWorkout(workout);
     form.reset({
-      name: workout.name,
-      description: workout.description || "",
+      name: workout.nome || workout.name,
+      description: workout.descricao || workout.description || "",
     });
     setIsDialogOpen(true);
   };
@@ -345,10 +345,10 @@ export default function Workouts() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-foreground mb-1" data-testid={`text-workout-name-${template.id}`}>
-                      {template.name}
+                      {template.nome || template.name}
                     </h3>
                     <p className="text-sm text-muted-foreground" data-testid={`text-workout-description-${template.id}`}>
-                      {template.description || "Sem descrição"}
+                      {template.descricao || template.description || "Sem descrição"}
                     </p>
                   </div>
                   <div className="flex space-x-2">
