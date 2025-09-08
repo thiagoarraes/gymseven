@@ -24,7 +24,13 @@ import {
   Dumbbell,
   Target,
   Filter,
-  Check
+  Check,
+  Heart,
+  ArrowUp,
+  Layers,
+  Zap,
+  TrendingUp,
+  Calendar
 } from "lucide-react";
 import { Reorder } from "framer-motion";
 import { workoutTemplateApi } from "@/lib/api";
@@ -38,6 +44,61 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
+
+// Muscle group color mapping function
+const getMuscleGroupInfo = (muscleGroup: string) => {
+  const groups: Record<string, { icon: any; bgColor: string; textColor: string; borderColor: string }> = {
+    "Peito": { 
+      icon: Heart, 
+      bgColor: "bg-rose-500/20", 
+      textColor: "text-rose-400", 
+      borderColor: "border-rose-500/30" 
+    },
+    "Costas": { 
+      icon: ArrowUp, 
+      bgColor: "bg-blue-500/20", 
+      textColor: "text-blue-400", 
+      borderColor: "border-blue-500/30" 
+    },
+    "Ombros": { 
+      icon: Layers, 
+      bgColor: "bg-amber-500/20", 
+      textColor: "text-amber-400", 
+      borderColor: "border-amber-500/30" 
+    },
+    "Bíceps": { 
+      icon: Zap, 
+      bgColor: "bg-purple-500/20", 
+      textColor: "text-purple-400", 
+      borderColor: "border-purple-500/30" 
+    },
+    "Tríceps": { 
+      icon: TrendingUp, 
+      bgColor: "bg-indigo-500/20", 
+      textColor: "text-indigo-400", 
+      borderColor: "border-indigo-500/30" 
+    },
+    "Pernas": { 
+      icon: Target, 
+      bgColor: "bg-emerald-500/20", 
+      textColor: "text-emerald-400", 
+      borderColor: "border-emerald-500/30" 
+    },
+    "Abdômen": { 
+      icon: Calendar, 
+      bgColor: "bg-orange-500/20", 
+      textColor: "text-orange-400", 
+      borderColor: "border-orange-500/30" 
+    },
+  };
+
+  return groups[muscleGroup] || { 
+    icon: Dumbbell, 
+    bgColor: "bg-gray-500/20", 
+    textColor: "text-gray-400", 
+    borderColor: "border-gray-500/30" 
+  };
+};
 
 export default function WorkoutTemplateEditor() {
   const { id } = useParams();
@@ -921,13 +982,17 @@ export default function WorkoutTemplateEditor() {
                 .sort((a: any, b: any) => (a.nome || a.name || '').localeCompare(b.nome || b.name || '', 'pt-BR'))
                 .map((exercise: any) => {
                   const isSelected = selectedExercises.has(exercise.id);
+                  const muscleGroup = exercise.grupoMuscular || exercise.muscleGroup;
+                  const groupInfo = getMuscleGroupInfo(muscleGroup);
+                  const IconComponent = groupInfo.icon;
+                  
                   return (
                     <Card 
                       key={exercise.id} 
-                      className={`border transition-all duration-200 cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10 ${
+                      className={`border transition-all duration-200 cursor-pointer group hover:shadow-lg ${
                         isSelected 
-                          ? 'bg-gradient-to-r from-blue-500/15 to-purple-500/10 border-blue-400/50 shadow-md shadow-blue-500/20' 
-                          : 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/60 hover:border-slate-600/60'
+                          ? `bg-gradient-to-r from-blue-500/15 to-purple-500/10 border-blue-400/50 shadow-md shadow-blue-500/20 hover:shadow-blue-500/30` 
+                          : 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/60 hover:border-slate-600/60 hover:shadow-slate-500/10'
                       } rounded-xl`}
                       onClick={() => {
                         const newSelected = new Set(selectedExercises);
@@ -942,13 +1007,13 @@ export default function WorkoutTemplateEditor() {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1 min-w-0">
-                            {/* Checkbox */}
-                            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                            {/* Modern Checkbox with [+] design */}
+                            <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 font-bold text-lg ${
                               isSelected 
-                                ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-400 shadow-md shadow-blue-500/30' 
-                                : 'border-slate-500/70 hover:border-blue-400/70 hover:bg-slate-700/30'
+                                ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 shadow-lg shadow-green-500/40 text-white scale-110' 
+                                : 'border-slate-500/60 hover:border-green-400/70 hover:bg-green-500/10 hover:shadow-md text-slate-500 hover:text-green-400'
                             }`}>
-                              {isSelected && <Check className="w-4 h-4 text-white" />}
+                              {isSelected ? '✓' : '+'}
                             </div>
                             
                             <div className="flex-1 min-w-0">
@@ -957,15 +1022,18 @@ export default function WorkoutTemplateEditor() {
                               }`}>
                                 {exercise.nome || exercise.name}
                               </h4>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <div className={`w-2.5 h-2.5 rounded-full ${
-                                  isSelected ? 'bg-blue-300' : 'bg-slate-400'
-                                }`}></div>
-                                <span className={`text-sm font-medium ${
-                                  isSelected ? 'text-blue-300' : 'text-slate-400 group-hover:text-slate-300'
+                              {/* Muscle Group Tag with proper colors */}
+                              <div className="flex items-center space-x-2 mt-2">
+                                <div className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium transition-all ${
+                                  groupInfo.bgColor
+                                } ${
+                                  groupInfo.textColor
+                                } ${
+                                  groupInfo.borderColor
                                 }`}>
-                                  {exercise.grupoMuscular || exercise.muscleGroup}
-                                </span>
+                                  <IconComponent className="w-3 h-3 mr-1.5" />
+                                  {muscleGroup}
+                                </div>
                               </div>
                             </div>
                           </div>
