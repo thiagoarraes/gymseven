@@ -55,12 +55,22 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const result = await this.db.insert(usuarios).values(user).returning();
+    // Convert dateOfBirth string to Date if needed
+    const processedUser = {
+      ...user,
+      dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth) : undefined
+    };
+    const result = await this.db.insert(usuarios).values([processedUser]).returning();
     return result[0];
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
-    const result = await this.db.update(usuarios).set(updates).where(eq(usuarios.id, id)).returning();
+    // Convert dateOfBirth string to Date if needed
+    const processedUpdates = {
+      ...updates,
+      dateOfBirth: updates.dateOfBirth ? new Date(updates.dateOfBirth) : undefined
+    };
+    const result = await this.db.update(usuarios).set(processedUpdates).where(eq(usuarios.id, id)).returning();
     return result[0];
   }
 
