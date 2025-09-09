@@ -1,5 +1,6 @@
 import { getStorage } from '../../../../../../server/storage';
 import { CreateExerciseDto, UpdateExerciseDto, ExerciseFilterDto, ExerciseResponseDto } from '../dto';
+import { insertExerciseSchema } from '@shared/schema';
 
 export class ExerciseService {
   private storage = getStorage();
@@ -35,7 +36,10 @@ export class ExerciseService {
   async createExercise(userId: string, exerciseData: CreateExerciseDto): Promise<ExerciseResponseDto> {
     const storage = await this.storage;
     
-    const exercise = await storage.createExercise(exerciseData, userId);
+    // Transform DTO to Portuguese using shared schema
+    const transformedData = insertExerciseSchema.parse(exerciseData);
+    
+    const exercise = await storage.createExercise(transformedData, userId);
     return this.mapExerciseToResponse(exercise);
   }
 
@@ -52,7 +56,10 @@ export class ExerciseService {
       throw new Error('Você não tem permissão para editar este exercício');
     }
 
-    const updatedExercise = await storage.updateExercise(exerciseId, updateData, userId);
+    // Transform partial DTO to Portuguese using shared schema  
+    const transformedData = insertExerciseSchema.partial().parse(updateData);
+    
+    const updatedExercise = await storage.updateExercise(exerciseId, transformedData, userId);
     if (!updatedExercise) {
       return null;
     }
@@ -86,9 +93,9 @@ export class ExerciseService {
   private mapExerciseToResponse(exercise: any): ExerciseResponseDto {
     return {
       id: exercise.id,
-      name: exercise.name,
-      muscleGroup: exercise.muscleGroup,
-      description: exercise.description || undefined,
+      name: exercise.nome || exercise.name, // Map from Portuguese to English
+      muscleGroup: exercise.grupoMuscular || exercise.muscleGroup, // Map from Portuguese to English
+      description: exercise.descricao || exercise.description || undefined,
       createdAt: exercise.createdAt,
     };
   }
