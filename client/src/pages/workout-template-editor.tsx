@@ -1539,7 +1539,7 @@ export default function WorkoutTemplateEditor() {
                             {(() => {
                               const groupInfo = getMuscleGroupInfo(exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular');
                               return (
-                                <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
+                                <div className={`inline-flex items-center px-2 py-1 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
                                   <span className="text-xs font-semibold tracking-wide">
                                     {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
                                   </span>
