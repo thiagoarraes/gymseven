@@ -1110,6 +1110,17 @@ export default function WorkoutTemplateEditor() {
                 </CardContent>
               </Card>
             ))}
+            
+            {/* Add More Exercises Button - Always visible when there are exercises */}
+            <div className="pt-4">
+              <Button
+                onClick={() => setShowExerciseSelector(true)}
+                className="w-full bg-gradient-to-r from-blue-500/80 to-blue-600/80 hover:from-blue-500 hover:to-blue-600 text-white font-medium py-4 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50"
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar Mais Exercícios
+              </Button>
+            </div>
           </div>
         )}
 
