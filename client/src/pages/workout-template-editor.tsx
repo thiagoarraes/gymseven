@@ -264,16 +264,23 @@ export default function WorkoutTemplateEditor() {
     onSuccess: (data, { exerciseId, updates }) => {
       console.log(`✅ Update successful for exercise ${exerciseId}:`, data);
       
-      // Show success message
-      toast({
-        title: "Exercício atualizado",
-        description: "Recarregando página...",
+      // Invalidate all workout template caches immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["workout-templates", user?.id] });
+      
+      // Also invalidate any cached workout template data
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('workout');
+        }
       });
       
-      // Force immediate page reload with cache clearing
-      setTimeout(() => {
-        window.location.href = window.location.href;
-      }, 300);
+      toast({
+        title: "Exercício atualizado",
+        description: "Alterações salvas com sucesso.",
+      });
     },
     onError: (err: any, { exerciseId, updates }) => {
       console.error(`❌ Error updating exercise ${exerciseId}:`, err);
