@@ -1247,16 +1247,11 @@ export default function WorkoutTemplateEditor() {
                                 {exercise.nome || exercise.name}
                               </h4>
                               {/* Muscle Group Tag with proper colors */}
-                              <div className="flex items-center space-x-2 mt-2">
-                                <div className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium transition-all ${
-                                  groupInfo.bgColor
-                                } ${
-                                  groupInfo.textColor
-                                } ${
-                                  groupInfo.borderColor
-                                }`}>
-                                  <IconComponent className="w-3 h-3 mr-1.5" />
-                                  {muscleGroup}
+                              <div className="mt-2">
+                                <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
+                                  <span className="text-xs font-semibold tracking-wide">
+                                    {muscleGroup}
+                                  </span>
                                 </div>
                               </div>
                             </div>
