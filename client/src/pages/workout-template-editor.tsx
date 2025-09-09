@@ -267,13 +267,13 @@ export default function WorkoutTemplateEditor() {
       // Show success message
       toast({
         title: "Exercício atualizado",
-        description: "Atualizando dados...",
+        description: "Recarregando página...",
       });
       
-      // Force immediate window reload to ensure fresh data
+      // Force immediate page reload with cache clearing
       setTimeout(() => {
-        window.location.reload();
-      }, 500);
+        window.location.href = window.location.href;
+      }, 300);
     },
     onError: (err: any, { exerciseId, updates }) => {
       console.error(`❌ Error updating exercise ${exerciseId}:`, err);
