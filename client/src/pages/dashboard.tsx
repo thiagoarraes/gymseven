@@ -174,9 +174,25 @@ export default function Dashboard() {
   }, [recentWorkouts]);
 
   // Weight history data
+  // Get exercises with weight history for select dropdown
+  const { data: exercisesWithWeightHistory = [] } = useQuery({
+    queryKey: ["/api/exercises-with-weight-history"],
+    queryFn: () => exerciseProgressApi.getExercisesWithWeightHistory(),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Get weight data based on selected exercise
   const { data: weightHistory = [] } = useQuery({
-    queryKey: ["/api/exercise-progress/weight"],
-    queryFn: () => exerciseProgressApi.getExercisesWeightSummary(),
+    queryKey: ["/api/exercise-progress/weight", selectedExerciseId],
+    queryFn: () => {
+      if (selectedExerciseId && selectedExerciseId !== "all") {
+        // Get specific exercise weight history
+        return exerciseProgressApi.getWeightHistory(selectedExerciseId, 20);
+      } else {
+        // Get overall weight summary (all exercises)
+        return exerciseProgressApi.getExercisesWeightSummary();
+      }
+    },
     staleTime: 0, // Always refetch
     gcTime: 0, // Don't cache
   });
@@ -187,34 +203,46 @@ export default function Dashboard() {
     
     console.log('📊 Processing weight history for chart:', weightHistory);
     
-    // Data already comes from API in chronological order (oldest to newest)
+    // Data format differs based on whether it's exercise-specific or overall
     return weightHistory.map((entry: any, index: number) => {
-        // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
-        const dateParts = entry.date.split('/');
         let formattedDate = entry.date;
+        let weightValue = entry.maxWeight || entry.weight || 0;
         
-        // Try to create a proper date if the format is DD/MM/YYYY
-        if (dateParts.length === 3) {
-          const day = dateParts[0];
-          const month = dateParts[1];
-          const year = dateParts[2];
-          
-          // Create date object and format it
-          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-          if (!isNaN(dateObj.getTime())) {
-            formattedDate = `${day}/${month}`;
+        // Handle different data formats
+        if (selectedExerciseId && selectedExerciseId !== "all") {
+          // Exercise-specific data format
+          if (entry.loggedDate) {
+            const logDate = new Date(entry.loggedDate);
+            formattedDate = logDate.toLocaleDateString('pt-BR');
+          }
+          weightValue = entry.weight || 0;
+        } else {
+          // Overall data format - parse date correctly
+          if (entry.date && entry.date.includes('/')) {
+            const dateParts = entry.date.split('/');
+            if (dateParts.length === 3) {
+              const day = dateParts[0];
+              const month = dateParts[1];
+              const year = dateParts[2];
+              
+              // Create date object and format it
+              const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+              if (!isNaN(dateObj.getTime())) {
+                formattedDate = `${day}/${month}`;
+              }
+            }
           }
         }
         
         return {
           session: index + 1,
-          weight: entry.maxWeight || entry.weight || 0,
+          weight: weightValue,
           date: formattedDate,
-          fullDate: entry.date,
-          workoutName: entry.workoutName
+          fullDate: entry.date || entry.loggedDate,
+          workoutName: entry.workoutName || 'Treino'
         };
       });
-  }, [weightHistory]);
+  }, [weightHistory, selectedExerciseId]);
 
   // Fetch workout summary when modal opens
   const { data: workoutSummary, isLoading: summaryLoading } = useQuery({
@@ -866,6 +894,16 @@ export default function Dashboard() {
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   <SelectItem value="all" className="py-3 px-4">Todos os exercícios</SelectItem>
+                  {exercisesWithWeightHistory.map((exercise: any) => (
+                    <SelectItem key={exercise.id} value={exercise.id} className="py-3 px-4">
+                      <div className="flex items-center justify-between w-full">
+                        <span>{exercise.name}</span>
+                        <Badge variant="secondary" className="ml-2 px-2 py-0.5 text-xs bg-blue-500/20 text-blue-300 border-blue-500/30 rounded-full">
+                          {exercise.muscleGroup}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

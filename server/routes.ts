@@ -938,6 +938,63 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     return null;
   }
 
+  // Get exercises that have weight history for select dropdown
+  app.get('/api/exercises-with-weight-history', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      console.log('📊 Fetching exercises with weight history for user:', req.user?.id);
+      
+      // Get all completed workout logs for the user
+      const workoutLogs = await db.getWorkoutLogs(req.user!.id);
+      const completedWorkouts = workoutLogs.filter(log => log.endTime);
+      
+      if (completedWorkouts.length === 0) {
+        console.log('📊 No completed workouts found');
+        return res.json([]);
+      }
+      
+      console.log('📊 Found', completedWorkouts.length, 'completed workouts');
+      
+      // Create a set to store unique exercises with weight data
+      const exercisesWithWeightData = new Map<string, { id: string, name: string, muscleGroup: string }>();
+      
+      for (const workout of completedWorkouts) {
+        // Get all exercises for this workout
+        const logExercises = await db.getWorkoutLogExercises(workout.id);
+        
+        for (const logExercise of logExercises) {
+          // Get sets for this exercise
+          const sets = await db.getWorkoutLogSets(logExercise.id);
+          
+          // Check if any set has weight data
+          const hasWeightData = sets.some(set => set.weight && set.weight > 0);
+          
+          if (hasWeightData && !exercisesWithWeightData.has(logExercise.exercicioId)) {
+            // Get exercise details
+            const exercise = await db.getExercise(logExercise.exercicioId);
+            
+            if (exercise) {
+              exercisesWithWeightData.set(logExercise.exercicioId, {
+                id: logExercise.exercicioId,
+                name: exercise.nome,
+                muscleGroup: exercise.grupoMuscular
+              });
+            }
+          }
+        }
+      }
+      
+      // Convert map to sorted array
+      const exercisesList = Array.from(exercisesWithWeightData.values())
+        .sort((a, b) => a.name.localeCompare(b.name));
+      
+      console.log('📊 Returning exercises with weight history:', exercisesList.length);
+      res.json(exercisesList);
+    } catch (error) {
+      console.error('Error fetching exercises with weight history:', error);
+      res.status(500).json({ message: "Erro ao buscar exercícios com histórico de peso" });
+    }
+  });
+
   // Get all exercises with their recent weight progression - user-specific
   app.get('/api/exercises-weight-summary', authenticateToken, async (req: AuthRequest, res) => {
     try {
