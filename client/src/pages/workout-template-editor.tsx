@@ -1165,7 +1165,7 @@ export default function WorkoutTemplateEditor() {
               <select 
                 value={muscleGroupFilter} 
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="flex-1 bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="flex-1 bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:bg-slate-600/70 active:bg-slate-600/80 hover:bg-slate-700/70 transition-all duration-200"
               >
                 <option value="all">Todos os grupos musculares</option>
                 {Array.from(new Set((allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup))).sort().map((group: any) => (
