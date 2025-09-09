@@ -220,6 +220,9 @@ export const insertWorkoutTemplateExerciseSchema = createInsertSchema(exercicios
   reps: z.union([z.string(), z.number()]).transform((val) => String(val)).optional(),
 });
 
+// Schema for partial updates - all fields are optional except validation
+export const updateWorkoutTemplateExerciseSchema = insertWorkoutTemplateExerciseSchema.partial();
+
 export const insertWorkoutLogSchema = createInsertSchema(registrosTreino).omit({
   id: true,
 }).extend({

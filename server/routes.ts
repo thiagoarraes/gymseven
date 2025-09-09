@@ -735,7 +735,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       console.log(`🔄 PUT /api/workout-template-exercises/${req.params.id} by user ${req.user!.id}`);
       console.log(`📥 Request body:`, req.body);
       
-      const updates = insertWorkoutTemplateExerciseSchema.partial().parse(req.body);
+      const updates = updateWorkoutTemplateExerciseSchema.parse(req.body);
       const templateExercise = await db.updateWorkoutTemplateExercise(req.params.id, updates, req.user!.id);
       
       if (!templateExercise) {
