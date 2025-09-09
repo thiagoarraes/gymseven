@@ -1233,7 +1233,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       const workoutData = {
         ...req.body,
-        user_id: req.user.id
+        usuarioId: req.user.id
       };
       
       const validatedData = insertWorkoutLogSchema.parse(workoutData);

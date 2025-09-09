@@ -117,8 +117,8 @@ export const workoutService = {
   // Create workout log (start workout)
   async createWorkoutLog(data: CreateWorkoutLogRequest): Promise<WorkoutLog> {
     const response = await apiRequest('POST', '/api/workout-logs', {
-      templateId: data.templateId,
-      name: data.name,
+      modeloId: data.templateId,
+      nome: data.name,
       startTime: new Date().toISOString(),
       completed: false
     });
