@@ -5,10 +5,13 @@ import { ApiResponseHelper } from '../utils/response';
 export const validateBody = (schema: AnyZodObject) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log('🔍 [VALIDATION] Validating request body:', JSON.stringify(req.body));
       req.body = schema.parse(req.body);
+      console.log('✅ [VALIDATION] Validation successful');
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        console.log('❌ [VALIDATION] Validation failed:', error.errors);
         const errors = error.errors.map(err => ({
           field: err.path.join('.'),
           message: err.message,
