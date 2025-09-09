@@ -1096,8 +1096,8 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         ? calculateDuration(log.startTime, log.endTime)
         : "Em andamento";
 
-      // TODO: Implement getWorkoutLogExercises in storage interface
-      const logExercises: any[] = [];
+      // Get workout log exercises
+      const logExercises = await db.getWorkoutLogExercises(req.params.id);
 
       let exercises: any[] = [];
       let totalSets = 0;
@@ -1107,18 +1107,23 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       if (logExercises && logExercises.length > 0) {
         for (const logExercise of logExercises) {
           // Get exercise details
-          const exercise = await db.getExercise(logExercise.exerciseId);
+          const exercise = await db.getExercise(logExercise.exercicioId);
 
           // Get sets for this exercise
           const sets = await db.getWorkoutLogSets(logExercise.id);
           
-          console.log(`Found ${sets?.length || 0} sets for exercise ${logExercise.id}:`, sets);
-
+          // Get exercise details for muscle group
+          
           const exerciseData = {
-            id: logExercise.exerciseId,
-            name: exercise?.nome || 'Exercício desconhecido',
+            id: logExercise.exercicioId,
+            name: logExercise.nomeExercicio || exercise?.nome || 'Exercício desconhecido',
             muscleGroup: exercise?.grupoMuscular || 'N/A',
-            sets: sets || []
+            sets: sets?.map(set => ({
+              setNumber: set.setNumber,
+              reps: set.reps,
+              weight: set.weight,
+              completed: set.completed
+            })) || []
           };
 
           exercises.push(exerciseData);
@@ -1134,8 +1139,6 @@ export async function registerRoutes(app: Express, createServerInstance = true):
                 const weight = parseFloat(set.weight) || 0;
                 const reps = parseInt(set.reps) || 0;
                 
-                console.log(`Processing set: ${weight}kg × ${reps} reps for exercise ${exercise?.nome}`);
-                
                 // Skip volume calculation for cardio exercises and exercises with no weight
                 if (weight > 0 && reps > 0) {
                   let setVolume = 0;
@@ -1144,13 +1147,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
                   if (reps > 100 && weight < 50) {
                     // Likely bodyweight exercise - use lower effective weight
                     setVolume = Math.min(weight, 5) * Math.min(reps, 50);
-                    console.log(`High reps exercise - limited volume: ${setVolume}kg`);
                   } else {
                     setVolume = weight * reps;
-                    console.log(`Normal exercise volume: ${setVolume}kg`);
                   }
                   totalVolume += setVolume;
-                  console.log(`Running total volume: ${totalVolume}kg`);
                 }
               }
             }
