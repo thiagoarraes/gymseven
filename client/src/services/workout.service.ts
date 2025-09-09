@@ -59,7 +59,9 @@ export const workoutService = {
       throw new Error('Failed to fetch workout templates');
     }
     
-    return response.json();
+    const responseData = await response.json();
+    // Extract data array from API v2 response structure
+    return responseData.data || responseData;
   },
 
   // Get workout templates with exercises
