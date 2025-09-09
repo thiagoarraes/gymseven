@@ -382,16 +382,18 @@ export default function Workouts() {
                         {template.exercises?.length || 0} exercícios
                       </span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl rounded-lg px-3 py-2 transition-all duration-300 hover:scale-105"
-                      onClick={() => navigate(`/workout-template/${template.id}?openModal=true`)}
-                      data-testid={`button-add-exercises-${template.id}`}
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      Adicionar
-                    </Button>
+                    {template.exercises && template.exercises.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl rounded-lg px-3 py-2 transition-all duration-300 hover:scale-105"
+                        onClick={() => navigate(`/workout-template/${template.id}?openModal=true`)}
+                        data-testid={`button-add-exercises-${template.id}`}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Adicionar
+                      </Button>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
