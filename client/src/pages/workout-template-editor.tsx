@@ -422,6 +422,37 @@ export default function WorkoutTemplateEditor() {
     removeExerciseMutation.mutate(exerciseId);
   };
 
+  const handleSaveExercise = async (exerciseId: string) => {
+    const changes = localChanges[exerciseId];
+    if (!changes || Object.keys(changes).length === 0) {
+      return;
+    }
+
+    try {
+      console.log(`💾 Saving individual exercise ${exerciseId}:`, changes);
+      await workoutTemplateApi.updateExercise(exerciseId, changes);
+      
+      // Remove from local changes after successful save
+      setLocalChanges(prev => {
+        const newChanges = { ...prev };
+        delete newChanges[exerciseId];
+        return newChanges;
+      });
+      
+      toast({
+        title: "Exercício salvo!",
+        description: "As alterações foram salvas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error saving exercise:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as alterações. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleForceRefresh = () => {
     // Limpar todos os caches relacionados
     queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
@@ -766,16 +797,32 @@ export default function WorkoutTemplateEditor() {
                       </div>
                     </div>
                     
-                    {/* Remove Button */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
-                      onClick={() => handleRemoveExercise(exercise.id)}
-                      title="Remover exercício"
-                    >
-                      <Trash2 className="text-red-400 w-4 h-4" />
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {/* Save Button - only show if there are local changes for this exercise */}
+                      {localChanges[exercise.id] && Object.keys(localChanges[exercise.id]).length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-9 h-9 p-0 hover:bg-green-500/20 rounded-xl transition-all duration-200 bg-green-500/10 border border-green-500/30"
+                          onClick={() => handleSaveExercise(exercise.id)}
+                          title="Salvar alterações"
+                        >
+                          <Save className="text-green-400 w-4 h-4" />
+                        </Button>
+                      )}
+                      
+                      {/* Remove Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
+                        onClick={() => handleRemoveExercise(exercise.id)}
+                        title="Remover exercício"
+                      >
+                        <Trash2 className="text-red-400 w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Exercise Parameters - Modern Grid Layout */}
@@ -1028,7 +1075,34 @@ export default function WorkoutTemplateEditor() {
                             </div>
                           </div>
                         </div>
+                        
+                        {/* Save Button for this exercise - shown when there are changes */}
+                        {localChanges[exercise.id] && Object.keys(localChanges[exercise.id]).length > 0 && (
+                          <div className="mt-4 flex justify-center">
+                            <Button
+                              onClick={() => handleSaveExercise(exercise.id)}
+                              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium px-6 py-2 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg shadow-green-500/25"
+                            >
+                              <Save className="w-4 h-4" />
+                              <span>Salvar Alterações</span>
+                            </Button>
+                          </div>
+                        )}
                       </>
+                    )}
+                    
+                    {/* Save Button for cardio exercises too */}
+                    {(exercise.exercise?.muscleGroup === 'Cardio' || exercise.muscleGroup === 'Cardio') && 
+                     localChanges[exercise.id] && Object.keys(localChanges[exercise.id]).length > 0 && (
+                      <div className="mt-4 flex justify-center">
+                        <Button
+                          onClick={() => handleSaveExercise(exercise.id)}
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium px-6 py-2 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg shadow-green-500/25"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>Salvar Alterações</span>
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>
@@ -1037,18 +1111,6 @@ export default function WorkoutTemplateEditor() {
           </div>
         )}
 
-        {/* Save Button */}
-        {reorderedExercises.length > 0 && (
-          <div className="flex justify-center pt-6">
-            <Button
-              onClick={handleSaveWorkout}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-12 py-4 rounded-2xl shadow-lg transition-all duration-300 flex items-center space-x-3"
-            >
-              <Save className="w-5 h-5" />
-              <span>Salvar Treino</span>
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Exercise Selector Dialog */}
