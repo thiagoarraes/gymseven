@@ -312,20 +312,20 @@ export default function WorkoutTemplateEditor() {
 
   // Effects - Sync templateExercises with reorderedExercises
   useEffect(() => {
-    console.log("🔄 useEffect triggered - templateExercises:", templateExercises);
-    console.log("🔄 templateExercises length:", templateExercises?.length);
-    console.log("🔄 templateExercises type:", typeof templateExercises);
-    console.log("🔄 templateExercises is array:", Array.isArray(templateExercises));
+    if (!templateExercises) return;
     
-    // Always sync, even if empty array (to clear reorderedExercises when needed)
-    if (Array.isArray(templateExercises)) {
-      console.log("✅ Setting reorderedExercises to:", templateExercises);
-      setReorderedExercises(templateExercises);
-    } else {
-      console.log("❌ templateExercises is not an array, resetting to empty");
-      setReorderedExercises([]);
+    // Only update if the data is actually different to prevent infinite loops
+    const newExercises = Array.isArray(templateExercises) ? templateExercises : [];
+    
+    // Check if current reorderedExercises is different from new data
+    const isDifferent = reorderedExercises.length !== newExercises.length || 
+                       reorderedExercises.some((ex, index) => ex.id !== newExercises[index]?.id);
+    
+    if (isDifferent) {
+      console.log("🔄 Updating reorderedExercises from templateExercises");
+      setReorderedExercises(newExercises);
     }
-  }, [templateExercises]);
+  }, [templateExercises, reorderedExercises]);
 
   useEffect(() => {
     if (template && typeof template === 'object' && template !== null) {
