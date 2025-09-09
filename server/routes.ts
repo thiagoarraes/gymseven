@@ -941,70 +941,69 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get all exercises with their recent weight progression - user-specific
   app.get('/api/exercises-weight-summary', authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log('📊 Fetching exercises weight summary for user:', req.user?.id);
       
+      // Get all completed workout logs for the user
+      const workoutLogs = await db.getWorkoutLogs(req.user!.id);
+      const completedWorkouts = workoutLogs.filter(log => log.endTime);
       
-      // No fallback data - return empty when no real data exists
-      const knownExercisesWithData: string[] = [];
+      if (completedWorkouts.length === 0) {
+        console.log('📊 No completed workouts found');
+        return res.json([]);
+      }
       
-      const exerciseSummaries: any[] = [];
+      console.log('📊 Found', completedWorkouts.length, 'completed workouts');
       
-      for (const exerciseName of knownExercisesWithData) {
+      // Create a map to store weight progression by date
+      const weightProgressionByDate = new Map<string, { date: string, maxWeight: number, workoutName: string }>();
+      
+      for (const workout of completedWorkouts) {
+        console.log('📊 Processing workout:', workout.nome, 'from', workout.startTime);
         
-        // TODO: Implement proper exercise lookup using storage interface
-        const exercises = await db.getExercises(req.user!.id);
+        // Get all exercises for this workout
+        const logExercises = await db.getWorkoutLogExercises(workout.id);
         
-        if (!exercises || exercises.length === 0) {
-          continue;
-        }
+        let workoutMaxWeight = 0;
         
-        const exercise = exercises[0];
-        
-        // TODO: Implement proper workout logs lookup using storage interface
-        const workout_logs = await db.getWorkoutLogs(req.user!.id);
-        
-        if (!workout_logs || workout_logs.length === 0) {
-          continue;
-        }
-        
-        
-        let lastWeight = null;
-        let sessionCount = 0;
-        
-        // Para cada workout, verificar se tem este exercício
-        for (const workoutLog of workout_logs) {
-            // TODO: Implement proper workout log exercises lookup
-          // TODO: Implement getWorkoutLogExercises method in storage interface
-          const logExercises: any[] = [];
+        for (const logExercise of logExercises) {
+          // Get sets for this exercise
+          const sets = await db.getWorkoutLogSets(logExercise.id);
           
-          if (logExercises && logExercises.length > 0) {
-            const logExercise = logExercises[0];
-            
-            // Buscar sets com peso
-              // TODO: Implement proper sets lookup
-            const sets = await db.getWorkoutLogSets(logExercise.id);
-            
-            if (sets && sets.length > 0) {
-              sessionCount++;
-              if (!lastWeight) {
-                lastWeight = Math.max(...sets.map((set: any) => set.weight || 0));
-              }
+          for (const set of sets) {
+            if (set.weight && set.weight > workoutMaxWeight) {
+              workoutMaxWeight = set.weight;
             }
           }
         }
         
-        if (sessionCount > 0 && lastWeight !== null) {
-          exerciseSummaries.push({
-            exerciseId: exercise.id,
-            id: exercise.id,
-            name: exercise.nome,
-            muscleGroup: exercise.grupoMuscular,
-            lastWeight,
-            sessionCount
-          });
+        if (workoutMaxWeight > 0) {
+          const workoutDate = new Date(workout.startTime);
+          const dateKey = workoutDate.toISOString().split('T')[0]; // YYYY-MM-DD
+          const displayDate = workoutDate.toLocaleDateString('pt-BR'); // DD/MM/YYYY
+          
+          // Only keep the highest weight for each date
+          const existing = weightProgressionByDate.get(dateKey);
+          if (!existing || workoutMaxWeight > existing.maxWeight) {
+            weightProgressionByDate.set(dateKey, {
+              date: displayDate,
+              maxWeight: workoutMaxWeight,
+              workoutName: workout.nome
+            });
+          }
         }
       }
       
-      res.json(exerciseSummaries);
+      // Convert map to sorted array
+      const weightProgression = Array.from(weightProgressionByDate.values())
+        .sort((a, b) => {
+          // Sort by date (newest first for API, but dashboard will reverse if needed)
+          const dateA = new Date(a.date.split('/').reverse().join('-'));
+          const dateB = new Date(b.date.split('/').reverse().join('-'));
+          return dateA.getTime() - dateB.getTime();
+        });
+      
+      console.log('📊 Returning weight progression data:', weightProgression);
+      res.json(weightProgression);
     } catch (error) {
       console.error('Error fetching exercises weight summary:', error);
       res.status(500).json({ message: "Erro ao buscar resumo de pesos dos exercícios" });

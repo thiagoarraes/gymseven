@@ -185,6 +185,8 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     if (!weightHistory || !Array.isArray(weightHistory) || weightHistory.length === 0) return [];
     
+    console.log('📊 Processing weight history for chart:', weightHistory);
+    
     // Data already comes from API in chronological order (oldest to newest)
     return weightHistory.map((entry: any, index: number) => {
         // Parse date correctly - entry.date is already in DD/MM/YYYY format from API
@@ -206,7 +208,7 @@ export default function Dashboard() {
         
         return {
           session: index + 1,
-          weight: entry.weight || entry.maxWeight || 0,
+          weight: entry.maxWeight || entry.weight || 0,
           date: formattedDate,
           fullDate: entry.date,
           workoutName: entry.workoutName
