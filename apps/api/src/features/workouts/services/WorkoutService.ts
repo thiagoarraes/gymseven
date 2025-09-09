@@ -31,7 +31,7 @@ export class WorkoutService {
       return null;
     }
 
-    if (template.user_id !== userId) {
+    if (template.usuarioId !== userId) {
       throw new Error('Acesso negado ao template de treino');
     }
 
@@ -46,7 +46,7 @@ export class WorkoutService {
       return null;
     }
 
-    if (template.user_id !== userId) {
+    if (template.usuarioId !== userId) {
       throw new Error('Acesso negado ao template de treino');
     }
 
@@ -54,17 +54,17 @@ export class WorkoutService {
     const templateResponse = this.mapTemplateToResponse(template);
     templateResponse.exercises = exercises.map(ex => ({
       id: ex.id,
-      exerciseId: ex.exerciseId,
-      exerciseName: ex.exercise.name,
-      sets: ex.sets,
-      reps: ex.reps,
+      exerciseId: ex.exercicioId,
+      exerciseName: ex.exercise.nome,
+      sets: ex.series,
+      reps: ex.repeticoes,
       weight: ex.weight || undefined,
-      restDurationSeconds: ex.restDurationSeconds,
+      restDurationSeconds: ex.restDurationSeconds || 90,
       order: ex.order,
       exercise: {
         id: ex.exercise.id,
-        name: ex.exercise.name,
-        muscleGroup: ex.exercise.muscleGroup,
+        name: ex.exercise.nome,
+        muscleGroup: ex.exercise.grupoMuscular,
       }
     }));
     templateResponse.totalExercises = exercises.length;
@@ -76,7 +76,7 @@ export class WorkoutService {
     const storage = await this.storage;
     const template = await storage.createWorkoutTemplate({
       ...templateData,
-      user_id: userId,
+      usuarioId: userId,
     });
     return this.mapTemplateToResponse(template);
   }
@@ -187,8 +187,11 @@ export class WorkoutService {
   async createWorkoutLog(userId: string, logData: CreateWorkoutLogDto): Promise<WorkoutLogResponseDto> {
     const storage = await this.storage;
     const log = await storage.createWorkoutLog({
-      ...logData,
       usuarioId: userId,
+      nome: logData.name,
+      startTime: logData.startTime,
+      modeloId: logData.templateId || null,
+      endTime: logData.endTime,
     });
     return this.mapLogToResponse(log);
   }
@@ -256,7 +259,13 @@ export class WorkoutService {
 
   async createWorkoutLogSet(userId: string, setData: CreateWorkoutLogSetDto): Promise<any> {
     const storage = await this.storage;
-    return await storage.createWorkoutLogSet(setData);
+    return await storage.createWorkoutLogSet({
+      exercicioRegistroId: setData.logExerciseId,
+      setNumber: setData.setNumber,
+      weight: setData.weight,
+      reps: setData.reps,
+      completed: setData.completed,
+    });
   }
 
   async updateWorkoutLogSet(setId: string, userId: string, updateData: UpdateWorkoutLogSetDto): Promise<any> {
