@@ -13,14 +13,9 @@ import {
 
 import { randomBytes } from 'crypto';
 
-// JWT Configuration - Secure generation for production
-const JWT_SECRET = process.env.JWT_SECRET || (() => {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('JWT_SECRET must be provided in production environment');
-  }
-  // Generate secure random string for development
-  return randomBytes(64).toString('hex');
-})();
+// JWT Configuration - Use the SAME secret as v2 for compatibility
+const JWT_SECRET = process.env.JWT_SECRET || 'stable-development-secret-for-replit-migration';
+console.log('🔍 [V1 AUTH] JWT_SECRET being used:', JWT_SECRET.substring(0, 10) + '...');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface AuthRequest extends Request {
