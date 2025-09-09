@@ -854,7 +854,7 @@ export default function WorkoutTemplateEditor() {
                               <label className="text-sm font-semibold text-slate-200">Repetições</label>
                             </div>
                             <Input
-                              value={exercise.reps}
+                              value={exercise.reps || ''}
                               onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
                               className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                               placeholder="8-12"
