@@ -249,88 +249,28 @@ export default function WorkoutTemplateEditor() {
 
   const updateExerciseMutation = useMutation({
     mutationFn: async ({ exerciseId, updates }: { exerciseId: string; updates: any }) => {
+      console.log(`🚀 Making API call to update exercise ${exerciseId}:`, updates);
       return await workoutTemplateApi.updateExercise(exerciseId, updates);
     },
-    onMutate: async ({ exerciseId, updates }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-      
-      // Snapshot the previous value
-      const previousExercises = queryClient.getQueryData(["/api/workout-templates", id, "exercises"]);
-      
-      // Find the current exercise to preserve all its data
-      const currentExercise = (previousExercises as any[])?.find((ex: any) => ex.id === exerciseId);
-      
-      if (currentExercise) {
-        // Create updated exercise preserving ALL original data
-        const updatedExercise = {
-          ...currentExercise,
-          ...updates,
-          // Explicitly preserve essential nested data that must not be lost
-          exercise: currentExercise.exercise,
-          exerciseName: currentExercise.exerciseName,
-          exerciseId: currentExercise.exerciseId,
-          // Map backend field names back to frontend field names for display
-          sets: updates.series !== undefined ? updates.series : currentExercise.sets,
-          reps: updates.repeticoes !== undefined ? updates.repeticoes : currentExercise.reps,
-        };
-
-        // Optimistically update the cache
-        queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
-          if (!old) return old;
-          return old.map((ex: any) => ex.id === exerciseId ? updatedExercise : ex);
-        });
-        
-        // Update local state
-        setReorderedExercises(prev => 
-          prev.map(ex => ex.id === exerciseId ? updatedExercise : ex)
-        );
-      }
-
-      // Return a context object with the snapshotted value
-      return { previousExercises };
-    },
     onSuccess: (data, { exerciseId, updates }) => {
-      // Force a fresh fetch to ensure we have the latest server data
+      console.log(`✅ Update successful for exercise ${exerciseId}:`, data);
+      // Simply invalidate cache and let it refetch - no optimistic updates to avoid data mixing
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      
+      toast({
+        title: "Exercício atualizado",
+        description: "As alterações foram salvas com sucesso.",
+      });
     },
-    onError: (err: any, variables, context) => {
-      console.error('❌ Error updating exercise:', err);
+    onError: (err: any, { exerciseId, updates }) => {
+      console.error(`❌ Error updating exercise ${exerciseId}:`, err);
       
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousExercises) {
-        queryClient.setQueryData(["/api/workout-templates", id, "exercises"], context.previousExercises);
-      }
-      
-      // Check if it's a 404 error (exercise not found or permission denied)
-      const is404Error = err?.status === 404 || 
-                        err?.message?.includes('não encontrado') ||
-                        err?.message?.includes('not found') ||
-                        (err?.response && err.response.status === 404);
-      
-      if (is404Error) {
-        console.warn('🔄 Exercise not found - likely deleted or cache stale, forcing refresh');
-        // Force refresh to sync with server state
-        queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-        queryClient.refetchQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-        
-        toast({
-          title: "Exercício não encontrado",
-          description: "O exercício pode ter sido removido. Atualizando a lista...",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro ao atualizar",
-          description: "Não foi possível atualizar o exercício. Tente novamente.",
-          variant: "destructive",
-        });
-      }
-    },
-    onSettled: () => {
-      // Always refetch after error or success to make sure we have the latest data
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o exercício. Tente novamente.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -404,28 +344,25 @@ export default function WorkoutTemplateEditor() {
   };
 
   const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
-    // Prevent sending null/undefined values - use validation
-    if (value === null || value === undefined) {
-      console.warn(`⚠️ Attempted to send null/undefined value for field ${field}. Skipping update.`);
+    console.log(`🔄 handleQuickUpdate called:`, { exerciseId, field, value });
+    
+    // Prevent sending null/undefined values for required fields
+    if ((field === 'sets' || field === 'series') && (value === null || value === undefined || value < 1)) {
+      console.warn(`⚠️ Invalid ${field} value: ${value}. Skipping update.`);
       return;
     }
 
     // Map frontend field names to backend field names (Portuguese)
     const fieldMapping: Record<string, string> = {
       'sets': 'series',
-      'reps': 'repeticoes',
+      'reps': 'repeticoes', 
       'weight': 'weight',
       'restDurationSeconds': 'restDurationSeconds',
       'restDuration': 'restDurationSeconds'
     };
 
     const backendField = fieldMapping[field] || field;
-    
-    // Additional validation for specific fields
-    if (backendField === 'series' && (typeof value !== 'number' || value < 1)) {
-      console.warn(`⚠️ Invalid series value: ${value}. Must be a positive number.`);
-      return;
-    }
+    console.log(`🔄 Field mapping: ${field} -> ${backendField}, value:`, value);
     
     updateExerciseMutation.mutate({
       exerciseId,
