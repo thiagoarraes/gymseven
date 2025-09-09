@@ -238,11 +238,33 @@ export class PostgreSQLStorage implements IStorage {
 
   // Workout Template Exercises
   async getWorkoutTemplateExercises(modeloId: string): Promise<(WorkoutTemplateExercise & { exercise: Exercise })[]> {
-    return await this.db
+    const rawResults = await this.db
       .select()
       .from(exerciciosModeloTreino)
       .leftJoin(exercicios, eq(exerciciosModeloTreino.exercicioId, exercicios.id))
-      .where(eq(exerciciosModeloTreino.modeloId, modeloId)) as any;
+      .where(eq(exerciciosModeloTreino.modeloId, modeloId));
+
+    // Map the nested join results to the expected flat structure
+    return rawResults.map((row: any) => ({
+      // Template exercise data
+      id: row.exerciciosModeloTreino.id,
+      modeloId: row.exerciciosModeloTreino.modeloId,
+      exercicioId: row.exerciciosModeloTreino.exercicioId,
+      series: row.exerciciosModeloTreino.series,
+      repeticoes: row.exerciciosModeloTreino.repeticoes,
+      weight: row.exerciciosModeloTreino.weight,
+      restDurationSeconds: row.exerciciosModeloTreino.restDurationSeconds,
+      order: row.exerciciosModeloTreino.order,
+      // Nested exercise data
+      exercise: {
+        id: row.exercicios.id,
+        usuarioId: row.exercicios.usuarioId,
+        nome: row.exercicios.nome,
+        grupoMuscular: row.exercicios.grupoMuscular,
+        descricao: row.exercicios.descricao,
+        createdAt: row.exercicios.createdAt,
+      }
+    }));
   }
 
   async addExerciseToTemplate(exercise: InsertWorkoutTemplateExercise): Promise<WorkoutTemplateExercise> {
