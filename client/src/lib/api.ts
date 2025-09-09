@@ -55,34 +55,41 @@ export const workoutTemplateApi = {
     const data = await response.json();
     console.log("🔍 API getExercises response:", data);
     
+    let exercises: any[] = [];
+    
     // Check if response has data property (API v2 format) and extract exercises array
     if (data && typeof data === 'object' && data.data) {
       console.log("📦 Extracting data.data:", data.data);
       // If data.data has exercises array, return it
       if (data.data.exercises && Array.isArray(data.data.exercises)) {
-        console.log("📦 Returning exercises array:", data.data.exercises);
-        return data.data.exercises;
+        console.log("📦 Found exercises array:", data.data.exercises);
+        exercises = data.data.exercises;
       }
       // If data.data is itself an array, return it
-      if (Array.isArray(data.data)) {
-        return data.data;
+      else if (Array.isArray(data.data)) {
+        exercises = data.data;
       }
     }
-    
     // Check if response has exercises property  
-    if (data && typeof data === 'object' && data.exercises) {
+    else if (data && typeof data === 'object' && data.exercises) {
       console.log("📦 Extracting data.exercises:", data.exercises);
-      return data.exercises;
+      exercises = data.exercises;
     }
-    
     // If data is directly an array
-    if (Array.isArray(data)) {
-      console.log("📦 Returning array data:", data);
-      return data;
+    else if (Array.isArray(data)) {
+      console.log("📦 Found direct array data:", data);
+      exercises = data;
     }
     
-    console.log("📦 Returning empty array - no exercises found");
-    return [];
+    // Sort exercises by order field to ensure correct sequence
+    const sortedExercises = exercises.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+    console.log("📦 Returning sorted exercises by order:", sortedExercises);
+    
+    if (sortedExercises.length === 0) {
+      console.log("📦 Returning empty array - no exercises found");
+    }
+    
+    return sortedExercises;
   },
 
   create: async (template: InsertWorkoutTemplate): Promise<WorkoutTemplate> => {
