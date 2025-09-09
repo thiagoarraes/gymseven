@@ -698,7 +698,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       
       // Update each exercise's order
       const updatePromises = exercises.map((exercise: { id: string; order: number }) => {
-        return db.updateWorkoutTemplateExercise(exercise.id, { ordem: exercise.order }, req.user!.id);
+        return db.updateWorkoutTemplateExercise(exercise.id, { order: exercise.order }, req.user!.id);
       });
       
       const results = await Promise.all(updatePromises);
