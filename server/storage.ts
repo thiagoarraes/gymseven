@@ -77,6 +77,10 @@ export interface IStorage {
   deleteWorkoutLog(id: string): Promise<boolean>;
   getRecentWorkoutLogs(limit?: number): Promise<WorkoutLog[]>;
   
+  // Workout Log Exercises
+  getWorkoutLogExercises(logId: string): Promise<WorkoutLogExercise[]>;
+  createWorkoutLogExercise(exercise: InsertWorkoutLogExercise): Promise<WorkoutLogExercise>;
+  
   // Workout Log Sets
   getWorkoutLogSets(logId: string): Promise<WorkoutLogSet[]>;
   createWorkoutLogSet(set: InsertWorkoutLogSet): Promise<WorkoutLogSet>;

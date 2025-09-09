@@ -856,7 +856,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Create workout log exercise
   app.post("/api/workout-log-exercises", authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log("🔍 [DEBUG] Creating workout log exercise with body:", req.body);
       const { logId, exerciseId, order } = req.body;
+      
+      if (!logId || !exerciseId) {
+        console.log("❌ Missing required fields: logId =", logId, "exerciseId =", exerciseId);
+        return res.status(400).json({ message: "logId e exerciseId são obrigatórios" });
+      }
       
       // First, get the exercise name from the exercises table
       const exercise = await db.getExercise(exerciseId);
@@ -866,16 +872,17 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
       
       const logExerciseData = {
-        logId,
-        exerciseId,
-        exerciseName: exercise.nome,
+        registroId: logId,
+        exercicioId: exerciseId,
+        nomeExercicio: exercise.nome,
         order: order || 1
       };
       
+      console.log("🔍 [DEBUG] Validating data:", logExerciseData);
       const validatedData = insertWorkoutLogExerciseSchema.parse(logExerciseData);
       
-      // TODO: Implement createWorkoutLogExercise in storage interface
-      res.status(501).json({ message: "Método não implementado" });
+      const result = await db.createWorkoutLogExercise(validatedData);
+      res.status(201).json(result);
     } catch (error) {
       console.error('Error creating workout log exercise:', error);
       res.status(400).json({ message: "Erro ao criar exercício do treino" });

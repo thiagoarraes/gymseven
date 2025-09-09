@@ -4,6 +4,7 @@ import {
   type WorkoutTemplate, type InsertWorkoutTemplate,
   type WorkoutTemplateExercise, type InsertWorkoutTemplateExercise,
   type WorkoutLog, type InsertWorkoutLog,
+  type WorkoutLogExercise, type InsertWorkoutLogExercise,
   type WorkoutLogSet, type InsertWorkoutLogSet,
   type WeightHistory, type InsertWeightHistory,
   type UserGoal, type InsertUserGoal,
@@ -336,6 +337,16 @@ export class PostgreSQLStorage implements IStorage {
       query = query.limit(limit) as any;
     }
     return await query;
+  }
+
+  // Workout Log Exercises
+  async getWorkoutLogExercises(registroId: string): Promise<WorkoutLogExercise[]> {
+    return await this.db.select().from(exerciciosRegistroTreino).where(eq(exerciciosRegistroTreino.registroId, registroId));
+  }
+
+  async createWorkoutLogExercise(exercise: InsertWorkoutLogExercise): Promise<WorkoutLogExercise> {
+    const result = await this.db.insert(exerciciosRegistroTreino).values(exercise).returning();
+    return result[0];
   }
 
   // Workout Log Sets
