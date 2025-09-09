@@ -244,10 +244,16 @@ export default function Dashboard() {
       });
   }, [weightHistory, selectedExerciseId]);
 
-  // Fetch workout summary when modal opens
+  // Fetch workout complete data when modal opens
   const { data: workoutSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/workout-logs', selectedWorkout, 'summary', Date.now()],
-    queryFn: () => workoutLogApi.getSummary(selectedWorkout!),
+    queryKey: ['/api/workout-logs', selectedWorkout, 'complete', Date.now()],
+    queryFn: async () => {
+      if (!selectedWorkout) return null;
+      const response = await fetch(`/api/workout-logs/${selectedWorkout}`);
+      if (!response.ok) throw new Error('Erro ao carregar dados do treino');
+      const result = await response.json();
+      return result.data || result;
+    },
     enabled: !!selectedWorkout && showSummaryModal,
     staleTime: 0, // Always refetch
     gcTime: 0, // Don't cache (replaces cacheTime in v5)
