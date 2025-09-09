@@ -258,71 +258,42 @@ export default function WorkoutTemplateEditor() {
       // Snapshot the previous value
       const previousExercises = queryClient.getQueryData(["/api/workout-templates", id, "exercises"]);
       
-      // Optimistically update to the new value with proper field mapping
-      queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
-        if (!old) return old;
-        return old.map((ex: any) => {
-          if (ex.id === exerciseId) {
-            // Preserve exercise info and update only the changed fields
-            return { 
-              ...ex, 
-              ...updates,
-              // Ensure exercise object is preserved (contains name, etc.)
-              exercise: ex.exercise 
-            };
-          }
-          return ex;
-        });
-      });
+      // Find the current exercise to preserve all its data
+      const currentExercise = (previousExercises as any[])?.find((ex: any) => ex.id === exerciseId);
       
-      // Update local state with original field names for frontend
-      setReorderedExercises(prev => 
-        prev.map(ex => 
-          ex.id === exerciseId 
-            ? { 
-                ...ex, 
-                ...updates,
-                // Preserve exercise object (contains name, etc.)
-                exercise: ex.exercise 
-              }
-            : ex
-        )
-      );
+      if (currentExercise) {
+        // Create updated exercise preserving ALL original data
+        const updatedExercise = {
+          ...currentExercise,
+          ...updates,
+          // Explicitly preserve essential nested data that must not be lost
+          exercise: currentExercise.exercise,
+          exerciseName: currentExercise.exerciseName,
+          exerciseId: currentExercise.exerciseId,
+          // Map backend field names back to frontend field names for display
+          sets: updates.series !== undefined ? updates.series : currentExercise.sets,
+          reps: updates.repeticoes !== undefined ? updates.repeticoes : currentExercise.reps,
+        };
+
+        // Optimistically update the cache
+        queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
+          if (!old) return old;
+          return old.map((ex: any) => ex.id === exerciseId ? updatedExercise : ex);
+        });
+        
+        // Update local state
+        setReorderedExercises(prev => 
+          prev.map(ex => ex.id === exerciseId ? updatedExercise : ex)
+        );
+      }
 
       // Return a context object with the snapshotted value
       return { previousExercises };
     },
     onSuccess: (data, { exerciseId, updates }) => {
-      // Update cache with actual server response
-      queryClient.setQueryData(["/api/workout-templates", id, "exercises"], (old: any) => {
-        if (!old) return old;
-        return old.map((ex: any) => {
-          if (ex.id === exerciseId) {
-            // Use server response data if available, otherwise merge updates preserving exercise info
-            return data || { 
-              ...ex, 
-              ...updates,
-              // Preserve exercise object
-              exercise: ex.exercise 
-            };
-          }
-          return ex;
-        });
-      });
-      
-      // Also update local state
-      setReorderedExercises(prev => 
-        prev.map(ex => 
-          ex.id === exerciseId 
-            ? (data || { 
-                ...ex, 
-                ...updates,
-                // Preserve exercise object
-                exercise: ex.exercise 
-              })
-            : ex
-        )
-      );
+      // Force a fresh fetch to ensure we have the latest server data
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
     },
     onError: (err: any, variables, context) => {
       console.error('❌ Error updating exercise:', err);
@@ -433,6 +404,12 @@ export default function WorkoutTemplateEditor() {
   };
 
   const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
+    // Prevent sending null/undefined values - use validation
+    if (value === null || value === undefined) {
+      console.warn(`⚠️ Attempted to send null/undefined value for field ${field}. Skipping update.`);
+      return;
+    }
+
     // Map frontend field names to backend field names (Portuguese)
     const fieldMapping: Record<string, string> = {
       'sets': 'series',
@@ -443,6 +420,12 @@ export default function WorkoutTemplateEditor() {
     };
 
     const backendField = fieldMapping[field] || field;
+    
+    // Additional validation for specific fields
+    if (backendField === 'series' && (typeof value !== 'number' || value < 1)) {
+      console.warn(`⚠️ Invalid series value: ${value}. Must be a positive number.`);
+      return;
+    }
     
     updateExerciseMutation.mutate({
       exerciseId,

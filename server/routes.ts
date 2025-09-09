@@ -9,6 +9,7 @@ import {
   insertExerciseSchema, 
   insertWorkoutTemplateSchema,
   insertWorkoutTemplateExerciseSchema,
+  updateWorkoutTemplateExerciseSchema,
   insertWorkoutLogSchema,
   insertWorkoutLogExerciseSchema,
   insertWorkoutLogSetSchema,
