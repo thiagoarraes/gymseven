@@ -396,7 +396,10 @@ export default function Workouts() {
                   
                   <div className="space-y-2">
                     {template.exercises && template.exercises.length > 0 ? (
-                      template.exercises.slice(0, 3).map((exercise: any, index: number) => (
+                      template.exercises
+                        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                        .slice(0, 3)
+                        .map((exercise: any, index: number) => (
                         <div key={exercise.id} className="flex items-center text-xs text-muted-foreground" data-testid={`exercise-${exercise.id}`}>
                           <span className="w-4 text-center">{index + 1}</span>
                           <span className="flex-1 ml-2">
