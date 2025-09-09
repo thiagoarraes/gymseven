@@ -807,11 +807,17 @@ export default function WorkoutTemplateEditor() {
                       <h3 className="text-2xl font-bold text-white leading-tight exercise-name mb-2">
                         {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
                       </h3>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                        <span className="text-blue-300 font-medium text-sm">
-                          {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
-                        </span>
+                      <div className="mt-1">
+                        {(() => {
+                          const groupInfo = getMuscleGroupInfo(exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular');
+                          return (
+                            <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
+                              <span className="text-xs font-semibold tracking-wide">
+                                {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                     
