@@ -797,32 +797,16 @@ export default function WorkoutTemplateEditor() {
                       </div>
                     </div>
                     
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      {/* Save Button - only show if there are local changes for this exercise */}
-                      {localChanges[exercise.id] && Object.keys(localChanges[exercise.id]).length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-9 h-9 p-0 hover:bg-green-500/20 rounded-xl transition-all duration-200 bg-green-500/10 border border-green-500/30"
-                          onClick={() => handleSaveExercise(exercise.id)}
-                          title="Salvar alterações"
-                        >
-                          <Save className="text-green-400 w-4 h-4" />
-                        </Button>
-                      )}
-                      
-                      {/* Remove Button */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
-                        onClick={() => handleRemoveExercise(exercise.id)}
-                        title="Remover exercício"
-                      >
-                        <Trash2 className="text-red-400 w-4 h-4" />
-                      </Button>
-                    </div>
+                    {/* Remove Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
+                      onClick={() => handleRemoveExercise(exercise.id)}
+                      title="Remover exercício"
+                    >
+                      <Trash2 className="text-red-400 w-4 h-4" />
+                    </Button>
                   </div>
 
                   {/* Exercise Parameters - Modern Grid Layout */}
