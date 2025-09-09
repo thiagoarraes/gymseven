@@ -352,7 +352,9 @@ export default function WorkoutTemplateEditor() {
     
     if (isDifferent) {
       console.log("🔄 Updating reorderedExercises from templateExercises");
-      setReorderedExercises(newExercises);
+      // Sort exercises by order property to maintain consistent ordering
+      const sortedExercises = [...newExercises].sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+      setReorderedExercises(sortedExercises);
       
       // Clean localChanges for exercises that no longer exist
       const newExerciseIds = new Set(newExercises.map(ex => ex.id));
