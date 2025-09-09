@@ -55,16 +55,16 @@ export class WorkoutService {
     templateResponse.exercises = exercises.map(ex => ({
       id: ex.id,
       exerciseId: ex.exercicioId,
-      exerciseName: ex.exercise.nome,
+      exerciseName: ex.exercise?.nome || 'Exercício não encontrado',
       sets: ex.series,
       reps: ex.repeticoes,
       weight: ex.weight || undefined,
       restDurationSeconds: ex.restDurationSeconds || 90,
       order: ex.order,
       exercise: {
-        id: ex.exercise.id,
-        name: ex.exercise.nome,
-        muscleGroup: ex.exercise.grupoMuscular,
+        id: ex.exercise?.id || '',
+        name: ex.exercise?.nome || 'Exercício não encontrado',
+        muscleGroup: ex.exercise?.grupoMuscular || '',
       }
     }));
     templateResponse.totalExercises = exercises.length;
