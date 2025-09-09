@@ -77,7 +77,10 @@ export const workoutService = {
           });
           
           if (response.ok) {
-            const exercises = await response.json();
+            const responseData = await response.json();
+            // Check if response has .data property (API v2 structure)
+            const exercises = responseData.data?.exercises || responseData.exercises || responseData;
+            
             return { ...template, exercises };
           } else {
             return { ...template, exercises: [] };

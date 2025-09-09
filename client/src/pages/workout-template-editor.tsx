@@ -235,6 +235,7 @@ export default function WorkoutTemplateEditor() {
     },
     onSuccess: (results) => {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["workout-templates"] }); // Invalidate main workout list
       refetchExercises(); // Force immediate refetch
       setShowExerciseSelector(false);
       setSelectedExercises(new Set());
@@ -265,6 +266,7 @@ export default function WorkoutTemplateEditor() {
       // Simply invalidate cache and let it refetch - no optimistic updates to avoid data mixing
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["workout-templates"] }); // Invalidate main workout list
       
       toast({
         title: "Exercício atualizado",
@@ -298,6 +300,7 @@ export default function WorkoutTemplateEditor() {
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id] });
+      queryClient.invalidateQueries({ queryKey: ["workout-templates"] }); // Invalidate main workout list
       
       toast({
         title: "Exercício removido!",
@@ -315,6 +318,7 @@ export default function WorkoutTemplateEditor() {
       // Only invalidate specific queries to avoid race conditions
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["workout-templates"] }); // Invalidate main workout list
     },
     onError: (error) => {
       console.error("❌ Failed to reorder exercises:", error);
