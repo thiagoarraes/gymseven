@@ -1,12 +1,29 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { randomBytes } from 'crypto';
 import { getStorage } from '../../../../../../server/storage';
 import { UserContextData } from '../../../core/types';
 import { LoginDto, RegisterDto, ChangePasswordDto, UpdateProfileDto, AuthResponseDto } from '../dto';
 
 export class AuthService {
   private storage = getStorage();
-  private jwtSecret = process.env.JWT_SECRET || 'fallback-secret';
+  private jwtSecret = (() => {
+    // Use the EXACT same JWT secret generation logic as v1 (server/auth.ts)
+    const secret = process.env.JWT_SECRET;
+    if (secret) {
+      console.log('🔍 [AUTH SERVICE V2] Using JWT_SECRET from env:', secret.substring(0, 10) + '...');
+      return secret;
+    }
+    
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET must be provided in production environment');
+    }
+    
+    // Generate secure random string for development - SAME as v1
+    const randomSecret = randomBytes(64).toString('hex');
+    console.log('🔍 [AUTH SERVICE V2] Generated random secret for development:', randomSecret.substring(0, 10) + '...');
+    return randomSecret;
+  })();
 
   async login(loginData: LoginDto): Promise<AuthResponseDto> {
     const storage = await this.storage;
@@ -171,7 +188,13 @@ export class AuthService {
         
         // If v2 fails, try with v1 secret (for backwards compatibility)
         try {
-          const v1Secret = process.env.JWT_SECRET || this.jwtSecret;
+          // Try with the actual v1 secret logic
+          const v1Secret = process.env.JWT_SECRET || (() => {
+            if (process.env.NODE_ENV === 'production') {
+              throw new Error('JWT_SECRET must be provided in production environment');
+            }
+            return randomBytes(64).toString('hex');
+          })();
           console.log('🔍 [AUTH SERVICE V2] Trying v1 verification with secret:', v1Secret.substring(0, 10) + '...');
           decoded = jwt.verify(token, v1Secret) as any;
           tokenSource = 'v1';
