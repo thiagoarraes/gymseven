@@ -189,7 +189,8 @@ export default function WorkoutSession() {
           exercicioRegistroId: logExerciseId,
           setNumber: currentSetIndex + 1,
           weight: currentWeight ? parseFloat(currentWeight) : null,
-          reps: currentReps ? parseInt(currentReps) : null
+          reps: currentReps ? parseInt(currentReps) : null,
+          completed: true
         });
         console.log(`Set ${currentSetIndex + 1} saved: ${currentWeight}kg x ${currentReps} reps`);
       } catch (error) {
