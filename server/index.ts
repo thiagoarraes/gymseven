@@ -1,3 +1,6 @@
+// Force memory storage before any other imports
+process.env.USE_MEMORY_STORAGE = 'true';
+
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { loadEnv } from "./env";

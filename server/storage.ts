@@ -5,6 +5,7 @@ import {
   type WorkoutTemplateExercise, type InsertWorkoutTemplateExercise,
   type WorkoutLog, type InsertWorkoutLog,
   type WorkoutLogSet, type InsertWorkoutLogSet,
+  type WorkoutLogExercise, type InsertWorkoutLogExercise,
   type WeightHistory, type InsertWeightHistory,
   type UserGoal, type InsertUserGoal,
   type UserPreferences, type InsertUserPreferences, type UpdateUserPreferences,
@@ -100,7 +101,17 @@ export interface IStorage {
 // Storage initialization - Memory storage by default, PostgreSQL optional
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Use PostgreSQL database if configured
+    console.log('🔍 [STORAGE] USE_MEMORY_STORAGE:', process.env.USE_MEMORY_STORAGE);
+    console.log('🔍 [STORAGE] DATABASE_URL presente:', !!process.env.DATABASE_URL);
+    
+    // Force memory storage if explicitly requested
+    if (process.env.USE_MEMORY_STORAGE === 'true') {
+      console.log('🚀 Using Memory storage (dados não persistentes) - forçado por configuração');
+      const { MemoryStorage } = await import('./memory-storage');
+      return new MemoryStorage();
+    }
+    
+    // Use PostgreSQL database if configured and not forced to memory
     if (process.env.DATABASE_URL) {
       console.log('🚀 Using PostgreSQL database configuration');
       console.log('✅ DATABASE_URL detected');

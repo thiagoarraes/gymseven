@@ -58,7 +58,19 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newUser: User = {
       id,
-      ...user,
+      email: user.email,
+      username: user.username,
+      password: user.password,
+      firstName: user.firstName ?? null,
+      lastName: user.lastName ?? null,
+      dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth) : null,
+      height: user.height ?? null,
+      weight: user.weight ?? null,
+      activityLevel: user.activityLevel ?? null,
+      fitnessGoals: user.fitnessGoals ?? null,
+      profileImageUrl: user.profileImageUrl ?? null,
+      experienceLevel: user.experienceLevel ?? null,
+      preferredWorkoutDuration: user.preferredWorkoutDuration ?? null,
       isActive: user.isActive ?? true,
       emailVerified: user.emailVerified ?? false,
       lastLoginAt: null,
@@ -107,8 +119,10 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newEntry: WeightHistory = {
       id,
-      ...entry,
-      date: entry.date || new Date()
+      usuarioId: entry.usuarioId,
+      peso: entry.peso,
+      date: entry.date || new Date(),
+      observacoes: entry.observacoes ?? null
     };
     this.weightHistory.set(id, newEntry);
     return newEntry;
@@ -137,7 +151,12 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newGoal: UserGoal = {
       id,
-      ...goal,
+      usuarioId: goal.usuarioId,
+      type: goal.type,
+      targetValue: goal.targetValue ?? null,
+      currentValue: goal.currentValue ?? null,
+      unit: goal.unit ?? null,
+      targetDate: goal.targetDate ?? null,
       isCompleted: goal.isCompleted ?? false,
       createdAt: new Date()
     };
@@ -170,7 +189,16 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newPrefs: UserPreferences = {
       id,
-      ...prefs
+      usuarioId: prefs.usuarioId,
+      theme: prefs.theme ?? null,
+      units: prefs.units ?? null,
+      language: prefs.language ?? null,
+      notifications: prefs.notifications ?? null,
+      soundEffects: prefs.soundEffects ?? null,
+      restTimerAutoStart: prefs.restTimerAutoStart ?? null,
+      defaultRestTime: prefs.defaultRestTime ?? null,
+      weekStartsOn: prefs.weekStartsOn ?? null,
+      trackingData: prefs.trackingData ?? null
     };
     this.userPreferences.set(id, newPrefs);
     return newPrefs;
@@ -402,7 +430,13 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newExercise: WorkoutTemplateExercise = {
       id,
-      ...exercise
+      modeloId: exercise.modeloId,
+      exercicioId: exercise.exercicioId,
+      series: exercise.series,
+      repeticoes: exercise.repeticoes,
+      weight: exercise.weight ?? null,
+      restDurationSeconds: exercise.restDurationSeconds ?? null,
+      order: exercise.order
     };
     this.workoutTemplateExercises.set(id, newExercise);
     return newExercise;
@@ -468,7 +502,11 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newLog: WorkoutLog = {
       id,
-      ...log
+      usuarioId: log.usuarioId,
+      modeloId: log.modeloId ?? null,
+      nome: log.nome,
+      startTime: log.startTime,
+      endTime: log.endTime ?? null
     };
     this.workoutLogs.set(id, newLog);
     return newLog;
@@ -529,7 +567,10 @@ export class MemoryStorage implements IStorage {
     const id = generateId();
     const newSet: WorkoutLogSet = {
       id,
-      ...set,
+      exercicioRegistroId: set.exercicioRegistroId,
+      setNumber: set.setNumber,
+      reps: set.reps ?? null,
+      weight: set.weight ?? null,
       completed: set.completed ?? false
     };
     this.workoutLogSets.set(id, newSet);
