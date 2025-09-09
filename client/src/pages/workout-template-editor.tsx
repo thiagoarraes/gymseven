@@ -119,6 +119,14 @@ export default function WorkoutTemplateEditor() {
   const [weightInputs, setWeightInputs] = useState<Record<string, string>>({});
   const [muscleGroupFilter, setMuscleGroupFilter] = useState<string>('all');
   const [selectedExercises, setSelectedExercises] = useState<Set<string>>(new Set());
+  
+  // Local changes state - stores pending changes until user clicks save
+  const [localChanges, setLocalChanges] = useState<Record<string, Partial<{
+    series: number;
+    repeticoes: string;
+    weight: number | null;
+    restDurationSeconds: number;
+  }>>>({});
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -343,15 +351,10 @@ export default function WorkoutTemplateEditor() {
     setIsEditingTemplateName(false);
   };
 
-  const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
-    console.log(`🔄 handleQuickUpdate called:`, { exerciseId, field, value });
+  // Update local changes only - no immediate server save
+  const handleLocalUpdate = (exerciseId: string, field: string, value: any) => {
+    console.log(`🔄 handleLocalUpdate called:`, { exerciseId, field, value });
     
-    // Prevent sending null/undefined values for required fields
-    if ((field === 'sets' || field === 'series') && (value === null || value === undefined || value < 1)) {
-      console.warn(`⚠️ Invalid ${field} value: ${value}. Skipping update.`);
-      return;
-    }
-
     // Map frontend field names to backend field names (Portuguese)
     const fieldMapping: Record<string, string> = {
       'sets': 'series',
@@ -362,12 +365,30 @@ export default function WorkoutTemplateEditor() {
     };
 
     const backendField = fieldMapping[field] || field;
-    console.log(`🔄 Field mapping: ${field} -> ${backendField}, value:`, value);
     
-    updateExerciseMutation.mutate({
-      exerciseId,
-      updates: { [backendField]: value },
-    });
+    setLocalChanges(prev => ({
+      ...prev,
+      [exerciseId]: {
+        ...prev[exerciseId],
+        [backendField]: value
+      }
+    }));
+
+    // Also update the local display immediately
+    setReorderedExercises(prev => 
+      prev.map(ex => {
+        if (ex.id === exerciseId) {
+          const updatedEx = { ...ex };
+          // Update the display field names
+          if (backendField === 'series') updatedEx.sets = value;
+          if (backendField === 'repeticoes') updatedEx.reps = value;
+          if (backendField === 'weight') updatedEx.weight = value;
+          if (backendField === 'restDurationSeconds') updatedEx.restDurationSeconds = value;
+          return updatedEx;
+        }
+        return ex;
+      })
+    );
   };
 
   const handleRemoveExercise = (exerciseId: string) => {
@@ -393,19 +414,62 @@ export default function WorkoutTemplateEditor() {
   };
 
   const handleSaveWorkout = async () => {
-    const exerciseUpdates = reorderedExercises.map((exercise, index) => ({
-      id: exercise.id,
-      order: index + 1,
-    }));
-    
-    if (exerciseUpdates.length > 0) {
-      reorderExercisesMutation.mutate(exerciseUpdates);
+    let hasChanges = false;
+
+    try {
+      // First save all local changes to exercises
+      if (Object.keys(localChanges).length > 0) {
+        console.log("💾 Saving local exercise changes:", localChanges);
+        
+        const promises = Object.entries(localChanges).map(([exerciseId, changes]) => {
+          if (Object.keys(changes).length > 0) {
+            return workoutTemplateApi.updateExercise(exerciseId, changes);
+          }
+          return Promise.resolve();
+        });
+
+        await Promise.all(promises);
+        hasChanges = true;
+        
+        // Clear local changes after successful save
+        setLocalChanges({});
+      }
+
+      // Then save exercise order changes  
+      const exerciseUpdates = reorderedExercises.map((exercise, index) => ({
+        id: exercise.id,
+        order: index + 1,
+      }));
+      
+      if (exerciseUpdates.length > 0) {
+        reorderExercisesMutation.mutate(exerciseUpdates);
+        hasChanges = true;
+      }
+      
+      if (!hasChanges) {
+        toast({
+          title: "Nenhuma alteração",
+          description: "Não há alterações para salvar.",
+        });
+        return;
+      }
+      
+      // Refresh data from server
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      
+      toast({
+        title: "Treino salvo!",
+        description: "Todas as alterações foram salvas com sucesso.",
+      });
+    } catch (error) {
+      console.error("Error saving workout:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as alterações. Tente novamente.",
+        variant: "destructive",
+      });
     }
-    
-    toast({
-      title: "Treino salvo!",
-      description: "Todas as alterações foram salvas com sucesso.",
-    });
   };
 
   const onSubmit = (data: FormData) => {
@@ -672,7 +736,7 @@ export default function WorkoutTemplateEditor() {
                             </div>
                             <Input
                               value={exercise.reps}
-                              onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                              onChange={(e) => handleLocalUpdate(exercise.id, 'reps', e.target.value)}
                               className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                               placeholder="30 min"
                             />
@@ -694,7 +758,7 @@ export default function WorkoutTemplateEditor() {
                               onBlur={(e) => {
                                 const value = e.target.value.trim();
                                 if (value === '') {
-                                  handleQuickUpdate(exercise.id, 'weight', null);
+                                  handleLocalUpdate(exercise.id, 'weight', null);
                                   setWeightInputs(prev => {
                                     const newInputs = { ...prev };
                                     delete newInputs[exercise.id];
@@ -703,7 +767,7 @@ export default function WorkoutTemplateEditor() {
                                 } else {
                                   const numericValue = parseFloat(value);
                                   if (!isNaN(numericValue)) {
-                                    handleQuickUpdate(exercise.id, 'weight', numericValue);
+                                    handleLocalUpdate(exercise.id, 'weight', numericValue);
                                     setWeightInputs(prev => {
                                       const newInputs = { ...prev };
                                       delete newInputs[exercise.id];
@@ -728,7 +792,7 @@ export default function WorkoutTemplateEditor() {
                                 variant="outline"
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
-                                onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
+                                onClick={() => exercise.sets > 1 && handleLocalUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                 disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                               >
                                 <Minus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
@@ -740,7 +804,7 @@ export default function WorkoutTemplateEditor() {
                                 variant="outline"
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
-                                onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
+                                onClick={() => handleLocalUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                 disabled={updateExerciseMutation.isPending}
                               >
                                 <Plus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
@@ -764,7 +828,7 @@ export default function WorkoutTemplateEditor() {
                                 variant="outline"
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
-                                onClick={() => exercise.sets > 1 && handleQuickUpdate(exercise.id, 'sets', exercise.sets - 1)}
+                                onClick={() => exercise.sets > 1 && handleLocalUpdate(exercise.id, 'sets', exercise.sets - 1)}
                                 disabled={exercise.sets <= 1 || updateExerciseMutation.isPending}
                               >
                                 <Minus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
@@ -776,7 +840,7 @@ export default function WorkoutTemplateEditor() {
                                 variant="outline"
                                 size="sm"
                                 className="w-10 h-10 p-0 bg-gradient-to-br from-slate-600/90 to-slate-700/80 border-slate-400/50 backdrop-blur-sm hover:from-blue-500/80 hover:to-blue-600/70 hover:border-blue-400/60 hover:scale-105 active:scale-95 rounded-xl shadow-md transition-all duration-200 group"
-                                onClick={() => handleQuickUpdate(exercise.id, 'sets', exercise.sets + 1)}
+                                onClick={() => handleLocalUpdate(exercise.id, 'sets', exercise.sets + 1)}
                                 disabled={updateExerciseMutation.isPending}
                               >
                                 <Plus className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
@@ -792,7 +856,7 @@ export default function WorkoutTemplateEditor() {
                             </div>
                             <Input
                               value={exercise.reps || ''}
-                              onChange={(e) => handleQuickUpdate(exercise.id, 'reps', e.target.value)}
+                              onChange={(e) => handleLocalUpdate(exercise.id, 'reps', e.target.value)}
                               className="text-center bg-slate-600/80 border-slate-400/40 backdrop-blur-sm text-white text-lg font-bold h-12 rounded-xl shadow-sm"
                               placeholder="8-12"
                             />
@@ -812,7 +876,7 @@ export default function WorkoutTemplateEditor() {
                                 onClick={() => {
                                   const currentWeight = exercise.weight || 0;
                                   const newWeight = Math.max(0, currentWeight - 2.5);
-                                  handleQuickUpdate(exercise.id, 'weight', newWeight === 0 ? null : newWeight);
+                                  handleLocalUpdate(exercise.id, 'weight', newWeight === 0 ? null : newWeight);
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
@@ -829,7 +893,7 @@ export default function WorkoutTemplateEditor() {
                                   onBlur={(e) => {
                                     const value = e.target.value.trim();
                                     if (value === '') {
-                                      handleQuickUpdate(exercise.id, 'weight', null);
+                                      handleLocalUpdate(exercise.id, 'weight', null);
                                       setWeightInputs(prev => {
                                         const newInputs = { ...prev };
                                         delete newInputs[exercise.id];
@@ -838,7 +902,7 @@ export default function WorkoutTemplateEditor() {
                                     } else {
                                       const numericValue = parseFloat(value);
                                       if (!isNaN(numericValue)) {
-                                        handleQuickUpdate(exercise.id, 'weight', numericValue);
+                                        handleLocalUpdate(exercise.id, 'weight', numericValue);
                                         setWeightInputs(prev => {
                                           const newInputs = { ...prev };
                                           delete newInputs[exercise.id];
@@ -858,7 +922,7 @@ export default function WorkoutTemplateEditor() {
                                 onClick={() => {
                                   const currentWeight = exercise.weight || 0;
                                   const newWeight = currentWeight + 2.5;
-                                  handleQuickUpdate(exercise.id, 'weight', newWeight);
+                                  handleLocalUpdate(exercise.id, 'weight', newWeight);
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
@@ -881,7 +945,7 @@ export default function WorkoutTemplateEditor() {
                                 onClick={() => {
                                   const currentRest = exercise.restDuration || exercise.restDurationSeconds || 90;
                                   const newRest = Math.max(30, currentRest - 15);
-                                  handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                                  handleLocalUpdate(exercise.id, 'restDurationSeconds', newRest);
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
@@ -899,7 +963,7 @@ export default function WorkoutTemplateEditor() {
                                 onClick={() => {
                                   const currentRest = exercise.restDuration || exercise.restDurationSeconds || 90;
                                   const newRest = Math.min(300, currentRest + 15);
-                                  handleQuickUpdate(exercise.id, 'restDurationSeconds', newRest);
+                                  handleLocalUpdate(exercise.id, 'restDurationSeconds', newRest);
                                 }}
                                 disabled={updateExerciseMutation.isPending}
                               >
