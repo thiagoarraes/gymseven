@@ -71,34 +71,15 @@ export default function Register() {
   const onSubmit = async (data: RegisterUser) => {
     setLoading(true);
     try {
-      // Use direct API call instead of signUp from auth context
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          username: data.username,
-          password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName,
-        }),
+      await signUp(data.email, data.password, {
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
       });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        // Store registration data for OTP verification
-        setRegistrationData(data);
-        
-        showSuccess("Código enviado!", result.message);
-        setShowOtpStep(true);
-      } else {
-        showError("Erro ao criar conta", result.message || "Tente novamente");
-      }
+      showSuccess('Conta criada!', 'Você foi autenticado com sucesso.');
+      setLocation('/dashboard');
     } catch (error: any) {
-      showError("Erro ao criar conta", error.message || "Erro de conexão. Tente novamente.");
+      showError('Erro ao criar conta', error.message || 'Tente novamente');
     } finally {
       setLoading(false);
     }
