@@ -4,6 +4,7 @@ import { useRoute } from "wouter";
 import { 
   Pause, 
   Square, 
+  StopCircle,
   ChevronLeft, 
   ChevronRight, 
   Check, 
@@ -311,7 +312,7 @@ export default function WorkoutSession() {
               className="flex-1 glass-card border-slate-700 py-2 rounded-lg font-medium text-slate-300"
               onClick={handleFinishWorkout}
             >
-              <Square className="w-4 h-4 mr-2" />
+              <StopCircle className="w-4 h-4 mr-2" />
               Finalizar
             </Button>
           </div>
