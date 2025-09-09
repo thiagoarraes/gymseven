@@ -266,7 +266,18 @@ export default function WorkoutTemplateEditor() {
       // Simply invalidate cache and let it refetch - no optimistic updates to avoid data mixing
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["workout-templates", user?.id] }); // Invalidate main workout list
+      
+      // Force invalidate main workout list with all possible cache keys
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === "workout-templates";
+        }
+      });
+      
+      // Add a small delay to ensure backend is updated before refetch
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["workout-templates", user?.id] });
+      }, 100);
       
       toast({
         title: "Exercício atualizado",
