@@ -30,69 +30,7 @@ interface Achievement {
   unlockedAt?: Date;
 }
 
-// Sample achievements data
-const SAMPLE_ACHIEVEMENTS: Achievement[] = [
-  {
-    id: 'first_workout',
-    name: 'Saindo do Sedentarismo',
-    description: 'Complete seu primeiro treino',
-    icon: Trophy,
-    category: 'milestone',
-    tier: 'bronze',
-    points: 10,
-    requirement: { type: 'workout_count', target: 1, timeframe: 'all_time' },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'workout_10',
-    name: 'Deixou de ser Frango',
-    description: 'Complete 10 treinos',
-    icon: Medal,
-    category: 'workout',
-    tier: 'prata',
-    points: 50,
-    requirement: { type: 'workout_count', target: 10, timeframe: 'all_time' },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'workout_50',
-    name: 'Marombeiro Raiz',
-    description: 'Complete 50 treinos',
-    icon: Crown,
-    category: 'workout',
-    tier: 'ouro',
-    points: 200,
-    requirement: { type: 'workout_count', target: 50, timeframe: 'all_time' },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'streak_3',
-    name: 'No Foco',
-    description: 'Treine por 3 dias consecutivos',
-    icon: Flame,
-    category: 'consistency',
-    tier: 'bronze',
-    points: 25,
-    requirement: { type: 'consecutive_days', target: 3 },
-    unlocked: false,
-    progress: 0
-  },
-  {
-    id: 'streak_7',
-    name: 'Beast Mode Ativado',
-    description: 'Treine por 7 dias consecutivos',
-    icon: Calendar,
-    category: 'consistency',
-    tier: 'prata',
-    points: 75,
-    requirement: { type: 'consecutive_days', target: 7 },
-    unlocked: false,
-    progress: 0
-  }
-];
+// Achievement system based on real workout data
 
 export default function Dashboard() {
   const [, navigate] = useLocation();
@@ -121,9 +59,7 @@ export default function Dashboard() {
 
   // Calculate achievements progress based on workout data
   const achievementsWithProgress = useMemo(() => {
-    if (!recentWorkouts.length) return SAMPLE_ACHIEVEMENTS;
-
-    const completedWorkouts = recentWorkouts.filter(log => log.endTime);
+    const completedWorkouts = recentWorkouts.filter(w => w.endTime);
     const totalWorkouts = completedWorkouts.length;
 
     // Helper function to calculate consecutive days
@@ -163,7 +99,47 @@ export default function Dashboard() {
 
     const currentStreak = calculateConsecutiveDays(completedWorkouts);
 
-    return SAMPLE_ACHIEVEMENTS.map(achievement => {
+    // Create dynamic achievements based on real data
+    const achievements: Achievement[] = [
+      {
+        id: 'first_workout',
+        name: 'Primeiro Treino',
+        description: 'Complete seu primeiro treino',
+        icon: Trophy,
+        category: 'milestone',
+        tier: 'bronze',
+        points: 10,
+        requirement: { type: 'workout_count', target: 1 },
+        unlocked: totalWorkouts >= 1,
+        progress: Math.min(totalWorkouts / 1, 1)
+      },
+      {
+        id: 'workout_10',
+        name: 'Dedicado',
+        description: 'Complete 10 treinos',
+        icon: Medal,
+        category: 'workout',
+        tier: 'prata',
+        points: 50,
+        requirement: { type: 'workout_count', target: 10 },
+        unlocked: totalWorkouts >= 10,
+        progress: Math.min(totalWorkouts / 10, 1)
+      },
+      {
+        id: 'workout_25',
+        name: 'Marombeiro',
+        description: 'Complete 25 treinos',
+        icon: Crown,
+        category: 'workout',
+        tier: 'ouro',
+        points: 100,
+        requirement: { type: 'workout_count', target: 25 },
+        unlocked: totalWorkouts >= 25,
+        progress: Math.min(totalWorkouts / 25, 1)
+      }
+    ];
+
+    return achievements.map(achievement => {
       let progress = 0;
       let unlocked = false;
 
@@ -259,20 +235,26 @@ export default function Dashboard() {
 
   // Get muscle groups from workout
   const getMuscleGroupsFromWorkout = (workout: any) => {
-    if (!workout) return ['Peito', 'Tríceps', 'Ombros']; // fallback
+    if (!workout) return [];
     
     // Try to get from workoutDetails first, then from workout directly
     const exercises = (workoutDetails as any)?.exercises || (workout as any)?.exercises;
-    if (!exercises || !Array.isArray(exercises)) return ['Peito', 'Tríceps', 'Ombros'];
+    if (!exercises || !Array.isArray(exercises)) return [];
     
     const muscleGroups = new Set<string>();
     exercises.forEach((exercise: any) => {
       if (exercise.muscleGroup) {
         muscleGroups.add(exercise.muscleGroup);
+      } else if (exercise.exercise?.muscleGroup) {
+        muscleGroups.add(exercise.exercise.muscleGroup);
+      } else if (exercise.exercicio?.muscleGroup) {
+        muscleGroups.add(exercise.exercicio.muscleGroup);
+      } else if (exercise.exercicio?.grupoMuscular) {
+        muscleGroups.add(exercise.exercicio.grupoMuscular);
       }
     });
     
-    return Array.from(muscleGroups).length > 0 ? Array.from(muscleGroups) : ['Peito', 'Tríceps', 'Ombros'];
+    return Array.from(muscleGroups).sort();
   };
 
   // Format date for workout card
