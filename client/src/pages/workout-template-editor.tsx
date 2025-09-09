@@ -433,9 +433,20 @@ export default function WorkoutTemplateEditor() {
   };
 
   const handleQuickUpdate = (exerciseId: string, field: string, value: any) => {
+    // Map frontend field names to backend field names (Portuguese)
+    const fieldMapping: Record<string, string> = {
+      'sets': 'series',
+      'reps': 'repeticoes',
+      'weight': 'weight',
+      'restDurationSeconds': 'restDurationSeconds',
+      'restDuration': 'restDurationSeconds'
+    };
+
+    const backendField = fieldMapping[field] || field;
+    
     updateExerciseMutation.mutate({
       exerciseId,
-      updates: { [field]: value },
+      updates: { [backendField]: value },
     });
   };
 

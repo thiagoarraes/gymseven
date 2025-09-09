@@ -214,8 +214,10 @@ export const insertWorkoutTemplateSchema = z.object({
 export const insertWorkoutTemplateExerciseSchema = createInsertSchema(exerciciosModeloTreino).omit({
   id: true,
 }).extend({
-  // Allow numbers for reps, but convert to string for storage
-  reps: z.union([z.string(), z.number()]).transform((val) => String(val)),
+  // Allow numbers for repeticoes, but convert to string for storage
+  repeticoes: z.union([z.string(), z.number()]).transform((val) => String(val)),
+  // Also accept reps for backwards compatibility
+  reps: z.union([z.string(), z.number()]).transform((val) => String(val)).optional(),
 });
 
 export const insertWorkoutLogSchema = createInsertSchema(registrosTreino).omit({
