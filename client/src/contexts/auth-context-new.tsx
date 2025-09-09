@@ -130,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(result.user);
       }
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error('Sign in error:', error.message || error.toString());
       throw new Error(error.message || 'Email ou senha incorretos');
     } finally {
       setLoading(false);
@@ -146,7 +146,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.log('Logging out user');
       setUser(null);
     } catch (error: any) {
-      console.error('Sign out error:', error);
+      console.error('Sign out error:', error.message || error.toString());
       throw new Error(error.message || 'Erro ao fazer logout');
     } finally {
       setLoading(false);
@@ -174,8 +174,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const data = await response.json();
       setUser(data.user);
-    } catch (error) {
-      console.error('Update profile error:', error);
+    } catch (error: any) {
+      console.error('Update profile error:', error.message || error.toString());
       throw error;
     }
   };
@@ -200,8 +200,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Remove token and clear user state
       localStorage.removeItem('auth-token');
       setUser(null);
-    } catch (error) {
-      console.error('Delete account error:', error);
+    } catch (error: any) {
+      console.error('Delete account error:', error.message || error.toString());
       throw error;
     }
   };

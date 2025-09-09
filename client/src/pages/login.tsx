@@ -63,7 +63,7 @@ export default function Login() {
       showSuccess("Login realizado com sucesso!", "Bem-vindo ao GymSeven!");
       // Don't redirect manually, let the auth context handle it via onAuthStateChange
     } catch (error: any) {
-      console.error('Login error in component:', error);
+      console.error('Login error in component:', error.message || error.toString());
       const errorMessage = error?.message || "Email ou senha incorretos";
       setLoginError(errorMessage);
     } finally {
