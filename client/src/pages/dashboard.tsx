@@ -246,18 +246,8 @@ export default function Dashboard() {
 
   // Fetch workout complete data when modal opens
   const { data: workoutSummary, isLoading: summaryLoading } = useQuery({
-    queryKey: ['/api/workout-logs', selectedWorkout, 'complete', Date.now()],
-    queryFn: async () => {
-      if (!selectedWorkout) return null;
-      try {
-        const response = await workoutLogApi.getById(selectedWorkout);
-        console.log('🔍 Full workout data received:', response);
-        return response;
-      } catch (error) {
-        console.error('Error loading workout data:', error);
-        throw new Error('Erro ao carregar dados do treino');
-      }
-    },
+    queryKey: ['/api/workout-logs', selectedWorkout, 'summary', Date.now()],
+    queryFn: () => workoutLogApi.getSummary(selectedWorkout!),
     enabled: !!selectedWorkout && showSummaryModal,
     staleTime: 0, // Always refetch
     gcTime: 0, // Don't cache (replaces cacheTime in v5)
