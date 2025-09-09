@@ -385,11 +385,12 @@ export default function Workouts() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg px-2 py-1 transition-all duration-200"
-                      onClick={() => navigate(`/workout-template/${template.id}`)}
+                      className="text-xs font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl rounded-lg px-3 py-2 transition-all duration-300 hover:scale-105"
+                      onClick={() => navigate(`/workout-template/${template.id}?openModal=true`)}
                       data-testid={`button-add-exercises-${template.id}`}
                     >
-                      + Adicionar
+                      <Plus className="w-3 h-3 mr-1" />
+                      Adicionar
                     </Button>
                   </div>
                   
@@ -408,11 +409,14 @@ export default function Workouts() {
                       ))
                     ) : (
                       <div 
-                        className="bg-muted/30 dark:bg-slate-800/30 border border-border dark:border-slate-700 rounded-lg p-3 text-center cursor-pointer hover:bg-muted/50 dark:hover:bg-slate-800/50 transition-colors"
-                        onClick={() => navigate(`/workout-template/${template.id}`)}
+                        className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-2 border-dashed border-blue-400/40 rounded-lg p-4 text-center cursor-pointer hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-400/60 transition-all duration-300 hover:scale-105"
+                        onClick={() => navigate(`/workout-template/${template.id}?openModal=true`)}
                         data-testid={`placeholder-add-exercises-${template.id}`}
                       >
-                        <span className="text-muted-foreground text-sm">+ Adicionar exercícios</span>
+                        <div className="flex items-center justify-center gap-2 text-blue-400 font-semibold">
+                          <Plus className="w-4 h-4" />
+                          <span className="text-sm">Adicionar exercícios</span>
+                        </div>
                       </div>
                     )}
                     

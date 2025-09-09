@@ -374,6 +374,18 @@ export default function WorkoutTemplateEditor() {
     }
   }, [template]);
 
+  // Check URL params to auto-open modal
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('openModal') === 'true') {
+      setShowExerciseSelector(true);
+      // Remove the parameter from URL without affecting history
+      const url = new URL(window.location.href);
+      url.searchParams.delete('openModal');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  }, []);
+
   // Handlers
   const handleTemplateNameEdit = () => {
     setIsEditingTemplateName(true);
