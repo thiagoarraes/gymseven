@@ -778,7 +778,7 @@ export default function AchievementsPage() {
 
   // Fetch workout logs to calculate real progress
   const { data: workoutLogs = [], isLoading } = useQuery({
-    queryKey: ["/api/workout-logs"],
+    queryKey: ["/api/v2/workouts/logs"],
     queryFn: workoutLogApi.getAll,
   });
 

@@ -139,7 +139,7 @@ export default function WorkoutTemplateEditor() {
 
   // Queries
   const { data: template, isLoading: templateLoading } = useQuery({
-    queryKey: ["/api/workout-templates", id],
+    queryKey: ["/api/v2/workouts/templates", id],
     enabled: !!id,
   });
 
@@ -154,7 +154,7 @@ export default function WorkoutTemplateEditor() {
   });
 
   const { data: allExercises = [] } = useQuery({
-    queryKey: ["/api/exercicios"],
+    queryKey: ["/api/v2/exercises"],
   }) as { data: any[] };
 
   // Mutations
@@ -164,7 +164,7 @@ export default function WorkoutTemplateEditor() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id] });
       setIsEditingTemplateName(false);
       toast({
         title: "Nome atualizado!",
@@ -234,7 +234,7 @@ export default function WorkoutTemplateEditor() {
       return Promise.all(promises);
     },
     onSuccess: (results) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["workout-templates", user?.id] }); // Invalidate main workout list
       refetchExercises(); // Force immediate refetch
       setShowExerciseSelector(false);
@@ -267,7 +267,7 @@ export default function WorkoutTemplateEditor() {
       // Force immediate cache removal and refetch
       queryClient.removeQueries({ queryKey: ["workout-templates", user?.id] });
       queryClient.removeQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
-      queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.removeQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       
       // Also remove any cached workout template data completely
       queryClient.removeQueries({ 
@@ -311,9 +311,9 @@ export default function WorkoutTemplateEditor() {
       });
       
       // Invalidate all related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id] });
       queryClient.invalidateQueries({ queryKey: ["workout-templates", user?.id] }); // Invalidate main workout list
       
       toast({
@@ -330,7 +330,7 @@ export default function WorkoutTemplateEditor() {
     },
     onSuccess: () => {
       // Only invalidate specific queries to avoid race conditions
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       queryClient.invalidateQueries({ queryKey: ["workout-templates", user?.id] }); // Invalidate main workout list
     },
@@ -574,7 +574,7 @@ export default function WorkoutTemplateEditor() {
       // Only invalidate queries if no reorder was done (to avoid double invalidation)
       if (!needsReorder) {
         queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
       }
       
       toast({

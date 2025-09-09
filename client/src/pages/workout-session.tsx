@@ -45,20 +45,20 @@ export default function WorkoutSession() {
   const workoutId = params?.id;
 
   const { data: workoutLog, isLoading: logLoading } = useQuery({
-    queryKey: ["/api/workout-logs", workoutId],
+    queryKey: ["/api/v2/workouts/logs", workoutId],
     queryFn: () => workoutLogApi.getById(workoutId!),
     enabled: !!workoutId,
   });
 
   const { data: templateExercises = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/workout-templates", workoutLog?.modeloId, "exercises"],
+    queryKey: ["/api/v2/workouts/templates", workoutLog?.modeloId, "exercises"],
     queryFn: () => workoutTemplateApi.getExercises(workoutLog!.modeloId!),
     enabled: !!workoutLog?.modeloId,
   });
 
   // Query for exercise weight history  
   const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
-    queryKey: ["/api/exercise-weight-history", templateExercises[currentExerciseIndex]?.exerciseId],
+    queryKey: ["/api/v2/exercises", templateExercises[currentExerciseIndex]?.exerciseId, "weight-history"],
     queryFn: () => exerciseProgressApi.getWeightHistory(templateExercises[currentExerciseIndex]!.exerciseId, 10),
     enabled: !!templateExercises[currentExerciseIndex]?.exerciseId,
   });
@@ -109,7 +109,7 @@ export default function WorkoutSession() {
     },
     onSuccess: (result) => {
       console.log("✅ Workout finished successfully:", result);
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/logs"] });
       toast({
         title: "Treino finalizado!",
         description: "Parabéns! Treino concluído com sucesso.",

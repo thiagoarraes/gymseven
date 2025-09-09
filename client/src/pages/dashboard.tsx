@@ -42,7 +42,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   
   const { data: recentWorkouts = [], isLoading: workoutsLoading } = useQuery({
-    queryKey: ["/api/workout-logs"],
+    queryKey: ["/api/v2/workouts/logs"],
     queryFn: workoutLogApi.getAll,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
@@ -50,14 +50,14 @@ export default function Dashboard() {
 
   // Get template exercises for the first workout to show muscle groups
   const { data: templateExercises = [] } = useQuery({
-    queryKey: ["/api/workout-templates", recentWorkouts[0]?.modeloId, "exercises"],
+    queryKey: ["/api/v2/workouts/templates", recentWorkouts[0]?.modeloId, "exercises"],
     queryFn: () => workoutTemplateApi.getExercises(recentWorkouts[0]!.modeloId!),
     enabled: !!recentWorkouts[0]?.modeloId,
   });
 
   // Get detailed workout data for modal
   const { data: workoutDetails, isLoading: workoutDetailsLoading } = useQuery({
-    queryKey: ["/api/workout-logs", selectedWorkoutForDetails?.id, "details"],
+    queryKey: ["/api/v2/workouts/logs", selectedWorkoutForDetails?.id, "details"],
     queryFn: () => workoutLogApi.getSummary(selectedWorkoutForDetails?.id),
     enabled: !!selectedWorkoutForDetails?.id,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -176,14 +176,14 @@ export default function Dashboard() {
   // Weight history data
   // Get exercises with weight history for select dropdown
   const { data: exercisesWithWeightHistory = [] } = useQuery({
-    queryKey: ["/api/exercises-with-weight-history"],
+    queryKey: ["/api/v2/exercises/with-weight-history"],
     queryFn: () => exerciseProgressApi.getExercisesWithWeightHistory(),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Get weight data based on selected exercise
   const { data: weightHistory = [] } = useQuery({
-    queryKey: ["/api/exercise-progress/weight", selectedExerciseId],
+    queryKey: ["/api/v2/exercises", selectedExerciseId, "weight-progress"],
     queryFn: () => {
       if (selectedExerciseId && selectedExerciseId !== "all") {
         // Get specific exercise weight history

@@ -10,44 +10,51 @@ import type {
 
 export const exerciseApi = {
   getAll: async (): Promise<Exercise[]> => {
-    const response = await apiRequest("GET", "/api/exercicios");
-    return response.json();
+    const response = await apiRequest("GET", "/api/v2/exercises");
+    const data = await response.json();
+    return data.data || data;
   },
 
   getById: async (id: string): Promise<Exercise> => {
-    const response = await apiRequest("GET", `/api/exercicios/${id}`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/exercises/${id}`);
+    const data = await response.json();
+    return data.data || data;
   },
 
   getByMuscleGroup: async (muscleGroup: string): Promise<Exercise[]> => {
-    const response = await apiRequest("GET", `/api/exercicios?muscleGroup=${encodeURIComponent(muscleGroup)}`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/exercises?muscleGroup=${encodeURIComponent(muscleGroup)}`);
+    const data = await response.json();
+    return data.data || data;
   },
 
   create: async (exercise: InsertExercise): Promise<Exercise> => {
-    const response = await apiRequest("POST", "/api/exercicios", exercise);
-    return response.json();
+    const response = await apiRequest("POST", "/api/v2/exercises", exercise);
+    const data = await response.json();
+    return data.data || data;
   },
 
   update: async (id: string, updates: Partial<InsertExercise>): Promise<Exercise> => {
-    const response = await apiRequest("PUT", `/api/exercicios/${id}`, updates);
-    return response.json();
+    const response = await apiRequest("PUT", `/api/v2/exercises/${id}`, updates);
+    const data = await response.json();
+    return data.data || data;
   },
 
   delete: async (id: string): Promise<void> => {
-    await apiRequest("DELETE", `/api/exercicios/${id}`);
+    await apiRequest("DELETE", `/api/v2/exercises/${id}`);
   },
 };
 
 export const workoutTemplateApi = {
   getAll: async (): Promise<WorkoutTemplate[]> => {
-    const response = await apiRequest("GET", "/api/workout-templates");
-    return response.json();
+    const response = await apiRequest("GET", "/api/v2/workouts/templates");
+    const data = await response.json();
+    return data.data || data;
   },
 
   getById: async (id: string): Promise<WorkoutTemplate> => {
-    const response = await apiRequest("GET", `/api/workout-templates/${id}`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/workouts/templates/${id}`);
+    const data = await response.json();
+    return data.data || data;
   },
 
   getExercises: async (templateId: string) => {
@@ -93,101 +100,118 @@ export const workoutTemplateApi = {
   },
 
   create: async (template: InsertWorkoutTemplate): Promise<WorkoutTemplate> => {
-    const response = await apiRequest("POST", "/api/workout-templates", template);
-    return response.json();
+    const response = await apiRequest("POST", "/api/v2/workouts/templates", template);
+    const data = await response.json();
+    return data.data || data;
   },
 
   update: async (id: string, updates: Partial<InsertWorkoutTemplate>): Promise<WorkoutTemplate> => {
-    const response = await apiRequest("PUT", `/api/workout-templates/${id}`, updates);
-    return response.json();
+    const response = await apiRequest("PUT", `/api/v2/workouts/templates/${id}`, updates);
+    const data = await response.json();
+    return data.data || data;
   },
 
   delete: async (id: string): Promise<void> => {
-    await apiRequest("DELETE", `/api/workout-templates/${id}`);
+    await apiRequest("DELETE", `/api/v2/workouts/templates/${id}`);
   },
 
   addExercise: async (templateId: string, exercise: any) => {
-    const response = await apiRequest("POST", `/api/workout-templates/${templateId}/exercises`, exercise);
-    return response.json();
+    const response = await apiRequest("POST", `/api/v2/workouts/templates/exercises`, { ...exercise, templateId });
+    const data = await response.json();
+    return data.data || data;
   },
 
   updateExercise: async (exerciseId: string, updates: any) => {
-    const response = await apiRequest("PUT", `/api/workout-template-exercises/${exerciseId}`, updates);
-    return response.json();
+    const response = await apiRequest("PUT", `/api/v2/workouts/templates/exercises/${exerciseId}`, updates);
+    const data = await response.json();
+    return data.data || data;
   },
 
-  removeExercise: async (exerciseId: string): Promise<void> => {
-    await apiRequest("DELETE", `/api/workout-template-exercises/${exerciseId}`);
+  removeExercise: async (templateId: string, exerciseId: string): Promise<void> => {
+    await apiRequest("DELETE", `/api/v2/workouts/templates/${templateId}/exercises/${exerciseId}`);
   },
 };
 
 export const workoutLogApi = {
   getAll: async (): Promise<WorkoutLog[]> => {
-    const response = await apiRequest("GET", "/api/workout-logs");
-    return response.json();
+    const response = await apiRequest("GET", "/api/v2/workouts/logs");
+    const data = await response.json();
+    return data.data || data;
   },
 
   getRecent: async (): Promise<WorkoutLog[]> => {
-    const response = await apiRequest("GET", "/api/workout-logs?recent=true");
-    return response.json();
+    const response = await apiRequest("GET", "/api/v2/workouts/logs?limit=10");
+    const data = await response.json();
+    return data.data || data;
   },
 
   getById: async (id: string): Promise<WorkoutLog> => {
-    const response = await apiRequest("GET", `/api/workout-logs/${id}`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/workouts/logs/${id}`);
+    const data = await response.json();
+    return data.data || data;
   },
 
   create: async (log: InsertWorkoutLog): Promise<WorkoutLog> => {
-    const response = await apiRequest("POST", "/api/workout-logs", log);
-    return response.json();
+    const response = await apiRequest("POST", "/api/v2/workouts/logs", log);
+    const data = await response.json();
+    return data.data || data;
   },
 
   update: async (id: string, updates: Partial<InsertWorkoutLog>): Promise<WorkoutLog> => {
-    const response = await apiRequest("PUT", `/api/workout-logs/${id}`, updates);
-    return response.json();
+    const response = await apiRequest("PUT", `/api/v2/workouts/logs/${id}`, updates);
+    const data = await response.json();
+    return data.data || data;
   },
 
   getSets: async (logId: string) => {
-    const response = await apiRequest("GET", `/api/workout-logs/${logId}/sets`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/workouts/logs/${logId}/sets`);
+    const data = await response.json();
+    return data.data || data;
   },
 
   getSummary: async (id: string) => {
-    const response = await apiRequest("GET", `/api/workout-logs/${id}/summary`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/workouts/logs/${id}/summary`);
+    const data = await response.json();
+    return data.data || data;
   },
 
   // Workout log exercises API
   createExercise: async (data: any) => {
-    const response = await apiRequest("POST", "/api/workout-log-exercises", data);
-    return response.json();
+    const response = await apiRequest("POST", "/api/v2/workouts/logs/exercises", data);
+    const data_response = await response.json();
+    return data_response.data || data_response;
   },
 
   // Workout log sets API
   createSet: async (data: any) => {
-    const response = await apiRequest("POST", "/api/workout-log-sets", data);
-    return response.json();
+    const response = await apiRequest("POST", "/api/v2/workouts/logs/sets", data);
+    const data_response = await response.json();
+    return data_response.data || data_response;
   },
 };
 
 export const exerciseProgressApi = {
   getWeightHistory: async (exerciseId: string, limit: number = 10) => {
-    const response = await apiRequest("GET", `/api/exercise-weight-history/${exerciseId}?limit=${limit}`);
-    return response.json();
+    const response = await apiRequest("GET", `/api/v2/exercises/${exerciseId}/weight-history?limit=${limit}`);
+    const data = await response.json();
+    return data.data || data;
   },
     
   getExercisesWeightSummary: async () => {
-    const response = await apiRequest("GET", '/api/exercises-weight-summary');
-    return response.json();
+    const response = await apiRequest("GET", '/api/v2/exercises/weight-summary');
+    const data = await response.json();
+    return data.data || data;
   },
 
   getExercisesWithProgress: async () => {
-    const response = await apiRequest("GET", '/api/exercises-with-progress');
-    return response.json();
+    const response = await apiRequest("GET", '/api/v2/exercises/with-progress');
+    const data = await response.json();
+    return data.data || data;
   },
 
   getExercisesWithWeightHistory: async () => {
-    const response = await apiRequest("GET", "/api/exercises-with-weight-history");
-    return response.json();
+    const response = await apiRequest("GET", "/api/v2/exercises/with-weight-history");
+    const data = await response.json();
+    return data.data || data;
   },
 };

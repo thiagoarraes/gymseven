@@ -104,19 +104,19 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const queryClient = useQueryClient();
 
   const { data: exercises = [], isLoading } = useQuery({
-    queryKey: ["/api/exercicios"],
+    queryKey: ["/api/v2/exercises"],
     queryFn: exerciseApi.getAll,
   });
 
   // Fetch exercise progress data for enhanced display
   const { data: exercisesWithProgress = [] } = useQuery({
-    queryKey: ["/api/exercises-with-progress"],
+    queryKey: ["/api/v2/exercises/with-progress"],
     queryFn: exerciseProgressApi.getExercisesWithProgress,
   });
 
   // Fetch weight history for expanded exercise
   const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
-    queryKey: ["/api/exercise-weight-history", expandedExercise],
+    queryKey: ["/api/v2/exercises", expandedExercise, "weight-history"],
     queryFn: () => expandedExercise ? exerciseProgressApi.getWeightHistory(expandedExercise, 8) : [],
     enabled: !!expandedExercise,
   });
@@ -135,7 +135,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const createMutation = useMutation({
     mutationFn: exerciseApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
       setIsDialogOpen(false);
       toast({
         title: "Exercício criado!",
@@ -155,7 +155,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     mutationFn: ({ id, data }: { id: string; data: Partial<ExerciseFormValues> }) =>
       exerciseApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
       setIsDialogOpen(false);
       setEditingExercise(null);
       toast({
@@ -168,7 +168,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const deleteMutation = useMutation({
     mutationFn: exerciseApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/exercicios"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
       toast({
         title: "Exercício excluído!",
         description: "O exercício foi removido com sucesso.",
