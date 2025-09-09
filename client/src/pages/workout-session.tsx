@@ -186,7 +186,7 @@ export default function WorkoutSession() {
     if (logExerciseId && (currentWeight || currentReps)) {
       try {
         await workoutLogApi.createSet({
-          logExerciseId,
+          exercicioRegistroId: logExerciseId,
           setNumber: currentSetIndex + 1,
           weight: currentWeight ? parseFloat(currentWeight) : null,
           reps: currentReps ? parseInt(currentReps) : null
