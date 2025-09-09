@@ -132,7 +132,7 @@ export default function Workouts() {
       const template = workoutTemplates.find((t: any) => t.id === templateId);
       return workoutService.createWorkoutLog({
         templateId,
-        name: template?.nome || template?.name || "Treino",
+        name: template?.name || "Treino",
         userId: user.id,
       });
     },

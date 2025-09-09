@@ -49,7 +49,7 @@ export interface CreateWorkoutLogRequest {
 export const workoutService = {
   // Get all workout templates for user
   async getWorkoutTemplates(userId: string): Promise<WorkoutTemplate[]> {
-    const response = await fetch('/api/workout-templates', {
+    const response = await fetch('/api/v2/workouts/templates', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
       }
@@ -70,7 +70,7 @@ export const workoutService = {
     const templatesWithExercises = await Promise.all(
       templates.map(async (template) => {
         try {
-          const response = await fetch(`/api/workout-templates/${template.id}/exercises`, {
+          const response = await fetch(`/api/v2/workouts/templates/${template.id}/exercises`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
             }
@@ -94,19 +94,19 @@ export const workoutService = {
 
   // Create workout template
   async createWorkoutTemplate(data: { name: string; description?: string }, userId: string): Promise<WorkoutTemplate> {
-    const response = await apiRequest('POST', '/api/workout-templates', data);
+    const response = await apiRequest('POST', '/api/v2/workouts/templates', data);
     return response.json();
   },
 
   // Update workout template
   async updateWorkoutTemplate(id: string, data: { name: string; description?: string }, userId: string): Promise<WorkoutTemplate> {
-    const response = await apiRequest('PUT', `/api/workout-templates/${id}`, data);
+    const response = await apiRequest('PUT', `/api/v2/workouts/templates/${id}`, data);
     return response.json();
   },
 
   // Delete workout template
   async deleteWorkoutTemplate(id: string, userId: string): Promise<void> {
-    await apiRequest('DELETE', `/api/workout-templates/${id}`);
+    await apiRequest('DELETE', `/api/v2/workouts/templates/${id}`);
   },
 
   // Create workout log (start workout)
