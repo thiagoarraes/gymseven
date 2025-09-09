@@ -912,15 +912,24 @@ export default function Dashboard() {
           
           <div className="h-80 relative">
             {chartData.length > 0 ? (
-              <div className="h-full w-full p-2">
+              <div className="h-full w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+                  <AreaChart 
+                    data={chartData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.6}/>
+                        <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                      </linearGradient>
+                    </defs>
                     <XAxis 
-                      dataKey="date" 
+                      dataKey="date"
                       axisLine={false}
                       tickLine={false}
-                      className="text-muted-foreground text-xs"
-                      tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fontSize: 12 }}
                       tickFormatter={(value) => {
                         try {
                           const date = new Date(value);
@@ -936,99 +945,53 @@ export default function Dashboard() {
                     <YAxis 
                       axisLine={false}
                       tickLine={false}
-                      className="text-muted-foreground text-xs"
-                      tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fontSize: 12 }}
                       tickFormatter={(value) => `${value}kg`}
-                      domain={['dataMin - 5', 'dataMax + 5']}
                     />
                     <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                        border: '1px solid rgba(148, 163, 184, 0.2)',
-                        borderRadius: '12px',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                        backdropFilter: 'blur(16px)',
-                        padding: '12px 16px'
-                      }}
-                      cursor={{ 
-                        stroke: 'hsl(var(--primary))', 
-                        strokeWidth: 2,
-                        strokeOpacity: 0.3,
-                        strokeDasharray: '5 5'
-                      }}
-                      formatter={(value: any, name: string) => {
-                        return [
-                          <span style={{ 
-                            color: 'hsl(var(--primary))', 
-                            fontWeight: '600',
-                            fontSize: '14px'
-                          }}>
-                            {value}kg
-                          </span>, 
-                          <span style={{ 
-                            color: 'hsl(var(--muted-foreground))',
-                            fontSize: '12px'
-                          }}>
-                            Peso máximo
-                          </span>
-                        ];
-                      }}
-                      labelFormatter={(label: string) => {
+                      labelFormatter={(label) => {
                         try {
                           const date = new Date(label);
-                          return (
-                            <span style={{ 
-                              color: 'white', 
-                              fontSize: '13px', 
-                              fontWeight: '500' 
-                            }}>
-                              {date.toLocaleDateString('pt-BR', {
-                                weekday: 'long',
-                                day: '2-digit',
-                                month: 'long',
-                                year: 'numeric'
-                              })}
-                            </span>
-                          );
+                          return date.toLocaleDateString('pt-BR', {
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric'
+                          });
                         } catch {
-                          return `Data: ${label}`;
+                          return label;
                         }
+                      }}
+                      formatter={(value: any) => [`${value}kg`, 'Peso máximo']}
+                      contentStyle={{
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(16px)'
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="weight"
-                      stroke="url(#strokeGradient)"
-                      fill="url(#fillGradient)"
+                      stroke="#3b82f6"
+                      fillOpacity={1}
+                      fill="url(#colorWeight)"
                       strokeWidth={3}
                       dot={{ 
-                        fill: 'hsl(var(--primary))', 
-                        strokeWidth: 3, 
-                        stroke: 'hsl(var(--background))',
-                        r: 5
+                        fill: '#3b82f6', 
+                        strokeWidth: 2, 
+                        stroke: 'white',
+                        r: 4
                       }}
                       activeDot={{ 
-                        r: 8, 
-                        stroke: 'hsl(var(--primary))', 
+                        r: 6, 
+                        stroke: '#3b82f6', 
                         strokeWidth: 2,
-                        fill: 'hsl(var(--background))',
-                        boxShadow: '0 0 0 4px hsla(var(--primary), 0.2)'
+                        fill: 'white'
                       }}
                     />
-                    <defs>
-                      <linearGradient id="fillGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
-                        <stop offset="25%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
-                        <stop offset="75%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="strokeGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={1}/>
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                      </linearGradient>
-                    </defs>
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
