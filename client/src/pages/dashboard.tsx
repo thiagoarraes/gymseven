@@ -253,9 +253,10 @@ export default function Dashboard() {
     gcTime: 0, // Don't cache (replaces cacheTime in v5)
   });
 
-  const handleWorkoutClick = (workoutId: string) => {
-    setSelectedWorkout(workoutId);
-    setShowSummaryModal(true);
+  const handleWorkoutClick = (workout: any) => {
+    console.log('Opening details modal for workout:', workout);
+    setSelectedWorkoutForDetails(workout);
+    setShowWorkoutDetailsModal(true);
   };
 
   const closeSummaryModal = () => {
@@ -839,7 +840,7 @@ export default function Dashboard() {
                 <div 
                   key={workout.id}
                   className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
-                  onClick={() => handleWorkoutClick(workout.id)}
+                  onClick={() => handleWorkoutClick(workout)}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 ${
