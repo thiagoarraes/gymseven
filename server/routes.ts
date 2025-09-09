@@ -659,7 +659,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
   app.put("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const updates = insertWorkoutTemplateSchema.partial().parse(req.body);
+      const updates = req.body;
       const template = await db.updateWorkoutTemplate(req.params.id, updates);
       if (!template) {
         return res.status(404).json({ message: "Modelo de treino não encontrado" });
@@ -680,6 +680,47 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     } catch (error) {
       console.error('Error deleting workout template:', error);
       res.status(500).json({ message: "Erro ao deletar modelo de treino" });
+    }
+  });
+
+  // Reorder workout template exercises
+  app.patch("/api/workout-templates/:id/reorder", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const templateId = req.params.id;
+      const { exercises } = req.body;
+      
+      if (!exercises || !Array.isArray(exercises)) {
+        return res.status(400).json({ message: "Lista de exercícios é obrigatória" });
+      }
+      
+      console.log(`🔄 PATCH /api/workout-templates/${templateId}/reorder by user ${req.user!.id}`);
+      console.log(`📥 Reordering ${exercises.length} exercises:`, exercises);
+      
+      // Update each exercise's order
+      const updatePromises = exercises.map((exercise: { id: string; order: number }) => {
+        return db.updateWorkoutTemplateExercise(exercise.id, { ordem: exercise.order }, req.user!.id);
+      });
+      
+      const results = await Promise.all(updatePromises);
+      
+      // Check if all updates were successful
+      const failedUpdates = results.filter(result => !result);
+      if (failedUpdates.length > 0) {
+        console.warn(`❌ ${failedUpdates.length} exercise updates failed`);
+        return res.status(400).json({ 
+          message: "Erro ao reordenar alguns exercícios",
+          code: "PARTIAL_REORDER_FAILURE"
+        });
+      }
+      
+      console.log(`✅ Successfully reordered ${exercises.length} exercises`);
+      res.json({ message: "Exercícios reordenados com sucesso", updated: exercises.length });
+    } catch (error: any) {
+      console.error(`💥 Error in PATCH /api/workout-templates/${req.params.id}/reorder:`, error);
+      res.status(500).json({ 
+        message: "Erro interno do servidor ao reordenar exercícios",
+        code: "INTERNAL_ERROR"
+      });
     }
   });
 
