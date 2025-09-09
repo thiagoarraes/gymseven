@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { workoutLogApi, exerciseApi, exerciseProgressApi } from "@/lib/api";
+import { workoutLogApi, exerciseApi, exerciseProgressApi, workoutTemplateApi } from "@/lib/api";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context-new";
 
@@ -46,6 +46,13 @@ export default function Dashboard() {
     queryFn: workoutLogApi.getAll,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
+  // Get template exercises for the first workout to show muscle groups
+  const { data: templateExercises = [] } = useQuery({
+    queryKey: ["/api/workout-templates", recentWorkouts[0]?.modeloId, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(recentWorkouts[0]!.modeloId!),
+    enabled: !!recentWorkouts[0]?.modeloId,
   });
 
   // Get detailed workout data for modal
@@ -237,20 +244,16 @@ export default function Dashboard() {
   const getMuscleGroupsFromWorkout = (workout: any) => {
     if (!workout) return [];
     
-    // Try to get from workoutDetails first, then from workout directly
-    const exercises = (workoutDetails as any)?.exercises || (workout as any)?.exercises;
+    // Use template exercises data instead of workout data
+    const exercises = templateExercises;
     if (!exercises || !Array.isArray(exercises)) return [];
     
     const muscleGroups = new Set<string>();
     exercises.forEach((exercise: any) => {
-      if (exercise.muscleGroup) {
-        muscleGroups.add(exercise.muscleGroup);
-      } else if (exercise.exercise?.muscleGroup) {
+      if (exercise.exercise?.muscleGroup) {
         muscleGroups.add(exercise.exercise.muscleGroup);
-      } else if (exercise.exercicio?.muscleGroup) {
-        muscleGroups.add(exercise.exercicio.muscleGroup);
-      } else if (exercise.exercicio?.grupoMuscular) {
-        muscleGroups.add(exercise.exercicio.grupoMuscular);
+      } else if (exercise.muscleGroup) {
+        muscleGroups.add(exercise.muscleGroup);
       }
     });
     
