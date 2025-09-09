@@ -386,10 +386,20 @@ export default function WorkoutTemplateEditor() {
     },
   });
 
-  // Effects
+  // Effects - Sync templateExercises with reorderedExercises
   useEffect(() => {
-    if (templateExercises.length > 0) {
+    console.log("🔄 useEffect triggered - templateExercises:", templateExercises);
+    console.log("🔄 templateExercises length:", templateExercises?.length);
+    console.log("🔄 templateExercises type:", typeof templateExercises);
+    console.log("🔄 templateExercises is array:", Array.isArray(templateExercises));
+    
+    // Always sync, even if empty array (to clear reorderedExercises when needed)
+    if (Array.isArray(templateExercises)) {
+      console.log("✅ Setting reorderedExercises to:", templateExercises);
       setReorderedExercises(templateExercises);
+    } else {
+      console.log("❌ templateExercises is not an array, resetting to empty");
+      setReorderedExercises([]);
     }
   }, [templateExercises]);
 

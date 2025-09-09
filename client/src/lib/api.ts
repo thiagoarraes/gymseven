@@ -52,7 +52,23 @@ export const workoutTemplateApi = {
 
   getExercises: async (templateId: string) => {
     const response = await apiRequest("GET", `/api/v2/workouts/templates/${templateId}/exercises`);
-    return response.json();
+    const data = await response.json();
+    console.log("🔍 API getExercises response:", data);
+    
+    // Check if response has data property (API v2 format)
+    if (data && typeof data === 'object' && data.data) {
+      console.log("📦 Extracting data.data:", data.data);
+      return data.data;
+    }
+    
+    // Check if response has exercises property  
+    if (data && typeof data === 'object' && data.exercises) {
+      console.log("📦 Extracting data.exercises:", data.exercises);
+      return data.exercises;
+    }
+    
+    console.log("📦 Returning raw data:", data);
+    return data;
   },
 
   create: async (template: InsertWorkoutTemplate): Promise<WorkoutTemplate> => {
