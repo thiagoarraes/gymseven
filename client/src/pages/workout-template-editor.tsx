@@ -286,8 +286,19 @@ export default function WorkoutTemplateEditor() {
     mutationFn: async (exerciseId: string) => {
       return await workoutTemplateApi.removeExercise(exerciseId);
     },
-    onSuccess: () => {
+    onSuccess: (_, exerciseId) => {
+      // Clear local changes for the removed exercise
+      setLocalChanges(prev => {
+        const newChanges = { ...prev };
+        delete newChanges[exerciseId];
+        return newChanges;
+      });
+      
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id] });
+      
       toast({
         title: "Exercício removido!",
         description: "O exercício foi removido do treino.",
@@ -324,8 +335,17 @@ export default function WorkoutTemplateEditor() {
     if (isDifferent) {
       console.log("🔄 Updating reorderedExercises from templateExercises");
       setReorderedExercises(newExercises);
+      
+      // Clean localChanges for exercises that no longer exist
+      const newExerciseIds = new Set(newExercises.map(ex => ex.id));
+      setLocalChanges(prev => {
+        const filtered = Object.fromEntries(
+          Object.entries(prev).filter(([exerciseId]) => newExerciseIds.has(exerciseId))
+        );
+        return filtered;
+      });
     }
-  }, [templateExercises, reorderedExercises]);
+  }, [templateExercises]);
 
   useEffect(() => {
     if (template && typeof template === 'object' && template !== null) {
@@ -428,18 +448,24 @@ export default function WorkoutTemplateEditor() {
       if (Object.keys(localChanges).length > 0) {
         console.log("💾 Saving local exercise changes:", localChanges);
         
+        // Get current exercise IDs to validate changes
+        const currentExerciseIds = new Set(reorderedExercises.map(ex => ex.id));
+        
         const updatePromises = [];
         for (const [exerciseId, changes] of Object.entries(localChanges)) {
-          if (Object.keys(changes).length > 0) {
+          // Only update if exercise still exists
+          if (currentExerciseIds.has(exerciseId) && Object.keys(changes).length > 0) {
             console.log(`💾 Updating exercise ${exerciseId} with:`, changes);
             updatePromises.push(workoutTemplateApi.updateExercise(exerciseId, changes));
+          } else if (!currentExerciseIds.has(exerciseId)) {
+            console.log(`⚠️ Skipping update for deleted exercise ${exerciseId}`);
           }
         }
 
         if (updatePromises.length > 0) {
           await Promise.all(updatePromises);
         }
-        hasChanges = true;
+        hasChanges = updatePromises.length > 0;
         
         // Clear local changes after successful save
         setLocalChanges({});
