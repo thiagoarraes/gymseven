@@ -27,6 +27,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { workoutLogApi } from "@/lib/api";
+import { useAuth } from "@/contexts/auth-context-new";
 
 // Achievement types and data structure
 interface Achievement {
@@ -927,7 +928,7 @@ export default function AchievementsPage() {
         </div>
 
         {/* Level System */}
-        <LevelSystem achievements={achievementsWithProgress} username={user?.user_metadata?.username || user?.email || 'Usuário'} />
+        <LevelSystem achievements={achievementsWithProgress} username={user?.username || user?.email?.split('@')[0] || 'Usuário'} />
 
         {/* Stats Overview */}
         <StatsOverview achievements={achievementsWithProgress} workoutLogs={workoutLogs} />
