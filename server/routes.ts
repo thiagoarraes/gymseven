@@ -822,16 +822,23 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Get exercises that have been used in completed workouts with weight data
   app.get('/api/exercises-with-progress', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      // For now, return all exercises with basic data since we don't have the complex query implemented
-      // TODO: Implement proper progress tracking by joining workout logs, exercises, and sets
       const exercises = await db.getAllExercises();
-      res.json(exercises.map(exercise => ({
-        ...exercise,
-        lastWeight: 0,
-        maxWeight: 0,
-        lastUsed: exercise.createdAt || new Date().toISOString(),
-        totalSessions: 0
-      })));
+      const exercisesWithProgress = [];
+      
+      for (const exercise of exercises) {
+        // Get exercise statistics from actual workout data
+        const stats = await db.getExerciseStats(exercise.id, req.user!.id);
+        
+        exercisesWithProgress.push({
+          ...exercise,
+          lastWeight: stats.lastWeight || 0,
+          maxWeight: stats.maxWeight || 0,
+          lastUsed: stats.lastUsed || null,
+          totalSessions: stats.totalSessions || 0
+        });
+      }
+      
+      res.json(exercisesWithProgress);
     } catch (error) {
       console.error('Error fetching exercises with progress:', error);
       res.status(500).json({ message: "Erro ao buscar exercícios com progresso" });
@@ -842,11 +849,10 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.get('/api/exercise-weight-history/:exerciseId', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { exerciseId } = req.params;
-      const { limit = 10 } = req.query;
+      const limit = parseInt(req.query.limit as string) || 10;
       
-      // For now, return empty array since we don't have the complex query implemented
-      // TODO: Implement proper weight history tracking by joining workout logs, exercises, and sets
-      res.json([]);
+      const weightHistory = await db.getExerciseWeightHistory(exerciseId, req.user!.id, limit);
+      res.json(weightHistory);
     } catch (error) {
       console.error('Error fetching exercise weight history:', error);
       res.status(500).json({ message: "Erro ao buscar histórico de peso do exercício" });

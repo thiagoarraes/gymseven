@@ -52,6 +52,16 @@ export interface IStorage {
   updateExercise(id: string, exercise: Partial<InsertExercise>, userId?: string): Promise<Exercise | undefined>;
   deleteExercise(id: string): Promise<boolean>;
   getExercisesByMuscleGroup(muscleGroup: string, userId?: string): Promise<Exercise[]>;
+  getExerciseStats(exerciseId: string, userId: string): Promise<{
+    lastWeight: number | null;
+    maxWeight: number | null;
+    lastUsed: string | null;
+    totalSessions: number;
+  }>;
+  getExerciseWeightHistory(exerciseId: string, userId: string, limit?: number): Promise<{
+    date: string;
+    weight: number;
+  }[]>;
   
   // Workout Templates
   getAllWorkoutTemplates(): Promise<WorkoutTemplate[]>;

@@ -16,7 +16,7 @@ import {
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, max, countDistinct, isNotNull } from "drizzle-orm";
 import type { IStorage } from './storage';
 
 export class PostgreSQLStorage implements IStorage {
@@ -209,6 +209,99 @@ export class PostgreSQLStorage implements IStorage {
       whereCondition = and(whereCondition, eq(exercicios.usuarioId, userId)) as any;
     }
     return await this.db.select().from(exercicios).where(whereCondition);
+  }
+
+  async getExerciseStats(exerciseId: string, userId: string): Promise<{
+    lastWeight: number | null;
+    maxWeight: number | null;
+    lastUsed: string | null;
+    totalSessions: number;
+  }> {
+    try {
+      // Get exercise statistics from workout logs where the user completed sets
+      const statsQuery = await this.db
+        .select({
+          maxWeight: max(seriesRegistroTreino.weight),
+          lastUsed: max(registrosTreino.startTime),
+          totalSessions: countDistinct(registrosTreino.id),
+        })
+        .from(seriesRegistroTreino)
+        .innerJoin(exerciciosRegistroTreino, eq(seriesRegistroTreino.exercicioRegistroId, exerciciosRegistroTreino.id))
+        .innerJoin(registrosTreino, eq(exerciciosRegistroTreino.registroId, registrosTreino.id))
+        .where(and(
+          eq(exerciciosRegistroTreino.exercicioId, exerciseId),
+          eq(registrosTreino.usuarioId, userId),
+          eq(seriesRegistroTreino.completed, true)
+        ));
+
+      // Get last weight from most recent completed set
+      const lastWeightQuery = await this.db
+        .select({
+          weight: seriesRegistroTreino.weight
+        })
+        .from(seriesRegistroTreino)
+        .innerJoin(exerciciosRegistroTreino, eq(seriesRegistroTreino.exercicioRegistroId, exerciciosRegistroTreino.id))
+        .innerJoin(registrosTreino, eq(exerciciosRegistroTreino.registroId, registrosTreino.id))
+        .where(and(
+          eq(exerciciosRegistroTreino.exercicioId, exerciseId),
+          eq(registrosTreino.usuarioId, userId),
+          eq(seriesRegistroTreino.completed, true),
+          isNotNull(seriesRegistroTreino.weight)
+        ))
+        .orderBy(desc(registrosTreino.startTime), desc(seriesRegistroTreino.setNumber))
+        .limit(1);
+
+      const stats = statsQuery[0];
+      const lastWeight = lastWeightQuery[0]?.weight || null;
+
+      return {
+        lastWeight: lastWeight,
+        maxWeight: stats?.maxWeight || null,
+        lastUsed: stats?.lastUsed?.toISOString() || null,
+        totalSessions: stats?.totalSessions || 0,
+      };
+    } catch (error) {
+      console.error('Error getting exercise stats:', error);
+      return {
+        lastWeight: null,
+        maxWeight: null,
+        lastUsed: null,
+        totalSessions: 0,
+      };
+    }
+  }
+
+  async getExerciseWeightHistory(exerciseId: string, userId: string, limit = 10): Promise<{
+    date: string;
+    weight: number;
+  }[]> {
+    try {
+      const weightHistory = await this.db
+        .select({
+          date: registrosTreino.startTime,
+          weight: max(seriesRegistroTreino.weight),
+        })
+        .from(seriesRegistroTreino)
+        .innerJoin(exerciciosRegistroTreino, eq(seriesRegistroTreino.exercicioRegistroId, exerciciosRegistroTreino.id))
+        .innerJoin(registrosTreino, eq(exerciciosRegistroTreino.registroId, registrosTreino.id))
+        .where(and(
+          eq(exerciciosRegistroTreino.exercicioId, exerciseId),
+          eq(registrosTreino.usuarioId, userId),
+          eq(seriesRegistroTreino.completed, true),
+          isNotNull(seriesRegistroTreino.weight)
+        ))
+        .groupBy(registrosTreino.startTime)
+        .orderBy(desc(registrosTreino.startTime))
+        .limit(limit);
+
+      return weightHistory.map(entry => ({
+        date: entry.date!.toISOString(),
+        weight: entry.weight || 0,
+      }));
+    } catch (error) {
+      console.error('Error getting exercise weight history:', error);
+      return [];
+    }
   }
 
   // Workout Templates
