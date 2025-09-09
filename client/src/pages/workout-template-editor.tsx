@@ -1535,11 +1535,17 @@ export default function WorkoutTemplateEditor() {
                           <h4 className="font-semibold text-white leading-tight truncate">
                             {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
                           </h4>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></div>
-                            <span className="text-xs text-blue-300 font-medium truncate">
-                              {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
-                            </span>
+                          <div className="mt-1">
+                            {(() => {
+                              const groupInfo = getMuscleGroupInfo(exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular');
+                              return (
+                                <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
+                                  <span className="text-xs font-semibold tracking-wide">
+                                    {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
