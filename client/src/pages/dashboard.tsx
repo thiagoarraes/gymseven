@@ -249,10 +249,13 @@ export default function Dashboard() {
     queryKey: ['/api/workout-logs', selectedWorkout, 'complete', Date.now()],
     queryFn: async () => {
       if (!selectedWorkout) return null;
-      const response = await fetch(`/api/workout-logs/${selectedWorkout}`);
-      if (!response.ok) throw new Error('Erro ao carregar dados do treino');
-      const result = await response.json();
-      return result.data || result;
+      try {
+        const response = await workoutLogApi.getById(selectedWorkout);
+        return response;
+      } catch (error) {
+        console.error('Error loading workout data:', error);
+        throw new Error('Erro ao carregar dados do treino');
+      }
     },
     enabled: !!selectedWorkout && showSummaryModal,
     staleTime: 0, // Always refetch
