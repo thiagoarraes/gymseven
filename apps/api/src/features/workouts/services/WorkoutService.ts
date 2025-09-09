@@ -12,6 +12,7 @@ import {
   WorkoutTemplateResponseDto,
   WorkoutLogResponseDto
 } from '../dto';
+import { insertWorkoutTemplateSchema, insertWorkoutLogSchema } from '@shared/schema';
 
 export class WorkoutService {
   private storage = getStorage();
@@ -74,10 +75,14 @@ export class WorkoutService {
 
   async createWorkoutTemplate(userId: string, templateData: CreateWorkoutTemplateDto): Promise<WorkoutTemplateResponseDto> {
     const storage = await this.storage;
-    const template = await storage.createWorkoutTemplate({
+    
+    // Transform DTO to Portuguese using shared schema
+    const transformedData = insertWorkoutTemplateSchema.parse({
       ...templateData,
       usuarioId: userId,
     });
+    
+    const template = await storage.createWorkoutTemplate(transformedData);
     return this.mapTemplateToResponse(template);
   }
 
@@ -276,8 +281,8 @@ export class WorkoutService {
   private mapTemplateToResponse(template: any): WorkoutTemplateResponseDto {
     return {
       id: template.id,
-      name: template.name,
-      description: template.description || undefined,
+      name: template.nome || template.name, // Map from Portuguese to English
+      description: template.descricao || template.description || undefined,
       createdAt: template.createdAt,
     };
   }
@@ -293,8 +298,8 @@ export class WorkoutService {
 
     return {
       id: log.id,
-      templateId: log.templateId || undefined,
-      name: log.name,
+      templateId: log.modeloId || log.templateId || undefined,
+      name: log.nome || log.name,
       startTime: log.startTime,
       endTime: log.endTime || undefined,
       duration,

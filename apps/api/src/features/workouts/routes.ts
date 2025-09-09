@@ -62,7 +62,7 @@ router.get('/templates/:id/exercises',
 );
 
 router.post('/templates',
-  validateBody(createWorkoutTemplateSchema),
+  // Skip DTO validation, let shared schema handle transformation
   asyncHandler(workoutController.createTemplate.bind(workoutController))
 );
 
