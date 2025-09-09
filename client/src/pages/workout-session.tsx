@@ -99,16 +99,30 @@ export default function WorkoutSession() {
   }, [templateExercises, currentExerciseIndex, currentWeight, currentReps]);
 
   const finishWorkoutMutation = useMutation({
-    mutationFn: () => workoutLogApi.update(workoutId!, {
-      endTime: new Date(),
-    }),
-    onSuccess: () => {
+    mutationFn: () => {
+      console.log("🏁 Finishing workout with ID:", workoutId);
+      const endTimeValue = new Date().toISOString();
+      console.log("🏁 Setting endTime to:", endTimeValue);
+      return workoutLogApi.update(workoutId!, {
+        endTime: endTimeValue,
+      });
+    },
+    onSuccess: (result) => {
+      console.log("✅ Workout finished successfully:", result);
       queryClient.invalidateQueries({ queryKey: ["/api/workout-logs"] });
       toast({
         title: "Treino finalizado!",
         description: "Parabéns! Treino concluído com sucesso.",
       });
       navigate("/");
+    },
+    onError: (error) => {
+      console.error("❌ Error finishing workout:", error);
+      toast({
+        title: "Erro ao finalizar treino",
+        description: "Ocorreu um erro ao finalizar o treino. Tente novamente.",
+        variant: "destructive",
+      });
     },
   });
 
