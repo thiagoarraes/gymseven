@@ -6,9 +6,13 @@ import cors from "cors";
 import { loadEnv } from "./env";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { resetStorage } from "./storage";
 
 // Import new refactored API setup
 import { setupRoutes as setupV2Routes } from "../apps/api/src/routes/index";
+
+// Force storage reset to ensure memory storage is used
+resetStorage();
 
 // Load environment variables from .env file first
 loadEnv();

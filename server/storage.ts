@@ -140,4 +140,10 @@ export async function getStorage(): Promise<IStorage> {
   return _storage;
 }
 
+// Force reset storage (useful for switching between memory and persistent)
+export function resetStorage(): void {
+  console.log('🔄 [STORAGE] Resetting storage instance');
+  _storage = undefined;
+}
+
 // Note: Export storage instance initialization will be handled by getStorage() function
