@@ -264,18 +264,23 @@ export default function WorkoutTemplateEditor() {
     onSuccess: (data, { exerciseId, updates }) => {
       console.log(`✅ Update successful for exercise ${exerciseId}:`, data);
       
-      // Invalidate all workout template caches immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["workout-templates", user?.id] });
+      // Force immediate cache removal and refetch
+      queryClient.removeQueries({ queryKey: ["workout-templates", user?.id] });
+      queryClient.removeQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+      queryClient.removeQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
       
-      // Also invalidate any cached workout template data
-      queryClient.invalidateQueries({ 
+      // Also remove any cached workout template data completely
+      queryClient.removeQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0];
           return typeof key === 'string' && key.includes('workout');
         }
       });
+      
+      // Force refetch the main workout templates
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["workout-templates", user?.id] });
+      }, 100);
       
       toast({
         title: "Exercício atualizado",

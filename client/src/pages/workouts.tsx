@@ -42,8 +42,8 @@ export default function Workouts() {
       return result;
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10, // 10 minutos
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache for long
   });
 
   // Mutation para criar template
