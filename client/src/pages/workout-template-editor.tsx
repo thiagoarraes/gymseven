@@ -264,8 +264,16 @@ export default function WorkoutTemplateEditor() {
     onSuccess: (data, { exerciseId, updates }) => {
       console.log(`✅ Update successful for exercise ${exerciseId}:`, data);
       
+      // Show success message
+      toast({
+        title: "Exercício atualizado",
+        description: "Atualizando dados...",
+      });
+      
       // Force immediate window reload to ensure fresh data
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (err: any, { exerciseId, updates }) => {
       console.error(`❌ Error updating exercise ${exerciseId}:`, err);
