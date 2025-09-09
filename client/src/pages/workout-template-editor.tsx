@@ -301,8 +301,13 @@ export default function WorkoutTemplateEditor() {
       return response.json();
     },
     onSuccess: () => {
+      // Only invalidate specific queries to avoid race conditions
       queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
     },
+    onError: (error) => {
+      console.error("❌ Failed to reorder exercises:", error);
+    }
   });
 
   // Effects - Sync templateExercises with reorderedExercises
@@ -374,21 +379,23 @@ export default function WorkoutTemplateEditor() {
       }
     }));
 
-    // Also update the local display immediately
-    setReorderedExercises(prev => 
-      prev.map(ex => {
-        if (ex.id === exerciseId) {
-          const updatedEx = { ...ex };
-          // Update the display field names
-          if (backendField === 'series') updatedEx.sets = value;
-          if (backendField === 'repeticoes') updatedEx.reps = value;
-          if (backendField === 'weight') updatedEx.weight = value;
-          if (backendField === 'restDurationSeconds') updatedEx.restDurationSeconds = value;
-          return updatedEx;
-        }
-        return ex;
-      })
-    );
+    // Also update the local display immediately with proper state immutability
+    setReorderedExercises(prev => {
+      return prev.map(ex => {
+        if (ex.id !== exerciseId) return ex;
+        
+        // Create a completely new object to avoid state mutation
+        const updatedEx = JSON.parse(JSON.stringify(ex));
+        
+        // Update the display field names
+        if (backendField === 'series') updatedEx.sets = value;
+        if (backendField === 'repeticoes') updatedEx.reps = value;  
+        if (backendField === 'weight') updatedEx.weight = value;
+        if (backendField === 'restDurationSeconds') updatedEx.restDurationSeconds = value;
+        
+        return updatedEx;
+      });
+    });
   };
 
   const handleRemoveExercise = (exerciseId: string) => {
@@ -450,7 +457,20 @@ export default function WorkoutTemplateEditor() {
         }));
         
         console.log("💾 Updating exercise order:", exerciseUpdates);
-        reorderExercisesMutation.mutate(exerciseUpdates);
+        
+        // Wait for reorder mutation to complete using mutateAsync
+        await new Promise<void>((resolve, reject) => {
+          reorderExercisesMutation.mutate(exerciseUpdates, {
+            onSuccess: () => {
+              console.log("✅ Exercise reorder completed successfully");
+              resolve();
+            },
+            onError: (error) => {
+              console.error("❌ Exercise reorder failed:", error);
+              reject(error);
+            }
+          });
+        });
         hasChanges = true;
       }
       
@@ -462,9 +482,11 @@ export default function WorkoutTemplateEditor() {
         return;
       }
       
-      // Refresh data from server
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      // Only invalidate queries if no reorder was done (to avoid double invalidation)
+      if (!needsReorder) {
+        queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates", id, "exercises"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/workout-templates", id, "exercises"] });
+      }
       
       toast({
         title: "Treino salvo!",
