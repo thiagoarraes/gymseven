@@ -40,11 +40,15 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 
 // Generate JWT token
 export function generateToken(userId: string): string {
-  return jwt.sign(
+  const token = jwt.sign(
     { userId, type: 'access' }, 
     JWT_SECRET, 
     { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
   );
+  console.log('🔍 [V1 AUTH] Generated token for user:', userId);
+  console.log('🔍 [V1 AUTH] Token:', token.substring(0, 30) + '...');
+  console.log('🔍 [V1 AUTH] Secret used:', JWT_SECRET.substring(0, 10) + '...');
+  return token;
 }
 
 export function verifyToken(token: string): { userId: string; type: string } | null {

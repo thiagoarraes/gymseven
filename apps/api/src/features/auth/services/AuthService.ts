@@ -200,6 +200,17 @@ export class AuthService {
       console.log('🔍 [AUTH SERVICE V2] Decoded token:', JSON.stringify(decoded));
       console.log('🔍 [AUTH SERVICE V2] Token source:', tokenSource);
       
+      // Let's also decode the token manually to see what's inside
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          console.log('🔍 [AUTH SERVICE V2] Manual token decode:', JSON.stringify(payload));
+        }
+      } catch (e) {
+        console.log('❌ [AUTH SERVICE V2] Failed to manually decode token');
+      }
+      
       // Get user data from database using the userId from token
       // Handle both v1 format { userId, type } and v2 format { userId }
       const userId = decoded.userId;
