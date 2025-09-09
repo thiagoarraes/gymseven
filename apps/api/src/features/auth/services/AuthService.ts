@@ -153,11 +153,29 @@ export class AuthService {
 
   async verifyToken(token: string): Promise<UserContextData> {
     try {
-      const decoded = jwt.verify(token, this.jwtSecret) as any;
+      // First, try with v2 secret
+      let decoded: any;
+      try {
+        decoded = jwt.verify(token, this.jwtSecret) as any;
+      } catch (v2Error) {
+        // If v2 fails, try with v1 secret (for backwards compatibility)
+        try {
+          const v1Secret = process.env.JWT_SECRET || this.jwtSecret;
+          decoded = jwt.verify(token, v1Secret) as any;
+        } catch (v1Error) {
+          throw new Error('Token inválido');
+        }
+      }
       
       // Get user data from database using the userId from token
+      // Handle both v1 format { userId, type } and v2 format { userId }
+      const userId = decoded.userId;
+      if (!userId) {
+        throw new Error('Token inválido - userId não encontrado');
+      }
+      
       const storage = await this.storage;
-      const user = await storage.getUser(decoded.userId);
+      const user = await storage.getUser(userId);
       if (!user) {
         throw new Error('Usuário não encontrado');
       }
@@ -170,7 +188,8 @@ export class AuthService {
         lastName: user.lastName || undefined,
         profileImageUrl: user.profileImageUrl || undefined,
       };
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Token verification failed:', error.message);
       throw new Error('Token inválido');
     }
   }
