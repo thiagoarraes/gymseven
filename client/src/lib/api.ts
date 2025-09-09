@@ -55,10 +55,18 @@ export const workoutTemplateApi = {
     const data = await response.json();
     console.log("🔍 API getExercises response:", data);
     
-    // Check if response has data property (API v2 format)
+    // Check if response has data property (API v2 format) and extract exercises array
     if (data && typeof data === 'object' && data.data) {
       console.log("📦 Extracting data.data:", data.data);
-      return data.data;
+      // If data.data has exercises array, return it
+      if (data.data.exercises && Array.isArray(data.data.exercises)) {
+        console.log("📦 Returning exercises array:", data.data.exercises);
+        return data.data.exercises;
+      }
+      // If data.data is itself an array, return it
+      if (Array.isArray(data.data)) {
+        return data.data;
+      }
     }
     
     // Check if response has exercises property  
@@ -67,8 +75,14 @@ export const workoutTemplateApi = {
       return data.exercises;
     }
     
-    console.log("📦 Returning raw data:", data);
-    return data;
+    // If data is directly an array
+    if (Array.isArray(data)) {
+      console.log("📦 Returning array data:", data);
+      return data;
+    }
+    
+    console.log("📦 Returning empty array - no exercises found");
+    return [];
   },
 
   create: async (template: InsertWorkoutTemplate): Promise<WorkoutTemplate> => {
