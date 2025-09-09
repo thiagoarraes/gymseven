@@ -13,14 +13,9 @@ loadEnv();
 // Verify database configuration before starting server
 function verifyDatabaseConfiguration() {
   if (!process.env.DATABASE_URL) {
-    console.log('\n❌ CONFIGURAÇÃO DE BANCO DE DADOS NECESSÁRIA\n');
-    console.log('Para usar este projeto, você precisa configurar a variável DATABASE_URL\n');
-    console.log('🔧 COMO CONFIGURAR NO REPLIT:');
-    console.log('1. Abra a aba "Secrets" no painel lateral');
-    console.log('2. Adicione DATABASE_URL com sua string de conexão PostgreSQL');
-    console.log('3. Reinicie o projeto após adicionar a credencial');
-    console.log('\n⚠️  O servidor não será iniciado sem essa configuração.\n');
-    process.exit(1);
+    console.log('\n⚠️ DATABASE_URL não configurado. Executando em modo de desenvolvimento com armazenamento em memória.');
+    console.log('Para persistência real, configure a variável DATABASE_URL.');
+    return;
   }
   console.log('✅ Configuração do banco de dados verificada com sucesso!');
 }
