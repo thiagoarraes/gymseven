@@ -1010,6 +1010,83 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
+  // Get individual exercises with their weight history
+  app.get('/api/exercises-history', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      console.log('🏋️ Fetching individual exercises history for user:', req.user?.id);
+      
+      // Get all completed workout logs for the user
+      const workoutLogs = await db.getWorkoutLogs(req.user!.id);
+      const completedWorkouts = workoutLogs.filter(log => log.endTime);
+      
+      if (completedWorkouts.length === 0) {
+        console.log('🏋️ No completed workouts found');
+        return res.json([]);
+      }
+      
+      // Create a map to store exercise history
+      const exerciseHistoryMap = new Map<string, any>();
+      
+      for (const workout of completedWorkouts) {
+        const logExercises = await db.getWorkoutLogExercises(workout.id);
+        
+        for (const logExercise of logExercises) {
+          const exerciseKey = logExercise.exercicioId;
+          const sets = await db.getWorkoutLogSets(logExercise.id);
+          
+          if (sets && sets.length > 0) {
+            // Get max weight for this exercise in this workout
+            const maxWeightInWorkout = Math.max(...sets.map(set => set.weight || 0));
+            
+            if (maxWeightInWorkout > 0) {
+              if (!exerciseHistoryMap.has(exerciseKey)) {
+                // Get exercise details
+                const exercise = await db.getExercise(logExercise.exercicioId);
+                exerciseHistoryMap.set(exerciseKey, {
+                  exerciseId: exerciseKey,
+                  name: logExercise.nomeExercicio || exercise?.nome || 'Exercício desconhecido',
+                  muscleGroup: exercise?.grupoMuscular || 'N/A',
+                  sessions: []
+                });
+              }
+              
+              const exerciseData = exerciseHistoryMap.get(exerciseKey);
+              exerciseData.sessions.push({
+                date: new Date(workout.startTime).toLocaleDateString('pt-BR'),
+                maxWeight: maxWeightInWorkout,
+                workoutName: workout.nome
+              });
+            }
+          }
+        }
+      }
+      
+      // Convert to array and sort sessions by date
+      const exerciseHistoryArray = Array.from(exerciseHistoryMap.values()).map(exercise => {
+        exercise.sessions.sort((a: any, b: any) => {
+          const dateA = new Date(a.date.split('/').reverse().join('-'));
+          const dateB = new Date(b.date.split('/').reverse().join('-'));
+          return dateB.getTime() - dateA.getTime(); // Most recent first
+        });
+        
+        // Add latest weight for easy access
+        exercise.latestWeight = exercise.sessions[0]?.maxWeight || 0;
+        exercise.latestDate = exercise.sessions[0]?.date || '';
+        
+        return exercise;
+      });
+      
+      // Sort by latest weight (heaviest first)
+      exerciseHistoryArray.sort((a: any, b: any) => b.latestWeight - a.latestWeight);
+      
+      console.log('🏋️ Returning exercise history data:', exerciseHistoryArray);
+      res.json(exerciseHistoryArray);
+    } catch (error) {
+      console.error('Error fetching exercises history:', error);
+      res.status(500).json({ message: "Erro ao buscar histórico de exercícios" });
+    }
+  });
+
   // Get daily volume data for progress charts (must be before parameterized routes)
   app.get('/api/workout-logs-daily-volume', authenticateToken, async (req: AuthRequest, res) => {
     try {

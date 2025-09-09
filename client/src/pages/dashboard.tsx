@@ -181,6 +181,14 @@ export default function Dashboard() {
     gcTime: 0, // Don't cache
   });
 
+  // Get exercises history for individual exercise display
+  const { data: exercisesHistory = [] } = useQuery({
+    queryKey: ["/api/exercises-history"],
+    queryFn: () => exerciseProgressApi.getExercisesHistory(),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
   // Process chart data
   const chartData = useMemo(() => {
     if (!weightHistory || !Array.isArray(weightHistory) || weightHistory.length === 0) return [];
@@ -935,6 +943,68 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Exercises History */}
+      {exercisesHistory.length > 0 && (
+        <Card className="glass-card rounded-2xl hover-lift">
+          <CardContent className="p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground mb-1">Exercícios Executados</h3>
+              <p className="text-sm text-muted-foreground">Histórico de pesos por exercício</p>
+            </div>
+            
+            <div className="space-y-4">
+              {exercisesHistory.map((exercise: any) => (
+                <div key={exercise.exerciseId} className="bg-muted/20 rounded-xl p-4 border border-muted/40 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                        <Dumbbell className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground text-base">{exercise.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant="secondary" 
+                            className="rounded-full px-2 py-0.5 text-xs bg-blue-500/20 text-blue-300 border-blue-500/30"
+                          >
+                            {exercise.muscleGroup}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {exercise.sessions.length} sessão{exercise.sessions.length !== 1 ? 'ões' : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-foreground">{exercise.latestWeight}kg</div>
+                      <div className="text-xs text-muted-foreground">{exercise.latestDate}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Session History */}
+                  <div className="pt-3 border-t border-muted/30">
+                    <div className="flex flex-wrap gap-2">
+                      {exercise.sessions.slice(0, 5).map((session: any, index: number) => (
+                        <div key={index} className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+                          <span className="font-medium text-foreground">{session.maxWeight}kg</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className="text-muted-foreground">{session.date}</span>
+                        </div>
+                      ))}
+                      {exercise.sessions.length > 5 && (
+                        <div className="text-xs text-muted-foreground px-3 py-2">
+                          +{exercise.sessions.length - 5} mais
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       {/* Workout Details Modal */}
       <Dialog open={showWorkoutDetailsModal} onOpenChange={setShowWorkoutDetailsModal}>

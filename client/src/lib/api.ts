@@ -185,4 +185,9 @@ export const exerciseProgressApi = {
     const response = await apiRequest("GET", '/api/exercises-with-progress');
     return response.json();
   },
+
+  getExercisesHistory: async () => {
+    const response = await apiRequest("GET", '/api/exercises-history');
+    return response.json();
+  },
 };
