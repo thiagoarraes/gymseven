@@ -90,7 +90,7 @@ export class WorkoutService {
       throw new Error('Template de treino não encontrado');
     }
     
-    if (existingTemplate.user_id !== userId) {
+    if (existingTemplate.usuarioId !== userId) {
       throw new Error('Você não tem permissão para editar este template');
     }
 
@@ -111,7 +111,7 @@ export class WorkoutService {
       throw new Error('Template de treino não encontrado');
     }
     
-    if (existingTemplate.user_id !== userId) {
+    if (existingTemplate.usuarioId !== userId) {
       throw new Error('Você não tem permissão para excluir este template');
     }
 
@@ -123,11 +123,22 @@ export class WorkoutService {
     
     // Verify template belongs to user
     const template = await storage.getWorkoutTemplate(exerciseData.templateId);
-    if (!template || template.user_id !== userId) {
+    if (!template || template.usuarioId !== userId) {
       throw new Error('Template de treino não encontrado ou acesso negado');
     }
 
-    return await storage.addExerciseToTemplate(exerciseData);
+    // Map API V2 data to storage format
+    const storageData = {
+      modeloId: exerciseData.templateId,
+      exercicioId: exerciseData.exerciseId,
+      series: exerciseData.sets,
+      repeticoes: exerciseData.reps,
+      weight: exerciseData.weight,
+      restDurationSeconds: exerciseData.restDurationSeconds,
+      order: exerciseData.order,
+    };
+
+    return await storage.addExerciseToTemplate(storageData);
   }
 
   async updateTemplateExercise(exerciseId: string, userId: string, updateData: UpdateTemplateExerciseDto): Promise<any> {
@@ -140,7 +151,7 @@ export class WorkoutService {
     
     // Verify template belongs to user
     const template = await storage.getWorkoutTemplate(templateId);
-    if (!template || template.user_id !== userId) {
+    if (!template || template.usuarioId !== userId) {
       throw new Error('Template de treino não encontrado ou acesso negado');
     }
 
@@ -166,7 +177,7 @@ export class WorkoutService {
       return null;
     }
 
-    if (log.user_id !== userId) {
+    if (log.usuarioId !== userId) {
       throw new Error('Acesso negado ao log de treino');
     }
 
@@ -177,7 +188,7 @@ export class WorkoutService {
     const storage = await this.storage;
     const log = await storage.createWorkoutLog({
       ...logData,
-      user_id: userId,
+      usuarioId: userId,
     });
     return this.mapLogToResponse(log);
   }
@@ -191,7 +202,7 @@ export class WorkoutService {
       throw new Error('Log de treino não encontrado');
     }
     
-    if (existingLog.user_id !== userId) {
+    if (existingLog.usuarioId !== userId) {
       throw new Error('Você não tem permissão para editar este log');
     }
 
@@ -212,7 +223,7 @@ export class WorkoutService {
       throw new Error('Log de treino não encontrado');
     }
     
-    if (existingLog.user_id !== userId) {
+    if (existingLog.usuarioId !== userId) {
       throw new Error('Você não tem permissão para excluir este log');
     }
 
@@ -225,7 +236,7 @@ export class WorkoutService {
     
     // Verify log belongs to user by checking the log
     const log = await storage.getWorkoutLog(exerciseData.logId);
-    if (!log || log.user_id !== userId) {
+    if (!log || log.usuarioId !== userId) {
       throw new Error('Log de treino não encontrado ou acesso negado');
     }
 
@@ -238,7 +249,7 @@ export class WorkoutService {
     return await storage.createWorkoutLogSet({
       logId: exerciseData.logId,
       exerciseId: exerciseData.exerciseId,
-      exerciseName: exercise.name,
+      exerciseName: exercise.nome,
       order: exerciseData.order,
     } as any);
   }
