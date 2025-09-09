@@ -399,10 +399,10 @@ export default function Workouts() {
                         <div key={exercise.id} className="flex items-center text-xs text-muted-foreground" data-testid={`exercise-${exercise.id}`}>
                           <span className="w-4 text-center">{index + 1}</span>
                           <span className="flex-1 ml-2">
-                            {exercise.exercise?.name || 'Exercício'}
+                            {exercise.exerciseName || exercise.exercise?.name || exercise.exercise?.nome || 'Exercício'}
                           </span>
                           <span className="text-blue-500 dark:text-blue-400 text-xs">
-                            {exercise.sets}×{exercise.reps}
+                            {exercise.sets || exercise.series}×{exercise.reps || exercise.repeticoes}
                           </span>
                         </div>
                       ))
