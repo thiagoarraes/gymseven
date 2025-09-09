@@ -421,27 +421,35 @@ export default function WorkoutTemplateEditor() {
       if (Object.keys(localChanges).length > 0) {
         console.log("💾 Saving local exercise changes:", localChanges);
         
-        const promises = Object.entries(localChanges).map(([exerciseId, changes]) => {
+        const updatePromises = [];
+        for (const [exerciseId, changes] of Object.entries(localChanges)) {
           if (Object.keys(changes).length > 0) {
-            return workoutTemplateApi.updateExercise(exerciseId, changes);
+            console.log(`💾 Updating exercise ${exerciseId} with:`, changes);
+            updatePromises.push(workoutTemplateApi.updateExercise(exerciseId, changes));
           }
-          return Promise.resolve();
-        });
+        }
 
-        await Promise.all(promises);
+        if (updatePromises.length > 0) {
+          await Promise.all(updatePromises);
+        }
         hasChanges = true;
         
         // Clear local changes after successful save
         setLocalChanges({});
       }
 
-      // Then save exercise order changes  
-      const exerciseUpdates = reorderedExercises.map((exercise, index) => ({
-        id: exercise.id,
-        order: index + 1,
-      }));
+      // Then save exercise order changes (only if needed)
+      const currentOrder = reorderedExercises.map(ex => ex.order);
+      const expectedOrder = reorderedExercises.map((_, index) => index + 1);
+      const needsReorder = !currentOrder.every((order, index) => order === expectedOrder[index]);
       
-      if (exerciseUpdates.length > 0) {
+      if (needsReorder && reorderedExercises.length > 0) {
+        const exerciseUpdates = reorderedExercises.map((exercise, index) => ({
+          id: exercise.id,
+          order: index + 1,
+        }));
+        
+        console.log("💾 Updating exercise order:", exerciseUpdates);
         reorderExercisesMutation.mutate(exerciseUpdates);
         hasChanges = true;
       }
