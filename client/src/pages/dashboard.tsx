@@ -251,6 +251,7 @@ export default function Dashboard() {
       if (!selectedWorkout) return null;
       try {
         const response = await workoutLogApi.getById(selectedWorkout);
+        console.log('🔍 Full workout data received:', response);
         return response;
       } catch (error) {
         console.error('Error loading workout data:', error);
