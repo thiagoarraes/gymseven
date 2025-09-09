@@ -1105,6 +1105,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       let hasActualSets = false;
 
       if (logExercises && logExercises.length > 0) {
+        // Group exercises by exercicioId to avoid duplicates
+        const exerciseMap = new Map<string, any>();
+
         for (const logExercise of logExercises) {
           // Get exercise details
           const exercise = await db.getExercise(logExercise.exercicioId);
@@ -1112,27 +1115,47 @@ export async function registerRoutes(app: Express, createServerInstance = true):
           // Get sets for this exercise
           const sets = await db.getWorkoutLogSets(logExercise.id);
           
-          // Get exercise details for muscle group
-          
-          const exerciseData = {
-            id: logExercise.exercicioId,
-            name: logExercise.nomeExercicio || exercise?.nome || 'Exercício desconhecido',
-            muscleGroup: exercise?.grupoMuscular || 'N/A',
-            sets: sets?.map(set => ({
+          const exerciseId = logExercise.exercicioId;
+          const exerciseName = logExercise.nomeExercicio || exercise?.nome || 'Exercício desconhecido';
+          const muscleGroup = exercise?.grupoMuscular || 'N/A';
+
+          // Check if exercise already exists in map
+          if (exerciseMap.has(exerciseId)) {
+            // Merge sets from duplicate exercise
+            const existingExercise = exerciseMap.get(exerciseId);
+            const newSets = sets?.map(set => ({
               setNumber: set.setNumber,
               reps: set.reps,
               weight: set.weight,
               completed: set.completed
-            })) || []
-          };
+            })) || [];
+            existingExercise.sets = [...existingExercise.sets, ...newSets];
+          } else {
+            // Create new exercise entry
+            const exerciseData = {
+              id: exerciseId,
+              name: exerciseName,
+              muscleGroup: muscleGroup,
+              sets: sets?.map(set => ({
+                setNumber: set.setNumber,
+                reps: set.reps,
+                weight: set.weight,
+                completed: set.completed
+              })) || []
+            };
+            exerciseMap.set(exerciseId, exerciseData);
+          }
+        }
 
-          exercises.push(exerciseData);
+        // Convert map to array
+        exercises = Array.from(exerciseMap.values());
 
-          // Calculate totals
-          if (sets && sets.length > 0) {
+        // Calculate totals from all exercises
+        for (const exercise of exercises) {
+          if (exercise.sets && exercise.sets.length > 0) {
             hasActualSets = true;
             // Count all sets that are completed
-            for (const set of sets as any[]) {
+            for (const set of exercise.sets) {
               if (set.completed || set.reps > 0) {
                 totalSets += 1;
                 // Calculate volume as weight × reps for proper volume calculation
