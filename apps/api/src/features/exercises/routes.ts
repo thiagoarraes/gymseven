@@ -54,5 +54,23 @@ router.delete('/:id',
   asyncHandler(exerciseController.delete.bind(exerciseController))
 );
 
+// Progress and weight history routes
+router.get('/with-progress',
+  asyncHandler(exerciseController.getWithProgress.bind(exerciseController))
+);
+
+router.get('/weight-summary',
+  asyncHandler(exerciseController.getWeightSummary.bind(exerciseController))
+);
+
+router.get('/with-weight-history',
+  asyncHandler(exerciseController.getWithWeightHistory.bind(exerciseController))
+);
+
+router.get('/:id/weight-history',
+  validateParams(idParamSchema),
+  asyncHandler(exerciseController.getWeightHistory.bind(exerciseController))
+);
+
 export { router as exerciseRoutes };
 export default router;

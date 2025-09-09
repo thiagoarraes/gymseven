@@ -67,6 +67,77 @@ export class ExerciseService {
     return this.mapExerciseToResponse(updatedExercise);
   }
 
+  // Progress and weight history methods
+  async getExercisesWithProgress(userId: string): Promise<any[]> {
+    const storage = await this.storage;
+    const exercises = await storage.getExercises(userId);
+    
+    const exercisesWithProgress = await Promise.all(
+      exercises.map(async (exercise) => {
+        const stats = await storage.getExerciseStats(exercise.id, userId);
+        return {
+          ...this.mapExerciseToResponse(exercise),
+          lastWeight: stats.lastWeight,
+          maxWeight: stats.maxWeight,
+          lastUsed: stats.lastUsed,
+          totalSessions: stats.totalSessions
+        };
+      })
+    );
+    
+    return exercisesWithProgress;
+  }
+
+  async getExercisesWeightSummary(userId: string): Promise<any[]> {
+    const storage = await this.storage;
+    const exercises = await storage.getExercises(userId);
+    
+    const weightSummary = await Promise.all(
+      exercises.map(async (exercise) => {
+        const stats = await storage.getExerciseStats(exercise.id, userId);
+        return {
+          exerciseId: exercise.id,
+          exerciseName: exercise.nome,
+          muscleGroup: exercise.grupoMuscular,
+          maxWeight: stats.maxWeight,
+          lastWeight: stats.lastWeight,
+          totalSessions: stats.totalSessions
+        };
+      })
+    );
+    
+    return weightSummary.filter(item => item.maxWeight !== null);
+  }
+
+  async getExercisesWithWeightHistory(userId: string): Promise<any[]> {
+    const storage = await this.storage;
+    const exercises = await storage.getExercises(userId);
+    
+    const exercisesWithHistory = await Promise.all(
+      exercises.map(async (exercise) => {
+        const history = await storage.getExerciseWeightHistory(exercise.id, userId, 10);
+        return {
+          ...this.mapExerciseToResponse(exercise),
+          weightHistory: history
+        };
+      })
+    );
+    
+    return exercisesWithHistory;
+  }
+
+  async getExerciseWeightHistory(exerciseId: string, userId: string, limit?: number): Promise<any[]> {
+    const storage = await this.storage;
+    
+    // Verify exercise exists and belongs to user
+    const exercise = await storage.getExercise(exerciseId);
+    if (!exercise || exercise.usuarioId !== userId) {
+      throw new Error('Exercício não encontrado ou acesso negado');
+    }
+    
+    return await storage.getExerciseWeightHistory(exerciseId, userId, limit);
+  }
+
   async deleteExercise(exerciseId: string, userId: string): Promise<boolean> {
     const storage = await this.storage;
     

@@ -70,6 +70,49 @@ export class ExerciseController {
     }
   }
 
+  // Progress and weight history endpoints
+  async getWithProgress(req: AuthenticatedRequest, res: Response): Promise<Response> {
+    try {
+      const exercises = await this.exerciseService.getExercisesWithProgress(req.user.id);
+      return ApiResponseHelper.success(res, exercises, 'Exercícios com progresso recuperados com sucesso');
+    } catch (error: any) {
+      return ApiResponseHelper.error(res, error.message);
+    }
+  }
+
+  async getWeightSummary(req: AuthenticatedRequest, res: Response): Promise<Response> {
+    try {
+      const summary = await this.exerciseService.getExercisesWeightSummary(req.user.id);
+      return ApiResponseHelper.success(res, summary, 'Resumo de peso dos exercícios recuperado com sucesso');
+    } catch (error: any) {
+      return ApiResponseHelper.error(res, error.message);
+    }
+  }
+
+  async getWithWeightHistory(req: AuthenticatedRequest, res: Response): Promise<Response> {
+    try {
+      const exercises = await this.exerciseService.getExercisesWithWeightHistory(req.user.id);
+      return ApiResponseHelper.success(res, exercises, 'Exercícios com histórico de peso recuperados com sucesso');
+    } catch (error: any) {
+      return ApiResponseHelper.error(res, error.message);
+    }
+  }
+
+  async getWeightHistory(req: AuthenticatedRequest, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      
+      const history = await this.exerciseService.getExerciseWeightHistory(id, req.user.id, limit);
+      return ApiResponseHelper.success(res, history, 'Histórico de peso do exercício recuperado com sucesso');
+    } catch (error: any) {
+      if (error.message.includes('não encontrado') || error.message.includes('acesso negado')) {
+        return ApiResponseHelper.notFound(res, error.message);
+      }
+      return ApiResponseHelper.error(res, error.message);
+    }
+  }
+
   async delete(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
