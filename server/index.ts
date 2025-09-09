@@ -10,19 +10,13 @@ import { setupRoutes as setupV2Routes } from "../apps/api/src/routes/index";
 // Load environment variables from .env file first
 loadEnv();
 
-// Verify database configuration before starting server
+// Verify database configuration before starting server (optional)
 function verifyDatabaseConfiguration() {
   if (!process.env.DATABASE_URL) {
-    console.log('\n❌ CONFIGURAÇÃO DE BANCO DE DADOS NECESSÁRIA\n');
-    console.log('Para usar este projeto, você precisa configurar a variável DATABASE_URL\n');
-    console.log('🔧 COMO CONFIGURAR NO REPLIT:');
-    console.log('1. Abra a aba "Secrets" no painel lateral');
-    console.log('2. Adicione DATABASE_URL com sua string de conexão PostgreSQL');
-    console.log('3. Reinicie o projeto após adicionar a credencial');
-    console.log('\n⚠️  O servidor não será iniciado sem essa configuração.\n');
-    process.exit(1);
+    console.log('⚠️  DATABASE_URL não configurado - usando storage em memória (dados não persistentes)');
+  } else {
+    console.log('✅ Configuração do banco de dados verificada com sucesso!');
   }
-  console.log('✅ Configuração do banco de dados verificada com sucesso!');
 }
 
 // Verify configuration before proceeding
