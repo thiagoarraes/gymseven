@@ -264,18 +264,8 @@ export default function WorkoutTemplateEditor() {
     onSuccess: (data, { exerciseId, updates }) => {
       console.log(`✅ Update successful for exercise ${exerciseId}:`, data);
       
-      // Clear all related caches immediately
-      queryClient.clear();
-      
-      // Then refetch the main workout templates list
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["workout-templates", user?.id] });
-      }, 50);
-      
-      toast({
-        title: "Exercício atualizado",
-        description: "As alterações foram salvas com sucesso.",
-      });
+      // Force immediate window reload to ensure fresh data
+      window.location.reload();
     },
     onError: (err: any, { exerciseId, updates }) => {
       console.error(`❌ Error updating exercise ${exerciseId}:`, err);
