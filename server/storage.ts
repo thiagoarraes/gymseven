@@ -97,20 +97,19 @@ export interface IStorage {
   updateWorkoutLogSet(id: string, set: Partial<InsertWorkoutLogSet>): Promise<WorkoutLogSet | undefined>;
 }
 
-// Storage initialization - PostgreSQL database only
+// Storage initialization - Prefer PostgreSQL, fallback to in-memory for development/demo
 export async function initializeStorage(): Promise<IStorage> {
   try {
-    // Use PostgreSQL database
     if (process.env.DATABASE_URL) {
       console.log('🚀 Using PostgreSQL database configuration');
       console.log('✅ DATABASE_URL detected');
       const { PostgreSQLStorage } = await import('./postgresql-storage');
       return new PostgreSQLStorage();
     }
-    
-    // If no database is configured, throw error
-    throw new Error('❌ Database configuration required. Please configure DATABASE_URL');
-    
+
+    console.log('⚠️ DATABASE_URL not set. Falling back to in-memory storage (development mode).');
+    const { MemoryStorage } = await import('./memory-storage');
+    return new MemoryStorage();
   } catch (error) {
     console.error('❌ Storage initialization failed:', error);
     throw error;
