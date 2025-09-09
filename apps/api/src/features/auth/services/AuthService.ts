@@ -152,33 +152,56 @@ export class AuthService {
   }
 
   async verifyToken(token: string): Promise<UserContextData> {
+    console.log('🔍 [AUTH SERVICE V2] Starting token verification');
+    console.log('🔍 [AUTH SERVICE V2] Token:', token.substring(0, 20) + '...');
+    console.log('🔍 [AUTH SERVICE V2] V2 Secret:', this.jwtSecret.substring(0, 10) + '...');
+    
     try {
       // First, try with v2 secret
       let decoded: any;
+      let tokenSource = '';
+      
       try {
+        console.log('🔍 [AUTH SERVICE V2] Trying v2 verification...');
         decoded = jwt.verify(token, this.jwtSecret) as any;
-      } catch (v2Error) {
+        tokenSource = 'v2';
+        console.log('✅ [AUTH SERVICE V2] V2 verification successful');
+      } catch (v2Error: any) {
+        console.log('❌ [AUTH SERVICE V2] V2 verification failed:', v2Error.message);
+        
         // If v2 fails, try with v1 secret (for backwards compatibility)
         try {
           const v1Secret = process.env.JWT_SECRET || this.jwtSecret;
+          console.log('🔍 [AUTH SERVICE V2] Trying v1 verification with secret:', v1Secret.substring(0, 10) + '...');
           decoded = jwt.verify(token, v1Secret) as any;
-        } catch (v1Error) {
+          tokenSource = 'v1';
+          console.log('✅ [AUTH SERVICE V2] V1 verification successful');
+        } catch (v1Error: any) {
+          console.log('❌ [AUTH SERVICE V2] V1 verification failed:', v1Error.message);
           throw new Error('Token inválido');
         }
       }
+      
+      console.log('🔍 [AUTH SERVICE V2] Decoded token:', JSON.stringify(decoded));
+      console.log('🔍 [AUTH SERVICE V2] Token source:', tokenSource);
       
       // Get user data from database using the userId from token
       // Handle both v1 format { userId, type } and v2 format { userId }
       const userId = decoded.userId;
       if (!userId) {
+        console.log('❌ [AUTH SERVICE V2] No userId in token');
         throw new Error('Token inválido - userId não encontrado');
       }
       
+      console.log('🔍 [AUTH SERVICE V2] Looking up user:', userId);
       const storage = await this.storage;
       const user = await storage.getUser(userId);
       if (!user) {
+        console.log('❌ [AUTH SERVICE V2] User not found in database');
         throw new Error('Usuário não encontrado');
       }
+      
+      console.log('✅ [AUTH SERVICE V2] User found:', user.email);
       
       return {
         id: user.id,
@@ -189,7 +212,7 @@ export class AuthService {
         profileImageUrl: user.profileImageUrl || undefined,
       };
     } catch (error: any) {
-      console.error('Token verification failed:', error.message);
+      console.error('❌ [AUTH SERVICE V2] Token verification failed:', error.message);
       throw new Error('Token inválido');
     }
   }

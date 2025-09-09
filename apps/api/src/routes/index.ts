@@ -26,7 +26,15 @@ export const setupRoutes = (app: Application): void => {
 
   if (flags.useNewWorkoutModule) {
     console.log('🔄 Using new workout module');
-    apiRouter.use('/workouts', authMiddleware.authenticate, workoutRoutes);
+    // Create a wrapper for the async middleware to ensure proper Promise handling
+    const authWrapper = (req: any, res: any, next: any) => {
+      console.log('🔍 [ROUTER] Applying auth middleware for:', req.path);
+      authMiddleware.authenticate(req, res, next).catch((error: any) => {
+        console.error('❌ [ROUTER] Auth middleware error:', error);
+        next(error);
+      });
+    };
+    apiRouter.use('/workouts', authWrapper, workoutRoutes);
   } else {
     console.log('🏋️ Using legacy workout module');
   }
