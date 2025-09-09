@@ -17,7 +17,7 @@ export const addExerciseToTemplateSchema = z.object({
   exerciseId: z.string().uuid("Exercise ID deve ser um UUID válido"),
   sets: z.number().min(1, "Número de séries deve ser pelo menos 1"),
   reps: z.union([z.string(), z.number()]).transform((val) => String(val)),
-  weight: z.number().optional(),
+  weight: z.number().nullable().optional(),
   restDurationSeconds: z.number().default(90),
   order: z.number().min(0, "Ordem deve ser um número positivo"),
 });
@@ -57,7 +57,7 @@ export const createWorkoutLogSetSchema = z.object({
   logExerciseId: z.string().uuid("Log Exercise ID deve ser um UUID válido"),
   setNumber: z.number().min(1, "Número da série deve ser pelo menos 1"),
   reps: z.number().min(0, "Número de repetições deve ser positivo").optional(),
-  weight: z.number().min(0, "Peso deve ser positivo").optional(),
+  weight: z.number().min(0, "Peso deve ser positivo").nullable().optional(),
   completed: z.boolean().default(false),
 });
 
