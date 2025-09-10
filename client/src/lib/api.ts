@@ -122,7 +122,7 @@ export const workoutTemplateApi = {
   },
 
   updateExercise: async (exerciseId: string, updates: any) => {
-    const response = await apiRequest("PUT", `/api/v2/workouts/templates/exercises/${exerciseId}`, updates);
+    const response = await apiRequest("PUT", `/api/workout-template-exercises/${exerciseId}`, updates);
     const data = await response.json();
     return data.data || data;
   },
