@@ -135,8 +135,11 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const createMutation = useMutation({
     mutationFn: exerciseApi.create,
     onSuccess: () => {
+      // Invalidate both exercise queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises/with-progress"] });
       setIsDialogOpen(false);
+      resetForm();
       toast({
         title: "Exercício criado!",
         description: "O exercício foi adicionado com sucesso.",
@@ -156,6 +159,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       exerciseApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises/with-progress"] });
       setIsDialogOpen(false);
       setEditingExercise(null);
       toast({
@@ -169,6 +173,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     mutationFn: exerciseApi.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises/with-progress"] });
       toast({
         title: "Exercício excluído!",
         description: "O exercício foi removido com sucesso.",
