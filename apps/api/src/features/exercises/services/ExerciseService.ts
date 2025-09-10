@@ -74,13 +74,19 @@ export class ExerciseService {
   // Progress and weight history methods
   async getExercisesWithProgress(userId: string): Promise<any[]> {
     try {
+      console.log('🔍 [SERVICE] getExercisesWithProgress called for user:', userId);
       const storage = await this.storage;
+      console.log('🔍 [SERVICE] Storage obtained');
+      
       const exercises = await storage.getExercises(userId);
+      console.log('🔍 [SERVICE] Found', exercises.length, 'exercises for user');
       
       const exercisesWithProgress = await Promise.all(
         exercises.map(async (exercise) => {
           try {
+            console.log('🔍 [SERVICE] Getting stats for exercise:', exercise.id);
             const stats = await storage.getExerciseStats(exercise.id, userId);
+            console.log('✅ [SERVICE] Got stats for exercise:', exercise.id, stats);
             return {
               ...this.mapExerciseToResponse(exercise),
               lastWeight: stats.lastWeight,
@@ -89,6 +95,7 @@ export class ExerciseService {
               totalSessions: stats.totalSessions
             };
           } catch (error) {
+            console.log('⚠️ [SERVICE] Failed to get stats for exercise:', exercise.id, error);
             // If stats fail, return exercise with default values
             return {
               ...this.mapExerciseToResponse(exercise),
@@ -101,9 +108,10 @@ export class ExerciseService {
         })
       );
       
+      console.log('✅ [SERVICE] Returning', exercisesWithProgress.length, 'exercises with progress');
       return exercisesWithProgress;
     } catch (error) {
-      console.error('Error in getExercisesWithProgress:', error);
+      console.error('❌ [SERVICE] Error in getExercisesWithProgress:', error);
       throw new Error('Erro ao buscar exercícios com progresso');
     }
   }
