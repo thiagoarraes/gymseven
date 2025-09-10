@@ -105,7 +105,7 @@ export default function WorkoutSession() {
       console.log("🏁 Setting endTime to:", endTimeValue);
       return workoutLogApi.update(workoutId!, {
         endTime: endTimeValue,
-      });
+      } as any);
     },
     onSuccess: (result) => {
       console.log("✅ Workout finished successfully:", result);
@@ -614,6 +614,80 @@ export default function WorkoutSession() {
           </CardContent>
         </Card>
       )}
+
+      {/* All Exercises Overview */}
+      <Card className="glass-card rounded-2xl">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Exercícios do Treino</h3>
+            <div className="text-sm text-slate-400">
+              {templateExercises.length} exercícios
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            {templateExercises.map((exercise: any, index: number) => (
+              <div 
+                key={exercise.id}
+                className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                  index === currentExerciseIndex
+                    ? 'bg-blue-500/10 border-blue-500/50 shadow-lg shadow-blue-500/20'
+                    : index < currentExerciseIndex
+                    ? 'bg-emerald-500/10 border-emerald-500/30'
+                    : 'bg-slate-800/30 border-slate-700/30'
+                }`}
+                onClick={() => {
+                  setCurrentExerciseIndex(index);
+                  setCurrentSetIndex(0);
+                  setCurrentWeight(exercise?.weight?.toString() || "");
+                  setCurrentReps(exercise?.reps?.toString() || "");
+                }}
+              >
+                <div className="flex items-center space-x-4">
+                  {/* Exercise Status Icon */}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                    index === currentExerciseIndex
+                      ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
+                      : index < currentExerciseIndex
+                      ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400'
+                      : 'bg-slate-700/50 border border-slate-600 text-slate-500'
+                  }`}>
+                    {index < currentExerciseIndex ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      index + 1
+                    )}
+                  </div>
+                  
+                  {/* Exercise Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-white text-sm">
+                          {exercise.exercise?.name || exercise.exerciseName || 'Exercício'}
+                        </h4>
+                        <p className="text-xs text-slate-400">
+                          {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-slate-300">
+                          {exercise.sets} × {exercise.reps} reps
+                        </div>
+                        {exercise.weight && (
+                          <div className="text-xs text-slate-500">
+                            {exercise.weight}kg
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Navigation */}
       <div className="flex space-x-3">
