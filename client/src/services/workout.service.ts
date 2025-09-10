@@ -123,5 +123,33 @@ export const workoutService = {
       completed: false
     });
     return response.json();
+  },
+
+  // Get all workout logs
+  async getAllLogs(limit?: number): Promise<{ success: boolean; data: WorkoutLog[]; error?: string }> {
+    try {
+      const params = limit ? `?limit=${limit}` : '';
+      const response = await fetch(`/api/v2/workouts/logs${params}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch workout logs');
+      }
+      
+      const responseData = await response.json();
+      return {
+        success: true,
+        data: responseData.data || responseData
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        data: [],
+        error: error.message
+      };
+    }
   }
 };

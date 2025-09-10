@@ -46,6 +46,24 @@ export default function Workouts() {
     gcTime: 0, // Don't cache for long
   });
 
+  // Query para buscar treinos ativos (sem endTime)
+  const { data: activeWorkouts = [] } = useQuery({
+    queryKey: ["active-workout-logs", user?.id],
+    queryFn: async () => {
+      if (!user?.id) {
+        throw new Error("Usuário não autenticado");
+      }
+      const result = await workoutService.getAllLogs(20); // Buscar até 20 logs recentes
+      if (result.success && result.data) {
+        // Filtrar apenas logs que não têm endTime (treinos ativos)
+        return result.data.filter((log: any) => !log.endTime);
+      }
+      return [];
+    },
+    enabled: !!user?.id,
+    staleTime: 30000, // Cache por 30 segundos
+  });
+
   // Mutation para criar template
   const createMutation = useMutation({
     mutationFn: (data: WorkoutFormValues) => {
@@ -137,6 +155,11 @@ export default function Workouts() {
       });
     },
     onSuccess: (workoutLog: any) => {
+      queryClient.invalidateQueries({ queryKey: ["active-workout-logs", user?.id] });
+      toast({
+        title: "Treino iniciado!",
+        description: "Seu treino foi iniciado com sucesso.",
+      });
       navigate(`/workout-session/${workoutLog.id}`);
     },
     onError: (error: Error) => {
@@ -173,8 +196,22 @@ export default function Workouts() {
     setIsDialogOpen(true);
   };
 
+  // Função para verificar se há um treino ativo para um template específico
+  const getActiveWorkoutForTemplate = (templateId: string) => {
+    return activeWorkouts.find((log: any) => 
+      log.modeloId === templateId || log.templateId === templateId
+    );
+  };
+
   const handleStartWorkout = (templateId: string) => {
-    startWorkoutMutation.mutate(templateId);
+    const activeWorkout = getActiveWorkoutForTemplate(templateId);
+    if (activeWorkout) {
+      // Se há um treino ativo, navegar para ele
+      navigate(`/workout-session/${activeWorkout.id}`);
+    } else {
+      // Se não há treino ativo, criar um novo
+      startWorkoutMutation.mutate(templateId);
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -434,19 +471,46 @@ export default function Workouts() {
                 </div>
                 
                 <div className="mt-4">
-                  <Button
-                    className="w-full gradient-accent py-3 rounded-xl font-semibold text-white hover:scale-105 transition-transform"
-                    onClick={() => handleStartWorkout(template.id)}
-                    disabled={startWorkoutMutation.isPending}
-                    data-testid={`button-start-workout-${template.id}`}
-                  >
-                    {startWorkoutMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {(() => {
+                    const activeWorkout = getActiveWorkoutForTemplate(template.id);
+                    return activeWorkout ? (
+                      <div className="space-y-3">
+                        <div className="bg-orange-500/15 border border-orange-500/30 rounded-lg p-3 text-center">
+                          <div className="flex items-center justify-center space-x-2 text-orange-400">
+                            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                            <span className="text-sm font-semibold">
+                              Treino em andamento
+                            </span>
+                          </div>
+                          <p className="text-xs text-orange-300/70 mt-1">
+                            Iniciado em {new Date(activeWorkout.startTime).toLocaleDateString('pt-BR')} às {new Date(activeWorkout.startTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        <Button
+                          className="w-full gradient-accent py-3 rounded-xl font-semibold text-white hover:scale-105 transition-transform bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                          onClick={() => handleStartWorkout(template.id)}
+                          data-testid={`button-return-workout-${template.id}`}
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          Voltar para o treino
+                        </Button>
+                      </div>
                     ) : (
-                      <Play className="w-4 h-4 mr-2" />
-                    )}
-                    Começar Treino
-                  </Button>
+                      <Button
+                        className="w-full gradient-accent py-3 rounded-xl font-semibold text-white hover:scale-105 transition-transform"
+                        onClick={() => handleStartWorkout(template.id)}
+                        disabled={startWorkoutMutation.isPending}
+                        data-testid={`button-start-workout-${template.id}`}
+                      >
+                        {startWorkoutMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Play className="w-4 h-4 mr-2" />
+                        )}
+                        Começar Treino
+                      </Button>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>
