@@ -45,8 +45,9 @@ export type UpdateWorkoutLogDto = z.infer<typeof updateWorkoutLogSchema>;
 
 // Workout Log Exercise DTOs
 export const createWorkoutLogExerciseSchema = z.object({
-  logId: z.string().uuid("Log ID deve ser um UUID válido"),
-  exerciseId: z.string().uuid("Exercise ID deve ser um UUID válido"),
+  registroId: z.string().uuid("Registro ID deve ser um UUID válido"),
+  exercicioId: z.string().uuid("Exercício ID deve ser um UUID válido"),
+  nomeExercicio: z.string().optional(),
   order: z.number().min(0, "Ordem deve ser um número positivo"),
 });
 

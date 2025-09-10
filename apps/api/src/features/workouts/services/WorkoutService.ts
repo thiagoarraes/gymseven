@@ -243,23 +243,23 @@ export class WorkoutService {
     const storage = await this.storage;
     
     // Verify log belongs to user by checking the log
-    const log = await storage.getWorkoutLog(exerciseData.logId);
+    const log = await storage.getWorkoutLog(exerciseData.registroId);
     if (!log || log.usuarioId !== userId) {
       throw new Error('Log de treino não encontrado ou acesso negado');
     }
 
     // Get exercise name for the log
-    const exercise = await storage.getExercise(exerciseData.exerciseId);
+    const exercise = await storage.getExercise(exerciseData.exercicioId);
     if (!exercise) {
       throw new Error('Exercício não encontrado');
     }
 
-    return await storage.createWorkoutLogSet({
-      logId: exerciseData.logId,
-      exerciseId: exerciseData.exerciseId,
-      exerciseName: exercise.nome,
+    return await storage.createWorkoutLogExercise({
+      registroId: exerciseData.registroId,
+      exercicioId: exerciseData.exercicioId,
+      nomeExercicio: exerciseData.nomeExercicio || exercise.nome,
       order: exerciseData.order,
-    } as any);
+    });
   }
 
   async createWorkoutLogSet(userId: string, setData: CreateWorkoutLogSetDto): Promise<any> {
