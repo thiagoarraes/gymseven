@@ -34,6 +34,7 @@ export default function WorkoutSession() {
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [restTimer, setRestTimer] = useState(0);
+  const [hasCompletedFirstSet, setHasCompletedFirstSet] = useState(false);
   const [workoutDuration, setWorkoutDuration] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [currentWeight, setCurrentWeight] = useState("");
@@ -95,10 +96,12 @@ export default function WorkoutSession() {
     if (templateExercises.length > 0) {
       const currentExercise = templateExercises[currentExerciseIndex];
       if (currentExercise) {
-        // Load exercise data: weight, reps, and rest time
+        // Load exercise data: weight and reps (but not rest timer until first set is completed)
         setCurrentWeight(currentExercise.weight?.toString() || "");
         setCurrentReps(currentExercise.reps?.toString() || "");
-        setRestTimer(currentExercise.restDurationSeconds || 90);
+        // Reset rest timer and completion status for new exercise
+        setRestTimer(0);
+        setHasCompletedFirstSet(false);
       }
     }
   }, [templateExercises, currentExerciseIndex]);
@@ -177,6 +180,7 @@ export default function WorkoutSession() {
       setCurrentExerciseIndex(prev => prev + 1);
       setCurrentSetIndex(0);
       // Weight, reps and rest timer will be set by useEffect when currentExerciseIndex changes
+      setHasCompletedFirstSet(false);
     }
   };
 
@@ -185,6 +189,7 @@ export default function WorkoutSession() {
       setCurrentExerciseIndex(prev => prev - 1);
       setCurrentSetIndex(0);
       // Weight, reps and rest timer will be set by useEffect when currentExerciseIndex changes
+      setHasCompletedFirstSet(false);
     }
   };
 
@@ -212,6 +217,7 @@ export default function WorkoutSession() {
       // Move to next set and reset to template defaults
       setCurrentSetIndex(prev => prev + 1);
       setRestTimer(exercise?.restDurationSeconds || 90);
+      setHasCompletedFirstSet(true);
       setCurrentWeight(exercise?.weight?.toString() || "");
       setCurrentReps(exercise?.reps?.toString() || "");
       toast({
@@ -454,7 +460,7 @@ export default function WorkoutSession() {
             </div>
             
             {/* Rest Timer */}
-            {(restTimer > 0 || true) && (
+            {hasCompletedFirstSet && restTimer > 0 && (
               <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
                 <div className="flex items-center justify-between mb-3">
                   <div>
