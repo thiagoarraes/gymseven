@@ -192,17 +192,18 @@ export default function Dashboard() {
   });
 
   // Get weight data based on selected exercise
-  const { data: weightHistory = [] } = useQuery({
+  const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
     queryKey: ["/api/v2/exercises", selectedExerciseId, "weight-progress"],
     queryFn: () => {
       if (selectedExerciseId && selectedExerciseId !== "all") {
         // Get specific exercise weight history
         return exerciseProgressApi.getWeightHistory(selectedExerciseId, 20);
       } else {
-        // Get overall weight summary (all exercises)
-        return exerciseProgressApi.getExercisesWeightSummary();
+        // Don't fetch data when "all" is selected - return empty array
+        return [];
       }
     },
+    enabled: !!(selectedExerciseId && selectedExerciseId !== "all"), // Only fetch when a specific exercise is selected
     staleTime: 0, // Always refetch
     gcTime: 0, // Don't cache
   });
@@ -955,7 +956,32 @@ export default function Dashboard() {
           </div>
           
           <div className="h-80 relative">
-            {chartData.length > 0 ? (
+            {weightHistoryLoading ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100/60 to-purple-100/40 dark:from-blue-500/10 dark:to-purple-500/5 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/20">
+                    <div className="loading-spinner w-10 h-10"></div>
+                  </div>
+                  <p className="text-lg font-medium text-foreground mb-2">Carregando progresso...</p>
+                </div>
+              </div>
+            ) : !selectedExerciseId || selectedExerciseId === "all" ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100/60 to-purple-100/40 dark:from-blue-500/10 dark:to-purple-500/5 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/20">
+                    <BarChart3 className="w-10 h-10 text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <p className="text-lg font-medium text-foreground mb-2">Selecione um exercício</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Escolha um exercício específico acima para visualizar seu progresso de peso
+                  </p>
+                  <div className="inline-flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-300 bg-blue-100/60 dark:bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-200/50 dark:border-blue-500/20">
+                    <Target className="w-3 h-3" />
+                    <span>Selecione um exercício no menu acima</span>
+                  </div>
+                </div>
+              </div>
+            ) : chartData.length > 0 ? (
               <div className="h-full w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart 
@@ -1047,11 +1073,11 @@ export default function Dashboard() {
                   </div>
                   <p className="text-lg font-medium text-foreground mb-2">Nenhum progresso registrado</p>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Complete treinos com peso para visualizar sua evolução
+                    Complete treinos com peso para visualizar sua evolução deste exercício
                   </p>
                   <div className="inline-flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-300 bg-blue-100/60 dark:bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-200/50 dark:border-blue-500/20">
                     <Play className="w-3 h-3" />
-                    <span>Inicie um treino para começar</span>
+                    <span>Execute treinos para começar</span>
                   </div>
                 </div>
               </div>
