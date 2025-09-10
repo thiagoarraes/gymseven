@@ -7,7 +7,7 @@ export function BottomNavigation() {
   const navItems = [
     { id: "dashboard", label: "Início", icon: Home, path: "/" },
     { id: "exercises", label: "Exercícios", icon: Dumbbell, path: "/exercicios" },
-    { id: "workouts", label: "Treinos", icon: List, path: "/workout-history" },
+    { id: "workouts", label: "Treinos", icon: List, path: "/treinos" },
     { id: "progress", label: "Conquistas", icon: Trophy, path: "/progresso" },
   ];
 
