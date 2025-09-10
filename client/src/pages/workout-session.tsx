@@ -121,9 +121,10 @@ export default function WorkoutSession() {
     },
     onSuccess: (result) => {
       console.log("✅ Workout finished successfully:", result);
-      // Invalidar queries relacionadas aos treinos
+      // Invalidar todas as queries relacionadas aos treinos
       queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/logs"] });
       queryClient.invalidateQueries({ queryKey: ["active-workout-logs"] }); // Query dos treinos ativos
+      queryClient.invalidateQueries({ queryKey: ["/api/v2/workouts/templates"] }); // Templates e exercícios do dashboard
       toast({
         title: "Treino finalizado!",
         description: "Parabéns! Treino concluído com sucesso.",

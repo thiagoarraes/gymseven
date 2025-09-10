@@ -48,12 +48,21 @@ export default function Dashboard() {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
+  // Calculate the most recent completed workout (sorted by endTime)
+  const mostRecentCompletedWorkout = useMemo(() => {
+    const completedWorkouts = recentWorkouts.filter(w => w.endTime);
+    return completedWorkouts.sort((a, b) => {
+      const dateA = new Date(a.endTime!);
+      const dateB = new Date(b.endTime!);
+      return dateB.getTime() - dateA.getTime();
+    })[0];
+  }, [recentWorkouts]);
 
-  // Get template exercises for the first workout to show muscle groups
+  // Get template exercises for the most recent completed workout to show muscle groups
   const { data: templateExercises = [] } = useQuery({
-    queryKey: ["/api/v2/workouts/templates", recentWorkouts[0]?.modeloId || (recentWorkouts[0] as any)?.templateId, "exercises"],
-    queryFn: () => workoutTemplateApi.getExercises(recentWorkouts[0]!.modeloId! || (recentWorkouts[0] as any)!.templateId!),
-    enabled: !!(recentWorkouts[0]?.modeloId || (recentWorkouts[0] as any)?.templateId),
+    queryKey: ["/api/v2/workouts/templates", mostRecentCompletedWorkout?.modeloId || (mostRecentCompletedWorkout as any)?.templateId, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(mostRecentCompletedWorkout!.modeloId! || (mostRecentCompletedWorkout as any)!.templateId!),
+    enabled: !!(mostRecentCompletedWorkout?.modeloId || (mostRecentCompletedWorkout as any)?.templateId),
   });
 
   // Get detailed workout data for modal
@@ -500,7 +509,7 @@ export default function Dashboard() {
       <div className="mobile-flex relative z-10">
         {/* Last Workout Card */}
         <div className="bg-gradient-to-br from-slate-50/90 to-blue-50/70 dark:from-slate-900/80 dark:to-slate-800/60 hover:from-blue-50/80 hover:to-indigo-50/70 dark:hover:from-slate-800/90 dark:hover:to-slate-700/80 rounded-2xl mobile-card-padding border border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300/70 dark:hover:border-slate-600/70 transition-all duration-300 cursor-pointer touch-feedback mobile-focus shadow-lg hover:shadow-xl dark:shadow-slate-900/30 backdrop-blur-sm">
-          {recentWorkouts.length > 0 ? (
+          {mostRecentCompletedWorkout ? (
             <div className="space-y-3 sm:space-y-4">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
@@ -514,11 +523,11 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold border shadow-sm ${
-                  recentWorkouts[0]?.endTime 
+                  mostRecentCompletedWorkout?.endTime 
                     ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/40' 
                     : 'bg-amber-500/15 text-amber-500 border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/40'
                 }`}>
-                  {recentWorkouts[0]?.endTime ? (
+                  {mostRecentCompletedWorkout?.endTime ? (
                     <>
                       <CheckCircle className="w-3 h-3 mr-1.5" />
                       <span>Concluído</span>
@@ -537,19 +546,19 @@ export default function Dashboard() {
                 {/* Workout Name and Date */}
                 <div>
                   <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                    {(recentWorkouts[0] as any)?.name || "Treino personalizado"}
+                    {(mostRecentCompletedWorkout as any)?.name || "Treino personalizado"}
                   </h4>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Calendar className="w-4 h-4" />
                     <span className="font-medium">
-                      {formatWorkoutDate((recentWorkouts[0]?.startTime || recentWorkouts[0]?.endTime)?.toString() || '')}
+                      {formatWorkoutDate((mostRecentCompletedWorkout?.startTime || mostRecentCompletedWorkout?.endTime)?.toString() || '')}
                     </span>
-                    {recentWorkouts[0]?.endTime && (
+                    {mostRecentCompletedWorkout?.endTime && (
                       <>
                         <span className="text-slate-400 dark:text-slate-500">•</span>
                         <Clock className="w-4 h-4" />
                         <span className="font-medium">
-                          {calculateDuration(recentWorkouts[0].startTime, recentWorkouts[0].endTime)}
+                          {calculateDuration(mostRecentCompletedWorkout.startTime, mostRecentCompletedWorkout.endTime)}
                         </span>
                       </>
                     )}
@@ -563,7 +572,7 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Grupos Musculares</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {getMuscleGroupsFromWorkout(recentWorkouts[0]).map((group, index) => (
+                    {getMuscleGroupsFromWorkout(mostRecentCompletedWorkout).map((group, index) => (
                       <Badge key={index} variant="secondary" className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
                         {group}
                       </Badge>
@@ -574,10 +583,10 @@ export default function Dashboard() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t border-slate-200/50 dark:border-slate-600/50">
-                {!recentWorkouts[0]?.endTime && (
+                {!mostRecentCompletedWorkout?.endTime && (
                   <Button 
                     className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-400 dark:hover:to-indigo-400 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg text-sm shadow-md"
-                    onClick={() => navigate(`/workout-session/${recentWorkouts[0]?.id}`)}
+                    onClick={() => navigate(`/workout-session/${mostRecentCompletedWorkout?.id}`)}
                   >
                     <Play className="w-4 h-4 mr-2" />
                     Continuar Treino
@@ -586,7 +595,7 @@ export default function Dashboard() {
                 <Button 
                   variant="outline" 
                   className="bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 border-slate-300/60 dark:border-slate-600/60 text-slate-700 dark:text-slate-300 font-medium py-2.5 px-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-md text-sm backdrop-blur-sm"
-                  onClick={() => handleWorkoutDetails(recentWorkouts[0])}
+                  onClick={() => handleWorkoutDetails(mostRecentCompletedWorkout)}
                 >
                   <Activity className="w-4 h-4 mr-2" />
                   Ver Detalhes
