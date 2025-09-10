@@ -1,5 +1,4 @@
-// Force memory storage before any other imports
-process.env.USE_MEMORY_STORAGE = 'true';
+// Storage will be configured automatically based on environment
 
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
