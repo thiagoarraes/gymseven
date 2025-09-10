@@ -73,36 +73,27 @@ export class ExerciseController {
   // Progress and weight history endpoints
   async getWithProgress(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      console.log('🔍 [CONTROLLER] getWithProgress called for user:', req.user.id);
       const exercises = await this.exerciseService.getExercisesWithProgress(req.user.id);
-      console.log('✅ [CONTROLLER] getWithProgress success, found', exercises.length, 'exercises');
       return ApiResponseHelper.success(res, exercises, 'Exercícios com progresso recuperados com sucesso');
     } catch (error: any) {
-      console.error('❌ [CONTROLLER] getWithProgress error:', error.message, error.stack);
       return ApiResponseHelper.error(res, error.message);
     }
   }
 
   async getWeightSummary(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      console.log('🔍 [CONTROLLER] getWeightSummary called for user:', req.user.id);
       const summary = await this.exerciseService.getExercisesWeightSummary(req.user.id);
-      console.log('✅ [CONTROLLER] getWeightSummary success, found', summary.length, 'summaries');
       return ApiResponseHelper.success(res, summary, 'Resumo de peso dos exercícios recuperado com sucesso');
     } catch (error: any) {
-      console.error('❌ [CONTROLLER] getWeightSummary error:', error.message, error.stack);
       return ApiResponseHelper.error(res, error.message);
     }
   }
 
   async getWithWeightHistory(req: AuthenticatedRequest, res: Response): Promise<Response> {
     try {
-      console.log('🔍 [CONTROLLER] getWithWeightHistory called for user:', req.user.id);
       const exercises = await this.exerciseService.getExercisesWithWeightHistory(req.user.id);
-      console.log('✅ [CONTROLLER] getWithWeightHistory success, found', exercises.length, 'exercises');
       return ApiResponseHelper.success(res, exercises, 'Exercícios com histórico de peso recuperados com sucesso');
     } catch (error: any) {
-      console.error('❌ [CONTROLLER] getWithWeightHistory error:', error.message, error.stack);
       return ApiResponseHelper.error(res, error.message);
     }
   }
