@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
   User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle, RotateCcw,
-  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, Shield, Key, VolumeX
+  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, VolumeX
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/contexts/theme-context';
 import { useNotifications } from '@/hooks/use-notifications';
-import { updateUserSchema, type UpdateUser, changePasswordSchema, type ChangePassword } from '@shared/schema';
+import { useAuth } from '@/contexts/auth-context-new';
+import { updateUserSchema, type UpdateUser } from '@shared/schema';
 import ImageCropModal from '@/components/ImageCropModal';
 import { z } from 'zod';
 
@@ -50,8 +51,7 @@ export default function Profile() {
   const [deleting, setDeleting] = useState(false);
   const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
   const [clearingData, setClearingData] = useState(false);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const { user, updateProfile, deleteAccount, changePassword } = useAuth();
+  const { user, updateProfile, deleteAccount } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
@@ -89,13 +89,13 @@ export default function Profile() {
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       email: user?.email || '',
-      username: user?.user_metadata?.username || '',
-      firstName: user?.user_metadata?.first_name || '',
-      lastName: user?.user_metadata?.last_name || '',
-      dateOfBirth: user?.user_metadata?.date_of_birth ? formatDateForInput(user.user_metadata.date_of_birth) : undefined,
-      height: user?.user_metadata?.height || undefined,
-      weight: user?.user_metadata?.weight || undefined,
-      activityLevel: user?.user_metadata?.activity_level || 'moderado',
+      username: user?.username || '',
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      dateOfBirth: user?.dateOfBirth ? formatDateForInput(user.dateOfBirth) : undefined,
+      height: user?.height || undefined,
+      weight: user?.weight || undefined,
+      activityLevel: user?.activityLevel || 'moderado',
     },
   });
 
@@ -112,14 +112,6 @@ export default function Profile() {
     },
   });
 
-  const passwordForm = useForm<ChangePassword>({
-    resolver: zodResolver(changePasswordSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
-  });
 
   // Atualiza o valor do formulário quando o tema muda
   useEffect(() => {
@@ -181,28 +173,6 @@ export default function Profile() {
     }
   };
 
-  const onSubmitPassword = async (data: ChangePassword) => {
-    setLoading(true);
-    try {
-      await changePassword(data.currentPassword, data.newPassword);
-      
-      toast({
-        title: "Senha alterada com sucesso!",
-        description: "Sua senha foi atualizada.",
-      });
-      
-      passwordForm.reset();
-      setShowPasswordForm(false);
-    } catch (error: any) {
-      toast({
-        title: "Erro ao alterar senha",
-        description: error.message || "Tente novamente",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleClearData = async () => {
     setClearingData(true);
@@ -257,9 +227,9 @@ export default function Profile() {
 
   const getUserInitials = () => {
     if (!user) return "U";
-    const firstName = user.user_metadata?.first_name || "";
-    const lastName = user.user_metadata?.last_name || "";
-    const username = user.user_metadata?.username || user.email || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    const username = user.username || user.email || "";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || username.charAt(0).toUpperCase() || "U";
   };
 
@@ -361,7 +331,7 @@ export default function Profile() {
           <div className="text-center space-y-4">
             <div className="relative inline-block">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.user_metadata?.username || user?.email || ""} />
+                <AvatarImage src={user?.profileImageUrl || ""} alt={user?.username || user?.email || ""} />
                 <AvatarFallback className="bg-blue-600 text-white text-2xl">
                   {getUserInitials()}
                 </AvatarFallback>
@@ -391,13 +361,13 @@ export default function Profile() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {user?.user_metadata?.first_name && user?.user_metadata?.last_name 
-                  ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}` 
-                  : user?.user_metadata?.username || user?.email}
+                {user?.firstName && user?.lastName 
+                  ? `${user.firstName} ${user.lastName}` 
+                  : user?.username || user?.email}
               </h1>
               <p className="text-muted-foreground">{user?.email}</p>
-              {user?.user_metadata?.username && (
-                <p className="text-sm text-muted-foreground/80">@{user.user_metadata.username}</p>
+              {user?.username && (
+                <p className="text-sm text-muted-foreground/80">@{user.username}</p>
               )}
             </div>
           </div>
@@ -830,119 +800,6 @@ export default function Profile() {
               </Card>
 
 
-              {/* Security */}
-              <Card className="glassmorphism">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center">
-                    <Shield className="mr-2 h-5 w-5" />
-                    Segurança
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-foreground font-medium">Alterar Senha</h3>
-                        <p className="text-muted-foreground text-sm">Mantenha sua conta segura</p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowPasswordForm(!showPasswordForm)}
-                        className="border-border text-foreground hover:bg-accent"
-                      >
-                        <Key className="mr-2 h-4 w-4" />
-                        {showPasswordForm ? 'Cancelar' : 'Alterar'}
-                      </Button>
-                    </div>
-
-                    {showPasswordForm && (
-                      <Separator className="bg-border" />
-                    )}
-
-                    {showPasswordForm && (
-                      <Form {...passwordForm}>
-                        <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className="space-y-4">
-                          <FormField
-                            control={passwordForm.control}
-                            name="currentPassword"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-foreground">Senha Atual</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    type="password"
-                                    className="bg-card border-border text-foreground"
-                                    disabled={loading}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={passwordForm.control}
-                            name="newPassword"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-foreground">Nova Senha</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    type="password"
-                                    className="bg-card border-border text-foreground"
-                                    disabled={loading}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={passwordForm.control}
-                            name="confirmPassword"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-foreground">Confirmar Nova Senha</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    type="password"
-                                    className="bg-card border-border text-foreground"
-                                    disabled={loading}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <Button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
-                            disabled={loading}
-                          >
-                            {loading ? (
-                              <div className="flex items-center space-x-2">
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                <span>Alterando...</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center space-x-2">
-                                <Key className="w-4 h-4" />
-                                <span>Alterar Senha</span>
-                              </div>
-                            )}
-                          </Button>
-                        </form>
-                      </Form>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </div>
