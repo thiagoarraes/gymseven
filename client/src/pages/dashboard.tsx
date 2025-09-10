@@ -1041,9 +1041,6 @@ export default function Dashboard() {
               <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="font-semibold text-white text-lg mb-1">
-                      {workoutDetails.name}
-                    </h3>
                     <div className="flex items-center gap-4 text-sm text-slate-400">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
