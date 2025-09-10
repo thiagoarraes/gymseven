@@ -1,15 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-// Debug logger function for API calls
-let debugLogger: ((call: any) => void) | null = null;
-
-export function setApiDebugLogger(logger: (call: any) => void) {
-  debugLogger = logger;
-}
-
-function generateId() {
-  return Math.random().toString(36).substr(2, 9);
-}
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -23,68 +13,24 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const startTime = Date.now();
-  const callId = generateId();
-  
   // Get token from localStorage
   const token = localStorage.getItem('auth-token');
   
-
   const headers: Record<string, string> = data ? { "Content-Type": "application/json" } : {};
   
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  let response: Response | undefined;
-  let responseData: any;
-  let error: string | undefined;
+  const response = await fetch(url, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: "include",
+  });
 
-  try {
-    response = await fetch(url, {
-      method,
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-      credentials: "include",
-    });
-
-    // Try to parse response for debugging
-    const responseText = await response.clone().text();
-    try {
-      responseData = JSON.parse(responseText);
-    } catch {
-      responseData = responseText;
-    }
-
-    await throwIfResNotOk(response);
-    
-  } catch (err: any) {
-    error = err.message;
-    // response might already be set from fetch, or create a dummy one
-    if (!response) {
-      response = { status: 0, statusText: 'Network Error' } as Response;
-    }
-    throw err;
-  } finally {
-    const endTime = Date.now();
-    const duration = endTime - startTime;
-
-    // Log to debug if enabled
-    if (debugLogger) {
-      debugLogger({
-        id: callId,
-        timestamp: new Date(startTime),
-        method,
-        url,
-        requestData: data,
-        responseData,
-        status: response?.status || 0,
-        error,
-        duration
-      });
-    }
-  }
-
+  await throwIfResNotOk(response);
+  
   return response;
 }
 

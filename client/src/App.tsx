@@ -8,9 +8,6 @@ import { BottomNavigation } from "@/components/layout/bottom-nav";
 import { AuthProvider, useAuth } from "@/contexts/auth-context-new";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { WorkoutProvider } from "@/contexts/workout-context";
-import { DebugProvider, useDebug } from "@/contexts/debug-context";
-import { DebugPanel } from "@/components/debug-panel";
-import { setApiDebugLogger } from "@/lib/queryClient";
 import Dashboard from "@/pages/dashboard";
 import Exercises from "@/pages/exercises";
 import Workouts from "@/pages/workouts";
@@ -83,15 +80,6 @@ function UnauthenticatedRouter() {
   );
 }
 
-function DebugSetup() {
-  const { addApiCall } = useDebug();
-
-  React.useEffect(() => {
-    setApiDebugLogger(addApiCall);
-  }, [addApiCall]);
-
-  return null;
-}
 
 function Router() {
   try {
@@ -125,16 +113,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <DebugProvider>
-          <AuthProvider>
-            <TooltipProvider>
-              <DebugSetup />
-              <Toaster />
-              <Router />
-              <DebugPanel />
-            </TooltipProvider>
-          </AuthProvider>
-        </DebugProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
