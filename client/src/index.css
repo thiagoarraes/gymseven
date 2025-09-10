@@ -919,3 +919,8 @@
     padding-bottom: max(100px, calc(100px + env(safe-area-inset-bottom)));
   }
 }
+
+/* Hide Radix UI Select item indicators (check marks) */
+[data-radix-select-item-indicator] {
+  display: none !important;
+}

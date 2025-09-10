@@ -944,12 +944,10 @@ export default function Dashboard() {
                   <SelectValue placeholder="Selecione um exercício" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  <SelectItem value="all" className="py-3 px-4 relative [&>*:first-child]:!hidden">
-                    <span className="absolute inset-0 flex items-center px-3">Todos os exercícios</span>
-                  </SelectItem>
+                  <SelectItem value="all" className="py-3 px-4" data-testid="select-all-exercises">Todos os exercícios</SelectItem>
                   {exercisesWithWeightHistory.map((exercise: any) => (
-                    <SelectItem key={exercise.id} value={exercise.id} className="py-3 px-4 relative [&>*:first-child]:!hidden">
-                      <div className="absolute inset-0 flex items-center justify-between px-3 w-full">
+                    <SelectItem key={exercise.id} value={exercise.id} className="py-3 px-4" data-testid={`select-exercise-${exercise.id}`}>
+                      <div className="flex items-center justify-between w-full">
                         <span>{exercise.name}</span>
                         <Badge variant="secondary" className="ml-2 px-2 py-0.5 text-xs bg-blue-500/20 text-blue-300 border-blue-500/30 rounded-full">
                           {exercise.muscleGroup}
