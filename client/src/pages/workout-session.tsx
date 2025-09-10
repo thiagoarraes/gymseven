@@ -232,7 +232,7 @@ export default function WorkoutSession() {
     }
   };
 
-  if (logLoading || exercisesLoading) {
+  if (logLoading || exercisesLoading || !templateExercises.length) {
     return (
       <div className="container mx-auto px-4">
         <div className="space-y-6">
@@ -270,6 +270,20 @@ export default function WorkoutSession() {
   }
 
   const currentExercise = templateExercises[currentExerciseIndex];
+  
+  // Add safety check for currentExercise
+  if (!currentExercise) {
+    return (
+      <div className="container mx-auto px-4">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-white mb-4">Nenhum exercício encontrado</h2>
+          <p className="text-slate-400 mb-4">Este template não possui exercícios cadastrados.</p>
+          <Button onClick={() => navigate("/treinos")}>Voltar aos treinos</Button>
+        </div>
+      </div>
+    );
+  }
+  
   const progress = templateExercises.length > 0 
     ? ((currentExerciseIndex + (currentSetIndex + 1) / (currentExercise?.sets || 1)) / templateExercises.length) * 100
     : 0;
@@ -287,7 +301,7 @@ export default function WorkoutSession() {
               </p>
               {currentExercise && (
                 <p className="text-sm text-blue-300 font-medium mt-1">
-                  {currentExercise?.exercise?.name || currentExercise?.name || 'Exercício'}
+                  {currentExercise?.exercise?.name || currentExercise?.exerciseName || 'Exercício'}
                 </p>
               )}
             </div>
@@ -333,9 +347,9 @@ export default function WorkoutSession() {
       <Card className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white">{currentExercise?.exercise?.name || currentExercise?.name || 'Exercício'}</h3>
+              <h3 className="text-lg font-semibold text-white">{currentExercise?.exercise?.name || currentExercise?.exerciseName || 'Exercício'}</h3>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || currentExercise?.muscleGroup || 'Grupo muscular'}</p>
+                <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || 'Grupo muscular'}</p>
                 <div className="flex items-center space-x-4 text-xs text-slate-500">
                   <span className="flex items-center space-x-1">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
