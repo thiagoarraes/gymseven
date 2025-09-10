@@ -22,15 +22,33 @@ const muscleGroupParamSchema = z.object({
   muscleGroup: z.string().min(1, 'Grupo muscular é obrigatório'),
 });
 
-// Routes
+// Routes - specific routes MUST come before parameterized routes
 router.get('/',
   validateQuery(exerciseFilterSchema),
   asyncHandler(exerciseController.getAll.bind(exerciseController))
 );
 
+// Progress and weight history routes (BEFORE /:id route)
+router.get('/with-progress',
+  asyncHandler(exerciseController.getWithProgress.bind(exerciseController))
+);
+
+router.get('/weight-summary',
+  asyncHandler(exerciseController.getWeightSummary.bind(exerciseController))
+);
+
+router.get('/with-weight-history',
+  asyncHandler(exerciseController.getWithWeightHistory.bind(exerciseController))
+);
+
 router.get('/muscle-group/:muscleGroup',
   validateParams(muscleGroupParamSchema),
   asyncHandler(exerciseController.getByMuscleGroup.bind(exerciseController))
+);
+
+router.get('/:id/weight-history',
+  validateParams(idParamSchema),
+  asyncHandler(exerciseController.getWeightHistory.bind(exerciseController))
 );
 
 router.get('/:id',
@@ -52,24 +70,6 @@ router.put('/:id',
 router.delete('/:id',
   validateParams(idParamSchema),
   asyncHandler(exerciseController.delete.bind(exerciseController))
-);
-
-// Progress and weight history routes
-router.get('/with-progress',
-  asyncHandler(exerciseController.getWithProgress.bind(exerciseController))
-);
-
-router.get('/weight-summary',
-  asyncHandler(exerciseController.getWeightSummary.bind(exerciseController))
-);
-
-router.get('/with-weight-history',
-  asyncHandler(exerciseController.getWithWeightHistory.bind(exerciseController))
-);
-
-router.get('/:id/weight-history',
-  validateParams(idParamSchema),
-  asyncHandler(exerciseController.getWeightHistory.bind(exerciseController))
 );
 
 export { router as exerciseRoutes };
