@@ -8,6 +8,9 @@ import { BottomNavigation } from "@/components/layout/bottom-nav";
 import { AuthProvider, useAuth } from "@/contexts/auth-context-new";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { WorkoutProvider } from "@/contexts/workout-context";
+import { DebugProvider, useDebug } from "@/contexts/debug-context";
+import { DebugPanel } from "@/components/debug-panel";
+import { setApiDebugLogger } from "@/lib/queryClient";
 import Dashboard from "@/pages/dashboard";
 import Exercises from "@/pages/exercises";
 import Workouts from "@/pages/workouts";
@@ -23,6 +26,7 @@ import Register from "@/pages/register";
 import VerifyOTP from "@/pages/verify-otp";
 import ForgotPassword from "@/pages/forgot-password";
 import NotFound from "@/pages/not-found";
+import React from "react";
 
 // Route wrapper components to handle params
 function ExercisesRoute() {
@@ -82,6 +86,12 @@ function UnauthenticatedRouter() {
 function Router() {
   try {
     const { isAuthenticated, loading } = useAuth();
+    const { addApiCall } = useDebug();
+
+    // Set up API debug logger
+    React.useEffect(() => {
+      setApiDebugLogger(addApiCall);
+    }, [addApiCall]);
 
     if (loading) {
       return (
@@ -111,12 +121,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </AuthProvider>
+        <DebugProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+              <DebugPanel />
+            </TooltipProvider>
+          </AuthProvider>
+        </DebugProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
