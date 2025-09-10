@@ -64,32 +64,36 @@ export default function WorkoutSession() {
     enabled: !!templateExercises[currentExerciseIndex]?.exerciseId,
   });
 
-  // Create workout log exercises when template exercises are loaded (disabled temporarily)
-  // useEffect(() => {
-  //   if (!templateExercises.length || !workoutId || Object.keys(logExerciseIds).length > 0) return;
+  // Create workout log exercises when template exercises are loaded
+  useEffect(() => {
+    if (!templateExercises.length || !workoutId || Object.keys(logExerciseIds).length > 0) return;
 
-  //   const createLogExercises = async () => {
-  //     const newLogExerciseIds: {[key: string]: string} = {};
+    const createLogExercises = async () => {
+      const newLogExerciseIds: {[key: string]: string} = {};
       
-  //     for (const templateExercise of templateExercises) {
-  //       try {
-  //         const logExercise = await workoutLogApi.createExercise({
-  //           logId: workoutId,
-  //           exerciseId: templateExercise.exerciseId,
-  //           order: templateExercise.order
-  //         });
-  //         newLogExerciseIds[templateExercise.exerciseId] = logExercise.id;
-  //       } catch (error) {
-  //         console.error('Error creating log exercise:', error);
-  //         // Continue with other exercises even if one fails
-  //       }
-  //     }
+      for (const templateExercise of templateExercises) {
+        try {
+          console.log(`🔧 Creating log exercise for: ${templateExercise.exerciseName} (${templateExercise.exerciseId})`);
+          const logExercise = await workoutLogApi.createExercise({
+            registroId: workoutId,
+            exercicioId: templateExercise.exerciseId,
+            nomeExercicio: templateExercise.exerciseName,
+            order: templateExercise.order
+          });
+          newLogExerciseIds[templateExercise.exerciseId] = logExercise.id;
+          console.log(`✅ Log exercise created with ID: ${logExercise.id}`);
+        } catch (error) {
+          console.error('Error creating log exercise:', error);
+          // Continue with other exercises even if one fails
+        }
+      }
       
-  //     setLogExerciseIds(newLogExerciseIds);
-  //   };
+      console.log('🗂️ All log exercise IDs:', newLogExerciseIds);
+      setLogExerciseIds(newLogExerciseIds);
+    };
 
-  //   createLogExercises();
-  // }, [templateExercises, workoutId, logExerciseIds]);
+    createLogExercises();
+  }, [templateExercises, workoutId, logExerciseIds]);
 
   // Initialize weight and reps when exercise changes
   useEffect(() => {
