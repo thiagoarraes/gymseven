@@ -83,15 +83,19 @@ function UnauthenticatedRouter() {
   );
 }
 
+function DebugSetup() {
+  const { addApiCall } = useDebug();
+
+  React.useEffect(() => {
+    setApiDebugLogger(addApiCall);
+  }, [addApiCall]);
+
+  return null;
+}
+
 function Router() {
   try {
     const { isAuthenticated, loading } = useAuth();
-    const { addApiCall } = useDebug();
-
-    // Set up API debug logger
-    React.useEffect(() => {
-      setApiDebugLogger(addApiCall);
-    }, [addApiCall]);
 
     if (loading) {
       return (
@@ -124,6 +128,7 @@ function App() {
         <DebugProvider>
           <AuthProvider>
             <TooltipProvider>
+              <DebugSetup />
               <Toaster />
               <Router />
               <DebugPanel />
