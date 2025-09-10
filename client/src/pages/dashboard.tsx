@@ -48,11 +48,12 @@ export default function Dashboard() {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
+
   // Get template exercises for the first workout to show muscle groups
   const { data: templateExercises = [] } = useQuery({
-    queryKey: ["/api/v2/workouts/templates", recentWorkouts[0]?.modeloId, "exercises"],
-    queryFn: () => workoutTemplateApi.getExercises(recentWorkouts[0]!.modeloId!),
-    enabled: !!recentWorkouts[0]?.modeloId,
+    queryKey: ["/api/v2/workouts/templates", recentWorkouts[0]?.modeloId || (recentWorkouts[0] as any)?.templateId, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(recentWorkouts[0]!.modeloId! || (recentWorkouts[0] as any)!.templateId!),
+    enabled: !!(recentWorkouts[0]?.modeloId || (recentWorkouts[0] as any)?.templateId),
   });
 
   // Get detailed workout data for modal
@@ -502,7 +503,7 @@ export default function Dashboard() {
                 {/* Workout Name and Date */}
                 <div>
                   <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                    {(recentWorkouts[0] as any)?.templateName || recentWorkouts[0]?.nome || "Treino personalizado"}
+                    {(recentWorkouts[0] as any)?.templateName || recentWorkouts[0]?.nome || (recentWorkouts[0] as any)?.name || "Treino personalizado"}
                   </h4>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Calendar className="w-4 h-4" />
