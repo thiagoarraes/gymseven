@@ -155,7 +155,7 @@ export default function WorkoutTemplateEditor() {
 
   const { data: allExercises = [] } = useQuery({
     queryKey: ["/api/v2/exercises"],
-  }) as { data: any[] };
+  });
 
   // Mutations
   const updateTemplateNameMutation = useMutation({
@@ -300,7 +300,7 @@ export default function WorkoutTemplateEditor() {
 
   const removeExerciseMutation = useMutation({
     mutationFn: async (exerciseId: string) => {
-      return await workoutTemplateApi.removeExercise(exerciseId);
+      return await workoutTemplateApi.removeExercise(id!, exerciseId);
     },
     onSuccess: (_, exerciseId) => {
       // Clear local changes for the removed exercise
@@ -1170,7 +1170,7 @@ export default function WorkoutTemplateEditor() {
                 className="flex-1 bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:bg-slate-600/70 active:bg-slate-600/80 hover:bg-slate-700/70 transition-all duration-200"
               >
                 <option value="all">Todos os grupos musculares</option>
-                {Array.from(new Set((allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup))).sort().map((group: any) => (
+                {Array.from(new Set(Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup) : [])).sort().map((group: any) => (
                   <option key={group} value={group}>{group}</option>
                 ))}
               </select>
@@ -1200,7 +1200,7 @@ export default function WorkoutTemplateEditor() {
           </DialogHeader>
           <div className="flex-1 overflow-y-auto py-4">
             <div className="grid grid-cols-2 gap-3">
-              {(allExercises as any[])
+              {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
                 .sort((a: any, b: any) => (a.nome || a.name || '').localeCompare(b.nome || b.name || '', 'pt-BR'))
@@ -1260,11 +1260,11 @@ export default function WorkoutTemplateEditor() {
                       </CardContent>
                     </Card>
                   );
-                })}
-              {(allExercises as any[])
+                }) : []}
+              {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
-                .length === 0 && (
+                .length === 0 : false && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-slate-800/50 flex items-center justify-center">
                     <Dumbbell className="w-8 h-8 text-slate-400" />
@@ -1302,7 +1302,7 @@ export default function WorkoutTemplateEditor() {
                     
                     for (const [index, exerciseId] of Array.from(selectedExercises).entries()) {
                       try {
-                        const exercise = (allExercises as any[]).find((ex: any) => ex.id === exerciseId);
+                        const exercise = Array.isArray(allExercises) ? (allExercises as any[]).find((ex: any) => ex.id === exerciseId) : null;
                         if (exercise) {
                           const exerciseData = {
                             exerciseId: exercise.id,
