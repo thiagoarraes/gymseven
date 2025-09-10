@@ -943,10 +943,10 @@ export default function Dashboard() {
                 <SelectTrigger className="w-full h-10 [&>svg]:hidden">
                   <SelectValue placeholder="Selecione um exercício" />
                 </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  <SelectItem value="all" className="py-3 px-4" data-testid="select-all-exercises">Todos os exercícios</SelectItem>
+                <SelectContent className="max-h-60 [&_*[data-radix-select-item-indicator]]:!hidden [&_[data-state='checked']>span:first-child]:!hidden">
+                  <SelectItem value="all" className="py-3 px-4 [&>span:first-child]:!hidden" data-testid="select-all-exercises">Todos os exercícios</SelectItem>
                   {exercisesWithWeightHistory.map((exercise: any) => (
-                    <SelectItem key={exercise.id} value={exercise.id} className="py-3 px-4" data-testid={`select-exercise-${exercise.id}`}>
+                    <SelectItem key={exercise.id} value={exercise.id} className="py-3 px-4 [&>span:first-child]:!hidden" data-testid={`select-exercise-${exercise.id}`}>
                       <div className="flex items-center justify-between w-full">
                         <span>{exercise.name}</span>
                         <Badge variant="secondary" className="ml-2 px-2 py-0.5 text-xs bg-blue-500/20 text-blue-300 border-blue-500/30 rounded-full">
