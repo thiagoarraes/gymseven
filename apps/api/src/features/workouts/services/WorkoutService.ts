@@ -309,4 +309,115 @@ export class WorkoutService {
   private mapLogsToResponse(logs: any[]): WorkoutLogResponseDto[] {
     return logs.map(log => this.mapLogToResponse(log));
   }
+
+  async getWorkoutLogSummary(logId: string, userId: string): Promise<any> {
+    const storage = await this.storage;
+    
+    // Get the workout log
+    const log = await storage.getWorkoutLog(logId);
+    if (!log) {
+      return null;
+    }
+
+    if (log.usuarioId !== userId) {
+      throw new Error('Acesso negado ao treino');
+    }
+
+    // Calculate duration
+    const duration = log.endTime 
+      ? Math.round((new Date(log.endTime).getTime() - new Date(log.startTime).getTime()) / 1000 / 60)
+      : null;
+
+    // Try to get actual workout log exercises and sets
+    const logExercises = await storage.getWorkoutLogExercises(logId);
+    
+    let exercises: any[] = [];
+    let totalSets = 0;
+    let totalReps = 0;
+    let totalVolume = 0;
+
+    if (logExercises && logExercises.length > 0) {
+      // Use actual logged data
+      const exerciseMap = new Map<string, any>();
+
+      for (const logExercise of logExercises) {
+        const exercise = await storage.getExercise(logExercise.exercicioId);
+        const sets = await storage.getWorkoutLogSets(logExercise.id);
+        
+        const exerciseId = logExercise.exercicioId;
+        const exerciseName = logExercise.nomeExercicio || exercise?.nome || 'Exercício desconhecido';
+        const muscleGroup = exercise?.grupoMuscular || 'N/A';
+
+        if (exerciseMap.has(exerciseId)) {
+          const existingExercise = exerciseMap.get(exerciseId);
+          const newSets = sets?.map(set => ({
+            setNumber: set.setNumber,
+            reps: set.reps,
+            weight: set.weight,
+            completed: set.completed
+          })) || [];
+          existingExercise.sets = [...existingExercise.sets, ...newSets];
+        } else {
+          const exerciseData = {
+            id: exerciseId,
+            name: exerciseName,
+            muscleGroup: muscleGroup,
+            sets: sets?.map(set => ({
+              setNumber: set.setNumber,
+              reps: set.reps,
+              weight: set.weight,
+              completed: set.completed
+            })) || []
+          };
+          exerciseMap.set(exerciseId, exerciseData);
+        }
+      }
+
+      exercises = Array.from(exerciseMap.values());
+    } else if (log.modeloId) {
+      // If no logged exercises, get from template to show structure
+      const templateExercises = await storage.getWorkoutTemplateExercises(log.modeloId);
+      
+      exercises = await Promise.all(templateExercises.map(async (templateEx) => {
+        const exercise = await storage.getExercise(templateEx.exercicioId);
+        return {
+          id: templateEx.exercicioId,
+          name: exercise?.nome || 'Exercício desconhecido',
+          muscleGroup: exercise?.grupoMuscular || 'N/A',
+          sets: Array.from({ length: templateEx.series }, (_, i) => ({
+            setNumber: i + 1,
+            reps: null,
+            weight: null,
+            completed: false
+          }))
+        };
+      }));
+    }
+
+    // Calculate totals
+    for (const exercise of exercises) {
+      if (exercise.sets && exercise.sets.length > 0) {
+        totalSets += exercise.sets.length;
+        for (const set of exercise.sets) {
+          if (set.reps) totalReps += set.reps;
+          if (set.weight && set.reps) totalVolume += (set.weight * set.reps);
+        }
+      }
+    }
+
+    return {
+      id: log.id,
+      name: log.nome,
+      startTime: log.startTime,
+      endTime: log.endTime,
+      duration,
+      exercises,
+      stats: {
+        totalExercises: exercises.length,
+        totalSets,
+        totalReps,
+        totalVolume: Math.round(totalVolume)
+      }
+    };
+  }
 }

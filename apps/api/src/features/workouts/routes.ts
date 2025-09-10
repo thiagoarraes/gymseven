@@ -136,5 +136,10 @@ router.put('/logs/sets/:setId',
   asyncHandler(workoutController.updateLogSet.bind(workoutController))
 );
 
+router.get('/logs/:id/summary',
+  validateParams(idParamSchema),
+  asyncHandler(workoutController.getLogSummary.bind(workoutController))
+);
+
 export { router as workoutRoutes };
 export default router;

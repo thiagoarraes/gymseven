@@ -293,4 +293,22 @@ export class WorkoutController {
       return ApiResponseHelper.error(res, error.message);
     }
   }
+
+  async getLogSummary(req: AuthenticatedRequest, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const summary = await this.workoutService.getWorkoutLogSummary(id, req.user.id);
+      
+      if (!summary) {
+        return ApiResponseHelper.notFound(res, 'Treino não encontrado');
+      }
+      
+      return ApiResponseHelper.success(res, summary, 'Resumo do treino recuperado com sucesso');
+    } catch (error: any) {
+      if (error.message.includes('Acesso negado')) {
+        return ApiResponseHelper.forbidden(res, error.message);
+      }
+      return ApiResponseHelper.error(res, error.message);
+    }
+  }
 }
