@@ -64,6 +64,14 @@ export default function WorkoutSession() {
     enabled: !!templateExercises[currentExerciseIndex]?.exerciseId,
   });
 
+  // Clear logExerciseIds when workoutId changes (new workout session)
+  useEffect(() => {
+    if (workoutId) {
+      console.log('🔄 New workout session detected, clearing exercise IDs cache');
+      setLogExerciseIds({});
+    }
+  }, [workoutId]);
+
   // Create workout log exercises when template exercises are loaded
   useEffect(() => {
     if (!templateExercises.length || !workoutId || Object.keys(logExerciseIds).length > 0) return;
