@@ -292,7 +292,7 @@ export default function WorkoutSession() {
               </p>
               {currentExercise && (
                 <p className="text-sm text-blue-300 font-medium mt-1">
-                  {currentExercise.exercise?.name || currentExercise.name || 'Exercício'}
+                  {currentExercise?.exercise?.name || currentExercise?.name || 'Exercício'}
                 </p>
               )}
             </div>
@@ -338,14 +338,14 @@ export default function WorkoutSession() {
       <Card className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white">{currentExercise.exercise?.name || currentExercise.name || 'Exercício'}</h3>
-              <p className="text-sm text-slate-400">{currentExercise.exercise?.muscleGroup || currentExercise.muscleGroup || 'Grupo muscular'}</p>
+              <h3 className="text-lg font-semibold text-white">{currentExercise?.exercise?.name || currentExercise?.name || 'Exercício'}</h3>
+              <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || currentExercise?.muscleGroup || 'Grupo muscular'}</p>
             </div>
             
             {/* Sets Tracking */}
             <div className="space-y-3">
               <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">
-                Séries - {currentSetIndex + 1} de {currentExercise.sets}
+                Séries - {currentSetIndex + 1} de {currentExercise?.sets || 0}
               </div>
               
               {/* Current Set */}
@@ -360,7 +360,7 @@ export default function WorkoutSession() {
                       type="number" 
                       value={currentWeight}
                       onChange={(e) => setCurrentWeight(e.target.value)}
-                      placeholder={currentExercise.weight?.toString() || "0"}
+                      placeholder={currentExercise?.weight?.toString() || "0"}
                       className="w-full bg-slate-800 border-slate-700 text-white text-center"
                     />
                   </div>
@@ -370,7 +370,7 @@ export default function WorkoutSession() {
                       type="number" 
                       value={currentReps}
                       onChange={(e) => setCurrentReps(e.target.value)}
-                      placeholder={currentExercise.reps?.toString() || "12"}
+                      placeholder={currentExercise?.reps?.toString() || "12"}
                       className="w-full bg-slate-800 border-slate-700 text-white text-center"
                     />
                   </div>
@@ -386,7 +386,7 @@ export default function WorkoutSession() {
               </div>
 
               {/* Upcoming Sets Preview */}
-              {Array.from({ length: Math.min(2, currentExercise.sets - currentSetIndex - 1) }).map((_, index) => (
+              {Array.from({ length: Math.min(2, (currentExercise?.sets || 0) - currentSetIndex - 1) }).map((_, index) => (
                 <div key={index} className="flex items-center space-x-3 p-3 bg-slate-800/20 rounded-xl border border-slate-700/30">
                   <div className="w-8 h-8 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center font-semibold text-slate-500 text-sm">
                     {currentSetIndex + index + 2}
