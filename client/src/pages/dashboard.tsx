@@ -222,17 +222,22 @@ export default function Dashboard() {
         
         // Handle different data formats and create valid dates
         if (selectedExerciseId && selectedExerciseId !== "all") {
-          // Exercise-specific data format
-          if (entry.loggedDate) {
-            const logDate = new Date(entry.loggedDate);
+          // Exercise-specific data format - check both loggedDate and date fields
+          const dateToProcess = entry.loggedDate || entry.date;
+          if (dateToProcess) {
+            const logDate = new Date(dateToProcess);
             if (!isNaN(logDate.getTime())) {
               fullDate = logDate;
               formattedDate = logDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
             } else {
-              // Fallback to current date if invalid
+              // If single data point, use a default label
               fullDate = new Date();
-              formattedDate = fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+              formattedDate = 'Hoje';
             }
+          } else {
+            // If no date, use session-based label for single data points
+            fullDate = new Date();
+            formattedDate = weightHistory.length === 1 ? 'Treino 1' : `Sessão ${index + 1}`;
           }
           weightValue = entry.weight || 0;
         } else {
@@ -935,7 +940,7 @@ export default function Dashboard() {
             </div>
             <div className="w-full">
               <Select value={selectedExerciseId || "all"} onValueChange={setSelectedExerciseId}>
-                <SelectTrigger className="w-full h-10">
+                <SelectTrigger className="w-full h-10 [&>svg]:hidden">
                   <SelectValue placeholder="Selecione um exercício" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
@@ -1001,6 +1006,10 @@ export default function Dashboard() {
                       tickLine={false}
                       tick={{ fontSize: 12 }}
                       tickFormatter={(value) => {
+                        // For single data point, return the pre-formatted date from chartData
+                        if (chartData.length === 1) {
+                          return chartData[0]?.date || value;
+                        }
                         try {
                           const date = new Date(value);
                           return date.toLocaleDateString('pt-BR', { 
@@ -1053,10 +1062,10 @@ export default function Dashboard() {
                         fill: '#3b82f6', 
                         strokeWidth: 2, 
                         stroke: 'white',
-                        r: 4
+                        r: chartData.length === 1 ? 8 : 4 // Larger dot for single data point
                       }}
                       activeDot={{ 
-                        r: 6, 
+                        r: chartData.length === 1 ? 10 : 6, 
                         stroke: '#3b82f6', 
                         strokeWidth: 2,
                         fill: 'white'
