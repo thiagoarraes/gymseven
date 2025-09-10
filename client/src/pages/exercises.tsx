@@ -412,6 +412,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       {/* Exercise List */}
       <div style={{padding: '10px', background: 'yellow', color: 'black'}}>
         DEBUG: isLoading={isLoading.toString()}, exercises.length={exercises.length}, enhancedExercises.length={enhancedExercises.length}, filteredExercises.length={filteredExercises.length}
+        <br/>searchTerm="{searchTerm}", selectedMuscleGroup="{selectedMuscleGroup}"
+        <br/>First exercise: {exercises[0] ? `${exercises[0].nome} (${exercises[0].grupoMuscular})` : 'None'}
       </div>
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
