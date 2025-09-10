@@ -206,32 +206,66 @@ export default function Dashboard() {
     
     // Data format differs based on whether it's exercise-specific or overall
     return weightHistory.map((entry: any, index: number) => {
-        let formattedDate = entry.date;
+        let formattedDate = '';
+        let fullDate = new Date();
         let weightValue = entry.maxWeight || entry.weight || 0;
         
-        // Handle different data formats
+        // Handle different data formats and create valid dates
         if (selectedExerciseId && selectedExerciseId !== "all") {
           // Exercise-specific data format
           if (entry.loggedDate) {
             const logDate = new Date(entry.loggedDate);
-            formattedDate = logDate.toLocaleDateString('pt-BR');
+            if (!isNaN(logDate.getTime())) {
+              fullDate = logDate;
+              formattedDate = logDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            } else {
+              // Fallback to current date if invalid
+              fullDate = new Date();
+              formattedDate = fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            }
           }
           weightValue = entry.weight || 0;
         } else {
           // Overall data format - parse date correctly
-          if (entry.date && entry.date.includes('/')) {
-            const dateParts = entry.date.split('/');
-            if (dateParts.length === 3) {
-              const day = dateParts[0];
-              const month = dateParts[1];
-              const year = dateParts[2];
-              
-              // Create date object and format it
-              const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-              if (!isNaN(dateObj.getTime())) {
-                formattedDate = `${day}/${month}`;
+          if (entry.date && typeof entry.date === 'string') {
+            if (entry.date.includes('/')) {
+              const dateParts = entry.date.split('/');
+              if (dateParts.length === 3) {
+                const day = parseInt(dateParts[0]);
+                const month = parseInt(dateParts[1]);
+                const year = parseInt(dateParts[2]);
+                
+                // Create date object and validate
+                const dateObj = new Date(year, month - 1, day);
+                if (!isNaN(dateObj.getTime())) {
+                  fullDate = dateObj;
+                  formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`;
+                } else {
+                  // Fallback to current date if invalid
+                  fullDate = new Date();
+                  formattedDate = fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                }
+              } else {
+                // Invalid date format - use current date as fallback
+                fullDate = new Date();
+                formattedDate = fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+              }
+            } else {
+              // Try to parse as ISO string or other format
+              const parsedDate = new Date(entry.date);
+              if (!isNaN(parsedDate.getTime())) {
+                fullDate = parsedDate;
+                formattedDate = parsedDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+              } else {
+                // Fallback to current date
+                fullDate = new Date();
+                formattedDate = fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
               }
             }
+          } else {
+            // No date provided - use current date as fallback
+            fullDate = new Date();
+            formattedDate = fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
           }
         }
         
@@ -239,7 +273,7 @@ export default function Dashboard() {
           session: index + 1,
           weight: weightValue,
           date: formattedDate,
-          fullDate: entry.date || entry.loggedDate,
+          fullDate: fullDate.toISOString(), // Always provide a valid ISO string
           workoutName: entry.workoutName || 'Treino'
         };
       });
