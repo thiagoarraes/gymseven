@@ -101,7 +101,7 @@ export default function WorkoutSession() {
   const finishWorkoutMutation = useMutation({
     mutationFn: () => {
       console.log("🏁 Finishing workout with ID:", workoutId);
-      const endTimeValue = new Date().toISOString();
+      const endTimeValue = new Date();
       console.log("🏁 Setting endTime to:", endTimeValue);
       return workoutLogApi.update(workoutId!, {
         endTime: endTimeValue,
