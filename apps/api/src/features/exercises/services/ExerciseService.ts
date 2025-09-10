@@ -73,61 +73,108 @@ export class ExerciseService {
 
   // Progress and weight history methods
   async getExercisesWithProgress(userId: string): Promise<any[]> {
-    const storage = await this.storage;
-    const exercises = await storage.getExercises(userId);
-    
-    const exercisesWithProgress = await Promise.all(
-      exercises.map(async (exercise) => {
-        const stats = await storage.getExerciseStats(exercise.id, userId);
-        return {
-          ...this.mapExerciseToResponse(exercise),
-          lastWeight: stats.lastWeight,
-          maxWeight: stats.maxWeight,
-          lastUsed: stats.lastUsed,
-          totalSessions: stats.totalSessions
-        };
-      })
-    );
-    
-    return exercisesWithProgress;
+    try {
+      const storage = await this.storage;
+      const exercises = await storage.getExercises(userId);
+      
+      const exercisesWithProgress = await Promise.all(
+        exercises.map(async (exercise) => {
+          try {
+            const stats = await storage.getExerciseStats(exercise.id, userId);
+            return {
+              ...this.mapExerciseToResponse(exercise),
+              lastWeight: stats.lastWeight,
+              maxWeight: stats.maxWeight,
+              lastUsed: stats.lastUsed,
+              totalSessions: stats.totalSessions
+            };
+          } catch (error) {
+            // If stats fail, return exercise with default values
+            return {
+              ...this.mapExerciseToResponse(exercise),
+              lastWeight: null,
+              maxWeight: null,
+              lastUsed: null,
+              totalSessions: 0
+            };
+          }
+        })
+      );
+      
+      return exercisesWithProgress;
+    } catch (error) {
+      console.error('Error in getExercisesWithProgress:', error);
+      throw new Error('Erro ao buscar exercícios com progresso');
+    }
   }
 
   async getExercisesWeightSummary(userId: string): Promise<any[]> {
-    const storage = await this.storage;
-    const exercises = await storage.getExercises(userId);
-    
-    const weightSummary = await Promise.all(
-      exercises.map(async (exercise) => {
-        const stats = await storage.getExerciseStats(exercise.id, userId);
-        return {
-          exerciseId: exercise.id,
-          exerciseName: exercise.nome,
-          muscleGroup: exercise.grupoMuscular,
-          maxWeight: stats.maxWeight,
-          lastWeight: stats.lastWeight,
-          totalSessions: stats.totalSessions
-        };
-      })
-    );
-    
-    return weightSummary.filter(item => item.maxWeight !== null);
+    try {
+      const storage = await this.storage;
+      const exercises = await storage.getExercises(userId);
+      
+      const weightSummary = await Promise.all(
+        exercises.map(async (exercise) => {
+          try {
+            const stats = await storage.getExerciseStats(exercise.id, userId);
+            return {
+              exerciseId: exercise.id,
+              exerciseName: exercise.nome,
+              muscleGroup: exercise.grupoMuscular,
+              maxWeight: stats.maxWeight,
+              lastWeight: stats.lastWeight,
+              totalSessions: stats.totalSessions
+            };
+          } catch (error) {
+            // If stats fail, return exercise with default values
+            return {
+              exerciseId: exercise.id,
+              exerciseName: exercise.nome,
+              muscleGroup: exercise.grupoMuscular,
+              maxWeight: null,
+              lastWeight: null,
+              totalSessions: 0
+            };
+          }
+        })
+      );
+      
+      // Return all exercises, not just those with weight data
+      return weightSummary;
+    } catch (error) {
+      console.error('Error in getExercisesWeightSummary:', error);
+      throw new Error('Erro ao buscar resumo de peso dos exercícios');
+    }
   }
 
   async getExercisesWithWeightHistory(userId: string): Promise<any[]> {
-    const storage = await this.storage;
-    const exercises = await storage.getExercises(userId);
-    
-    const exercisesWithHistory = await Promise.all(
-      exercises.map(async (exercise) => {
-        const history = await storage.getExerciseWeightHistory(exercise.id, userId, 10);
-        return {
-          ...this.mapExerciseToResponse(exercise),
-          weightHistory: history
-        };
-      })
-    );
-    
-    return exercisesWithHistory;
+    try {
+      const storage = await this.storage;
+      const exercises = await storage.getExercises(userId);
+      
+      const exercisesWithHistory = await Promise.all(
+        exercises.map(async (exercise) => {
+          try {
+            const history = await storage.getExerciseWeightHistory(exercise.id, userId, 10);
+            return {
+              ...this.mapExerciseToResponse(exercise),
+              weightHistory: history || []
+            };
+          } catch (error) {
+            // If history fails, return exercise with empty history
+            return {
+              ...this.mapExerciseToResponse(exercise),
+              weightHistory: []
+            };
+          }
+        })
+      );
+      
+      return exercisesWithHistory;
+    } catch (error) {
+      console.error('Error in getExercisesWithWeightHistory:', error);
+      throw new Error('Erro ao buscar exercícios com histórico de peso');
+    }
   }
 
   async getExerciseWeightHistory(exerciseId: string, userId: string, limit?: number): Promise<any[]> {
