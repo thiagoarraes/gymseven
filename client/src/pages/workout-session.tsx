@@ -50,33 +50,11 @@ export default function WorkoutSession() {
     enabled: !!workoutId,
   });
 
-  // Debug workoutLog
-  useEffect(() => {
-    if (workoutLog) {
-      console.log("📋 WorkoutLog loaded:", workoutLog);
-      console.log("📋 WorkoutLog templateId:", workoutLog.templateId);
-    }
-    if (logError) {
-      console.error("❌ Error loading workoutLog:", logError);
-    }
-  }, [workoutLog, logError]);
-
   const { data: templateExercises = [], isLoading: exercisesLoading, error: exercisesError } = useQuery({
-    queryKey: ["/api/v2/workouts/templates", workoutLog?.templateId, "exercises"],
-    queryFn: () => workoutTemplateApi.getExercises(workoutLog!.templateId!),
-    enabled: !!workoutLog?.templateId,
+    queryKey: ["/api/v2/workouts/templates", workoutLog?.modeloId || (workoutLog as any)?.templateId, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(workoutLog!.modeloId! || (workoutLog as any)!.templateId!),
+    enabled: !!(workoutLog?.modeloId || (workoutLog as any)?.templateId),
   });
-
-  // Debug templateExercises
-  useEffect(() => {
-    if (templateExercises.length > 0) {
-      console.log("🏋️ TemplateExercises loaded:", templateExercises);
-      console.log("🏋️ Total exercises:", templateExercises.length);
-    }
-    if (exercisesError) {
-      console.error("❌ Error loading templateExercises:", exercisesError);
-    }
-  }, [templateExercises, exercisesError]);
 
   // Query for exercise weight history  
   const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
@@ -85,31 +63,32 @@ export default function WorkoutSession() {
     enabled: !!templateExercises[currentExerciseIndex]?.exerciseId,
   });
 
-  // Create workout log exercises when template exercises are loaded
-  useEffect(() => {
-    if (!templateExercises.length || !workoutId || Object.keys(logExerciseIds).length > 0) return;
+  // Create workout log exercises when template exercises are loaded (disabled temporarily)
+  // useEffect(() => {
+  //   if (!templateExercises.length || !workoutId || Object.keys(logExerciseIds).length > 0) return;
 
-    const createLogExercises = async () => {
-      const newLogExerciseIds: {[key: string]: string} = {};
+  //   const createLogExercises = async () => {
+  //     const newLogExerciseIds: {[key: string]: string} = {};
       
-      for (const templateExercise of templateExercises) {
-        try {
-          const logExercise = await workoutLogApi.createExercise({
-            logId: workoutId,
-            exerciseId: templateExercise.exerciseId,
-            order: templateExercise.order
-          });
-          newLogExerciseIds[templateExercise.exerciseId] = logExercise.id;
-        } catch (error) {
-          console.error('Error creating log exercise:', error);
-        }
-      }
+  //     for (const templateExercise of templateExercises) {
+  //       try {
+  //         const logExercise = await workoutLogApi.createExercise({
+  //           logId: workoutId,
+  //           exerciseId: templateExercise.exerciseId,
+  //           order: templateExercise.order
+  //         });
+  //         newLogExerciseIds[templateExercise.exerciseId] = logExercise.id;
+  //       } catch (error) {
+  //         console.error('Error creating log exercise:', error);
+  //         // Continue with other exercises even if one fails
+  //       }
+  //     }
       
-      setLogExerciseIds(newLogExerciseIds);
-    };
+  //     setLogExerciseIds(newLogExerciseIds);
+  //   };
 
-    createLogExercises();
-  }, [templateExercises, workoutId, logExerciseIds]);
+  //   createLogExercises();
+  // }, [templateExercises, workoutId, logExerciseIds]);
 
   // Initialize weight and reps when exercise changes
   useEffect(() => {
