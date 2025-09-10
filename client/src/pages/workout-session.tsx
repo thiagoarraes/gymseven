@@ -89,14 +89,18 @@ export default function WorkoutSession() {
     createLogExercises();
   }, [templateExercises, workoutId, logExerciseIds]);
 
-  // Initialize weight and reps when first exercise loads
+  // Initialize weight and reps when exercise changes
   useEffect(() => {
-    if (templateExercises.length > 0 && currentExerciseIndex === 0 && !currentWeight && !currentReps) {
-      const firstExercise = templateExercises[0];
-      setCurrentWeight(firstExercise?.weight?.toString() || "");
-      setCurrentReps(firstExercise?.reps?.toString() || "");
+    if (templateExercises.length > 0) {
+      const currentExercise = templateExercises[currentExerciseIndex];
+      if (currentExercise) {
+        // Load exercise data: weight, reps, and rest time
+        setCurrentWeight(currentExercise.weight?.toString() || "");
+        setCurrentReps(currentExercise.reps?.toString() || "");
+        setRestTimer(currentExercise.restDurationSeconds || 90);
+      }
     }
-  }, [templateExercises, currentExerciseIndex, currentWeight, currentReps]);
+  }, [templateExercises, currentExerciseIndex]);
 
   const finishWorkoutMutation = useMutation({
     mutationFn: () => {
@@ -171,12 +175,7 @@ export default function WorkoutSession() {
     if (currentExerciseIndex < templateExercises.length - 1) {
       setCurrentExerciseIndex(prev => prev + 1);
       setCurrentSetIndex(0);
-      const nextExercise = templateExercises[currentExerciseIndex + 1];
-      setRestTimer(nextExercise?.restDurationSeconds || 90);
-      
-      // Initialize weight and reps with template defaults for the new exercise
-      setCurrentWeight(nextExercise?.weight?.toString() || "");
-      setCurrentReps(nextExercise?.reps?.toString() || "");
+      // Weight, reps and rest timer will be set by useEffect when currentExerciseIndex changes
     }
   };
 
@@ -184,11 +183,7 @@ export default function WorkoutSession() {
     if (currentExerciseIndex > 0) {
       setCurrentExerciseIndex(prev => prev - 1);
       setCurrentSetIndex(0);
-      
-      // Initialize weight and reps with template defaults for the previous exercise
-      const prevExercise = templateExercises[currentExerciseIndex - 1];
-      setCurrentWeight(prevExercise?.weight?.toString() || "");
-      setCurrentReps(prevExercise?.reps?.toString() || "");
+      // Weight, reps and rest timer will be set by useEffect when currentExerciseIndex changes
     }
   };
 
@@ -339,7 +334,28 @@ export default function WorkoutSession() {
           <CardContent className="p-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-white">{currentExercise?.exercise?.name || currentExercise?.name || 'Exercício'}</h3>
-              <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || currentExercise?.muscleGroup || 'Grupo muscular'}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || currentExercise?.muscleGroup || 'Grupo muscular'}</p>
+                <div className="flex items-center space-x-4 text-xs text-slate-500">
+                  <span className="flex items-center space-x-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{currentExercise?.restDurationSeconds || 90}s descanso</span>
+                  </span>
+                  <span className="flex items-center space-x-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span>{currentExercise?.sets || 0} séries</span>
+                  </span>
+                </div>
+              </div>
+              {currentExercise?.exercise?.instructions && (
+                <div className="mt-2 p-2 bg-slate-800/20 rounded-lg border border-slate-700/30">
+                  <p className="text-xs text-slate-300">{currentExercise.exercise.instructions}</p>
+                </div>
+              )}
             </div>
             
             {/* Sets Tracking */}
@@ -396,6 +412,7 @@ export default function WorkoutSession() {
                       <label className="text-xs text-slate-500 block mb-1">Peso (kg)</label>
                       <Input 
                         disabled 
+                        value={currentExercise?.weight?.toString() || ""}
                         className="w-full bg-slate-800/50 border-slate-700/50 text-slate-500 text-center" 
                       />
                     </div>
@@ -403,6 +420,7 @@ export default function WorkoutSession() {
                       <label className="text-xs text-slate-500 block mb-1">Reps</label>
                       <Input 
                         disabled 
+                        value={currentExercise?.reps?.toString() || ""}
                         className="w-full bg-slate-800/50 border-slate-700/50 text-slate-500 text-center" 
                       />
                     </div>
