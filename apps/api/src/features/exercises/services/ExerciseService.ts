@@ -26,7 +26,7 @@ export class ExerciseService {
     }
 
     // Verify ownership if userId provided
-    if (userId && exercise.user_id !== userId) {
+    if (userId && exercise.usuarioId !== userId) {
       throw new Error('Acesso negado ao exercício');
     }
 
@@ -52,12 +52,16 @@ export class ExerciseService {
       throw new Error('Exercício não encontrado');
     }
     
-    if (existingExercise.user_id !== userId) {
+    if (existingExercise.usuarioId !== userId) {
       throw new Error('Você não tem permissão para editar este exercício');
     }
 
     // Transform partial DTO to Portuguese using shared schema  
-    const transformedData = insertExerciseSchema.partial().parse(updateData);
+    const transformedData = {
+      ...(updateData.name && { nome: updateData.name }),
+      ...(updateData.muscleGroup && { grupoMuscular: updateData.muscleGroup }),
+      ...(updateData.description !== undefined && { descricao: updateData.description })
+    };
     
     const updatedExercise = await storage.updateExercise(exerciseId, transformedData, userId);
     if (!updatedExercise) {
@@ -147,7 +151,7 @@ export class ExerciseService {
       throw new Error('Exercício não encontrado');
     }
     
-    if (existingExercise.user_id !== userId) {
+    if (existingExercise.usuarioId !== userId) {
       throw new Error('Você não tem permissão para excluir este exercício');
     }
 
