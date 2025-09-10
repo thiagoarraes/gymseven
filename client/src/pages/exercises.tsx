@@ -213,8 +213,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const handleEdit = (exercise: any) => {
     setEditingExercise(exercise);
     form.reset({
-      name: exercise.nome,
-      muscleGroup: exercise.grupoMuscular,
+      name: exercise.nome || exercise.name || '',
+      muscleGroup: exercise.grupoMuscular || exercise.muscleGroup || '',
     });
     setIsDialogOpen(true);
   };
@@ -247,11 +247,19 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
   const filteredExercises = enhancedExercises
     .filter((exercise) => {
-      const matchesSearch = exercise.nome?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
-      const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exercise.grupoMuscular === selectedMuscleGroup;
+      // Handle both API response formats (nome/name and grupoMuscular/muscleGroup)
+      const exerciseName = exercise.nome || exercise.name || '';
+      const exerciseMuscleGroup = exercise.grupoMuscular || exercise.muscleGroup || '';
+      
+      const matchesSearch = searchTerm === '' || exerciseName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesMuscleGroup = selectedMuscleGroup === "Todos" || exerciseMuscleGroup === selectedMuscleGroup;
       return matchesSearch && matchesMuscleGroup;
     })
-    .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR'));
+    .sort((a, b) => {
+      const nameA = a.nome || a.name || '';
+      const nameB = b.nome || b.name || '';
+      return nameA.localeCompare(nameB, 'pt-BR');
+    });
 
   const resetForm = () => {
     setEditingExercise(null);
@@ -410,11 +418,6 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
       </Card>
 
       {/* Exercise List */}
-      <div style={{padding: '10px', background: 'yellow', color: 'black'}}>
-        DEBUG: isLoading={isLoading.toString()}, exercises.length={exercises.length}, enhancedExercises.length={enhancedExercises.length}, filteredExercises.length={filteredExercises.length}
-        <br/>searchTerm="{searchTerm}", selectedMuscleGroup="{selectedMuscleGroup}"
-        <br/>First exercise: {exercises[0] ? `${exercises[0].nome} (${exercises[0].grupoMuscular})` : 'None'}
-      </div>
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
@@ -540,16 +543,16 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-foreground text-lg leading-snug break-words hyphens-auto" style={{wordBreak: 'break-word', hyphens: 'auto'}}>
-                          {exercise.nome}
+                          {exercise.nome || exercise.name}
                         </h4>
                         {/* Improved Muscle Group Badge */}
                         <div className="mt-2">
                           {(() => {
-                            const groupInfo = getMuscleGroupInfo(exercise.grupoMuscular);
+                            const groupInfo = getMuscleGroupInfo(exercise.grupoMuscular || exercise.muscleGroup || '');
                             return (
                               <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
                                 <span className="text-xs font-semibold tracking-wide">
-                                  {exercise.grupoMuscular}
+                                  {exercise.grupoMuscular || exercise.muscleGroup}
                                 </span>
                               </div>
                             );
