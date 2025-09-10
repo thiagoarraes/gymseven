@@ -44,17 +44,39 @@ export default function WorkoutSession() {
 
   const workoutId = params?.id;
 
-  const { data: workoutLog, isLoading: logLoading } = useQuery({
+  const { data: workoutLog, isLoading: logLoading, error: logError } = useQuery({
     queryKey: ["/api/v2/workouts/logs", workoutId],
     queryFn: () => workoutLogApi.getById(workoutId!),
     enabled: !!workoutId,
   });
 
-  const { data: templateExercises = [], isLoading: exercisesLoading } = useQuery({
-    queryKey: ["/api/v2/workouts/templates", workoutLog?.modeloId, "exercises"],
-    queryFn: () => workoutTemplateApi.getExercises(workoutLog!.modeloId!),
-    enabled: !!workoutLog?.modeloId,
+  // Debug workoutLog
+  useEffect(() => {
+    if (workoutLog) {
+      console.log("📋 WorkoutLog loaded:", workoutLog);
+      console.log("📋 WorkoutLog templateId:", workoutLog.templateId);
+    }
+    if (logError) {
+      console.error("❌ Error loading workoutLog:", logError);
+    }
+  }, [workoutLog, logError]);
+
+  const { data: templateExercises = [], isLoading: exercisesLoading, error: exercisesError } = useQuery({
+    queryKey: ["/api/v2/workouts/templates", workoutLog?.templateId, "exercises"],
+    queryFn: () => workoutTemplateApi.getExercises(workoutLog!.templateId!),
+    enabled: !!workoutLog?.templateId,
   });
+
+  // Debug templateExercises
+  useEffect(() => {
+    if (templateExercises.length > 0) {
+      console.log("🏋️ TemplateExercises loaded:", templateExercises);
+      console.log("🏋️ Total exercises:", templateExercises.length);
+    }
+    if (exercisesError) {
+      console.error("❌ Error loading templateExercises:", exercisesError);
+    }
+  }, [templateExercises, exercisesError]);
 
   // Query for exercise weight history  
   const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
@@ -232,7 +254,8 @@ export default function WorkoutSession() {
     }
   };
 
-  if (logLoading || exercisesLoading || !templateExercises.length) {
+  // Enhanced loading check
+  if (logLoading || (workoutLog && exercisesLoading)) {
     return (
       <div className="container mx-auto px-4">
         <div className="space-y-6">
@@ -272,7 +295,7 @@ export default function WorkoutSession() {
   const currentExercise = templateExercises[currentExerciseIndex];
   
   // Add safety check for currentExercise
-  if (!currentExercise) {
+  if (!currentExercise || !templateExercises.length) {
     return (
       <div className="container mx-auto px-4">
         <div className="text-center py-12">
