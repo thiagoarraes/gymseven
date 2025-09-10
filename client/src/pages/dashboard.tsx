@@ -503,7 +503,7 @@ export default function Dashboard() {
                 {/* Workout Name and Date */}
                 <div>
                   <h4 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                    {(recentWorkouts[0] as any)?.name || recentWorkouts[0]?.nome || (recentWorkouts[0] as any)?.templateName || "Treino personalizado"}
+                    {recentWorkouts[0]?.nome || "Treino personalizado"}
                   </h4>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Calendar className="w-4 h-4" />
