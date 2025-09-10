@@ -335,8 +335,7 @@ export default function WorkoutSession() {
       </Card>
 
       {/* Current Exercise */}
-      {currentExercise && (
-        <Card className="glass-card rounded-2xl">
+      <Card className="glass-card rounded-2xl">
           <CardContent className="p-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-white">{currentExercise.exercise?.name || currentExercise.name || 'Exercício'}</h3>
@@ -628,7 +627,6 @@ export default function WorkoutSession() {
             )}
           </CardContent>
         </Card>
-      )}
 
 
       {/* Navigation */}
