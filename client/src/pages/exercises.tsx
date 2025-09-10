@@ -108,10 +108,12 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     queryFn: exerciseApi.getAll,
   });
 
-  // Fetch exercise progress data for enhanced display
+  // Fetch exercise progress data for enhanced display (optional)
   const { data: exercisesWithProgress = [] } = useQuery({
     queryKey: ["/api/v2/exercises/with-progress"],
     queryFn: exerciseProgressApi.getExercisesWithProgress,
+    retry: false, // Don't retry if this fails
+    refetchOnMount: false, // Don't refetch on mount
   });
 
   // Fetch weight history for expanded exercise
@@ -121,7 +123,7 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     enabled: !!expandedExercise,
   });
 
-  // Merge exercises with progress data
+  // Merge exercises with progress data (fallback to base exercise data)
   const enhancedExercises = exercises.map(exercise => {
     const progressData = exercisesWithProgress.find((p: any) => p.id === exercise.id);
     return {
