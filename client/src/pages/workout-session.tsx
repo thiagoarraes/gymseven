@@ -421,7 +421,7 @@ export default function WorkoutSession() {
             </div>
             
             {/* Rest Timer */}
-            {restTimer > 0 && (
+            {(restTimer > 0 || true) && (
               <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
                 <div className="flex items-center justify-between mb-3">
                   <div>
@@ -464,7 +464,7 @@ export default function WorkoutSession() {
             )}
 
             {/* Exercise Progress Accordion */}
-            {currentExercise && weightHistory.length > 0 && (
+            {currentExercise && (
               <Accordion type="single" collapsible className="mt-6">
                 <AccordionItem value="progress" className="border-slate-700/30">
                   <AccordionTrigger className="bg-slate-800/20 px-4 py-3 rounded-xl border border-slate-700/30 hover:bg-slate-800/30 transition-colors">
@@ -477,23 +477,36 @@ export default function WorkoutSession() {
                         </div>
                         <div>
                           <div className="text-sm font-medium text-white">Progresso de Peso</div>
-                          <div className="text-xs text-slate-400">{weightHistory.length} sessões registradas</div>
+                          <div className="text-xs text-slate-400">{weightHistory.length > 0 ? `${weightHistory.length} sessões registradas` : 'Primeira sessão - Sem histórico ainda'}</div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-semibold text-blue-400">
-                          {weightHistory[0]?.maxWeight || 0}kg
+                          {weightHistory.length > 0 ? `${weightHistory[0]?.maxWeight || 0}kg` : 'N/A'}
                         </div>
-                        <div className="text-xs text-slate-500">Máximo atual</div>
+                        <div className="text-xs text-slate-500">{weightHistory.length > 0 ? 'Máximo atual' : 'Sem dados'}</div>
                       </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-4">
                     {/* Chart Container */}
                     <div className="bg-slate-800/10 rounded-xl p-4 mt-3">
-                      {/* Area Chart */}
-                      <div className="h-40 mb-4">
-                        <ResponsiveContainer width="100%" height="100%">
+                      {weightHistory.length === 0 && (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-slate-700/30 rounded-full flex items-center justify-center">
+                            <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          </div>
+                          <p className="text-slate-400 text-sm mb-2">Sem histórico de peso</p>
+                          <p className="text-slate-500 text-xs">Complete este treino para começar seu progresso!</p>
+                        </div>
+                      )}
+                      {weightHistory.length > 0 && (
+                        <>
+                          {/* Area Chart */}
+                          <div className="h-40 mb-4">
+                            <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={weightHistory.map((entry: any, index: number) => ({
                             session: index + 1,
                             weight: entry.maxWeight || entry.weight || 0,
@@ -587,7 +600,9 @@ export default function WorkoutSession() {
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
-
+                        </>
+                      )}
+                      
                       {/* Progress Stats */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-slate-800/30 rounded-lg p-3 text-center">
