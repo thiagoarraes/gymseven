@@ -362,19 +362,21 @@ export default function WorkoutSession() {
               <h3 className="text-lg font-semibold text-white">{currentExercise?.exercise?.name || currentExercise?.exerciseName || 'Exercício'}</h3>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || 'Grupo muscular'}</p>
-                <div className="flex items-center space-x-4 text-xs text-slate-500">
-                  <span className="flex items-center space-x-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-orange-500/15 border border-orange-500/30 rounded-lg px-3 py-1.5 flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>{currentExercise?.restDurationSeconds || 90}s descanso</span>
-                  </span>
-                  <span className="flex items-center space-x-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="text-sm font-semibold text-orange-400">
+                      {formatTime(currentExercise?.restDurationSeconds || 90)} descanso
+                    </span>
+                  </div>
+                  <div className="bg-blue-500/15 border border-blue-500/30 rounded-lg px-3 py-1.5 flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
-                    <span>{currentExercise?.sets || 0} séries</span>
-                  </span>
+                    <span className="text-sm font-semibold text-blue-400">{currentExercise?.sets || 0} séries</span>
+                  </div>
                 </div>
               </div>
               {currentExercise?.exercise?.instructions && (
