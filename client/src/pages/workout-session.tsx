@@ -630,6 +630,54 @@ export default function WorkoutSession() {
         </Card>
       )}
 
+      {/* Workout Summary */}
+      {currentExercise && (
+        <Card className="glass-card rounded-2xl">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="text-xs text-slate-500 uppercase tracking-wide">Exercício Atual</div>
+                <div className="text-sm font-medium text-white truncate">
+                  {currentExercise.exercise?.name || currentExercise.name || 'Exercício'}
+                </div>
+                <div className="text-xs text-blue-300">
+                  {currentExercise.exercise?.muscleGroup || currentExercise.muscleGroup || 'Grupo muscular'}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-xs text-slate-500 uppercase tracking-wide">Progresso</div>
+                <div className="text-sm font-medium text-emerald-400">
+                  Série {currentSetIndex + 1} de {currentExercise.sets}
+                </div>
+                <div className="text-xs text-slate-400">
+                  {currentWeight && currentReps ? `${currentWeight}kg × ${currentReps} reps` : 'Configurando...'}
+                </div>
+              </div>
+            </div>
+            
+            {/* Quick Stats Row */}
+            <div className="mt-4 pt-4 border-t border-slate-700/30">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-semibold text-blue-400">{templateExercises.length}</div>
+                  <div className="text-xs text-slate-500">Exercícios</div>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-orange-400">{formatTime(workoutDuration)}</div>
+                  <div className="text-xs text-slate-500">Tempo decorrido</div>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-emerald-400">
+                    {Math.round(progress)}%
+                  </div>
+                  <div className="text-xs text-slate-500">Completado</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Navigation */}
       <div className="flex space-x-3">
         <Button
