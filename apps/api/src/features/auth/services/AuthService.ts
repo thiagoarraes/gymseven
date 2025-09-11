@@ -118,8 +118,15 @@ export class AuthService {
       }
     }
 
+    // Convert null values to undefined for storage interface compatibility
+    const storageData = {
+      ...updateData,
+      height: updateData.height === null ? undefined : updateData.height,
+      weight: updateData.weight === null ? undefined : updateData.weight,
+    };
+    
     // Update user
-    const updatedUser = await storage.updateUser(userId, updateData);
+    const updatedUser = await storage.updateUser(userId, storageData);
     if (!updatedUser) {
       throw new Error('Usuário não encontrado');
     }

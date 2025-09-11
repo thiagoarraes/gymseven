@@ -49,19 +49,41 @@ export interface CreateWorkoutLogRequest {
 export const workoutService = {
   // Get all workout templates for user
   async getWorkoutTemplates(userId: string): Promise<WorkoutTemplate[]> {
-    const response = await fetch('/api/v2/workouts/templates', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+    try {
+      const response = await fetch('/api/v2/workouts/templates', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        // Check if response is HTML (error page) vs JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('text/html')) {
+          throw new Error(`Server returned error (${response.status}): Unable to fetch workout templates`);
+        }
+        
+        // Try to get JSON error message
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to fetch workout templates (${response.status})`);
+        } catch {
+          throw new Error(`Failed to fetch workout templates (${response.status})`);
+        }
       }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch workout templates');
+      
+      const responseData = await response.json();
+      // Extract data array from API v2 response structure
+      return responseData.data || responseData;
+    } catch (error: any) {
+      console.error('Error fetching workout templates:', error);
+      // Re-throw with a cleaner message
+      if (error.message.includes('<!DOCTYPE') || error.message.includes('Unexpected token')) {
+        throw new Error('Erro ao carregar treinos - Verifique sua conexão e tente novamente');
+      }
+      throw new Error(error.message || 'Erro ao carregar treinos');
     }
-    
-    const responseData = await response.json();
-    // Extract data array from API v2 response structure
-    return responseData.data || responseData;
   },
 
   // Get workout templates with exercises
@@ -131,12 +153,25 @@ export const workoutService = {
       const params = limit ? `?limit=${limit}` : '';
       const response = await fetch(`/api/v2/workouts/logs${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch workout logs');
+        // Check if response is HTML (error page) vs JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('text/html')) {
+          throw new Error(`Server returned error (${response.status}): Unable to fetch workout logs`);
+        }
+        
+        // Try to get JSON error message
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to fetch workout logs (${response.status})`);
+        } catch {
+          throw new Error(`Failed to fetch workout logs (${response.status})`);
+        }
       }
       
       const responseData = await response.json();
@@ -145,10 +180,17 @@ export const workoutService = {
         data: responseData.data || responseData
       };
     } catch (error: any) {
+      console.error('Error fetching workout logs:', error);
+      // Handle JSON parsing errors more gracefully
+      let errorMessage = error.message;
+      if (error.message.includes('<!DOCTYPE') || error.message.includes('Unexpected token')) {
+        errorMessage = 'Erro ao carregar histórico de treinos - Verifique sua conexão';
+      }
+      
       return {
         success: false,
         data: [],
-        error: error.message
+        error: errorMessage
       };
     }
   }
