@@ -21,10 +21,10 @@ import {
   insertUserGoalSchema,
   updateUserPreferencesSchema
 } from "@shared/schema";
-import { registerUser, loginUser, changeUserPassword, optionalAuth } from "./auth";
-import { authenticateToken, type AuthRequest } from "./auth";
+import { registerUserSupabase, loginUserSupabase, changeUserPasswordSupabase, optionalSupabaseAuth } from "./auth-supabase";
+import { authenticateSupabaseToken, type AuthRequest } from "./auth-supabase";
 
-// Use local authentication only
+// Use Supabase authentication
 
 // Configure multer for avatar uploads
 const uploadsDir = path.join(process.cwd(), 'uploads', 'avatars');
@@ -61,12 +61,27 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   // Initialize storage once for all routes
   const db = await getStorage();
   
-  // Use PostgreSQL-based authentication
+  // Use Supabase-based authentication
     app.post('/api/auth/register', async (req, res) => {
       try {
-        const { user, token } = await registerUser(req.body);
-        res.status(201).json({ user, token });
+        console.log('🔄 [AUTH ROUTES] Registration request received:', { email: req.body.email });
+        const result = await registerUserSupabase(req.body);
+        
+        if (result.needsConfirmation) {
+          res.status(201).json({ 
+            user: result.user,
+            message: 'Usuário criado! Verifique seu email para confirmar a conta.',
+            needsConfirmation: true
+          });
+        } else {
+          res.status(201).json({ 
+            user: result.user, 
+            token: result.session?.access_token,
+            session: result.session
+          });
+        }
       } catch (error: any) {
+        console.error('❌ [AUTH ROUTES] Registration error:', error);
         if (error.name === 'ZodError') {
           res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         } else {
@@ -77,9 +92,15 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
     app.post('/api/auth/login', async (req, res) => {
       try {
-        const { user, token } = await loginUser(req.body);
-        res.json({ user, token });
+        console.log('🔄 [AUTH ROUTES] Login request received:', { email: req.body.email });
+        const result = await loginUserSupabase(req.body);
+        res.json({ 
+          user: result.user, 
+          token: result.access_token,
+          session: result.session
+        });
       } catch (error: any) {
+        console.error('❌ [AUTH ROUTES] Login error:', error);
         if (error.name === 'ZodError') {
           res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
         } else {
@@ -93,7 +114,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     });
 
     // Get current user endpoint
-    app.get('/api/auth/me', authenticateToken, async (req: AuthRequest, res) => {
+    app.get('/api/auth/me', authenticateSupabaseToken, async (req: AuthRequest, res) => {
       try {
         if (!req.user) {
           return res.status(401).json({ message: 'Usuário não autenticado' });
@@ -116,7 +137,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   
 
   // Update user profile
-  app.put('/api/auth/profile', authenticateToken, async (req: AuthRequest, res) => {
+  app.put('/api/auth/profile', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       // Check if email is being changed and if it's already in use
       if (req.body.email && req.body.email !== req.user!.email) {
@@ -161,9 +182,9 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/auth/change-password", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/auth/change-password", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
-      await changeUserPassword(req.user!.id, req.body);
+      await changeUserPasswordSupabase(req.user!.id, req.body);
       res.json({ message: "Senha alterada com sucesso" });
     } catch (error: any) {
       if (error.message.includes('incorreta')) {
@@ -180,7 +201,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Clear user data endpoint (keep account, remove all data)
-  app.delete('/api/auth/clear-data', authenticateToken, async (req: AuthRequest, res) => {
+  app.delete('/api/auth/clear-data', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const userId = req.user!.id;
       
@@ -201,7 +222,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Delete account endpoint
-  app.delete('/api/auth/account', authenticateToken, async (req: AuthRequest, res) => {
+  app.delete('/api/auth/account', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const userId = req.user!.id;
       
@@ -228,7 +249,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Upload avatar endpoint
-  app.post('/api/auth/upload-avatar', authenticateToken, uploadAvatar.single('avatar'), async (req: AuthRequest, res) => {
+  app.post('/api/auth/upload-avatar', authenticateSupabaseToken, uploadAvatar.single('avatar'), async (req: AuthRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'Nenhum arquivo enviado' });
@@ -305,7 +326,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
 
   // Weight History routes
-  app.get("/api/weight-history", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/weight-history", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       const history = await db.getWeightHistory(req.user!.id, limit);
@@ -315,7 +336,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/weight-history", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/weight-history", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertWeightHistorySchema.parse({
         ...req.body,
@@ -335,7 +356,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/weight-history/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/weight-history/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertWeightHistorySchema.partial().parse(req.body);
       const entry = await db.updateWeightEntry(req.params.id, validatedData);
@@ -357,7 +378,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/weight-history/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.delete("/api/weight-history/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const success = await db.deleteWeightEntry(req.params.id);
       if (!success) {
@@ -370,7 +391,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // User Goals routes
-  app.get("/api/goals", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/goals", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const goals = await db.getUserGoals(req.user!.id);
       res.json(goals);
@@ -379,7 +400,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/goals", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/goals", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertUserGoalSchema.parse({
         ...req.body,
@@ -399,7 +420,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/goals/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/goals/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertUserGoalSchema.partial().parse(req.body);
       const goal = await db.updateUserGoal(req.params.id, validatedData);
@@ -421,7 +442,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/goals/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.delete("/api/goals/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const success = await db.deleteUserGoal(req.params.id);
       if (!success) {
@@ -434,7 +455,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // User Preferences routes
-  app.get("/api/preferences", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/preferences", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const preferences = await db.getUserPreferences(req.user!.id);
       if (!preferences) {
@@ -459,7 +480,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/preferences", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/preferences", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = updateUserPreferencesSchema.parse(req.body);
       const preferences = await db.updateUserPreferences(req.user!.id, validatedData);
@@ -482,7 +503,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Exercise routes - require authentication
-  app.get("/api/exercicios", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/exercicios", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const { muscleGroup } = req.query;
       let exercises;
@@ -509,7 +530,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/exercicios/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const exercise = await db.getExercise(req.params.id);
       if (!exercise) {
@@ -521,7 +542,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/exercicios", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/exercicios", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       // Debug logging
       console.log('Exercise creation request:', {
@@ -566,7 +587,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/exercicios/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertExerciseSchema.parse(req.body);
       const updates = validatedData;
@@ -581,7 +602,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/exercicios/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.delete("/api/exercicios/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const deleted = await db.deleteExercise(req.params.id);
       if (!deleted) {
@@ -594,7 +615,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Workout Template routes - require authentication
-  app.get("/api/workout-templates", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/workout-templates", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       // Get user-specific templates only
       const templates = await db.getWorkoutTemplates(req.user!.id);
@@ -604,7 +625,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/workout-templates/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const template = await db.getWorkoutTemplate(req.params.id);
       if (!template) {
@@ -616,7 +637,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-templates/:id/exercises", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/workout-templates/:id/exercises", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const exercises = await db.getWorkoutTemplateExercises(req.params.id);
       res.json(exercises);
@@ -626,7 +647,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/workout-templates", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/workout-templates", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log("Workout template creation request:", {
         body: req.body,
@@ -657,7 +678,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/workout-templates/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const updates = req.body;
       const template = await db.updateWorkoutTemplate(req.params.id, updates);
@@ -670,7 +691,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/workout-templates/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.delete("/api/workout-templates/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const deleted = await db.deleteWorkoutTemplate(req.params.id, req.user!.id);
       if (!deleted) {
@@ -684,7 +705,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Reorder workout template exercises
-  app.patch("/api/workout-templates/:id/reorder", authenticateToken, async (req: AuthRequest, res) => {
+  app.patch("/api/workout-templates/:id/reorder", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const templateId = req.params.id;
       const { exercises } = req.body;
@@ -724,7 +745,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/workout-templates/:id/exercises", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/workout-templates/:id/exercises", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const templateId = req.params.id;
       
@@ -772,7 +793,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/workout-template-exercises/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log(`🔄 PUT /api/workout-template-exercises/${req.params.id} by user ${req.user!.id}`);
       console.log(`📥 Request body:`, req.body);
@@ -807,7 +828,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/workout-template-exercises/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.delete("/api/workout-template-exercises/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const deleted = await db.deleteWorkoutTemplateExercise(req.params.id, req.user!.id);
       if (!deleted) {
@@ -820,7 +841,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get exercises that have been used in completed workouts with weight data
-  app.get('/api/exercises-with-progress', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/exercises-with-progress', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const exercises = await db.getAllExercises();
       const exercisesWithProgress = [];
@@ -846,7 +867,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get exercise weight progression data for progress charts
-  app.get('/api/exercise-weight-history/:exerciseId', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/exercise-weight-history/:exerciseId', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const { exerciseId } = req.params;
       const limit = parseInt(req.query.limit as string) || 10;
@@ -860,7 +881,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Create workout log exercise
-  app.post("/api/workout-log-exercises", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/workout-log-exercises", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log("🔍 [DEBUG] Creating workout log exercise with body:", req.body);
       const { logId, exerciseId, order } = req.body;
@@ -896,7 +917,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Create workout log set
-  app.post("/api/workout-log-sets", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/workout-log-sets", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const validatedData = insertWorkoutLogSetSchema.parse(req.body);
       const result = await db.createWorkoutLogSet(validatedData);
@@ -915,7 +936,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Update workout log set
-  app.put("/api/workout-log-sets/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/workout-log-sets/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
       const { weight, reps, completed } = req.body;
@@ -939,7 +960,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   }
 
   // Get exercises that have weight history for select dropdown
-  app.get('/api/exercises-with-weight-history', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/exercises-with-weight-history', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log('📊 Fetching exercises with weight history for user:', req.user?.id);
       
@@ -996,7 +1017,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get all exercises with their recent weight progression - user-specific
-  app.get('/api/exercises-weight-summary', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/exercises-weight-summary', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log('📊 Fetching exercises weight summary for user:', req.user?.id);
       
@@ -1068,7 +1089,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Get daily volume data for progress charts (must be before parameterized routes)
-  app.get('/api/workout-logs-daily-volume', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/workout-logs-daily-volume', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const logs = await db.getWorkoutLogs(req.user!.id);
       
@@ -1102,7 +1123,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   });
 
   // Workout Log routes - require authentication
-  app.get("/api/workout-logs", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/workout-logs", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const { recent } = req.query;
       let logs;
@@ -1130,7 +1151,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/workout-logs/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const log = await db.getWorkoutLog(req.params.id);
       if (!log) {
@@ -1142,7 +1163,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.get("/api/workout-logs/:id/summary", optionalAuth, async (req: AuthRequest, res) => {
+  app.get("/api/workout-logs/:id/summary", optionalSupabaseAuth, async (req: AuthRequest, res) => {
     try {
       console.log('📊 Fetching workout summary for ID:', req.params.id);
       const log = await db.getWorkoutLog(req.params.id);
@@ -1314,7 +1335,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     return estimatedWeights[muscleGroup] || 50;
   }
 
-  app.post("/api/workout-logs", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/workout-logs", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log("Creating workout log with data:", req.body);
       
@@ -1337,7 +1358,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.put("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.put("/api/workout-logs/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       console.log(`Updating workout log ${req.params.id} with data:`, req.body);
       
@@ -1374,7 +1395,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.delete("/api/workout-logs/:id", authenticateToken, async (req: AuthRequest, res) => {
+  app.delete("/api/workout-logs/:id", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       // First check if workout belongs to authenticated user
       const existingLog = await db.getWorkoutLog(req.params.id);
@@ -1445,7 +1466,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   }
 
   // User Achievements routes - sistema de conquistas isolado por usuário
-  app.get("/api/achievements", authenticateToken, async (req: AuthRequest, res) => {
+  app.get("/api/achievements", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const achievements = await db.getUserAchievements(req.user!.id);
       res.json(achievements);
@@ -1454,7 +1475,7 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     }
   });
 
-  app.post("/api/achievements", authenticateToken, async (req: AuthRequest, res) => {
+  app.post("/api/achievements", authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const achievement = await db.createUserAchievement({
         ...req.body,
