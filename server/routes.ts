@@ -137,6 +137,30 @@ export async function registerRoutes(app: Express, createServerInstance = true):
       }
     });
 
+    // Verify OTP endpoint (alias for email confirmation to match frontend expectations)
+    app.post('/api/auth/verify-otp', async (req, res) => {
+      try {
+        const { email, token, password, username, firstName, lastName } = req.body;
+        
+        if (!email || !token) {
+          return res.status(400).json({ message: 'Email e token são obrigatórios' });
+        }
+        
+        console.log('📧 [AUTH ROUTES] OTP verification request:', { email });
+        const result = await confirmEmailSupabase(email, token);
+        
+        res.json({
+          message: 'Email confirmado com sucesso! Agora você pode fazer login.',
+          user: result.user,
+          token: result.session?.access_token,
+          session: result.session
+        });
+      } catch (error: any) {
+        console.error('❌ [AUTH ROUTES] OTP verification error:', error);
+        res.status(400).json({ message: error.message });
+      }
+    });
+
     // Get current user endpoint
     app.get('/api/auth/me', authenticateSupabaseToken, async (req: AuthRequest, res) => {
       try {
