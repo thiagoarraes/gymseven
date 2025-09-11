@@ -171,9 +171,10 @@ export class AuthService {
     console.log('🔍 [AUTH SERVICE V2] V2 Secret:', this.jwtSecret.substring(0, 10) + '...');
     
     try {
-      // First, try with v2 secret
+      // First, try with v2 secret (local JWT tokens)
       let decoded: any;
       let tokenSource = '';
+      let user: any;
       
       try {
         console.log('🔍 [AUTH SERVICE V2] Trying v2 verification...');
@@ -193,10 +194,60 @@ export class AuthService {
           console.log('✅ [AUTH SERVICE V2] V1 verification successful');
         } catch (v1Error: any) {
           console.log('❌ [AUTH SERVICE V2] V1 verification failed:', v1Error.message);
-          throw new Error('Token inválido');
+          
+          // If both local JWT attempts fail, try Supabase verification
+          try {
+            console.log('🔍 [AUTH SERVICE V2] Trying Supabase token verification...');
+            const { createClient } = await import('@supabase/supabase-js');
+            const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+            const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+            
+            const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+              auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+              }
+            });
+
+            // Verify token with Supabase
+            const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token);
+            
+            if (error || !supabaseUser) {
+              console.log('❌ [AUTH SERVICE V2] Supabase token verification failed:', error?.message || 'No user');
+              throw new Error('Token inválido');
+            }
+
+            console.log('✅ [AUTH SERVICE V2] Supabase token verification successful:', supabaseUser.email);
+            tokenSource = 'supabase';
+
+            // Get user from our database by email (since Supabase user ID != our user ID)
+            const storage = await this.storage;
+            user = await storage.getUserByEmail(supabaseUser.email!);
+            
+            if (!user) {
+              console.log('❌ [AUTH SERVICE V2] Supabase user not found in local DB:', supabaseUser.email);
+              throw new Error('Usuário não encontrado no banco local');
+            }
+
+            console.log('✅ [AUTH SERVICE V2] Found user in local DB:', user.email);
+            
+            return {
+              id: user.id,
+              email: user.email,
+              username: user.username,
+              firstName: user.firstName || undefined,
+              lastName: user.lastName || undefined,
+              profileImageUrl: user.profileImageUrl || undefined,
+            };
+            
+          } catch (supabaseError: any) {
+            console.log('❌ [AUTH SERVICE V2] Supabase verification failed:', supabaseError.message);
+            throw new Error('Token inválido');
+          }
         }
       }
       
+      // Handle local JWT tokens (v1 and v2)
       console.log('🔍 [AUTH SERVICE V2] Decoded token:', JSON.stringify(decoded));
       console.log('🔍 [AUTH SERVICE V2] Token source:', tokenSource);
       
@@ -221,7 +272,7 @@ export class AuthService {
       
       console.log('🔍 [AUTH SERVICE V2] Looking up user:', userId);
       const storage = await this.storage;
-      const user = await storage.getUser(userId);
+      user = await storage.getUser(userId);
       if (!user) {
         console.log('❌ [AUTH SERVICE V2] User not found in database');
         throw new Error('Usuário não encontrado');
