@@ -1,8 +1,10 @@
-// Storage will be configured automatically based on environment
+// CRITICAL: Load environment variables FIRST before any imports that depend on them
+import { loadEnv } from "./env";
+loadEnv();
 
+// Now safe to import modules that check environment variables
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { loadEnv } from "./env";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { resetStorage } from "./storage";
@@ -13,20 +15,35 @@ import { setupRoutes as setupV2Routes } from "../apps/api/src/routes/index";
 // Force storage reset to ensure memory storage is used
 resetStorage();
 
-// Load environment variables from .env file first
-loadEnv();
+console.log('🔧 Environment setup completed');
 
-// Verify database configuration before starting server (optional)
-function verifyDatabaseConfiguration() {
+// Verify environment configuration
+function verifyEnvironmentConfiguration() {
+  console.log('🔍 Verificando configuração de ambiente...');
+  
+  // Database configuration
   if (!process.env.DATABASE_URL) {
     console.log('⚠️  DATABASE_URL não configurado - usando storage em memória (dados não persistentes)');
   } else {
     console.log('✅ Configuração do banco de dados verificada com sucesso!');
   }
+  
+  // Supabase configuration  
+  if (!process.env.VITE_SUPABASE_URL) {
+    console.log('❌ VITE_SUPABASE_URL não configurada!');
+  } else {
+    console.log('✅ VITE_SUPABASE_URL configurada');
+  }
+  
+  if (!process.env.VITE_SUPABASE_ANON_KEY) {
+    console.log('❌ VITE_SUPABASE_ANON_KEY não configurada!');
+  } else {
+    console.log('✅ VITE_SUPABASE_ANON_KEY configurada');
+  }
 }
 
 // Verify configuration before proceeding
-verifyDatabaseConfiguration();
+verifyEnvironmentConfiguration();
 
 const app = express();
 

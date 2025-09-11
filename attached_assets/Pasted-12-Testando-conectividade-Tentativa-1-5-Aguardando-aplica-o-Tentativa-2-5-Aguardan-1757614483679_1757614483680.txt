@@ -1,0 +1,75 @@
+12. Testando conectividade...
+⏳ Tentativa 1/5 - Aguardando aplicação...
+⏳ Tentativa 2/5 - Aguardando aplicação...
+⏳ Tentativa 3/5 - Aguardando aplicação...
+⏳ Tentativa 4/5 - Aguardando aplicação...
+⏳ Tentativa 5/5 - Aguardando aplicação...
+❌ ERRO: Aplicação não está respondendo após 5 tentativas
+[TAILING] Tailing last 20 lines for [gymseven] process (change the value with --lines option)
+/root/.pm2/logs/gymseven-out.log last 20 lines:
+0|gymseven | 
+0|gymseven | > rest-express@1.0.0 start
+0|gymseven | > NODE_ENV=production node dist/index.js
+0|gymseven | 
+0|gymseven | 
+0|gymseven | > rest-express@1.0.0 start
+0|gymseven | > NODE_ENV=production node dist/index.js
+0|gymseven | 
+0|gymseven | 
+0|gymseven | > rest-express@1.0.0 start
+0|gymseven | > NODE_ENV=production node dist/index.js
+0|gymseven | 
+0|gymseven | 
+0|gymseven | > rest-express@1.0.0 start
+0|gymseven | > NODE_ENV=production node dist/index.js
+0|gymseven | 
+0|gymseven | 
+0|gymseven | > rest-express@1.0.0 start
+0|gymseven | > NODE_ENV=production node dist/index.js
+0|gymseven | 
+
+/root/.pm2/logs/gymseven-error.log last 20 lines:
+0|gymseven | npm warn config       Default value does install optional deps unless otherwise omitted.
+0|gymseven | npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+0|gymseven | npm warn config `--include=optional` to include them.
+0|gymseven | npm warn config
+0|gymseven | npm warn config       Default value does install optional deps unless otherwise omitted.
+0|gymseven | file:///var/www/gymseven/dist/index.js:1188
+0|gymseven |   throw new Error("VITE_SUPABASE_URL must be set");
+0|gymseven |         ^
+0|gymseven | 
+0|gymseven | Error: VITE_SUPABASE_URL must be set
+0|gymseven |     at file:///var/www/gymseven/dist/index.js:1188:9
+0|gymseven |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|gymseven |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|gymseven |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|gymseven | 
+0|gymseven | Node.js v20.19.4
+0|gymseven | npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+0|gymseven | npm warn config `--include=optional` to include them.
+0|gymseven | npm warn config
+0|gymseven | npm warn config       Default value does install optional deps unless otherwise omitted.
+
+0|gymseven  | npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+0|gymseven  | npm warn config `--include=optional` to include them.
+0|gymseven  | npm warn config
+0|gymseven  | npm warn config       Default value does install optional deps unless otherwise omitted.
+0|gymseven  | > rest-express@1.0.0 start
+0|gymseven  | > NODE_ENV=production node dist/index.js
+0|gymseven  | file:///var/www/gymseven/dist/index.js:1188
+0|gymseven  |   throw new Error("VITE_SUPABASE_URL must be set");
+0|gymseven  |         ^
+0|gymseven  | Error: VITE_SUPABASE_URL must be set
+0|gymseven  |     at file:///var/www/gymseven/dist/index.js:1188:9
+0|gymseven  |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|gymseven  |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|gymseven  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|gymseven  | Node.js v20.19.4
+0|gymseven  | npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+0|gymseven  | npm warn config `--include=optional` to include them.
+0|gymseven  | npm warn config
+0|gymseven  | npm warn config       Default value does install optional deps unless otherwise omitted.
+0|gymseven  | npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+0|gymseven  | npm warn config `--include=optional` to include them.
+0|gymseven  | npm warn config
+0|gymseven  | npm warn config       Default value does install optional deps unless otherwise omitted.
