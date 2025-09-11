@@ -357,27 +357,60 @@ export async function registerRoutes(app: Express, createServerInstance = true):
         return res.status(400).json({ message: 'Email é obrigatório' });
       }
 
-      // Check if user exists
-      const user = await db.getUserByEmail(email);
+      console.log(`🔄 [AUTH] Password reset requested for email: ${email}`);
+
+      // Check if user exists in local database (for logging purposes only)
+      const localUser = await db.getUserByEmail(email);
+      if (!localUser) {
+        console.log(`⚠️ [AUTH] Password reset requested for email not in local DB: ${email}`);
+      } else {
+        console.log(`✅ [AUTH] Password reset for existing local user: ${email}`);
+      }
+
+      // Always attempt Supabase reset - Supabase will handle user existence internally
+      // This prevents sync issues between local DB and Supabase Auth
+
+      // Use Supabase to send password reset email
+      const { createClient } = await import('@supabase/supabase-js');
       
-      // For security, we always return success even if user doesn't exist
-      // This prevents email enumeration attacks
-      if (!user) {
-        console.log(`Password reset requested for non-existent email: ${email}`);
+      // Validate environment variables
+      const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (!supabaseUrl || !supabaseServiceKey) {
+        console.error('❌ [AUTH] Missing Supabase environment variables');
+        return res.status(500).json({ message: 'Erro de configuração do servidor' });
+      }
+      
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      console.log(`🔄 [AUTH] Sending reset email via Supabase for: ${email}`);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${req.protocol}://${req.get('host')}/reset-password`
+      });
+
+      if (error) {
+        console.error('❌ [AUTH] Supabase reset password error:', error);
+        
+        // Log the specific error for debugging but don't expose to client
+        if (error.message.includes('User not found') || error.message.includes('Invalid email')) {
+          console.log(`⚠️ [AUTH] Email not found in Supabase Auth: ${email}`);
+        } else {
+          console.log(`❌ [AUTH] Unexpected Supabase error: ${error.message}`);
+        }
+        
+        // Always return success message to prevent email enumeration attacks
         return res.json({ message: 'Se o email existir, você receberá as instruções de recuperação' });
       }
 
-      // TODO: Here you would normally:
-      // 1. Generate a secure reset token
-      // 2. Store it in the database with expiration
-      // 3. Send email with reset link
-      
-      console.log(`Password reset requested for user: ${user.id} (${user.email})`);
-      
-      // For now, just log and return success
-      res.json({ message: 'Se o email existir, você receberá as instruções de recuperação' });
+      console.log(`✅ [AUTH] Password reset email sent successfully to: ${email}`);
+      res.json({ 
+        message: 'Se o email existir, você receberá as instruções de recuperação',
+        success: true
+      });
     } catch (error: any) {
-      console.error('Forgot password error:', error);
+      console.error('❌ [AUTH] Forgot password error:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   });
