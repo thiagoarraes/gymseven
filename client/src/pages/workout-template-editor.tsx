@@ -1148,7 +1148,7 @@ export default function WorkoutTemplateEditor() {
 
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
-        <DialogContent className="max-w-4xl max-h-[90vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-4xl max-h-[90vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col">
           <DialogHeader className="flex-shrink-0 pb-4">
             <div className="flex items-center space-x-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
@@ -1160,14 +1160,16 @@ export default function WorkoutTemplateEditor() {
               </div>
             </div>
             
-            {/* Muscle Group Filter */}
-            <div className="flex items-center space-x-3 bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
-              <Filter className="w-5 h-5 text-slate-400" />
-              <span className="text-slate-300 text-sm font-medium min-w-fit">Filtrar por grupo:</span>
+            {/* Muscle Group Filter - Mobile Optimized */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Filter className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                <span className="text-slate-300 text-sm font-medium whitespace-nowrap">Filtrar por grupo:</span>
+              </div>
               <select 
                 value={muscleGroupFilter} 
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="flex-1 bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:bg-slate-600/70 active:bg-slate-600/80 hover:bg-slate-700/70 transition-all duration-200"
+                className="w-full sm:flex-1 bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-3 py-3 sm:py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:bg-slate-600/70 active:bg-slate-600/80 hover:bg-slate-700/70 transition-all duration-200"
               >
                 <option value="all">Todos os grupos musculares</option>
                 {Array.from(new Set(Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup) : [])).sort().map((group: any) => (
@@ -1199,7 +1201,7 @@ export default function WorkoutTemplateEditor() {
             )}
           </DialogHeader>
           <div className="flex-1 overflow-y-auto py-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
@@ -1228,9 +1230,9 @@ export default function WorkoutTemplateEditor() {
                         setSelectedExercises(newSelected);
                       }}
                     >
-                      <CardContent className="p-4">
+                      <CardContent className="p-3 sm:p-4">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 flex-1 min-w-0">
+                          <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
                             {/* Modern Checkbox with [+] design */}
                             <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 font-bold text-lg ${
                               isSelected 
@@ -1241,7 +1243,7 @@ export default function WorkoutTemplateEditor() {
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                              <h4 className={`font-semibold text-lg leading-tight transition-colors ${
+                              <h4 className={`font-semibold text-base sm:text-lg leading-tight transition-colors ${
                                 isSelected ? 'text-blue-200' : 'text-white group-hover:text-blue-300'
                               }`}>
                                 {exercise.nome || exercise.name}
@@ -1279,9 +1281,9 @@ export default function WorkoutTemplateEditor() {
               )}
             </div>
           </div>
-          {/* Footer with main action button */}
-          <div className="flex-shrink-0 pt-6 border-t border-slate-700/50">
-            <div className="flex gap-3">
+          {/* Footer with main action button - Mobile Optimized */}
+          <div className="flex-shrink-0 pt-4 sm:pt-6 border-t border-slate-700/50">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -1289,7 +1291,7 @@ export default function WorkoutTemplateEditor() {
                   setSelectedExercises(new Set());
                   setMuscleGroupFilter('all');
                 }}
-                className="flex-1 h-12 border-slate-600/60 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500 transition-all"
+                className="w-full sm:flex-1 h-12 sm:h-12 border-slate-600/60 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500 transition-all"
               >
                 Cancelar
               </Button>
@@ -1366,7 +1368,7 @@ export default function WorkoutTemplateEditor() {
                   }
                 }}
                 disabled={addExerciseMutation.isPending}
-                className={`flex-[2] h-12 font-semibold transition-all duration-200 ${
+                className={`w-full sm:flex-[2] h-12 sm:h-12 font-semibold transition-all duration-200 ${
                   selectedExercises.size > 0
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30'
                     : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600'
