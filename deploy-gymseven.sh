@@ -70,6 +70,10 @@ fi
 
 # 10. Testar se build funciona localmente
 echo "10. Testando build antes do restart..."
+# Carregar variáveis do .env (mesmo ambiente que PM2 usará)
+set -a
+source .env
+set +a
 export NODE_ENV=production
 if ! timeout 10s node dist/index.js > /tmp/test-build.log 2>&1; then
     echo "❌ ERRO: Build falhou no teste local"
@@ -78,7 +82,7 @@ if ! timeout 10s node dist/index.js > /tmp/test-build.log 2>&1; then
     exit 1
 fi
 
-echo "✅ Build testado com sucesso"
+echo "✅ Build testado com sucesso (ambiente espelhado do PM2)"
 
 # 11. Reiniciar aplicação
 echo "11. Reiniciando aplicação..."
