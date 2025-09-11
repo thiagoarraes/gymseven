@@ -21,7 +21,7 @@ import {
   insertUserGoalSchema,
   updateUserPreferencesSchema
 } from "@shared/schema";
-import { registerUserSupabase, loginUserSupabase, changeUserPasswordSupabase, optionalSupabaseAuth, confirmEmailSupabase } from "./auth-supabase";
+import { registerUserSupabase, loginUserSupabase, changeUserPasswordSupabase, optionalSupabaseAuth, confirmEmailSupabase, clearUserDataSupabase, deleteUserAccountSupabase } from "./auth-supabase";
 import { authenticateSupabaseToken, type AuthRequest } from "./auth-supabase";
 
 // Use Supabase authentication
@@ -229,19 +229,13 @@ export async function registerRoutes(app: Express, createServerInstance = true):
     try {
       const userId = req.user!.id;
       
-      // Use direct database queries to clear user data
-      if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        
-        // For now, return a more helpful message
-        res.status(501).json({ 
-        });
-      } else {
-        // For PostgreSQL storage
-        res.status(501).json({ message: "Funcionalidade não implementada" });
-      }
+      console.log('🧹 [AUTH ROUTES] Clear data request for user:', req.user!.email);
+      await clearUserDataSupabase(userId);
+      
+      res.json({ message: "Todos os dados foram removidos com sucesso. Sua conta foi mantida." });
     } catch (error: any) {
-      console.error('Error clearing user data:', error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      console.error('❌ [AUTH ROUTES] Clear data error:', error);
+      res.status(500).json({ message: error.message || "Erro interno do servidor" });
     }
   });
 
@@ -249,26 +243,49 @@ export async function registerRoutes(app: Express, createServerInstance = true):
   app.delete('/api/auth/account', authenticateSupabaseToken, async (req: AuthRequest, res) => {
     try {
       const userId = req.user!.id;
+      const userEmail = req.user!.email;
+      const supabaseAuthId = req.supabaseAuthId;
+      
+      console.log('🗑️ [AUTH ROUTES] Delete account request for user:', userEmail);
       
       // Delete user avatar file if exists
       if (req.user!.profileImageUrl && req.user!.profileImageUrl.startsWith('/uploads/avatars/')) {
         const avatarPath = path.join(process.cwd(), req.user!.profileImageUrl);
         if (fs.existsSync(avatarPath)) {
           fs.unlinkSync(avatarPath);
+          console.log('🗑️ [AUTH ROUTES] Avatar file deleted:', avatarPath);
         }
       }
       
-      // Delete user from database (cascading deletes will handle related data)
-      const deleted = await db.deleteUser(userId);
+      // Delete account from both Supabase Auth and local DB
+      const deleteResult = await deleteUserAccountSupabase(userEmail, userId, supabaseAuthId);
       
-      if (!deleted) {
-        return res.status(404).json({ message: "Usuário não encontrado" });
+      let message = "Conta excluída com sucesso";
+      
+      if (deleteResult.supabaseAuthDeleted && deleteResult.localDbDeleted) {
+        message = "Conta excluída completamente do Supabase Auth e sistema local. Você será desconectado automaticamente.";
+      } else if (deleteResult.localDbDeleted) {
+        message = "Conta excluída do sistema local. ";
+        if (deleteResult.errors.length > 0) {
+          message += "Aviso: " + deleteResult.errors.join('; ');
+        }
       }
       
-      res.status(200).json({ message: "Conta excluída com sucesso" });
+      res.status(200).json({ 
+        message,
+        details: {
+          supabaseAuthDeleted: deleteResult.supabaseAuthDeleted,
+          localDbDeleted: deleteResult.localDbDeleted,
+          errors: deleteResult.errors
+        }
+      });
     } catch (error: any) {
-      console.error('Error deleting account:', error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      console.error('❌ [AUTH ROUTES] Delete account error:', error);
+      if (error.message.includes('não encontrado')) {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: error.message || "Erro interno do servidor" });
+      }
     }
   });
 

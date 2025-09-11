@@ -9,6 +9,7 @@ export interface AuthRequest extends Request {
     email: string;
     [key: string]: any;
   };
+  supabaseAuthId?: string; // Supabase Auth user ID
   supabaseClient?: typeof supabase;
 }
 
@@ -282,6 +283,9 @@ export async function authenticateSupabaseToken(req: AuthRequest, res: Response,
     // Attach user to request
     req.user = dbUser;
     
+    // Attach Supabase Auth user ID for potential admin operations
+    req.supabaseAuthId = user.id;
+    
     // Create authenticated Supabase client for RLS with user token
     req.supabaseClient = supabase;
 
@@ -328,6 +332,153 @@ export async function changeUserPasswordSupabase(userId: string, passwordData: a
     throw new Error('Mudança de senha deve ser feita pelo cliente autenticado usando supabase.auth.updateUser()');
   } catch (error: any) {
     console.error('❌ [SUPABASE AUTH] Password change failed:', error);
+    throw error;
+  }
+}
+
+// Clear all user data but keep account
+export async function clearUserDataSupabase(userId: string) {
+  console.log('🧹 [SUPABASE AUTH] Clearing all data for user:', userId);
+
+  try {
+    const db = await getStorage();
+    
+    // Clear all user-related data in order (respecting foreign key constraints)
+    console.log('🗑️ [CLEAR DATA] Removing workout logs...');
+    const workoutLogs = await db.getWorkoutLogs(userId);
+    for (const log of workoutLogs) {
+      await db.deleteWorkoutLog(log.id);
+    }
+
+    console.log('🗑️ [CLEAR DATA] Removing workout templates...');
+    const templates = await db.getWorkoutTemplates(userId);
+    for (const template of templates) {
+      await db.deleteWorkoutTemplate(template.id);
+    }
+
+    console.log('🗑️ [CLEAR DATA] Removing exercises...');
+    const exercises = await db.getExercises(userId);
+    for (const exercise of exercises) {
+      await db.deleteExercise(exercise.id);
+    }
+
+    console.log('🗑️ [CLEAR DATA] Removing weight history...');
+    const weightHistory = await db.getWeightHistory(userId);
+    for (const entry of weightHistory) {
+      await db.deleteWeightEntry(entry.id);
+    }
+
+    console.log('🗑️ [CLEAR DATA] Removing goals...');
+    const goals = await db.getUserGoals(userId);
+    for (const goal of goals) {
+      await db.deleteUserGoal(goal.id);
+    }
+
+    console.log('🗑️ [CLEAR DATA] Removing achievements...');
+    const achievements = await db.getUserAchievements(userId);
+    for (const achievement of achievements) {
+      await db.deleteUserAchievement(achievement.id);
+    }
+
+    console.log('✅ [CLEAR DATA] All user data cleared successfully');
+
+  } catch (error: any) {
+    console.error('❌ [SUPABASE AUTH] Clear data failed:', error);
+    throw new Error(`Erro ao limpar dados: ${error.message}`);
+  }
+}
+
+// Delete user account completely (from Supabase Auth AND local DB)
+export async function deleteUserAccountSupabase(userEmail: string, userId: string, supabaseAuthId?: string) {
+  console.log('🗑️ [SUPABASE AUTH] Deleting account for user:', userEmail);
+
+  let supabaseAuthDeleted = false;
+  let localDbDeleted = false;
+  const errors: string[] = [];
+
+  try {
+    // Try to delete from Supabase Auth if we have service role key and auth ID
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseAuthId) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL!;
+        
+        const supabaseAdmin = createClient(
+          supabaseUrl,
+          process.env.SUPABASE_SERVICE_ROLE_KEY,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        );
+        
+        console.log('🗑️ [SUPABASE AUTH] Deleting from Supabase Auth with ID:', supabaseAuthId);
+        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(supabaseAuthId);
+        
+        if (deleteError) {
+          console.error('❌ [SUPABASE AUTH] Error deleting from Supabase Auth:', deleteError);
+          if (deleteError.message.includes('not found')) {
+            console.log('ℹ️ [SUPABASE AUTH] User already deleted from Supabase Auth');
+            supabaseAuthDeleted = true; // User doesn't exist = successfully "deleted"
+          } else {
+            errors.push('Erro ao excluir do Supabase Auth: ' + deleteError.message);
+          }
+        } else {
+          console.log('✅ [SUPABASE AUTH] User deleted from Supabase Auth successfully');
+          supabaseAuthDeleted = true;
+        }
+      } catch (adminError: any) {
+        console.error('❌ [SUPABASE AUTH] Admin operation failed:', adminError);
+        errors.push('Erro nas operações administrativas do Supabase: ' + adminError.message);
+      }
+    } else if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('⚠️ [SUPABASE AUTH] No service role key - skipping Supabase Auth deletion');
+      errors.push('Usuário pode ainda existir no Supabase Auth (sem chave de administrador)');
+    } else if (!supabaseAuthId) {
+      console.log('⚠️ [SUPABASE AUTH] No Supabase Auth ID - skipping Supabase Auth deletion');
+      errors.push('Não foi possível identificar o ID do usuário no Supabase Auth');
+    }
+
+    // Always try to delete from local database
+    console.log('🗑️ [SUPABASE AUTH] Deleting from local database...');
+    const db = await getStorage();
+    
+    // First clear all user data
+    try {
+      await clearUserDataSupabase(userId);
+      console.log('🧹 [SUPABASE AUTH] User data cleared before account deletion');
+    } catch (clearError: any) {
+      console.error('⚠️ [SUPABASE AUTH] Error clearing user data:', clearError);
+      // Continue with account deletion even if data clearing fails
+    }
+    
+    // Then delete the user account
+    const deleted = await db.deleteUser(userId);
+    
+    if (!deleted) {
+      throw new Error('Usuário não encontrado no banco local');
+    }
+    
+    localDbDeleted = true;
+    console.log('✅ [SUPABASE AUTH] User deleted from local database successfully');
+
+    // Return success message based on what was actually deleted
+    if (supabaseAuthDeleted && localDbDeleted) {
+      console.log('✅ [SUPABASE AUTH] Account completely deleted from both systems');
+    } else if (localDbDeleted) {
+      console.log('ℹ️ [SUPABASE AUTH] Account deleted from local system only');
+    }
+
+    return {
+      supabaseAuthDeleted,
+      localDbDeleted,
+      errors
+    };
+
+  } catch (error: any) {
+    console.error('❌ [SUPABASE AUTH] Account deletion failed:', error);
     throw error;
   }
 }
