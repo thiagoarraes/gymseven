@@ -71,8 +71,30 @@ export async function registerUserSupabase(userData: RegisterUser) {
     }
 
     console.log('✅ [SUPABASE AUTH] User created successfully in Supabase Auth:', authData.user.id);
+    console.log('📧 [SUPABASE AUTH] Email confirmed:', authData.user.email_confirmed_at ? 'YES' : 'NO');
+    console.log('🔐 [SUPABASE AUTH] Session created:', authData.session ? 'YES' : 'NO');
 
-    // 2. Create user in our database (for compatibility with existing system)
+    // Determinar se precisa de confirmação
+    const needsConfirmation = !authData.session;
+    
+    if (needsConfirmation) {
+      console.log('📧 [SUPABASE AUTH] User needs email confirmation - NOT creating in local DB yet');
+      
+      return {
+        user: {
+          id: authData.user.id,
+          email: authData.user.email!,
+          username: validatedData.username,
+          firstName: validatedData.firstName,
+          lastName: validatedData.lastName,
+        },
+        session: null,
+        needsConfirmation: true,
+        message: 'Usuário criado! Verifique seu email para confirmar a conta antes de fazer login.'
+      };
+    }
+
+    // 2. Se não precisa confirmação, criar usuário no banco local
     const newUser = await db.createUser({
       email: validatedData.email,
       username: validatedData.username,
@@ -92,11 +114,58 @@ export async function registerUserSupabase(userData: RegisterUser) {
         lastName: validatedData.lastName,
       },
       session: authData.session,
-      needsConfirmation: !authData.session // If no session, user needs email confirmation
+      needsConfirmation: false
     };
 
   } catch (error: any) {
     console.error('❌ [SUPABASE AUTH] Registration failed:', error);
+    throw error;
+  }
+}
+
+// Confirm email with OTP
+export async function confirmEmailSupabase(email: string, token: string) {
+  console.log('📧 [SUPABASE AUTH] Confirming email for:', email);
+
+  try {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup'
+    });
+
+    if (error) {
+      console.error('❌ [SUPABASE AUTH] Email confirmation failed:', error);
+      throw new Error(`Erro na confirmação: ${error.message}`);
+    }
+
+    console.log('✅ [SUPABASE AUTH] Email confirmed successfully for:', email);
+
+    // Agora criar o usuário no banco local após confirmação
+    const db = await getStorage();
+    let dbUser = await db.getUserByEmail(email);
+    
+    if (!dbUser && data.user) {
+      console.log('🔄 [SUPABASE AUTH] Creating user in local DB after email confirmation...');
+      
+      dbUser = await db.createUser({
+        email: data.user.email!,
+        username: data.user.user_metadata?.username || data.user.email!.split('@')[0],
+        password: '', // Empty since Supabase handles auth
+        firstName: data.user.user_metadata?.first_name || '',
+        lastName: data.user.user_metadata?.last_name || ''
+      });
+      
+      console.log('✅ [SUPABASE AUTH] User created in local DB:', dbUser.id);
+    }
+
+    return {
+      user: dbUser,
+      session: data.session
+    };
+
+  } catch (error: any) {
+    console.error('❌ [SUPABASE AUTH] Email confirmation failed:', error);
     throw error;
   }
 }
@@ -119,6 +188,9 @@ export async function loginUserSupabase(credentials: LoginUser) {
       if (authError.message.includes('Invalid login credentials')) {
         throw new Error('Email ou senha incorretos');
       }
+      if (authError.message.includes('Email not confirmed')) {
+        throw new Error('Email não confirmado. Verifique sua caixa de entrada e confirme seu email antes de fazer login.');
+      }
       throw new Error(`Erro no login: ${authError.message}`);
     }
 
@@ -134,11 +206,13 @@ export async function loginUserSupabase(credentials: LoginUser) {
 
     // Create user in our DB if doesn't exist (migration scenario)
     if (!user) {
-      console.log('🔄 [SUPABASE AUTH] User not found in DB, creating...');
+      console.log('🔄 [SUPABASE AUTH] User not found in DB, creating for migration...');
       user = await db.createUser({
         email: authData.user.email!,
         username: authData.user.user_metadata?.username || authData.user.email!.split('@')[0],
         password: '', // Empty since Supabase handles auth
+        firstName: authData.user.user_metadata?.first_name || '',
+        lastName: authData.user.user_metadata?.last_name || ''
       });
     }
 
@@ -232,7 +306,7 @@ export async function optionalSupabaseAuth(req: AuthRequest, res: Response, next
     
     if (!error && user) {
       const db = await getStorage();
-      const dbUser = await db.getUser(user.id);
+      const dbUser = await db.getUserByEmail(user.email!);
       if (dbUser) {
         req.user = dbUser;
       }
@@ -249,14 +323,9 @@ export async function changeUserPasswordSupabase(userId: string, passwordData: a
   const validatedData = changePasswordSchema.parse(passwordData);
 
   try {
-    // For now, we need to handle this differently since Supabase requires
-    // the user to be authenticated to change password
-    // This would typically be called from a client-side authenticated context
-    
-    // For server-side password change, we'd need to use the service role key
-    // which we should avoid for security reasons in this context
-    
-    throw new Error('Mudança de senha deve ser feita pelo cliente autenticado');
+    // Para mudança de senha no Supabase, isso deve ser feito no cliente
+    // com o usuário autenticado, não no servidor
+    throw new Error('Mudança de senha deve ser feita pelo cliente autenticado usando supabase.auth.updateUser()');
   } catch (error: any) {
     console.error('❌ [SUPABASE AUTH] Password change failed:', error);
     throw error;

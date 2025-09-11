@@ -21,7 +21,7 @@ import {
   insertUserGoalSchema,
   updateUserPreferencesSchema
 } from "@shared/schema";
-import { registerUserSupabase, loginUserSupabase, changeUserPasswordSupabase, optionalSupabaseAuth } from "./auth-supabase";
+import { registerUserSupabase, loginUserSupabase, changeUserPasswordSupabase, optionalSupabaseAuth, confirmEmailSupabase } from "./auth-supabase";
 import { authenticateSupabaseToken, type AuthRequest } from "./auth-supabase";
 
 // Use Supabase authentication
@@ -111,6 +111,30 @@ export async function registerRoutes(app: Express, createServerInstance = true):
 
     app.post('/api/auth/logout', (req, res) => {
       res.json({ message: 'Logout realizado com sucesso' });
+    });
+
+    // Email confirmation endpoint
+    app.post('/api/auth/confirm', async (req, res) => {
+      try {
+        const { email, token } = req.body;
+        
+        if (!email || !token) {
+          return res.status(400).json({ message: 'Email e token s\u00e3o obrigat\u00f3rios' });
+        }
+        
+        console.log('\ud83d\udce7 [AUTH ROUTES] Email confirmation request:', { email });
+        const result = await confirmEmailSupabase(email, token);
+        
+        res.json({
+          message: 'Email confirmado com sucesso! Agora voc\u00ea pode fazer login.',
+          user: result.user,
+          token: result.session?.access_token,
+          session: result.session
+        });
+      } catch (error: any) {
+        console.error('\u274c [AUTH ROUTES] Email confirmation error:', error);
+        res.status(400).json({ message: error.message });
+      }
     });
 
     // Get current user endpoint
