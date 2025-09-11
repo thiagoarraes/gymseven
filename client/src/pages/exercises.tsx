@@ -108,6 +108,9 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     queryFn: exerciseApi.getAll,
   });
 
+  // Ensure exercises is always an array
+  const safeExercises = Array.isArray(exercises) ? exercises : [];
+
   // Fetch exercise progress data for enhanced display (optional)
   const { data: exercisesWithProgress = [] } = useQuery({
     queryKey: ["/api/v2/exercises/with-progress"],
@@ -124,10 +127,15 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   });
 
   // Merge exercises with progress data (fallback to base exercise data)
-  const enhancedExercises = exercises.map(exercise => {
+  const enhancedExercises = safeExercises.map(exercise => {
     const progressData = exercisesWithProgress.find((p: any) => p.id === exercise.id);
     return {
       ...exercise,
+      // Standardize property names - use both Portuguese and English for compatibility
+      name: exercise.nome || exercise.name,
+      nome: exercise.nome || exercise.name,
+      muscleGroup: exercise.grupoMuscular || exercise.muscleGroup,
+      grupoMuscular: exercise.grupoMuscular || exercise.muscleGroup,
       maxWeight: progressData?.maxWeight || 0,
       lastWorkout: progressData?.lastUsed || null,
       totalSessions: progressData?.totalSessions || 0
