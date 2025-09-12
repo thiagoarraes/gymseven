@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
   User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle, RotateCcw,
-  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, VolumeX
+  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, VolumeX, XCircle, CheckCircle, Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,10 +51,65 @@ export default function Profile() {
   const [deleting, setDeleting] = useState(false);
   const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
   const [clearingData, setClearingData] = useState(false);
+  
+  // Estado para controle do modal de status
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusModalData, setStatusModalData] = useState<{
+    title: string;
+    description: string;
+    status: 'active' | 'blocked' | 'unsupported';
+    icon: 'CheckCircle' | 'AlertTriangle' | 'XCircle';
+  } | null>(null);
   const { user, updateProfile, deleteAccount } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
+
+  // Função para abrir modal de status
+  const openStatusModal = (type: 'notifications' | 'sound', status: 'active' | 'blocked' | 'unsupported') => {
+    const data = {
+      notifications: {
+        active: {
+          title: 'Notificações Ativas',
+          description: 'As notificações push estão funcionando corretamente. Você receberá alertas sobre treinos, lembretes de descanso e outras informações importantes do app.',
+          icon: 'CheckCircle' as const
+        },
+        blocked: {
+          title: 'Notificações Bloqueadas',
+          description: 'Você negou a permissão para notificações. Para reativar, vá nas configurações do seu navegador, encontre este site e permita as notificações. Depois volte aqui e ative novamente.',
+          icon: 'AlertTriangle' as const
+        },
+        unsupported: {
+          title: 'Notificações Não Suportadas',
+          description: 'Seu navegador não suporta notificações push. Considere atualizar para uma versão mais recente ou usar um navegador moderno como Chrome, Firefox ou Safari.',
+          icon: 'XCircle' as const
+        }
+      },
+      sound: {
+        active: {
+          title: 'Efeitos Sonoros Ativos',
+          description: 'Os sons de feedback estão habilitados. Você ouvirá sons durante treinos, alertas de descanso e outras interações do app para uma experiência mais imersiva.',
+          icon: 'CheckCircle' as const
+        },
+        blocked: {
+          title: 'Efeitos Sonoros Desativados',
+          description: 'Os efeitos sonoros estão desligados. Você pode ativá-los a qualquer momento para receber feedback sonoro durante os treinos.',
+          icon: 'AlertTriangle' as const
+        },
+        unsupported: {
+          title: 'Áudio Não Suportado',
+          description: 'Seu navegador não suporta reprodução de áudio ou está com o áudio desabilitado. Verifique as configurações do navegador ou considere usar um navegador moderno.',
+          icon: 'XCircle' as const
+        }
+      }
+    };
+
+    setStatusModalData({
+      ...data[type][status],
+      status
+    });
+    setStatusModalOpen(true);
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Format date helpers
@@ -667,30 +722,45 @@ export default function Profile() {
                         name="notifications"
                         render={({ field }) => (
                           <FormItem className="rounded-lg border border-border p-3 sm:p-4">
-                            <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
+                                {/* Título com ícone de status */}
+                                <div className="flex items-center gap-2 mb-2">
                                   <FormLabel className="text-base text-foreground flex items-center gap-2 mb-0">
                                     <Bell className="h-4 w-4 shrink-0" />
                                     <span className="font-medium">Notificações Push</span>
                                   </FormLabel>
+                                  {/* Ícone de status clicável */}
                                   {!isSupported && (
-                                    <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
-                                      Não suportado
-                                    </span>
+                                    <button
+                                      onClick={() => openStatusModal('notifications', 'unsupported')}
+                                      className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
+                                      title="Clique para mais informações"
+                                    >
+                                      <XCircle className="h-4 w-4 text-destructive" />
+                                    </button>
                                   )}
                                   {isSupported && permission === 'denied' && (
-                                    <span className="text-xs bg-orange-500/20 text-orange-600 px-2 py-1 rounded whitespace-nowrap">
-                                      Bloqueado
-                                    </span>
+                                    <button
+                                      onClick={() => openStatusModal('notifications', 'blocked')}
+                                      className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
+                                      title="Clique para mais informações"
+                                    >
+                                      <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                    </button>
                                   )}
                                   {isSupported && permission === 'granted' && field.value && (
-                                    <span className="text-xs bg-green-500/20 text-green-600 px-2 py-1 rounded whitespace-nowrap">
-                                      Ativo
-                                    </span>
+                                    <button
+                                      onClick={() => openStatusModal('notifications', 'active')}
+                                      className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
+                                      title="Clique para mais informações"
+                                    >
+                                      <CheckCircle className="h-4 w-4 text-green-600" />
+                                    </button>
                                   )}
                                 </div>
-                                <FormDescription className="text-muted-foreground text-sm">
+                                {/* Descrição */}
+                                <FormDescription className="text-muted-foreground text-sm mb-3">
                                   {!isSupported 
                                     ? 'Seu navegador não suporta notificações push'
                                     : permission === 'denied'
@@ -699,7 +769,8 @@ export default function Profile() {
                                   }
                                 </FormDescription>
                               </div>
-                              <FormControl>
+                              {/* Botão em linha separada no mobile */}
+                              <FormControl className="w-full sm:w-auto">
                                 <Button
                                   type="button"
                                   variant={field.value && permission === 'granted' ? 'default' : 'outline'}
@@ -726,7 +797,7 @@ export default function Profile() {
                                       field.onChange(!currentValue);
                                     }
                                   }}
-                                  className={`min-w-[80px] h-9 shrink-0 font-medium transition-all ${
+                                  className={`w-full sm:min-w-[80px] h-9 shrink-0 font-medium transition-all ${
                                     field.value && permission === 'granted' 
                                       ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' 
                                       : 'bg-muted hover:bg-muted/80 text-muted-foreground border-muted'
@@ -746,40 +817,52 @@ export default function Profile() {
                         name="soundEffects"
                         render={({ field }) => (
                           <FormItem className="rounded-lg border border-border p-3 sm:p-4">
-                            <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
+                                {/* Título com ícone de status */}
+                                <div className="flex items-center gap-2 mb-2">
                                   <FormLabel className="text-base text-foreground flex items-center gap-2 mb-0">
                                     {field.value ? <Volume2 className="h-4 w-4 shrink-0" /> : <VolumeX className="h-4 w-4 shrink-0" />}
                                     <span className="font-medium">Efeitos Sonoros</span>
                                   </FormLabel>
+                                  {/* Ícone de status clicável */}
                                   {!soundEffects.isSupported && (
-                                    <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
-                                      Não suportado
-                                    </span>
+                                    <button
+                                      onClick={() => openStatusModal('sound', 'unsupported')}
+                                      className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
+                                      title="Clique para mais informações"
+                                    >
+                                      <XCircle className="h-4 w-4 text-destructive" />
+                                    </button>
                                   )}
                                   {soundEffects.isSupported && field.value && (
-                                    <span className="text-xs bg-green-500/20 text-green-600 px-2 py-1 rounded whitespace-nowrap">
-                                      Ativo
-                                    </span>
+                                    <button
+                                      onClick={() => openStatusModal('sound', 'active')}
+                                      className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
+                                      title="Clique para mais informações"
+                                    >
+                                      <CheckCircle className="h-4 w-4 text-green-600" />
+                                    </button>
                                   )}
                                 </div>
-                                <FormDescription className="text-muted-foreground text-sm">
+                                {/* Descrição */}
+                                <FormDescription className="text-muted-foreground text-sm mb-3">
                                   {soundEffects.isSupported 
                                     ? 'Sons de feedback durante treinos e descanso'
                                     : 'Seu navegador não suporta áudio'
                                   }
                                 </FormDescription>
                               </div>
-                              <FormControl>
-                                <div className="flex flex-col items-center gap-2">
+                              {/* Botões em linha separada no mobile */}
+                              <FormControl className="w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                   <Button
                                     type="button"
                                     variant={field.value && soundEffects.isSupported ? 'default' : 'outline'}
                                     size="sm"
                                     disabled={!soundEffects.isSupported}
                                     onClick={() => field.onChange(!field.value)}
-                                    className={`min-w-[80px] h-9 shrink-0 font-medium transition-all ${
+                                    className={`w-full sm:min-w-[80px] h-9 shrink-0 font-medium transition-all ${
                                       field.value && soundEffects.isSupported 
                                         ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' 
                                         : 'bg-muted hover:bg-muted/80 text-muted-foreground border-muted'
@@ -793,7 +876,7 @@ export default function Profile() {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => soundEffects.testSound()}
-                                      className="text-xs px-3 py-1 h-7 shrink-0 min-w-[60px] hover:bg-muted"
+                                      className="w-full sm:w-auto text-xs px-3 py-1 h-7 shrink-0 hover:bg-muted"
                                       data-testid="button-test-sound"
                                     >
                                       Testar
@@ -824,6 +907,28 @@ export default function Profile() {
         fileName={selectedFileName}
         onCropComplete={handleCropComplete}
       />
+
+      {/* Status Info Modal */}
+      <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {statusModalData?.icon === 'CheckCircle' && <CheckCircle className="h-5 w-5 text-green-600" />}
+              {statusModalData?.icon === 'AlertTriangle' && <AlertTriangle className="h-5 w-5 text-orange-600" />}
+              {statusModalData?.icon === 'XCircle' && <XCircle className="h-5 w-5 text-destructive" />}
+              {statusModalData?.title}
+            </DialogTitle>
+            <DialogDescription className="text-left">
+              {statusModalData?.description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button onClick={() => setStatusModalOpen(false)} variant="outline">
+              Entendi
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
