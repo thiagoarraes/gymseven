@@ -368,83 +368,83 @@ export default function WorkoutSession() {
 
       {/* Current Exercise */}
       <Card className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white">{currentExercise?.exercise?.name || currentExercise?.exerciseName || 'Exercício'}</h3>
+          <CardContent className="p-6 sm:p-8">
+            <div className="mb-6 sm:mb-8">
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">{currentExercise?.exercise?.name || currentExercise?.exerciseName || 'Exercício'}</h3>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-slate-400">{currentExercise?.exercise?.muscleGroup || 'Grupo muscular'}</p>
-                <div className="flex items-center space-x-3">
-                  <div className="bg-orange-500/15 border border-orange-500/30 rounded-lg px-3 py-1.5 flex items-center space-x-2">
+                <p className="text-sm sm:text-base text-slate-400">{currentExercise?.exercise?.muscleGroup || 'Grupo muscular'}</p>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="bg-orange-500/15 border border-orange-500/30 rounded-lg px-4 py-2.5 flex items-center space-x-2">
                     <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm font-semibold text-orange-400">
+                    <span className="text-sm sm:text-base font-semibold text-orange-400">
                       {formatTime(currentExercise?.restDurationSeconds || 90)} descanso
                     </span>
                   </div>
-                  <div className="bg-blue-500/15 border border-blue-500/30 rounded-lg px-3 py-1.5 flex items-center space-x-2">
+                  <div className="bg-blue-500/15 border border-blue-500/30 rounded-lg px-4 py-2.5 flex items-center space-x-2">
                     <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
-                    <span className="text-sm font-semibold text-blue-400">{currentExercise?.sets || 0} séries</span>
+                    <span className="text-sm sm:text-base font-semibold text-blue-400">{currentExercise?.sets || 0} séries</span>
                   </div>
                 </div>
               </div>
               {currentExercise?.exercise?.instructions && (
-                <div className="mt-2 p-2 bg-slate-800/20 rounded-lg border border-slate-700/30">
-                  <p className="text-xs text-slate-300">{currentExercise.exercise.instructions}</p>
+                <div className="mt-4 p-4 bg-slate-800/20 rounded-lg border border-slate-700/30">
+                  <p className="text-sm sm:text-base text-slate-300 leading-relaxed">{currentExercise.exercise.instructions}</p>
                 </div>
               )}
             </div>
             
             {/* Sets Tracking */}
-            <div className="space-y-3">
-              <div className="text-xs text-slate-500 uppercase tracking-wide mb-2">
+            <div className="space-y-5 sm:space-y-6">
+              <div className="text-sm sm:text-base text-slate-500 uppercase tracking-wide mb-4 font-medium">
                 Séries - {currentSetIndex + 1} de {currentExercise?.sets || 0}
               </div>
               
               {/* Current Set - Mobile Optimized */}
-              <div className="bg-slate-800/30 rounded-xl border border-blue-500/30 p-4">
+              <div className="bg-slate-800/30 rounded-xl border border-blue-500/30 p-5 sm:p-6">
                 {/* Set Number Header */}
-                <div className="flex items-center justify-center space-x-2 mb-4">
-                  <div className="w-10 h-10 bg-blue-500/20 border border-blue-500 rounded-xl flex items-center justify-center font-semibold text-blue-400">
+                <div className="flex items-center justify-center space-x-3 mb-6 sm:mb-8">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-500/20 border border-blue-500 rounded-xl flex items-center justify-center font-semibold text-blue-400 text-lg sm:text-xl">
                     {currentSetIndex + 1}
                   </div>
-                  <span className="text-sm font-medium text-slate-300">Série Atual</span>
+                  <span className="text-sm sm:text-base font-medium text-slate-300">Série Atual</span>
                 </div>
                 
                 {/* Mobile-First Input Layout */}
-                <div className="space-y-4">
+                <div className="space-y-6 sm:space-y-8">
                   {/* Weight and Reps Row */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label className="text-sm font-medium text-slate-300 block mb-2">Peso (kg)</label>
+                      <label className="text-sm sm:text-base font-medium text-slate-300 block mb-3">Peso (kg)</label>
                       <Input 
                         type="number" 
                         value={currentWeight}
                         onChange={(e) => setCurrentWeight(e.target.value)}
                         placeholder={currentExercise?.weight?.toString() || "0"}
-                        className="w-full h-14 bg-slate-800 border-slate-700 text-white text-center text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full h-14 sm:h-16 bg-slate-800 border-slate-700 text-white text-center text-lg sm:text-xl font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-xl"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300 block mb-2">Repetições</label>
+                      <label className="text-sm sm:text-base font-medium text-slate-300 block mb-3">Repetições</label>
                       <Input 
                         type="number" 
                         value={currentReps}
                         onChange={(e) => setCurrentReps(e.target.value)}
                         placeholder={currentExercise?.reps?.toString() || "12"}
-                        className="w-full h-14 bg-slate-800 border-slate-700 text-white text-center text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full h-14 sm:h-16 bg-slate-800 border-slate-700 text-white text-center text-lg sm:text-xl font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-xl"
                       />
                     </div>
                   </div>
                   
                   {/* Complete Button */}
                   <Button
-                    className="w-full h-14 gradient-accent rounded-xl font-semibold text-white hover:scale-105 transition-transform touch-feedback text-lg"
+                    className="w-full h-14 sm:h-16 gradient-accent rounded-xl font-semibold text-white hover:scale-105 transition-transform touch-feedback text-lg sm:text-xl"
                     onClick={handleCompleteSet}
                   >
-                    <Check className="w-6 h-6 mr-2" />
+                    <Check className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                     Concluir Série
                   </Button>
                 </div>
@@ -452,15 +452,15 @@ export default function WorkoutSession() {
 
               {/* Upcoming Sets Preview - Simplified for Mobile */}
               {Array.from({ length: Math.min(2, (currentExercise?.sets || 0) - currentSetIndex - 1) }).map((_, index) => (
-                <div key={index} className="bg-slate-800/20 rounded-xl border border-slate-700/30 p-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-8 h-8 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center font-semibold text-slate-500 text-sm">
+                <div key={index} className="bg-slate-800/20 rounded-xl border border-slate-700/30 p-5 sm:p-6">
+                  <div className="flex items-center space-x-3 mb-4 sm:mb-5">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center font-semibold text-slate-500 text-sm sm:text-base">
                       {currentSetIndex + index + 2}
                     </div>
-                    <span className="text-sm font-medium text-slate-500">Próxima Série</span>
+                    <span className="text-sm sm:text-base font-medium text-slate-500">Próxima Série</span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-4">
                     <div>
                       <label className="text-sm text-slate-500 block mb-1">Peso (kg)</label>
                       <div className="w-full h-12 bg-slate-800/50 border border-slate-700/50 rounded-lg flex items-center justify-center text-slate-500 text-center font-semibold">
@@ -480,23 +480,23 @@ export default function WorkoutSession() {
             
             {/* Rest Timer */}
             {hasCompletedFirstSet && restTimer > 0 && (
-              <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
-                <div className="flex items-center justify-between mb-3">
+              <div className="mt-8 p-5 sm:p-6 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+                <div className="flex items-center justify-between mb-4 sm:mb-5">
                   <div>
-                    <div className="text-sm text-orange-400 font-medium">Descanso</div>
-                    <div className="text-xs text-slate-400">Entre séries</div>
+                    <div className="text-sm sm:text-base text-orange-400 font-medium">Descanso</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Entre séries</div>
                   </div>
-                  <div className="text-2xl font-bold text-orange-400">{formatTime(restTimer)}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-orange-400">{formatTime(restTimer)}</div>
                 </div>
                 <Progress 
                   value={((templateExercises[currentExerciseIndex]?.restDurationSeconds || 90) - restTimer) / (templateExercises[currentExerciseIndex]?.restDurationSeconds || 90) * 100}
-                  className="w-full mb-3 h-2"
+                  className="w-full mb-4 sm:mb-5 h-2 sm:h-3"
                 />
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center justify-center space-x-3 sm:space-x-4">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-3 bg-slate-800/50 border-orange-500/30 text-orange-400 hover:bg-orange-500/20"
+                    className="h-10 sm:h-12 px-4 sm:px-5 bg-slate-800/50 border-orange-500/30 text-orange-400 hover:bg-orange-500/20 text-sm sm:text-base"
                     onClick={() => setRestTimer(prev => Math.max(0, prev - 15))}
                   >
                     -15s
@@ -504,7 +504,7 @@ export default function WorkoutSession() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-3 bg-slate-800/50 border-orange-500/30 text-orange-400 hover:bg-orange-500/20"
+                    className="h-10 sm:h-12 px-4 sm:px-5 bg-slate-800/50 border-orange-500/30 text-orange-400 hover:bg-orange-500/20 text-sm sm:text-base"
                     onClick={() => setRestTimer(prev => prev + 15)}
                   >
                     +15s
@@ -512,7 +512,7 @@ export default function WorkoutSession() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-3 bg-slate-800/50 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                    className="h-10 sm:h-12 px-4 sm:px-5 bg-slate-800/50 border-red-500/30 text-red-400 hover:bg-red-500/20 text-sm sm:text-base"
                     onClick={() => setRestTimer(0)}
                   >
                     Pular
