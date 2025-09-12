@@ -718,33 +718,41 @@ export default function Profile() {
                                 </FormDescription>
                               </div>
                               <FormControl>
-                                <div className="flex items-center justify-center">
-                                  <Switch
-                                    checked={field.value && permission === 'granted'}
-                                    disabled={!isSupported}
-                                    onCheckedChange={async (checked) => {
-                                      if (checked && permission !== 'granted') {
-                                        const granted = await requestPermission();
-                                        if (granted) {
-                                          field.onChange(true);
-                                          // Testar notificação
-                                          setTimeout(() => {
-                                            sendNotification({
-                                              title: '🎉 Notificações ativadas!',
-                                              body: 'Você receberá alertas sobre seus treinos.',
-                                              tag: 'welcome-notification'
-                                            });
-                                          }, 1000);
-                                        } else {
-                                          field.onChange(false);
-                                        }
+                                <Button
+                                  type="button"
+                                  variant={field.value && permission === 'granted' ? 'default' : 'outline'}
+                                  size="sm"
+                                  disabled={!isSupported}
+                                  onClick={async () => {
+                                    const currentValue = field.value && permission === 'granted';
+                                    if (!currentValue && permission !== 'granted') {
+                                      const granted = await requestPermission();
+                                      if (granted) {
+                                        field.onChange(true);
+                                        // Testar notificação
+                                        setTimeout(() => {
+                                          sendNotification({
+                                            title: '🎉 Notificações ativadas!',
+                                            body: 'Você receberá alertas sobre seus treinos.',
+                                            tag: 'welcome-notification'
+                                          });
+                                        }, 1000);
                                       } else {
-                                        field.onChange(checked);
+                                        field.onChange(false);
                                       }
-                                    }}
-                                    className="shrink-0 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
-                                  />
-                                </div>
+                                    } else {
+                                      field.onChange(!currentValue);
+                                    }
+                                  }}
+                                  className={`min-w-[80px] h-9 shrink-0 font-medium transition-all ${
+                                    field.value && permission === 'granted' 
+                                      ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' 
+                                      : 'bg-muted hover:bg-muted/80 text-muted-foreground border-muted'
+                                  }`}
+                                  data-testid="toggle-notifications"
+                                >
+                                  {field.value && permission === 'granted' ? 'Ativo' : 'Inativo'}
+                                </Button>
                               </FormControl>
                             </div>
                           </FormItem>
@@ -783,18 +791,27 @@ export default function Profile() {
                               </div>
                               <FormControl>
                                 <div className="flex flex-col items-center gap-2">
-                                  <Switch
-                                    checked={field.value && soundEffects.isSupported}
+                                  <Button
+                                    type="button"
+                                    variant={field.value && soundEffects.isSupported ? 'default' : 'outline'}
+                                    size="sm"
                                     disabled={!soundEffects.isSupported}
-                                    onCheckedChange={field.onChange}
-                                    className="shrink-0 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
-                                  />
+                                    onClick={() => field.onChange(!field.value)}
+                                    className={`min-w-[80px] h-9 shrink-0 font-medium transition-all ${
+                                      field.value && soundEffects.isSupported 
+                                        ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' 
+                                        : 'bg-muted hover:bg-muted/80 text-muted-foreground border-muted'
+                                    }`}
+                                    data-testid="toggle-sound-effects"
+                                  >
+                                    {field.value && soundEffects.isSupported ? 'Ativo' : 'Inativo'}
+                                  </Button>
                                   {field.value && soundEffects.isSupported && (
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => soundEffects.testSound()}
-                                      className="text-xs px-2 py-1 h-6 shrink-0 min-w-0"
+                                      className="text-xs px-3 py-1 h-7 shrink-0 min-w-[60px] hover:bg-muted"
                                       data-testid="button-test-sound"
                                     >
                                       Testar
