@@ -33,7 +33,7 @@ import {
   Calendar
 } from "lucide-react";
 import { Reorder } from "framer-motion";
-import { workoutTemplateApi } from "@/lib/api";
+import { workoutTemplateApi, exerciseApi } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/auth-context-new";
 
@@ -154,7 +154,10 @@ export default function WorkoutTemplateEditor() {
   });
 
   const { data: allExercises = [] } = useQuery({
-    queryKey: ["/api/v2/exercises"],
+    queryKey: ["exercises"],
+    queryFn: exerciseApi.getAll,
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnMount: true,
   });
 
   // Mutations
