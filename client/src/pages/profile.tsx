@@ -669,23 +669,23 @@ export default function Profile() {
                           <FormItem className="rounded-lg border border-border p-3 sm:p-4">
                             <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
                               <div className="flex-1 min-w-0">
-                                <FormLabel className="text-base text-foreground flex items-center gap-2 mb-1">
-                                  <Bell className="h-4 w-4 shrink-0" />
-                                  <span className="font-medium">Notificações Push</span>
-                                </FormLabel>
-                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <FormLabel className="text-base text-foreground flex items-center gap-2 mb-0">
+                                    <Bell className="h-4 w-4 shrink-0" />
+                                    <span className="font-medium">Notificações Push</span>
+                                  </FormLabel>
                                   {!isSupported && (
                                     <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
                                       Não suportado
                                     </span>
                                   )}
                                   {isSupported && permission === 'denied' && (
-                                    <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
+                                    <span className="text-xs bg-orange-500/20 text-orange-600 px-2 py-1 rounded whitespace-nowrap">
                                       Bloqueado
                                     </span>
                                   )}
                                   {isSupported && permission === 'granted' && field.value && (
-                                    <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
+                                    <span className="text-xs bg-green-500/20 text-green-600 px-2 py-1 rounded whitespace-nowrap">
                                       Ativo
                                     </span>
                                   )}
@@ -748,18 +748,18 @@ export default function Profile() {
                           <FormItem className="rounded-lg border border-border p-3 sm:p-4">
                             <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
                               <div className="flex-1 min-w-0">
-                                <FormLabel className="text-base text-foreground flex items-center gap-2 mb-1">
-                                  {field.value ? <Volume2 className="h-4 w-4 shrink-0" /> : <VolumeX className="h-4 w-4 shrink-0" />}
-                                  <span className="font-medium">Efeitos Sonoros</span>
-                                </FormLabel>
-                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <FormLabel className="text-base text-foreground flex items-center gap-2 mb-0">
+                                    {field.value ? <Volume2 className="h-4 w-4 shrink-0" /> : <VolumeX className="h-4 w-4 shrink-0" />}
+                                    <span className="font-medium">Efeitos Sonoros</span>
+                                  </FormLabel>
                                   {!soundEffects.isSupported && (
                                     <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
                                       Não suportado
                                     </span>
                                   )}
                                   {soundEffects.isSupported && field.value && (
-                                    <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
+                                    <span className="text-xs bg-green-500/20 text-green-600 px-2 py-1 rounded whitespace-nowrap">
                                       Ativo
                                     </span>
                                   )}
