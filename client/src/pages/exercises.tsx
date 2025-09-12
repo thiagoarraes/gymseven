@@ -104,8 +104,15 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const queryClient = useQueryClient();
 
   const { data: exercises = [], isLoading } = useQuery({
-    queryKey: ["/api/v2/exercises"],
-    queryFn: exerciseApi.getAll,
+    queryKey: ["exercises"],
+    queryFn: async () => {
+      console.log("🔍 Fetching exercises from API...");
+      const result = await exerciseApi.getAll();
+      console.log("✅ Exercises received:", result);
+      return result;
+    },
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnMount: true,
   });
 
   // Ensure exercises is always an array
@@ -113,17 +120,19 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
 
   // Fetch exercise progress data for enhanced display (optional)
   const { data: exercisesWithProgress = [] } = useQuery({
-    queryKey: ["/api/v2/exercises/with-progress"],
+    queryKey: ["exercises", "with-progress"],
     queryFn: exerciseProgressApi.getExercisesWithProgress,
     retry: false, // Don't retry if this fails
-    refetchOnMount: false, // Don't refetch on mount
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnMount: true,
   });
 
   // Fetch weight history for expanded exercise
   const { data: weightHistory = [], isLoading: weightHistoryLoading } = useQuery({
-    queryKey: ["/api/v2/exercises", expandedExercise, "weight-history"],
+    queryKey: ["exercises", expandedExercise, "weight-history"],
     queryFn: () => expandedExercise ? exerciseProgressApi.getWeightHistory(expandedExercise, 8) : [],
     enabled: !!expandedExercise,
+    staleTime: 1000 * 60, // 1 minute
   });
 
   // Merge exercises with progress data (fallback to base exercise data)
@@ -146,8 +155,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     mutationFn: exerciseApi.create,
     onSuccess: () => {
       // Invalidate both exercise queries to ensure UI updates
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises/with-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises", "with-progress"] });
       setIsDialogOpen(false);
       resetForm();
       toast({
@@ -168,8 +177,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
     mutationFn: ({ id, data }: { id: string; data: Partial<ExerciseFormValues> }) =>
       exerciseApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises/with-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises", "with-progress"] });
       setIsDialogOpen(false);
       setEditingExercise(null);
       toast({
@@ -182,8 +191,8 @@ export default function Exercises({ selectionMode = false, selectedExercises = [
   const deleteMutation = useMutation({
     mutationFn: exerciseApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/v2/exercises/with-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises", "with-progress"] });
       toast({
         title: "Exercício excluído!",
         description: "O exercício foi removido com sucesso.",
