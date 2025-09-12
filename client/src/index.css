@@ -117,13 +117,19 @@
 @layer utilities {
   /* Mobile-first optimizations */
   .mobile-container {
-    @apply px-4 sm:px-6 lg:px-8;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    @apply px-3 sm:px-6 lg:px-8;
   }
   
   .mobile-spacing {
     @apply space-y-2 sm:space-y-3;
+  }
+  
+  .touch-feedback {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+  
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
   
   .mobile-card-padding {

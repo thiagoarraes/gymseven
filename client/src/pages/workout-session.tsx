@@ -312,10 +312,10 @@ export default function WorkoutSession() {
     : 0;
 
   return (
-    <div className="container mx-auto px-4 space-y-4">
+    <div className="container mx-auto px-2 sm:px-4 space-y-3 sm:space-y-4 pb-safe">
       {/* Workout Header */}
       <Card className="glass-card rounded-2xl">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold text-white">{workoutLog.nome}</h2>
@@ -344,15 +344,15 @@ export default function WorkoutSession() {
             className="w-full mb-4 h-2"
           />
           
-          {/* Quick Actions */}
-          <div className="flex space-x-3">
+          {/* Quick Actions - Mobile Optimized */}
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Button
               variant="outline"
-              className="flex-1 glass-card border-slate-700 py-2 rounded-lg font-medium text-slate-300"
+              className="flex-1 glass-card border-slate-700 py-3 rounded-lg font-medium text-slate-300 touch-feedback min-h-[48px]"
               onClick={() => setIsPaused(!isPaused)}
             >
-              {isPaused ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
-              {isPaused ? "Continuar" : "Pausar"}
+              {isPaused ? <Play className="w-5 h-5 mr-2" /> : <Pause className="w-5 h-5 mr-2" />}
+              {isPaused ? "Continuar Treino" : "Pausar Treino"}
             </Button>
             <Button
               variant="outline"
@@ -403,73 +403,75 @@ export default function WorkoutSession() {
                 Séries - {currentSetIndex + 1} de {currentExercise?.sets || 0}
               </div>
               
-              {/* Current Set */}
-              <div className="flex items-center space-x-3 p-3 bg-slate-800/30 rounded-xl border border-blue-500/30">
-                <div className="w-8 h-8 bg-blue-500/20 border border-blue-500 rounded-lg flex items-center justify-center font-semibold text-blue-400 text-sm">
-                  {currentSetIndex + 1}
+              {/* Current Set - Mobile Optimized */}
+              <div className="bg-slate-800/30 rounded-xl border border-blue-500/30 p-4">
+                {/* Set Number Header */}
+                <div className="flex items-center justify-center space-x-2 mb-4">
+                  <div className="w-10 h-10 bg-blue-500/20 border border-blue-500 rounded-xl flex items-center justify-center font-semibold text-blue-400">
+                    {currentSetIndex + 1}
+                  </div>
+                  <span className="text-sm font-medium text-slate-300">Série Atual</span>
                 </div>
-                <div className="flex-1 grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-xs text-slate-400 block mb-1">Peso (kg)</label>
-                    <Input 
-                      type="number" 
-                      value={currentWeight}
-                      onChange={(e) => setCurrentWeight(e.target.value)}
-                      placeholder={currentExercise?.weight?.toString() || "0"}
-                      className="w-full bg-slate-800 border-slate-700 text-white text-center"
-                    />
+                
+                {/* Mobile-First Input Layout */}
+                <div className="space-y-4">
+                  {/* Weight and Reps Row */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-slate-300 block mb-2">Peso (kg)</label>
+                      <Input 
+                        type="number" 
+                        value={currentWeight}
+                        onChange={(e) => setCurrentWeight(e.target.value)}
+                        placeholder={currentExercise?.weight?.toString() || "0"}
+                        className="w-full h-14 bg-slate-800 border-slate-700 text-white text-center text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-300 block mb-2">Repetições</label>
+                      <Input 
+                        type="number" 
+                        value={currentReps}
+                        onChange={(e) => setCurrentReps(e.target.value)}
+                        placeholder={currentExercise?.reps?.toString() || "12"}
+                        className="w-full h-14 bg-slate-800 border-slate-700 text-white text-center text-lg font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-xs text-slate-400 block mb-1">Reps</label>
-                    <Input 
-                      type="number" 
-                      value={currentReps}
-                      onChange={(e) => setCurrentReps(e.target.value)}
-                      placeholder={currentExercise?.reps?.toString() || "12"}
-                      className="w-full bg-slate-800 border-slate-700 text-white text-center"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button
-                      className="w-full gradient-accent py-2 rounded-lg font-semibold text-white hover:scale-105 transition-transform"
-                      onClick={handleCompleteSet}
-                    >
-                      <Check className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  
+                  {/* Complete Button */}
+                  <Button
+                    className="w-full h-14 gradient-accent rounded-xl font-semibold text-white hover:scale-105 transition-transform touch-feedback text-lg"
+                    onClick={handleCompleteSet}
+                  >
+                    <Check className="w-6 h-6 mr-2" />
+                    Concluir Série
+                  </Button>
                 </div>
               </div>
 
-              {/* Upcoming Sets Preview */}
+              {/* Upcoming Sets Preview - Simplified for Mobile */}
               {Array.from({ length: Math.min(2, (currentExercise?.sets || 0) - currentSetIndex - 1) }).map((_, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 bg-slate-800/20 rounded-xl border border-slate-700/30">
-                  <div className="w-8 h-8 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center font-semibold text-slate-500 text-sm">
-                    {currentSetIndex + index + 2}
+                <div key={index} className="bg-slate-800/20 rounded-xl border border-slate-700/30 p-4">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-8 h-8 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center font-semibold text-slate-500 text-sm">
+                      {currentSetIndex + index + 2}
+                    </div>
+                    <span className="text-sm font-medium text-slate-500">Próxima Série</span>
                   </div>
-                  <div className="flex-1 grid grid-cols-3 gap-3">
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="text-xs text-slate-500 block mb-1">Peso (kg)</label>
-                      <Input 
-                        disabled 
-                        value={currentExercise?.weight?.toString() || ""}
-                        className="w-full bg-slate-800/50 border-slate-700/50 text-slate-500 text-center" 
-                      />
+                      <label className="text-sm text-slate-500 block mb-1">Peso (kg)</label>
+                      <div className="w-full h-12 bg-slate-800/50 border border-slate-700/50 rounded-lg flex items-center justify-center text-slate-500 text-center font-semibold">
+                        {currentExercise?.weight?.toString() || "0"}
+                      </div>
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500 block mb-1">Reps</label>
-                      <Input 
-                        disabled 
-                        value={currentExercise?.reps?.toString() || ""}
-                        className="w-full bg-slate-800/50 border-slate-700/50 text-slate-500 text-center" 
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button 
-                        disabled 
-                        className="w-full bg-slate-800/50 border-slate-700/50 py-2 rounded-lg font-semibold text-slate-600"
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
+                      <label className="text-sm text-slate-500 block mb-1">Repetições</label>
+                      <div className="w-full h-12 bg-slate-800/50 border border-slate-700/50 rounded-lg flex items-center justify-center text-slate-500 text-center font-semibold">
+                        {currentExercise?.reps?.toString() || "12"}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -686,24 +688,26 @@ export default function WorkoutSession() {
         </Card>
 
 
-      {/* Navigation */}
-      <div className="flex space-x-3">
+      {/* Navigation - Mobile Optimized */}
+      <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 sticky bottom-4 z-10">
         <Button
           variant="outline"
-          className="flex-1 glass-card border-slate-700 py-4 rounded-xl font-semibold text-slate-300"
+          className="flex-1 glass-card border-slate-700 py-4 sm:py-4 rounded-xl font-semibold text-slate-300 touch-feedback min-h-[56px] backdrop-blur-lg"
           onClick={handlePrevExercise}
           disabled={currentExerciseIndex === 0}
         >
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Anterior
+          <ChevronLeft className="w-5 h-5 mr-2" />
+          <span className="hidden sm:inline">Anterior</span>
+          <span className="sm:hidden">Exercício Anterior</span>
         </Button>
         <Button
-          className="flex-1 gradient-accent py-4 rounded-xl font-semibold text-white hover:scale-105 transition-transform"
+          className="flex-1 gradient-accent py-4 sm:py-4 rounded-xl font-semibold text-white hover:scale-105 transition-transform touch-feedback min-h-[56px] backdrop-blur-lg"
           onClick={handleNextExercise}
           disabled={currentExerciseIndex >= templateExercises.length - 1}
         >
-          Próximo
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <span className="hidden sm:inline">Próximo</span>
+          <span className="sm:hidden">Próximo Exercício</span>
+          <ChevronRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
 
