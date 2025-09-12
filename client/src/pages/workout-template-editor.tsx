@@ -812,37 +812,39 @@ export default function WorkoutTemplateEditor() {
             {reorderedExercises.map((exercise: any, index: number) => (
               <Card key={exercise.id} className="bg-gradient-to-br from-slate-800/80 via-slate-800/70 to-blue-900/20 border-slate-600/40 rounded-2xl hover:border-slate-500/60 transition-all duration-300 group shadow-xl hover:shadow-2xl">
                 <CardContent className="p-6">
-                  {/* Exercise Header - Clean and Spacious */}
-                  <div className="flex items-start gap-4 mb-6">
-                    {/* Exercise Number Badge */}
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
-                      <span className="font-bold text-blue-400">{index + 1}</span>
-                    </div>
-                    
-                    {/* Exercise Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-2xl font-bold text-white leading-tight exercise-name mb-2">
-                        {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
-                      </h3>
-                      <div className="mt-1">
-                        {(() => {
-                          const groupInfo = getMuscleGroupInfo(exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular');
-                          return (
-                            <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
-                              <span className="text-xs font-semibold tracking-wide">
-                                {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
-                              </span>
-                            </div>
-                          );
-                        })()}
+                  {/* Exercise Header - Optimized Layout */}
+                  <div className="relative mb-6">
+                    <div className="flex items-start gap-3 pr-12">
+                      {/* Exercise Number Badge - Smaller */}
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                        <span className="font-bold text-blue-400 text-sm">{index + 1}</span>
+                      </div>
+                      
+                      {/* Exercise Info - Full Width */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-2xl font-bold text-white leading-tight exercise-name mb-2">
+                          {exercise.exercise?.name || exercise.name || 'Exercício sem nome'}
+                        </h3>
+                        <div className="mt-1">
+                          {(() => {
+                            const groupInfo = getMuscleGroupInfo(exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular');
+                            return (
+                              <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
+                                <span className="text-xs font-semibold tracking-wide">
+                                  {exercise.exercise?.muscleGroup || exercise.muscleGroup || 'Grupo muscular'}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                     
-                    {/* Remove Button */}
+                    {/* Remove Button - Positioned Absolutely */}
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
+                      className="absolute top-0 right-0 w-9 h-9 p-0 hover:bg-red-500/20 rounded-xl transition-all duration-200 opacity-0 group-hover:opacity-70 hover:!opacity-100"
                       onClick={() => handleRemoveExercise(exercise.id)}
                       title="Remover exercício"
                     >
