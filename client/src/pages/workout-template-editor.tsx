@@ -1165,14 +1165,14 @@ export default function WorkoutTemplateEditor() {
             </div>
             
             {/* Filter Row */}
-            <div className="flex items-center gap-3 mb-4">
-              <Filter className="w-4 h-4 text-slate-400" />
+            <div className="mb-4">
               <select 
                 value={muscleGroupFilter} 
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="bg-slate-800/80 border border-slate-600/60 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 min-w-[140px] flex-1"
+                className="w-full bg-gradient-to-r from-slate-800/90 to-slate-700/90 border border-slate-600/60 text-white rounded-xl px-5 py-3.5 text-base font-medium focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 shadow-lg backdrop-blur-sm transition-all duration-200 hover:from-slate-700/90 hover:to-slate-600/90 hover:border-slate-500/70 cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 20 20\"><path stroke=\"%236B7280\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\" d=\"M6 8l4 4 4-4\"/></svg>')] bg-no-repeat bg-[length:20px_20px] bg-[right_16px_center]"
+                style={{ backgroundPosition: 'right 16px center' }}
               >
-                <option value="all">Todos os grupos</option>
+                <option value="all">🎯 Filtrar por grupo muscular - Todos os grupos</option>
                 {(() => {
                   // Normalize and collect unique muscle groups
                   const allGroups = Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => {
@@ -1193,8 +1193,23 @@ export default function WorkoutTemplateEditor() {
                   }).filter(Boolean) : [];
                   
                   const uniqueGroups = Array.from(new Set(allGroups)).sort();
+                  const groupEmojis = {
+                    'Peito': '💪',
+                    'Costas': '🏋️',
+                    'Ombros': '🤲',
+                    'Bíceps': '💪',
+                    'Tríceps': '💪',
+                    'Pernas': '🦵',
+                    'Glúteos': '🍑',
+                    'Abdômen': '🔥',
+                    'Cardio': '❤️',
+                    'Antebraços': '✊'
+                  };
+                  
                   return uniqueGroups.map((group: string) => (
-                    <option key={group} value={group}>{group}</option>
+                    <option key={group} value={group}>
+                      {groupEmojis[group as keyof typeof groupEmojis] || '🔸'} {group}
+                    </option>
                   ));
                 })()}
               </select>
