@@ -654,27 +654,9 @@ export default function Profile() {
               {/* Notifications */}
               <Card className="glassmorphism mb-4">
                 <CardHeader>
-                  <CardTitle className="text-foreground flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Bell className="mr-2 h-5 w-5" />
-                      Notificações
-                    </div>
-                    {isSupported && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          sendNotification({
-                            title: '🧪 Teste de notificação',
-                            body: 'Se você viu isso, as notificações estão funcionando!',
-                            tag: 'test-notification'
-                          });
-                        }}
-                        disabled={permission !== 'granted'}
-                      >
-                        Testar
-                      </Button>
-                    )}
+                  <CardTitle className="text-foreground flex items-center">
+                    <Bell className="mr-2 h-5 w-5" />
+                    Notificações
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
