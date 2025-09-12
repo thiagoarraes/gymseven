@@ -1152,25 +1152,25 @@ export default function WorkoutTemplateEditor() {
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
         <DialogContent className="max-w-[96vw] sm:max-w-3xl lg:max-w-5xl h-[92vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col p-3 sm:p-4">
-          <DialogHeader className="flex-shrink-0 pb-2 pr-10">
+          <DialogHeader className="flex-shrink-0 pb-4 pr-10 pt-2">
             {/* Title Row */}
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+            <div className="flex items-center space-x-4 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
                 <Dumbbell className="w-4 h-4 text-blue-400" />
               </div>
               <div>
-                <DialogTitle className="text-white text-lg font-bold leading-none">Escolher Exercícios</DialogTitle>
-                <p className="text-slate-400 text-xs mt-1">Selecione exercícios para adicionar</p>
+                <DialogTitle className="text-white text-xl font-bold leading-tight">Escolher Exercícios</DialogTitle>
+                <p className="text-slate-400 text-sm mt-1.5">Selecione exercícios para adicionar</p>
               </div>
             </div>
             
             {/* Filter Row */}
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-3 mb-4">
               <Filter className="w-4 h-4 text-slate-400" />
               <select 
                 value={muscleGroupFilter} 
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="bg-slate-800/80 border border-slate-600/60 text-white rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 min-w-[140px] flex-1"
+                className="bg-slate-800/80 border border-slate-600/60 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 min-w-[140px] flex-1"
               >
                 <option value="all">Todos os grupos</option>
                 {(() => {
