@@ -684,63 +684,69 @@ export default function Profile() {
                         control={preferencesForm.control}
                         name="notifications"
                         render={({ field }) => (
-                          <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border p-4 space-y-3 sm:space-y-0">
-                            <div className="space-y-1 flex-1">
-                              <FormLabel className="text-base text-foreground flex items-center flex-wrap gap-2">
-                                <Bell className="h-4 w-4 shrink-0" />
-                                <span>Notificações Push</span>
-                                {!isSupported && (
-                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
-                                    Não suportado
-                                  </span>
-                                )}
-                                {isSupported && permission === 'denied' && (
-                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
-                                    Bloqueado
-                                  </span>
-                                )}
-                                {isSupported && permission === 'granted' && field.value && (
-                                  <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
-                                    Ativo
-                                  </span>
-                                )}
-                              </FormLabel>
-                              <FormDescription className="text-muted-foreground text-sm">
-                                {!isSupported 
-                                  ? 'Seu navegador não suporta notificações push'
-                                  : permission === 'denied'
-                                  ? 'Ative as notificações nas configurações do navegador'
-                                  : 'Receba lembretes sobre treinos e descanso'
-                                }
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value && permission === 'granted'}
-                                disabled={!isSupported}
-                                onCheckedChange={async (checked) => {
-                                  if (checked && permission !== 'granted') {
-                                    const granted = await requestPermission();
-                                    if (granted) {
-                                      field.onChange(true);
-                                      // Testar notificação
-                                      setTimeout(() => {
-                                        sendNotification({
-                                          title: '🎉 Notificações ativadas!',
-                                          body: 'Você receberá alertas sobre seus treinos.',
-                                          tag: 'welcome-notification'
-                                        });
-                                      }, 1000);
-                                    } else {
-                                      field.onChange(false);
-                                    }
-                                  } else {
-                                    field.onChange(checked);
+                          <FormItem className="rounded-lg border border-border p-3 sm:p-4">
+                            <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+                              <div className="flex-1 min-w-0">
+                                <FormLabel className="text-base text-foreground flex items-center gap-2 mb-1">
+                                  <Bell className="h-4 w-4 shrink-0" />
+                                  <span className="font-medium">Notificações Push</span>
+                                </FormLabel>
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                  {!isSupported && (
+                                    <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
+                                      Não suportado
+                                    </span>
+                                  )}
+                                  {isSupported && permission === 'denied' && (
+                                    <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
+                                      Bloqueado
+                                    </span>
+                                  )}
+                                  {isSupported && permission === 'granted' && field.value && (
+                                    <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
+                                      Ativo
+                                    </span>
+                                  )}
+                                </div>
+                                <FormDescription className="text-muted-foreground text-sm">
+                                  {!isSupported 
+                                    ? 'Seu navegador não suporta notificações push'
+                                    : permission === 'denied'
+                                    ? 'Ative as notificações nas configurações do navegador'
+                                    : 'Receba lembretes sobre treinos e descanso'
                                   }
-                                }}
-                                className="shrink-0"
-                              />
-                            </FormControl>
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <div className="flex items-center justify-center">
+                                  <Switch
+                                    checked={field.value && permission === 'granted'}
+                                    disabled={!isSupported}
+                                    onCheckedChange={async (checked) => {
+                                      if (checked && permission !== 'granted') {
+                                        const granted = await requestPermission();
+                                        if (granted) {
+                                          field.onChange(true);
+                                          // Testar notificação
+                                          setTimeout(() => {
+                                            sendNotification({
+                                              title: '🎉 Notificações ativadas!',
+                                              body: 'Você receberá alertas sobre seus treinos.',
+                                              tag: 'welcome-notification'
+                                            });
+                                          }, 1000);
+                                        } else {
+                                          field.onChange(false);
+                                        }
+                                      } else {
+                                        field.onChange(checked);
+                                      }
+                                    }}
+                                    className="shrink-0 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                                  />
+                                </div>
+                              </FormControl>
+                            </div>
                           </FormItem>
                         )}
                       />
@@ -749,50 +755,54 @@ export default function Profile() {
                         control={preferencesForm.control}
                         name="soundEffects"
                         render={({ field }) => (
-                          <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border p-4 space-y-3 sm:space-y-0">
-                            <div className="space-y-1 flex-1">
-                              <FormLabel className="text-base text-foreground flex items-center flex-wrap gap-2">
-                                {field.value ? <Volume2 className="h-4 w-4 shrink-0" /> : <VolumeX className="h-4 w-4 shrink-0" />}
-                                <span>Efeitos Sonoros</span>
-                                {!soundEffects.isSupported && (
-                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
-                                    Não suportado
-                                  </span>
-                                )}
-                                {soundEffects.isSupported && field.value && (
-                                  <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
-                                    Ativo
-                                  </span>
-                                )}
-                              </FormLabel>
-                              <FormDescription className="text-muted-foreground text-sm">
-                                {soundEffects.isSupported 
-                                  ? 'Sons de feedback durante treinos e descanso'
-                                  : 'Seu navegador não suporta áudio'
-                                }
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto sm:flex-shrink-0">
-                                <Switch
-                                  checked={field.value && soundEffects.isSupported}
-                                  disabled={!soundEffects.isSupported}
-                                  onCheckedChange={field.onChange}
-                                  className="shrink-0"
-                                />
-                                {field.value && soundEffects.isSupported && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => soundEffects.testSound()}
-                                    className="text-xs px-3 py-1 h-7 shrink-0 w-full sm:w-auto"
-                                    data-testid="button-test-sound"
-                                  >
-                                    Testar
-                                  </Button>
-                                )}
+                          <FormItem className="rounded-lg border border-border p-3 sm:p-4">
+                            <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+                              <div className="flex-1 min-w-0">
+                                <FormLabel className="text-base text-foreground flex items-center gap-2 mb-1">
+                                  {field.value ? <Volume2 className="h-4 w-4 shrink-0" /> : <VolumeX className="h-4 w-4 shrink-0" />}
+                                  <span className="font-medium">Efeitos Sonoros</span>
+                                </FormLabel>
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                  {!soundEffects.isSupported && (
+                                    <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
+                                      Não suportado
+                                    </span>
+                                  )}
+                                  {soundEffects.isSupported && field.value && (
+                                    <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
+                                      Ativo
+                                    </span>
+                                  )}
+                                </div>
+                                <FormDescription className="text-muted-foreground text-sm">
+                                  {soundEffects.isSupported 
+                                    ? 'Sons de feedback durante treinos e descanso'
+                                    : 'Seu navegador não suporta áudio'
+                                  }
+                                </FormDescription>
                               </div>
-                            </FormControl>
+                              <FormControl>
+                                <div className="flex flex-col items-center gap-2">
+                                  <Switch
+                                    checked={field.value && soundEffects.isSupported}
+                                    disabled={!soundEffects.isSupported}
+                                    onCheckedChange={field.onChange}
+                                    className="shrink-0 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                                  />
+                                  {field.value && soundEffects.isSupported && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => soundEffects.testSound()}
+                                      className="text-xs px-2 py-1 h-6 shrink-0 min-w-0"
+                                      data-testid="button-test-sound"
+                                    >
+                                      Testar
+                                    </Button>
+                                  )}
+                                </div>
+                              </FormControl>
+                            </div>
                           </FormItem>
                         )}
                       />
