@@ -1149,14 +1149,14 @@ export default function WorkoutTemplateEditor() {
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
         <DialogContent className="max-w-[96vw] sm:max-w-2xl lg:max-w-4xl max-h-[88vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col p-4 sm:p-6">
-          <DialogHeader className="flex-shrink-0 pb-3 sm:pb-4">
-            <div className="flex items-center space-x-3 mb-3">
+          <DialogHeader className="flex-shrink-0 pb-3 sm:pb-4 pr-10">
+            <div className="flex items-start space-x-3 mb-4">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
                 <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
               </div>
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-white text-lg sm:text-2xl font-bold leading-tight">Escolher Exercícios</DialogTitle>
-                <p className="text-slate-400 text-xs sm:text-sm mt-0.5">Selecione exercícios para adicionar ao seu treino</p>
+              <div className="flex-1 min-w-0 space-y-1">
+                <DialogTitle className="text-white text-lg sm:text-2xl font-bold leading-tight pr-2">Escolher Exercícios</DialogTitle>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">Selecione exercícios para adicionar ao seu treino</p>
               </div>
             </div>
             
@@ -1169,7 +1169,13 @@ export default function WorkoutTemplateEditor() {
               <select 
                 value={muscleGroupFilter} 
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="w-full sm:flex-1 bg-slate-700/60 border border-slate-600/60 text-white rounded-md px-3 py-2.5 sm:py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
+                className="w-full sm:flex-1 bg-slate-700/60 border border-slate-600/60 text-white rounded-md px-3 py-2.5 sm:py-2 pr-8 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 transition-all duration-200 appearance-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 8px center',
+                  backgroundSize: '16px'
+                }}
               >
                 <option value="all">Todos os grupos musculares</option>
                 {Array.from(new Set(Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup) : [])).sort().map((group: any) => (
@@ -1245,7 +1251,7 @@ export default function WorkoutTemplateEditor() {
                             <h4 className={`font-semibold text-sm sm:text-base leading-tight transition-colors mb-1.5 ${
                               isSelected ? 'text-blue-200' : 'text-white group-hover:text-blue-300'
                             }`}>
-                              {exercise.nome || exercise.name}
+                              {exercise.nome || exercise.name || 'Exercício sem nome'}
                             </h4>
                             {/* Muscle Group Tag with proper colors */}
                             <div className={`inline-flex items-center px-2 py-1 rounded-md border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm`}>
