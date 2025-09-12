@@ -11,29 +11,127 @@ export interface NotificationOptions {
   actions?: { action: string; title: string }[];
 }
 
+export interface NotificationSupportStatus {
+  isSupported: boolean;
+  isIOS: boolean;
+  isPWA: boolean;
+  hasPushManager: boolean;
+  hasServiceWorker: boolean;
+  hasNotificationAPI: boolean;
+  iOSVersion?: number;
+  reason?: string;
+  instructions?: string[];
+}
+
 export function useNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [isSupported, setIsSupported] = useState(false);
+  const [supportStatus, setSupportStatus] = useState<NotificationSupportStatus>({
+    isSupported: false,
+    isIOS: false,
+    isPWA: false,
+    hasPushManager: false,
+    hasServiceWorker: false,
+    hasNotificationAPI: false
+  });
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const { toast } = useToast();
   const soundEffects = useSoundEffects();
 
-  useEffect(() => {
-    // Verificar suporte a notificações
-    const supported = 'Notification' in window && 'serviceWorker' in navigator;
-    setIsSupported(supported);
+  // Função avançada de detecção de suporte para iOS/PWA
+  const detectNotificationSupport = (): NotificationSupportStatus => {
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                  (window.navigator as any).standalone === true ||
+                  document.referrer.includes('android-app://');
+    const hasPushManager = 'PushManager' in window;
+    const hasServiceWorker = 'serviceWorker' in navigator;
+    const hasNotificationAPI = 'Notification' in window;
     
-    if (supported) {
+    let iOSVersion: number | undefined;
+    if (isIOS) {
+      const match = userAgent.match(/OS (\d+)_/);
+      if (match) {
+        iOSVersion = parseInt(match[1]);
+      }
+    }
+    
+    let reason = '';
+    let instructions: string[] = [];
+    let isSupported = false;
+    
+    if (isIOS) {
+      // iOS específico - precisa ser PWA instalada
+      if (!iOSVersion || iOSVersion < 16) {
+        reason = 'iOS muito antigo. É necessário iOS 16.4 ou superior.';
+        instructions = ['Atualize seu iPhone para iOS 16.4 ou superior'];
+      } else if (!isPWA) {
+        reason = 'App não está instalado como PWA.';
+        instructions = [
+          'No Safari, toque no botão Compartilhar (quadrado com seta)',
+          'Selecione "Adicionar à Tela de Início"',
+          'Confirme a instalação',
+          'Abra o app pela tela inicial (não pelo Safari)',
+          'Volte aqui e ative as notificações'
+        ];
+      } else if (!hasPushManager) {
+        reason = 'Push API não está habilitada no Safari.';
+        instructions = [
+          'Abra Configurações do iPhone',
+          'Vá em Safari > Avançado > Recursos Experimentais', 
+          'Ative "Push API"',
+          'Volte ao app e tente novamente'
+        ];
+      } else if (!hasServiceWorker || !hasNotificationAPI) {
+        reason = 'Recursos necessários não disponíveis.';
+        instructions = ['Verifique se está usando a versão mais recente do Safari'];
+      } else {
+        isSupported = true;
+      }
+    } else {
+      // Android/Desktop - verificação padrão
+      if (!hasNotificationAPI) {
+        reason = 'Seu navegador não suporta notificações.';
+        instructions = ['Use um navegador moderno como Chrome, Firefox ou Edge'];
+      } else if (!hasServiceWorker) {
+        reason = 'Service Worker não suportado.';
+        instructions = ['Atualize seu navegador para uma versão mais recente'];
+      } else {
+        isSupported = true;
+      }
+    }
+    
+    return {
+      isSupported,
+      isIOS,
+      isPWA,
+      hasPushManager,
+      hasServiceWorker,
+      hasNotificationAPI,
+      iOSVersion,
+      reason,
+      instructions
+    };
+  };
+
+  useEffect(() => {
+    // Detectar suporte avançado a notificações
+    const status = detectNotificationSupport();
+    setSupportStatus(status);
+    
+    if (status.hasNotificationAPI) {
       setPermission(Notification.permission);
     }
+    
+    console.log('🔍 [NOTIFICATION SUPPORT]', status);
   }, []);
 
   // Solicitar permissão para notificações
   const requestPermission = async (): Promise<boolean> => {
-    if (!isSupported) {
+    if (!supportStatus.isSupported) {
       toast({
         title: "Notificações não suportadas",
-        description: "Seu navegador não suporta notificações push.",
+        description: supportStatus.reason || "Seu navegador não suporta notificações push.",
         variant: "destructive"
       });
       return false;
@@ -70,7 +168,7 @@ export function useNotifications() {
 
   // Inicializar service worker automaticamente
   useEffect(() => {
-    if (isSupported) {
+    if (supportStatus.isSupported && supportStatus.hasServiceWorker) {
       navigator.serviceWorker.register('/sw.js')
         .then((reg) => {
           setRegistration(reg);
@@ -80,7 +178,7 @@ export function useNotifications() {
           console.error('Erro ao registrar Service Worker:', error);
         });
     }
-  }, [isSupported]);
+  }, [supportStatus.isSupported, supportStatus.hasServiceWorker]);
 
   // Enviar notificação local
   const sendNotification = async (options: NotificationOptions) => {
@@ -170,7 +268,8 @@ export function useNotifications() {
 
   return {
     permission,
-    isSupported,
+    isSupported: supportStatus.isSupported,
+    supportStatus,
     requestPermission,
     sendNotification,
     notifyRestComplete,
