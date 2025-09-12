@@ -128,7 +128,11 @@ export const workoutTemplateApi = {
   },
 
   removeExercise: async (templateId: string, exerciseId: string): Promise<void> => {
-    await apiRequest("DELETE", `/api/v2/workouts/templates/${templateId}/exercises/${exerciseId}`);
+    const response = await apiRequest("DELETE", `/api/workout-template-exercises/${exerciseId}`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Failed to delete exercise: ${response.status}`);
+    }
   },
 };
 
