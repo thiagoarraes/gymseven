@@ -1166,22 +1166,59 @@ export default function WorkoutTemplateEditor() {
                 <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
                 <span className="text-slate-300 text-xs sm:text-sm font-medium">Filtrar:</span>
               </div>
-              <select 
-                value={muscleGroupFilter} 
-                onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="w-full sm:flex-1 bg-slate-700/60 border border-slate-600/60 text-white rounded-md px-3 py-2.5 sm:py-2 pr-8 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 transition-all duration-200 appearance-none"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 8px center',
-                  backgroundSize: '16px'
-                }}
-              >
-                <option value="all">Todos os grupos musculares</option>
-                {Array.from(new Set(Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup) : [])).sort().map((group: any) => (
-                  <option key={group} value={group}>{group}</option>
-                ))}
-              </select>
+              {(() => {
+                // Normalize and collect unique muscle groups
+                const allGroups = Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => {
+                  const group = ex.grupoMuscular || ex.muscleGroup || 'Sem grupo';
+                  const normalized = group.trim();
+                  // Standardize muscle group names
+                  if (normalized.toLowerCase().includes('peit')) return 'Peito';
+                  if (normalized.toLowerCase().includes('cos')) return 'Costas';
+                  if (normalized.toLowerCase().includes('ombr')) return 'Ombros';
+                  if (normalized.toLowerCase().includes('bic')) return 'Bíceps';
+                  if (normalized.toLowerCase().includes('tric')) return 'Tríceps';
+                  if (normalized.toLowerCase().includes('pern')) return 'Pernas';
+                  if (normalized.toLowerCase().includes('glut')) return 'Glúteos';
+                  if (normalized.toLowerCase().includes('abdom') || normalized.toLowerCase().includes('core')) return 'Abdômen';
+                  if (normalized.toLowerCase().includes('cardi')) return 'Cardio';
+                  if (normalized.toLowerCase().includes('ante')) return 'Antebraços';
+                  return normalized || 'Sem grupo';
+                }).filter(Boolean) : [];
+                
+                const uniqueGroups = Array.from(new Set(allGroups)).sort();
+                
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <button
+                      onClick={() => setMuscleGroupFilter('all')}
+                      className={`p-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 border touch-manipulation ${
+                        muscleGroupFilter === 'all'
+                          ? 'bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-sm'
+                          : 'bg-slate-700/60 border-slate-600/50 text-slate-300 hover:bg-slate-600/70 hover:border-slate-500/60'
+                      }`}
+                    >
+                      Todos
+                    </button>
+                    {uniqueGroups.map((group: string) => {
+                      const groupInfo = getMuscleGroupInfo(group);
+                      const isActive = muscleGroupFilter === group;
+                      return (
+                        <button
+                          key={group}
+                          onClick={() => setMuscleGroupFilter(group)}
+                          className={`p-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 border touch-manipulation ${
+                            isActive
+                              ? `${groupInfo.bgColor} ${groupInfo.borderColor} ${groupInfo.textColor} shadow-sm`
+                              : 'bg-slate-700/60 border-slate-600/50 text-slate-300 hover:bg-slate-600/70 hover:border-slate-500/60'
+                          }`}
+                        >
+                          <span className="truncate">{group}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
             
             {/* Selected Count */}
@@ -1210,7 +1247,25 @@ export default function WorkoutTemplateEditor() {
             <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
               {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
-                .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
+                .filter((exercise: any) => {
+                  if (muscleGroupFilter === 'all') return true;
+                  
+                  const exerciseGroup = exercise.grupoMuscular || exercise.muscleGroup || 'Sem grupo';
+                  let normalized = exerciseGroup.trim();
+                  // Apply the same normalization as in the filter buttons
+                  if (normalized.toLowerCase().includes('peit')) normalized = 'Peito';
+                  else if (normalized.toLowerCase().includes('cos')) normalized = 'Costas';
+                  else if (normalized.toLowerCase().includes('ombr')) normalized = 'Ombros';
+                  else if (normalized.toLowerCase().includes('bic')) normalized = 'Bíceps';
+                  else if (normalized.toLowerCase().includes('tric')) normalized = 'Tríceps';
+                  else if (normalized.toLowerCase().includes('pern')) normalized = 'Pernas';
+                  else if (normalized.toLowerCase().includes('glut')) normalized = 'Glúteos';
+                  else if (normalized.toLowerCase().includes('abdom') || normalized.toLowerCase().includes('core')) normalized = 'Abdômen';
+                  else if (normalized.toLowerCase().includes('cardi')) normalized = 'Cardio';
+                  else if (normalized.toLowerCase().includes('ante')) normalized = 'Antebraços';
+                  
+                  return normalized === muscleGroupFilter;
+                })
                 .sort((a: any, b: any) => (a.nome || a.name || '').localeCompare(b.nome || b.name || '', 'pt-BR'))
                 .map((exercise: any) => {
                   const isSelected = selectedExercises.has(exercise.id);
@@ -1267,7 +1322,25 @@ export default function WorkoutTemplateEditor() {
                 }) : []}
               {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
-                .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
+                .filter((exercise: any) => {
+                  if (muscleGroupFilter === 'all') return true;
+                  
+                  const exerciseGroup = exercise.grupoMuscular || exercise.muscleGroup || 'Sem grupo';
+                  let normalized = exerciseGroup.trim();
+                  // Apply the same normalization as in the filter buttons
+                  if (normalized.toLowerCase().includes('peit')) normalized = 'Peito';
+                  else if (normalized.toLowerCase().includes('cos')) normalized = 'Costas';
+                  else if (normalized.toLowerCase().includes('ombr')) normalized = 'Ombros';
+                  else if (normalized.toLowerCase().includes('bic')) normalized = 'Bíceps';
+                  else if (normalized.toLowerCase().includes('tric')) normalized = 'Tríceps';
+                  else if (normalized.toLowerCase().includes('pern')) normalized = 'Pernas';
+                  else if (normalized.toLowerCase().includes('glut')) normalized = 'Glúteos';
+                  else if (normalized.toLowerCase().includes('abdom') || normalized.toLowerCase().includes('core')) normalized = 'Abdômen';
+                  else if (normalized.toLowerCase().includes('cardi')) normalized = 'Cardio';
+                  else if (normalized.toLowerCase().includes('ante')) normalized = 'Antebraços';
+                  
+                  return normalized === muscleGroupFilter;
+                })
                 .length === 0 : false && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-slate-800/50 flex items-center justify-center">
