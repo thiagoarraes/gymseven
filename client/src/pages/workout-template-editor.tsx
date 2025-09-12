@@ -1148,28 +1148,28 @@ export default function WorkoutTemplateEditor() {
 
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-4xl max-h-[90vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col">
-          <DialogHeader className="flex-shrink-0 pb-4">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30">
-                <Dumbbell className="w-5 h-5 text-blue-400" />
+        <DialogContent className="max-w-[96vw] sm:max-w-2xl lg:max-w-4xl max-h-[88vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col p-4 sm:p-6">
+          <DialogHeader className="flex-shrink-0 pb-3 sm:pb-4">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
               </div>
-              <div>
-                <DialogTitle className="text-white text-2xl font-bold">Escolher Exercícios</DialogTitle>
-                <p className="text-slate-400 text-sm">Selecione exercícios para adicionar ao seu treino</p>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-white text-lg sm:text-2xl font-bold leading-tight">Escolher Exercícios</DialogTitle>
+                <p className="text-slate-400 text-xs sm:text-sm mt-0.5">Selecione exercícios para adicionar ao seu treino</p>
               </div>
             </div>
             
             {/* Muscle Group Filter - Mobile Optimized */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Filter className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                <span className="text-slate-300 text-sm font-medium whitespace-nowrap">Filtrar por grupo:</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-slate-800/40 rounded-lg p-3 border border-slate-700/40">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                <span className="text-slate-300 text-xs sm:text-sm font-medium">Filtrar:</span>
               </div>
               <select 
                 value={muscleGroupFilter} 
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
-                className="w-full sm:flex-1 bg-slate-700/50 border border-slate-600/50 text-white rounded-lg px-3 py-3 sm:py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:bg-slate-600/70 active:bg-slate-600/80 hover:bg-slate-700/70 transition-all duration-200"
+                className="w-full sm:flex-1 bg-slate-700/60 border border-slate-600/60 text-white rounded-md px-3 py-2.5 sm:py-2 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 transition-all duration-200"
               >
                 <option value="all">Todos os grupos musculares</option>
                 {Array.from(new Set(Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => ex.grupoMuscular || ex.muscleGroup) : [])).sort().map((group: any) => (
@@ -1180,28 +1180,28 @@ export default function WorkoutTemplateEditor() {
             
             {/* Selected Count */}
             {selectedExercises.size > 0 && (
-              <div className="flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl px-4 py-3 mt-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-400/50 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-blue-400" />
+              <div className="flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-lg px-3 py-2.5 mt-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/50 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-blue-400" />
                   </div>
-                  <span className="text-blue-300 font-medium">
-                    {selectedExercises.size} exercício{selectedExercises.size > 1 ? 's' : ''} selecionado{selectedExercises.size > 1 ? 's' : ''}
+                  <span className="text-blue-300 font-medium text-sm">
+                    {selectedExercises.size} selecionado{selectedExercises.size > 1 ? 's' : ''}
                   </span>
                 </div>
                 <Button
                   size="sm"
                   onClick={() => setSelectedExercises(new Set())}
                   variant="outline"
-                  className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-400 text-xs"
+                  className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-400 text-xs h-7 px-2"
                 >
-                  Limpar Seleção
+                  Limpar
                 </Button>
               </div>
             )}
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex-1 overflow-y-auto py-2 sm:py-4">
+            <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
               {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .filter((exercise: any) => muscleGroupFilter === 'all' || (exercise.grupoMuscular || exercise.muscleGroup) === muscleGroupFilter)
@@ -1230,32 +1230,28 @@ export default function WorkoutTemplateEditor() {
                         setSelectedExercises(newSelected);
                       }}
                     >
-                      <CardContent className="p-3 sm:p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
-                            {/* Modern Checkbox with [+] design */}
-                            <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 font-bold text-lg ${
-                              isSelected 
-                                ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 shadow-lg shadow-green-500/40 text-white scale-110' 
-                                : 'border-slate-500/60 hover:border-green-400/70 hover:bg-green-500/10 hover:shadow-md text-slate-500 hover:text-green-400'
+                      <CardContent className="p-3">
+                        <div className="flex items-center space-x-3 w-full">
+                          {/* Modern Checkbox with [+] design */}
+                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 flex items-center justify-center transition-all duration-300 font-bold text-base flex-shrink-0 ${
+                            isSelected 
+                              ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 shadow-md shadow-green-500/30 text-white' 
+                              : 'border-slate-500/60 hover:border-green-400/70 hover:bg-green-500/10 text-slate-500 hover:text-green-400'
+                          }`}>
+                            {isSelected ? '✓' : '+'}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <h4 className={`font-semibold text-sm sm:text-base leading-tight transition-colors mb-1.5 ${
+                              isSelected ? 'text-blue-200' : 'text-white group-hover:text-blue-300'
                             }`}>
-                              {isSelected ? '✓' : '+'}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <h4 className={`font-semibold text-base sm:text-lg leading-tight transition-colors ${
-                                isSelected ? 'text-blue-200' : 'text-white group-hover:text-blue-300'
-                              }`}>
-                                {exercise.nome || exercise.name}
-                              </h4>
-                              {/* Muscle Group Tag with proper colors */}
-                              <div className="mt-2">
-                                <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm transition-all duration-200 hover:scale-105`}>
-                                  <span className="text-xs font-semibold tracking-wide">
-                                    {muscleGroup}
-                                  </span>
-                                </div>
-                              </div>
+                              {exercise.nome || exercise.name}
+                            </h4>
+                            {/* Muscle Group Tag with proper colors */}
+                            <div className={`inline-flex items-center px-2 py-1 rounded-md border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm`}>
+                              <span className="text-xs font-medium">
+                                {muscleGroup}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1282,8 +1278,8 @@ export default function WorkoutTemplateEditor() {
             </div>
           </div>
           {/* Footer with main action button - Mobile Optimized */}
-          <div className="flex-shrink-0 pt-4 sm:pt-6 border-t border-slate-700/50">
-            <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-shrink-0 pt-3 sm:pt-4 border-t border-slate-700/50">
+            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -1291,7 +1287,7 @@ export default function WorkoutTemplateEditor() {
                   setSelectedExercises(new Set());
                   setMuscleGroupFilter('all');
                 }}
-                className="w-full sm:flex-1 h-12 sm:h-12 border-slate-600/60 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500 transition-all"
+                className="w-full sm:flex-1 h-11 sm:h-12 border-slate-600/60 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500 transition-all text-sm sm:text-base"
               >
                 Cancelar
               </Button>
@@ -1368,14 +1364,14 @@ export default function WorkoutTemplateEditor() {
                   }
                 }}
                 disabled={addExerciseMutation.isPending}
-                className={`w-full sm:flex-[2] h-12 sm:h-12 font-semibold transition-all duration-200 ${
+                className={`w-full sm:flex-[2] h-11 sm:h-12 font-semibold transition-all duration-200 text-sm sm:text-base ${
                   selectedExercises.size > 0
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30'
                     : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600'
                 }`}
               >
                 {selectedExercises.size > 0 
-                  ? `Adicionar ${selectedExercises.size} Exercício${selectedExercises.size > 1 ? 's' : ''}` 
+                  ? `Adicionar ${selectedExercises.size}${selectedExercises.size > 1 ? ' exercícios' : ' exercício'}` 
                   : 'Concluir'
                 }
               </Button>
