@@ -303,9 +303,12 @@ export default function WorkoutTemplateEditor() {
 
   const removeExerciseMutation = useMutation({
     mutationFn: async (exerciseId: string) => {
+      console.log(`🗑️ Attempting to remove exercise: ${exerciseId}`);
       return await workoutTemplateApi.removeExercise(id!, exerciseId);
     },
     onSuccess: (_, exerciseId) => {
+      console.log(`✅ Exercise ${exerciseId} removed successfully`);
+      
       // Clear local changes for the removed exercise
       setLocalChanges(prev => {
         const newChanges = { ...prev };
@@ -322,6 +325,15 @@ export default function WorkoutTemplateEditor() {
       toast({
         title: "Exercício removido!",
         description: "O exercício foi removido do treino.",
+      });
+    },
+    onError: (error: any, exerciseId) => {
+      console.error(`❌ Failed to remove exercise ${exerciseId}:`, error);
+      
+      toast({
+        title: "Erro ao remover exercício",
+        description: "Não foi possível remover o exercício. Tente novamente.",
+        variant: "destructive",
       });
     },
   });
