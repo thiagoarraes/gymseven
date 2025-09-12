@@ -530,16 +530,16 @@ export default function Profile() {
                     Ações irreversíveis com seus dados
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 sm:space-y-6">
                   {/* Limpar Dados */}
-                  <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg">
-                    <div>
-                      <h3 className="text-foreground font-medium">Limpar Todos os Dados</h3>
-                      <p className="text-muted-foreground text-sm">Remove todos os treinos, exercícios e configurações (mantém a conta)</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 border border-destructive/20 rounded-lg space-y-4 sm:space-y-0">
+                    <div className="flex-1 pr-0 sm:pr-4">
+                      <h3 className="text-foreground font-medium text-base sm:text-lg mb-2">Limpar Todos os Dados</h3>
+                      <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">Remove todos os treinos, exercícios e configurações (mantém a conta)</p>
                     </div>
                     <Dialog open={clearDataDialogOpen} onOpenChange={setClearDataDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
+                        <Button variant="destructive" size="sm" className="w-full sm:w-auto h-10 sm:h-9 text-sm font-medium">
                           <RotateCcw className="mr-2 h-4 w-4" />
                           Limpar
                         </Button>
@@ -552,11 +552,11 @@ export default function Profile() {
                             Sua conta será mantida, mas todos os dados serão perdidos permanentemente.
                           </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setClearDataDialogOpen(false)}>
+                        <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-2">
+                          <Button variant="outline" onClick={() => setClearDataDialogOpen(false)} className="w-full sm:w-auto order-2 sm:order-1">
                             Cancelar
                           </Button>
-                          <Button variant="destructive" onClick={handleClearData} disabled={clearingData}>
+                          <Button variant="destructive" onClick={handleClearData} disabled={clearingData} className="w-full sm:w-auto order-1 sm:order-2">
                             {clearingData ? (
                               <div className="flex items-center space-x-2">
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -572,14 +572,14 @@ export default function Profile() {
                   </div>
 
                   {/* Excluir Conta */}
-                  <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg">
-                    <div>
-                      <h3 className="text-foreground font-medium">Excluir Conta</h3>
-                      <p className="text-muted-foreground text-sm">Remove permanentemente sua conta e todos os dados</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 border border-destructive/20 rounded-lg space-y-4 sm:space-y-0">
+                    <div className="flex-1 pr-0 sm:pr-4">
+                      <h3 className="text-foreground font-medium text-base sm:text-lg mb-2">Excluir Conta</h3>
+                      <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">Remove permanentemente sua conta e todos os dados</p>
                     </div>
                     <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
+                        <Button variant="destructive" size="sm" className="w-full sm:w-auto h-10 sm:h-9 text-sm font-medium">
                           <Trash2 className="mr-2 h-4 w-4" />
                           Excluir
                         </Button>
@@ -592,11 +592,11 @@ export default function Profile() {
                             permanentemente removidos de nossos servidores.
                           </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                        <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-2">
+                          <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="w-full sm:w-auto order-2 sm:order-1">
                             Cancelar
                           </Button>
-                          <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting}>
+                          <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting} className="w-full sm:w-auto order-1 sm:order-2">
                             {deleting ? (
                               <div className="flex items-center space-x-2">
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
