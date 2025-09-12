@@ -684,28 +684,28 @@ export default function Profile() {
                         control={preferencesForm.control}
                         name="notifications"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base text-foreground flex items-center">
-                                <Bell className="mr-2 h-4 w-4" />
-                                Notificações Push
+                          <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border p-4 space-y-3 sm:space-y-0">
+                            <div className="space-y-1 flex-1">
+                              <FormLabel className="text-base text-foreground flex items-center flex-wrap gap-2">
+                                <Bell className="h-4 w-4 shrink-0" />
+                                <span>Notificações Push</span>
                                 {!isSupported && (
-                                  <span className="ml-2 text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
                                     Não suportado
                                   </span>
                                 )}
                                 {isSupported && permission === 'denied' && (
-                                  <span className="ml-2 text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
                                     Bloqueado
                                   </span>
                                 )}
                                 {isSupported && permission === 'granted' && field.value && (
-                                  <span className="ml-2 text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">
+                                  <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
                                     Ativo
                                   </span>
                                 )}
                               </FormLabel>
-                              <FormDescription className="text-muted-foreground">
+                              <FormDescription className="text-muted-foreground text-sm">
                                 {!isSupported 
                                   ? 'Seu navegador não suporta notificações push'
                                   : permission === 'denied'
@@ -738,6 +738,7 @@ export default function Profile() {
                                     field.onChange(checked);
                                   }
                                 }}
+                                className="shrink-0"
                               />
                             </FormControl>
                           </FormItem>
@@ -751,15 +752,15 @@ export default function Profile() {
                           <FormItem className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-border p-4 space-y-3 sm:space-y-0">
                             <div className="space-y-1 flex-1">
                               <FormLabel className="text-base text-foreground flex items-center flex-wrap gap-2">
-                                {field.value ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                                {field.value ? <Volume2 className="h-4 w-4 shrink-0" /> : <VolumeX className="h-4 w-4 shrink-0" />}
                                 <span>Efeitos Sonoros</span>
                                 {!soundEffects.isSupported && (
-                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded">
+                                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded whitespace-nowrap">
                                     Não suportado
                                   </span>
                                 )}
                                 {soundEffects.isSupported && field.value && (
-                                  <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded">
+                                  <span className="text-xs bg-green-500/20 text-green-500 px-2 py-1 rounded whitespace-nowrap">
                                     Ativo
                                   </span>
                                 )}
@@ -772,7 +773,7 @@ export default function Profile() {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <div className="flex items-center justify-end gap-3 sm:flex-shrink-0">
+                              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto sm:flex-shrink-0">
                                 <Switch
                                   checked={field.value && soundEffects.isSupported}
                                   disabled={!soundEffects.isSupported}
@@ -784,7 +785,8 @@ export default function Profile() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => soundEffects.testSound()}
-                                    className="text-xs px-3 py-1 h-7 shrink-0"
+                                    className="text-xs px-3 py-1 h-7 shrink-0 w-full sm:w-auto"
+                                    data-testid="button-test-sound"
                                   >
                                     Testar
                                   </Button>
