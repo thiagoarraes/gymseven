@@ -64,14 +64,14 @@ export default function Profile() {
   const { user, updateProfile, deleteAccount } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const { permission, isSupported, supportStatus, requestPermission, sendNotification, soundEffects } = useNotifications();
+  const { permission, isSupported, supportStatus, requestPermission, sendNotification, soundEffects, refreshSupport } = useNotifications();
   
   // Estado para o modal de guia iOS
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   
   // Função para tentar nova detecção
   const retryDetection = () => {
-    window.location.reload(); // Força nova detecção
+    refreshSupport(); // Recarrega detecção sem reload da página
   };
 
   // Função para abrir modal de status

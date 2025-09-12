@@ -183,7 +183,7 @@ export function useNotifications() {
   // Enviar notificação local
   const sendNotification = async (options: NotificationOptions) => {
     if (permission !== 'granted') {
-      console.warn('Permissão de notificação não concedida');
+      console.warn('⚠️ [NOTIFICATION] Permissão de notificação não concedida');
       return false;
     }
 
@@ -221,7 +221,7 @@ export function useNotifications() {
       
       return true;
     } catch (error) {
-      console.error('Erro ao enviar notificação:', error);
+      console.error('❌ [NOTIFICATION ERROR] Erro ao enviar notificação:', error);
       return false;
     }
   };
@@ -266,6 +266,19 @@ export function useNotifications() {
     });
   };
 
+  // Função para recarregar detecção de suporte
+  const refreshSupport = () => {
+    console.log('🔄 [REFRESH] Recarregando detecção de suporte...');
+    const newStatus = detectNotificationSupport();
+    setSupportStatus(newStatus);
+    
+    if (newStatus.hasNotificationAPI) {
+      setPermission(Notification.permission);
+    }
+    
+    console.log('✅ [REFRESH] Detecção atualizada:', newStatus);
+  };
+
   return {
     permission,
     isSupported: supportStatus.isSupported,
@@ -277,5 +290,6 @@ export function useNotifications() {
     notifyWorkoutComplete,
     notifyPersonalRecord,
     soundEffects,
+    refreshSupport,
   };
 }
