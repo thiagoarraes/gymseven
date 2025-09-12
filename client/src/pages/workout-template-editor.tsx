@@ -1171,7 +1171,7 @@ export default function WorkoutTemplateEditor() {
                 onChange={(e) => setMuscleGroupFilter(e.target.value)}
                 className="w-full bg-slate-800/90 border border-slate-600/60 text-white rounded-lg px-4 py-3 text-base font-medium focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 transition-all duration-200 hover:bg-slate-700/90 hover:border-slate-500/70"
               >
-                <option value="all">Filtrar por grupo muscular - Todos os grupos</option>
+                <option value="all">Todos os grupos</option>
                 {(() => {
                   // Normalize and collect unique muscle groups
                   const allGroups = Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => {
