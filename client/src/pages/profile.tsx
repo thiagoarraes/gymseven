@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
   User, Camera, Save, Calendar, Mail, AtSign, CalendarIcon, Upload, Trash2, AlertTriangle, RotateCcw,
-  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, VolumeX, XCircle, CheckCircle, Info
+  Settings as SettingsIcon, Moon, Sun, Bell, Volume2, Clock, VolumeX, XCircle, CheckCircle, Info, Smartphone, HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ import { useNotifications } from '@/hooks/use-notifications';
 import { useAuth } from '@/contexts/auth-context-new';
 import { updateUserSchema, type UpdateUser } from '@shared/schema';
 import ImageCropModal from '@/components/ImageCropModal';
+import { IOSNotificationGuide } from '@/components/ios-notification-guide';
 import { z } from 'zod';
 
 // Simple preferences schema
@@ -63,7 +64,15 @@ export default function Profile() {
   const { user, updateProfile, deleteAccount } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const { permission, isSupported, requestPermission, sendNotification, soundEffects } = useNotifications();
+  const { permission, isSupported, supportStatus, requestPermission, sendNotification, soundEffects } = useNotifications();
+  
+  // Estado para o modal de guia iOS
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
+  
+  // Função para tentar nova detecção
+  const retryDetection = () => {
+    window.location.reload(); // Força nova detecção
+  };
 
   // Função para abrir modal de status
   const openStatusModal = (type: 'notifications' | 'sound', status: 'active' | 'blocked' | 'unsupported') => {
@@ -731,7 +740,16 @@ export default function Profile() {
                                     <span className="font-medium">Notificações Push</span>
                                   </FormLabel>
                                   {/* Ícone de status clicável */}
-                                  {!isSupported && (
+                                  {!isSupported && supportStatus.isIOS && (
+                                    <button
+                                      onClick={() => setShowIOSGuide(true)}
+                                      className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
+                                      title="Guia para iOS"
+                                    >
+                                      <Smartphone className="h-4 w-4 text-blue-500" />
+                                    </button>
+                                  )}
+                                  {!isSupported && !supportStatus.isIOS && (
                                     <button
                                       onClick={() => openStatusModal('notifications', 'unsupported')}
                                       className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-muted transition-colors"
@@ -762,16 +780,30 @@ export default function Profile() {
                                 {/* Descrição */}
                                 <FormDescription className="text-muted-foreground text-sm mb-3">
                                   {!isSupported 
-                                    ? 'Seu navegador não suporta notificações push'
+                                    ? supportStatus.reason || 'Seu navegador não suporta notificações push'
                                     : permission === 'denied'
                                     ? 'Ative as notificações nas configurações do navegador'
                                     : 'Receba lembretes sobre treinos e descanso'
                                   }
                                 </FormDescription>
                               </div>
-                              {/* Botão em linha separada no mobile */}
+                              {/* Botões em linha separada no mobile */}
                               <FormControl className="w-full sm:w-auto">
-                                <Button
+                                <div className="flex gap-2">
+                                  {!isSupported && supportStatus.isIOS && (
+                                    <Button
+                                      type="button"
+                                      onClick={() => setShowIOSGuide(true)}
+                                      size="sm"
+                                      variant="outline"
+                                      className="flex items-center gap-2"
+                                      data-testid="button-ios-help"
+                                    >
+                                      <HelpCircle className="h-4 w-4" />
+                                      Ajuda iOS
+                                    </Button>
+                                  )}
+                                  <Button
                                   type="button"
                                   variant={field.value && permission === 'granted' ? 'default' : 'outline'}
                                   size="sm"
@@ -806,6 +838,7 @@ export default function Profile() {
                                 >
                                   {field.value && permission === 'granted' ? 'Ativo' : 'Inativo'}
                                 </Button>
+                                </div>
                               </FormControl>
                             </div>
                           </FormItem>
@@ -929,6 +962,14 @@ export default function Profile() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* iOS Notification Guide Modal */}
+      <IOSNotificationGuide
+        open={showIOSGuide}
+        onOpenChange={setShowIOSGuide}
+        supportStatus={supportStatus}
+        onRetryDetection={retryDetection}
+      />
     </div>
   );
 }
