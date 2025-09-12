@@ -1151,84 +1151,61 @@ export default function WorkoutTemplateEditor() {
 
       {/* Exercise Selector Dialog */}
       <Dialog open={showExerciseSelector} onOpenChange={setShowExerciseSelector}>
-        <DialogContent className="max-w-[96vw] sm:max-w-2xl lg:max-w-4xl max-h-[88vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col p-4 sm:p-6">
-          <DialogHeader className="flex-shrink-0 pb-3 sm:pb-4 pr-10">
-            <div className="flex items-start space-x-3 mb-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
-                <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+        <DialogContent className="max-w-[96vw] sm:max-w-3xl lg:max-w-5xl h-[92vh] bg-gradient-to-b from-slate-900/98 to-slate-800/95 backdrop-blur-xl border-slate-600/50 shadow-2xl flex flex-col p-3 sm:p-4">
+          <DialogHeader className="flex-shrink-0 pb-2 pr-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                  <Dumbbell className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <DialogTitle className="text-white text-lg font-bold leading-none">Escolher Exercícios</DialogTitle>
+                  <p className="text-slate-400 text-xs mt-1">Selecione exercícios para adicionar</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0 space-y-1">
-                <DialogTitle className="text-white text-lg sm:text-2xl font-bold leading-tight pr-2">Escolher Exercícios</DialogTitle>
-                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">Selecione exercícios para adicionar ao seu treino</p>
-              </div>
-            </div>
-            
-            {/* Muscle Group Filter - Mobile Optimized */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-slate-800/40 rounded-lg p-3 border border-slate-700/40">
+              
+              {/* Compact Filter in Header */}
               <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                <span className="text-slate-300 text-xs sm:text-sm font-medium">Filtrar:</span>
+                <Filter className="w-4 h-4 text-slate-400" />
+                <select 
+                  value={muscleGroupFilter} 
+                  onChange={(e) => setMuscleGroupFilter(e.target.value)}
+                  className="bg-slate-800/80 border border-slate-600/60 text-white rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 min-w-[140px]"
+                >
+                  <option value="all">Todos os grupos</option>
+                  {(() => {
+                    // Normalize and collect unique muscle groups
+                    const allGroups = Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => {
+                      const group = ex.grupoMuscular || ex.muscleGroup || 'Sem grupo';
+                      const normalized = group.trim();
+                      // Standardize muscle group names
+                      if (normalized.toLowerCase().includes('peit')) return 'Peito';
+                      if (normalized.toLowerCase().includes('cos')) return 'Costas';
+                      if (normalized.toLowerCase().includes('ombr')) return 'Ombros';
+                      if (normalized.toLowerCase().includes('bic')) return 'Bíceps';
+                      if (normalized.toLowerCase().includes('tric')) return 'Tríceps';
+                      if (normalized.toLowerCase().includes('pern')) return 'Pernas';
+                      if (normalized.toLowerCase().includes('glut')) return 'Glúteos';
+                      if (normalized.toLowerCase().includes('abdom') || normalized.toLowerCase().includes('core')) return 'Abdômen';
+                      if (normalized.toLowerCase().includes('cardi')) return 'Cardio';
+                      if (normalized.toLowerCase().includes('ante')) return 'Antebraços';
+                      return normalized || 'Sem grupo';
+                    }).filter(Boolean) : [];
+                    
+                    const uniqueGroups = Array.from(new Set(allGroups)).sort();
+                    return uniqueGroups.map((group: string) => (
+                      <option key={group} value={group}>{group}</option>
+                    ));
+                  })()}
+                </select>
               </div>
-              {(() => {
-                // Normalize and collect unique muscle groups
-                const allGroups = Array.isArray(allExercises) ? (allExercises as any[]).map((ex: any) => {
-                  const group = ex.grupoMuscular || ex.muscleGroup || 'Sem grupo';
-                  const normalized = group.trim();
-                  // Standardize muscle group names
-                  if (normalized.toLowerCase().includes('peit')) return 'Peito';
-                  if (normalized.toLowerCase().includes('cos')) return 'Costas';
-                  if (normalized.toLowerCase().includes('ombr')) return 'Ombros';
-                  if (normalized.toLowerCase().includes('bic')) return 'Bíceps';
-                  if (normalized.toLowerCase().includes('tric')) return 'Tríceps';
-                  if (normalized.toLowerCase().includes('pern')) return 'Pernas';
-                  if (normalized.toLowerCase().includes('glut')) return 'Glúteos';
-                  if (normalized.toLowerCase().includes('abdom') || normalized.toLowerCase().includes('core')) return 'Abdômen';
-                  if (normalized.toLowerCase().includes('cardi')) return 'Cardio';
-                  if (normalized.toLowerCase().includes('ante')) return 'Antebraços';
-                  return normalized || 'Sem grupo';
-                }).filter(Boolean) : [];
-                
-                const uniqueGroups = Array.from(new Set(allGroups)).sort();
-                
-                return (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <button
-                      onClick={() => setMuscleGroupFilter('all')}
-                      className={`p-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 border touch-manipulation ${
-                        muscleGroupFilter === 'all'
-                          ? 'bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-sm'
-                          : 'bg-slate-700/60 border-slate-600/50 text-slate-300 hover:bg-slate-600/70 hover:border-slate-500/60'
-                      }`}
-                    >
-                      Todos
-                    </button>
-                    {uniqueGroups.map((group: string) => {
-                      const groupInfo = getMuscleGroupInfo(group);
-                      const isActive = muscleGroupFilter === group;
-                      return (
-                        <button
-                          key={group}
-                          onClick={() => setMuscleGroupFilter(group)}
-                          className={`p-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 border touch-manipulation ${
-                            isActive
-                              ? `${groupInfo.bgColor} ${groupInfo.borderColor} ${groupInfo.textColor} shadow-sm`
-                              : 'bg-slate-700/60 border-slate-600/50 text-slate-300 hover:bg-slate-600/70 hover:border-slate-500/60'
-                          }`}
-                        >
-                          <span className="truncate">{group}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
             </div>
             
-            {/* Selected Count */}
+            {/* Compact Selected Count */}
             {selectedExercises.size > 0 && (
-              <div className="flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-lg px-3 py-2.5 mt-3">
+              <div className="flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-md px-3 py-2 mt-2">
                 <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/50 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 border border-blue-400/50 flex items-center justify-center">
                     <Check className="w-3 h-3 text-blue-400" />
                   </div>
                   <span className="text-blue-300 font-medium text-sm">
@@ -1239,15 +1216,17 @@ export default function WorkoutTemplateEditor() {
                   size="sm"
                   onClick={() => setSelectedExercises(new Set())}
                   variant="outline"
-                  className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-400 text-xs h-7 px-2"
+                  className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-400 text-xs h-6 px-2"
                 >
                   Limpar
                 </Button>
               </div>
             )}
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto py-2 sm:py-4">
-            <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
+          
+          {/* Maximized Exercise List Area */}
+          <div className="flex-1 overflow-y-auto py-2 px-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {Array.isArray(allExercises) ? (allExercises as any[])
                 .filter((exercise: any) => !reorderedExercises.some(ex => ex.exerciseId === exercise.id))
                 .filter((exercise: any) => {
@@ -1283,7 +1262,7 @@ export default function WorkoutTemplateEditor() {
                         isSelected 
                           ? `bg-gradient-to-r from-blue-500/15 to-purple-500/10 border-blue-400/50 shadow-md shadow-blue-500/20 hover:shadow-blue-500/30` 
                           : 'bg-slate-800/30 border-slate-700/40 hover:bg-slate-800/60 hover:border-slate-600/60 hover:shadow-slate-500/10'
-                      } rounded-xl`}
+                      } rounded-lg`}
                       onClick={() => {
                         const newSelected = new Set(selectedExercises);
                         if (isSelected) {
@@ -1296,8 +1275,8 @@ export default function WorkoutTemplateEditor() {
                     >
                       <CardContent className="p-3">
                         <div className="flex items-center space-x-3 w-full">
-                          {/* Modern Checkbox with [+] design */}
-                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 flex items-center justify-center transition-all duration-300 font-bold text-base flex-shrink-0 ${
+                          {/* Compact Checkbox */}
+                          <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300 font-bold text-sm flex-shrink-0 ${
                             isSelected 
                               ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 shadow-md shadow-green-500/30 text-white' 
                               : 'border-slate-500/60 hover:border-green-400/70 hover:bg-green-500/10 text-slate-500 hover:text-green-400'
@@ -1306,13 +1285,13 @@ export default function WorkoutTemplateEditor() {
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <h4 className={`font-semibold text-sm sm:text-base leading-tight transition-colors mb-1.5 ${
+                            <h4 className={`font-semibold text-sm leading-tight transition-colors mb-1 ${
                               isSelected ? 'text-blue-200' : 'text-white group-hover:text-blue-300'
                             }`}>
                               {exercise.nome || exercise.name || 'Exercício sem nome'}
                             </h4>
-                            {/* Muscle Group Tag with proper colors */}
-                            <div className={`inline-flex items-center px-2 py-1 rounded-md border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm`}>
+                            {/* Compact Muscle Group Tag */}
+                            <div className={`inline-flex items-center px-2 py-0.5 rounded-md border ${groupInfo.bgColor} ${groupInfo.textColor} ${groupInfo.borderColor} backdrop-blur-sm`}>
                               <span className="text-xs font-medium">
                                 {muscleGroup}
                               </span>
